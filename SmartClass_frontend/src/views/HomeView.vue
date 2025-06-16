@@ -4,7 +4,7 @@
 
 <template>
   <div class="home-container">
-    <h1>欢迎使用智慧课堂系统</h1>
+    <h1>欢迎使用智慧555系统</h1>
   </div>
 </template>
 
