@@ -1,0 +1,289 @@
+# AI赋能教育管理与学习辅助平台 - 配置文件
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  tomcat:
+    uri-encoding: UTF-8
+    max-connections: 1000
+    threads:
+      max: 200
+      min-spare: 10
+
+spring:
+  application:
+    name: education_platform
+  
+  profiles:
+    active: dev
+  
+  # 数据源配置 - 直接使用JDBC连接
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/education_platform?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+    username: root
+    password: 641641773
+  
+  # Redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 
+      database: 0
+      timeout: 10000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1ms
+          max-idle: 8
+          min-idle: 0
+  
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      enabled: true
+  
+  # 邮件配置
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: your-email@qq.com
+    password: your-email-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  
+  # Jackson配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+  
+  # 缓存配置
+  cache:
+    type: redis
+    redis:
+      time-to-live: 1800000  # 30分钟
+      cache-null-values: false
+
+# MyBatis-Plus配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    call-setters-on-nulls: true
+    jdbc-type-for-null: 'null'
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      table-underline: true
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.education.entity
+
+# 日志配置
+logging:
+  level:
+    com.education: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: INFO
+    org.mybatis: DEBUG
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
+  file:
+    name: logs/education-platform.log
+    max-size: 100MB
+    max-history: 30
+
+# Actuator监控配置 - 完全禁用以避免BeanCreationException
+management:
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      enabled: true
+      show-details: when-authorized
+  metrics:
+    enable:
+      all: false
+
+# Knife4j API文档配置
+knife4j:
+  enable: true
+  openapi:
+    title: AI赋能教育管理与学习辅助平台 API
+    description: 提供完整的教育管理和学习辅助功能的RESTful API
+    version: 1.0.0
+    concat: Education Platform Team
+    email: support@education.com
+    url: https://education.com
+    license: MIT
+    license-url: https://opensource.org/licenses/MIT
+    terms-of-service-url: https://education.com/terms
+  setting:
+    language: zh_cn
+    enable-version: true
+    enable-reload-cache-parameter: true
+    enable-after-script: true
+    enable-filter-multipart-api-method-type: POST
+    enable-filter-multipart-apis: false
+    enable-request-cache: true
+    enable-host: false
+
+# 自定义配置
+education:
+  # JWT配置
+  jwt:
+    secret: education-platform-jwt-secret-key-2024
+    expiration: 7200000  # 2小时
+    refresh-expiration: 604800000  # 7天
+    header: Authorization
+    prefix: Bearer 
+  
+  # 文件存储配置
+  file:
+    upload-path: /data/education/uploads/
+    max-size: 104857600  # 100MB
+    allowed-types: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar
+  
+  # MinIO配置
+  minio:
+    endpoint: http://localhost:9000
+    access-key: minioadmin
+    secret-key: minioadmin
+    bucket-name: education-platform
+  
+
+  
+  # 安全配置
+  security:
+    # 密码加密强度
+    password-strength: 10
+    # 登录失败最大次数
+    max-login-attempts: 5
+    # 账户锁定时间(分钟)
+    account-lock-time: 30
+    # 验证码有效期(分钟)
+    captcha-expire-time: 5
+  
+  # 业务配置
+  business:
+    # 默认分页大小
+    default-page-size: 20
+    # 最大分页大小
+    max-page-size: 100
+    # 成绩保留小数位数
+    grade-decimal-places: 2
+    # 任务提交最大次数
+    max-submission-attempts: 3
+  
+  # 缓存配置
+  cache:
+    # 用户信息缓存时间(秒)
+    user-info-ttl: 1800
+    # 课程列表缓存时间(秒)
+    course-list-ttl: 600
+    # 成绩统计缓存时间(秒)
+    grade-stats-ttl: 300
+    # 验证码缓存时间(秒)
+    captcha-ttl: 300
+
+---
+# 开发环境配置
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/education_platform?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 
+
+logging:
+  level:
+    com.education: DEBUG
+    root: INFO
+
+education:
+  ai:
+    enabled: false  # 开发环境关闭AI功能
+
+---
+# 测试环境配置
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:mysql://test-db:3306/education_platform_test?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8
+    username: test_user
+    password: test_password
+  data:
+    redis:
+      host: test-redis
+      port: 6379
+
+logging:
+  level:
+    com.education: INFO
+    root: WARN
+
+---
+# 生产环境配置
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: jdbc:mysql://prod-db:3306/education_platform?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: ${DB_USERNAME:prod_user}
+    password: ${DB_PASSWORD:prod_password}
+  data:
+    redis:
+      host: ${REDIS_HOST:prod-redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
+logging:
+  level:
+    com.education: INFO
+    root: WARN
+    org.springframework.security: WARN
+  file:
+    name: /var/log/education-platform/application.log
+
+education:
+  jwt:
+    secret: ${JWT_SECRET:your-production-jwt-secret-key}
+  minio:
+    endpoint: ${MINIO_ENDPOINT:http://minio:9000}
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  ai:
+    api-key: ${OPENAI_API_KEY:your-production-openai-api-key}
