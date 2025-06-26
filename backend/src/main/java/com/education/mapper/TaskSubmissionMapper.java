@@ -21,13 +21,33 @@ import java.util.Map;
 public interface TaskSubmissionMapper extends BaseMapper<TaskSubmission> {
 
     /**
-     * 根据任务ID查询提交列表
+     * 根据任务ID查询所有提交记录
      * 
      * @param taskId 任务ID
-     * @return 提交列表
+     * @return 提交记录列表
      */
-    @Select("SELECT * FROM task_submission WHERE task_id = #{taskId} AND is_deleted = 0 ORDER BY submit_time DESC")
+    @Select("SELECT * FROM task_submission WHERE task_id = #{taskId} AND is_deleted = 0")
     List<TaskSubmission> selectByTaskId(@Param("taskId") Long taskId);
+
+    /**
+     * 根据任务ID分页查询提交记录
+     * 
+     * @param taskId 任务ID
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 提交记录列表
+     */
+    @Select("SELECT * FROM task_submission WHERE task_id = #{taskId} AND is_deleted = 0 LIMIT #{offset}, #{limit}")
+    List<TaskSubmission> selectSubmissionsByTaskId(@Param("taskId") Long taskId, @Param("offset") int offset, @Param("limit") Integer limit);
+
+    /**
+     * 统计任务的提交数量
+     * 
+     * @param taskId 任务ID
+     * @return 提交数量
+     */
+    @Select("SELECT COUNT(*) FROM task_submission WHERE task_id = #{taskId} AND is_deleted = 0")
+    Long countSubmissionsByTaskId(@Param("taskId") Long taskId);
 
     /**
      * 根据学生ID查询提交列表

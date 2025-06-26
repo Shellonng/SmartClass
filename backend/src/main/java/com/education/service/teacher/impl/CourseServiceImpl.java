@@ -129,9 +129,9 @@ public class CourseServiceImpl implements CourseService {
                 .map(this::convertToCourseResponse)
                 .collect(Collectors.toList());
         
-        return new PageResponse<>(
-                coursePage.getCurrent(),
-                coursePage.getSize(),
+        return new PageResponse<CourseDTO.CourseResponse>(
+                (int) coursePage.getCurrent(),
+                (int) coursePage.getSize(),
                 coursePage.getTotal(),
                 courseResponses
         );
@@ -459,15 +459,19 @@ public class CourseServiceImpl implements CourseService {
     
     @Override
     public PageResponse<Object> getCourseStudents(Long courseId, Long teacherId, PageRequest pageRequest) {
-        log.info("获取课程学生列表，课程ID: {}, 教师ID: {}", courseId, teacherId);
         validateCourseAccess(courseId, teacherId);
-        // TODO: 实现学生列表查询
-        return new PageResponse<>(
-                (long) pageRequest.getPageNum(),
-                (long) pageRequest.getPageSize(),
-                0L,
-                new ArrayList<Object>()
-        );
+        
+        // 获取课程学生列表
+        // 这里假设有一个方法可以获取课程学生列表
+        List<Object> students = courseMapper.selectCourseStudents(courseId, pageRequest);
+        Long total = courseMapper.countCourseStudents(courseId);
+        
+        return PageResponse.<Object>builder()
+                .records(students)
+                .total(total)
+                .current(pageRequest.getCurrent())
+                .pageSize(pageRequest.getPageSize())
+                .<Object>build();
     }
     
     @Override
@@ -538,15 +542,18 @@ public class CourseServiceImpl implements CourseService {
     
     @Override
     public PageResponse<Object> getCourseReviews(Long courseId, Long teacherId, PageRequest pageRequest) {
-        log.info("获取课程评价列表，课程ID: {}, 教师ID: {}", courseId, teacherId);
         validateCourseAccess(courseId, teacherId);
-        // TODO: 实现课程评价查询逻辑
-        return new PageResponse<>(
-                (long) pageRequest.getPageNum(),
-                (long) pageRequest.getPageSize(),
-                0L,
-                new ArrayList<Object>()
-        );
+        
+        // 获取课程评价列表
+        List<Object> reviews = courseMapper.selectCourseReviews(courseId, pageRequest);
+        Long total = courseMapper.countCourseReviews(courseId);
+        
+        return PageResponse.<Object>builder()
+                .records(reviews)
+                .total(total)
+                .current(pageRequest.getCurrent())
+                .pageSize(pageRequest.getPageSize())
+                .<Object>build();
     }
     
     @Override
@@ -559,15 +566,18 @@ public class CourseServiceImpl implements CourseService {
     
     @Override
     public PageResponse<Object> getCourseResources(Long courseId, Long teacherId, PageRequest pageRequest) {
-        log.info("获取课程资源列表，课程ID: {}, 教师ID: {}", courseId, teacherId);
         validateCourseAccess(courseId, teacherId);
-        // TODO: 实现课程资源查询逻辑
-        return new PageResponse<>(
-                (long) pageRequest.getPageNum(),
-                (long) pageRequest.getPageSize(),
-                0L,
-                new ArrayList<Object>()
-        );
+        
+        // 获取课程资源列表
+        List<Object> resources = courseMapper.selectCourseResources(courseId, pageRequest);
+        Long total = courseMapper.countCourseResources(courseId);
+        
+        return PageResponse.<Object>builder()
+                .records(resources)
+                .total(total)
+                .current(pageRequest.getCurrent())
+                .pageSize(pageRequest.getPageSize())
+                .<Object>build();
     }
     
     @Override
@@ -590,15 +600,18 @@ public class CourseServiceImpl implements CourseService {
     
     @Override
     public PageResponse<Object> getCourseTasks(Long courseId, Long teacherId, PageRequest pageRequest) {
-        log.info("获取课程任务列表，课程ID: {}, 教师ID: {}", courseId, teacherId);
         validateCourseAccess(courseId, teacherId);
-        // TODO: 实现课程任务查询逻辑
-        return new PageResponse<>(
-                (long) pageRequest.getPageNum(),
-                (long) pageRequest.getPageSize(),
-                0L,
-                new ArrayList<Object>()
-        );
+        
+        // 获取课程任务列表
+        List<Object> tasks = courseMapper.selectCourseTasks(courseId, pageRequest);
+        Long total = courseMapper.countCourseTasks(courseId);
+        
+        return PageResponse.<Object>builder()
+                .records(tasks)
+                .total(total)
+                .current(pageRequest.getCurrent())
+                .pageSize(pageRequest.getPageSize())
+                .<Object>build();
     }
     
     @Override
@@ -612,15 +625,18 @@ public class CourseServiceImpl implements CourseService {
     
     @Override
     public PageResponse<Object> getCourseAnnouncements(Long courseId, Long teacherId, PageRequest pageRequest) {
-        log.info("获取课程公告列表，课程ID: {}, 教师ID: {}", courseId, teacherId);
         validateCourseAccess(courseId, teacherId);
-        // TODO: 实现课程公告查询逻辑
-        return new PageResponse<>(
-                (long) pageRequest.getPageNum(),
-                (long) pageRequest.getPageSize(),
-                0L,
-                new ArrayList<Object>()
-        );
+        
+        // 获取课程公告列表
+        List<Object> announcements = courseMapper.selectCourseAnnouncements(courseId, pageRequest);
+        Long total = courseMapper.countCourseAnnouncements(courseId);
+        
+        return PageResponse.<Object>builder()
+                .records(announcements)
+                .total(total)
+                .current(pageRequest.getCurrent())
+                .pageSize(pageRequest.getPageSize())
+                .<Object>build();
     }
     
     @Override

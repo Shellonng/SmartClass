@@ -153,11 +153,12 @@ public class KnowledgeServiceImpl implements KnowledgeService {
                 .map(this::convertToGraphResponse)
                 .collect(Collectors.toList());
         
-        return PageResponse.of(
-                (long) pageRequest.getPage(),
-                (long) pageRequest.getSize(),
-                graphPage.getTotal(),
-                graphResponses);
+        return PageResponse.<KnowledgeDTOExtension.KnowledgeGraphResponse>builder()
+                .records(graphResponses)
+                .total(graphPage.getTotal())
+                .current(pageRequest.getCurrent())
+                .pageSize(pageRequest.getPageSize())
+                .build();
     }
     
     @Override

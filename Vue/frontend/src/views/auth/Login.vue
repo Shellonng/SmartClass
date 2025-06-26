@@ -45,12 +45,12 @@
     <div class="login-form-section">
       <div class="form-container">
         <div class="form-header">
-          <h2 class="form-title">欢迎回来</h2>
-          <p class="form-subtitle">请选择您的身份并登录账户</p>
+          <h2 class="form-title">{{ pageTitle }}</h2>
+          <p class="form-subtitle">{{ pageSubtitle }}</p>
         </div>
 
-        <!-- 身份选择 -->
-        <div class="role-selection">
+        <!-- 身份选择 - 只在登录模式显示 -->
+        <div v-if="!isRegisterMode" class="role-selection">
           <div class="role-tabs">
             <div 
               class="role-tab" 
@@ -71,38 +71,38 @@
           </div>
         </div>
           
-          <a-form
-            :model="loginForm"
-            :rules="loginRules"
-            @finish="handleLogin"
-            layout="vertical"
-            class="login-form"
-          >
-            <a-form-item name="username" label="用户名">
-              <a-input
-                v-model:value="loginForm.username"
-                size="large"
-                placeholder="请输入用户名"
-              >
-                <template #prefix>
-                  <UserOutlined />
-                </template>
-              </a-input>
-            </a-form-item>
-            
-            <a-form-item name="password" label="密码">
-              <a-input-password
-                v-model:value="loginForm.password"
-                size="large"
-                placeholder="请输入密码"
-              >
-                <template #prefix>
-                  <LockOutlined />
-                </template>
-              </a-input-password>
-            </a-form-item>
-            
-
+        <!-- 登录表单 -->
+        <a-form
+          v-if="!isRegisterMode"
+          :model="loginForm"
+          :rules="loginRules"
+          @finish="handleLogin"
+          layout="vertical"
+          class="login-form"
+        >
+          <a-form-item name="username" label="用户名">
+            <a-input
+              v-model:value="loginForm.username"
+              size="large"
+              placeholder="请输入用户名"
+            >
+              <template #prefix>
+                <UserOutlined />
+              </template>
+            </a-input>
+          </a-form-item>
+          
+          <a-form-item name="password" label="密码">
+            <a-input-password
+              v-model:value="loginForm.password"
+              size="large"
+              placeholder="请输入密码"
+            >
+              <template #prefix>
+                <LockOutlined />
+              </template>
+            </a-input-password>
+          </a-form-item>
           
           <div class="form-options">
             <a-checkbox v-model:checked="loginForm.remember">
@@ -122,9 +122,105 @@
             {{ selectedRole === 'teacher' ? '教师登录' : '学生登录' }}
           </a-button>
         </a-form>
+
+        <!-- 注册表单 -->
+        <a-form
+          v-else
+          :model="registerForm"
+          :rules="registerRules"
+          @finish="handleRegister"
+          layout="vertical"
+          class="register-form"
+        >
+          <a-form-item name="realName" label="真实姓名">
+            <a-input
+              v-model:value="registerForm.realName"
+              size="large"
+              placeholder="请输入真实姓名"
+            >
+              <template #prefix>
+                <UserOutlined />
+              </template>
+            </a-input>
+          </a-form-item>
+
+          <a-form-item name="username" label="用户名">
+            <a-input
+              v-model:value="registerForm.username"
+              size="large"
+              placeholder="请输入用户名"
+            >
+              <template #prefix>
+                <UserOutlined />
+              </template>
+            </a-input>
+          </a-form-item>
+
+          <a-form-item name="email" label="邮箱">
+            <a-input
+              v-model:value="registerForm.email"
+              size="large"
+              placeholder="请输入邮箱地址"
+            >
+              <template #prefix>
+                <MailOutlined />
+              </template>
+            </a-input>
+          </a-form-item>
+          
+          <a-form-item name="password" label="密码">
+            <a-input-password
+              v-model:value="registerForm.password"
+              size="large"
+              placeholder="请输入密码"
+            >
+              <template #prefix>
+                <LockOutlined />
+              </template>
+            </a-input-password>
+          </a-form-item>
+
+          <a-form-item name="confirmPassword" label="确认密码">
+            <a-input-password
+              v-model:value="registerForm.confirmPassword"
+              size="large"
+              placeholder="请再次输入密码"
+            >
+              <template #prefix>
+                <LockOutlined />
+              </template>
+            </a-input-password>
+          </a-form-item>
+
+          <!-- 用户类型选择 -->
+          <a-form-item name="role" label="用户角色">
+            <a-radio-group v-model:value="registerForm.role" size="large">
+              <a-radio-button value="STUDENT">学生</a-radio-button>
+              <a-radio-button value="TEACHER">教师</a-radio-button>
+            </a-radio-group>
+          </a-form-item>
+          
+          <a-button 
+            type="primary" 
+            html-type="submit" 
+            size="large" 
+            block
+            :loading="loading"
+            class="register-btn"
+          >
+            立即注册
+          </a-button>
+        </a-form>
         
         <div class="form-footer">
-          <p>还没有账户？ <a @click="showRegisterModal = true" class="register-link">立即注册</a></p>
+          <p v-if="!isRegisterMode">
+            还没有账户？ 
+            <router-link to="/register" class="register-link">立即注册</router-link>
+          </p>
+          <p v-else>
+            已有账户？ 
+            <router-link to="/login" class="login-link">立即登录</router-link>
+          </p>
         </div>
       </div>
       
@@ -152,37 +248,12 @@
         </a-form-item>
       </a-form>
     </a-modal>
-    
-    <!-- 注册弹窗 -->
-    <a-modal
-      v-model:open="showRegisterModal"
-      title="用户注册"
-      @ok="handleRegister"
-    >
-      <a-form :model="registerForm" layout="vertical">
-        <a-form-item label="用户名">
-          <a-input v-model:value="registerForm.username" placeholder="请输入用户名" />
-        </a-form-item>
-        <a-form-item label="密码">
-          <a-input-password v-model:value="registerForm.password" placeholder="请输入密码" />
-        </a-form-item>
-        <a-form-item label="确认密码">
-          <a-input-password v-model:value="registerForm.confirmPassword" placeholder="请确认密码" />
-        </a-form-item>
-        <a-form-item label="邮箱">
-          <a-input v-model:value="registerForm.email" placeholder="请输入邮箱" />
-        </a-form-item>
-        <a-form-item label="真实姓名">
-          <a-input v-model:value="registerForm.realName" placeholder="请输入真实姓名" />
-        </a-form-item>
-      </a-form>
-    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
   UserOutlined,
@@ -190,14 +261,23 @@ import {
   ArrowRightOutlined,
   ArrowLeftOutlined,
   LockOutlined,
-  RobotOutlined
+  RobotOutlined,
+  MailOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import type { LoginRequest } from '@/api/auth'
 import { register } from '@/api/auth'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
+
+// 判断当前是登录还是注册模式
+const isRegisterMode = computed(() => route.name === 'Register')
+const pageTitle = computed(() => isRegisterMode.value ? '用户注册' : '欢迎回来')
+const pageSubtitle = computed(() => 
+  isRegisterMode.value ? '创建账户，开启学习之旅' : '请选择您的身份并登录账户'
+)
 
 // 选择的角色
 const selectedRole = ref<'teacher' | 'student' | ''>('student')
@@ -223,20 +303,45 @@ const registerForm = reactive({
   password: '',
   confirmPassword: '',
   email: '',
-  realName: ''
+  realName: '',
+  role: 'STUDENT'
 })
 
 // 表单验证规则
 const loginRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+}
 
+const registerRules = {
+  realName: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }],
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, message: '请确认密码', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string) => {
+        if (value !== registerForm.password) {
+          return Promise.reject('两次输入的密码不一致')
+        }
+        return Promise.resolve()
+      },
+      trigger: 'blur'
+    }
+  ],
+  role: [{ required: true, message: '请选择用户角色', trigger: 'change' }]
 }
 
 // 状态
 const loading = ref(false)
 const showForgotModal = ref(false)
-const showRegisterModal = ref(false)
 
 
 // 选择角色
@@ -278,10 +383,7 @@ const handleForgotPassword = () => {
 // 处理注册
 const handleRegister = async () => {
   try {
-    if (registerForm.password !== registerForm.confirmPassword) {
-      message.error('两次输入的密码不一致')
-      return
-    }
+    loading.value = true
     
     // 调用注册API
     const registerData = {
@@ -290,7 +392,7 @@ const handleRegister = async () => {
       confirmPassword: registerForm.confirmPassword,
       email: registerForm.email,
       realName: registerForm.realName,
-      role: 'student' // 默认注册为学生
+      role: registerForm.role
     }
     
     const response = await register(registerData)
@@ -302,9 +404,6 @@ const handleRegister = async () => {
       const { token, userInfo } = response.data.data
       authStore.setToken(token)
       authStore.user = userInfo
-      
-      // 关闭注册模态框
-      showRegisterModal.value = false
       
       // 根据用户角色跳转到对应页面
       if (userInfo.role === 'student') {
@@ -322,6 +421,8 @@ const handleRegister = async () => {
     } else {
       message.error('注册失败，请稍后重试')
     }
+  } finally {
+    loading.value = false
   }
 }
 

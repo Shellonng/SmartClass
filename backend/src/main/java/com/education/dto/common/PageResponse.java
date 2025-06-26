@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 分页响应结果类
@@ -61,12 +62,12 @@ public class PageResponse<T> implements Serializable {
         this.pageSize = pageSize;
         this.total = total;
         this.records = records;
-        this.pages = (total + pageSize - 1) / pageSize;
-        this.hasNext = current < pages;
-        this.hasPrevious = current > 1;
+        this.pages = total == null || pageSize == null || pageSize == 0 ? 0L : (total + pageSize - 1) / pageSize;
+        this.hasNext = current != null && pages != null && current < pages;
+        this.hasPrevious = current != null && current > 1;
         this.navigation = new PageNavigation();
         this.navigation.setFirstPage(1);
-        this.navigation.setLastPage(Math.toIntExact(pages));
+        this.navigation.setLastPage(pages != null ? pages.intValue() : 0);
         this.navigation.setNextPage(hasNext ? current + 1 : null);
         this.navigation.setPreviousPage(hasPrevious ? current - 1 : null);
     }
@@ -79,9 +80,12 @@ public class PageResponse<T> implements Serializable {
      * @return 分页响应对象
      */
     public static <T> PageResponse<T> of(IPage<T> page) {
+        Long current = page.getCurrent();
+        Long size = page.getSize();
+        
         return new PageResponse<>(
-            page.getCurrent().intValue(),
-            page.getSize(),
+            Objects.isNull(current) ? 1 : current.intValue(),
+            Objects.isNull(size) ? 10 : size.intValue(),
             page.getTotal(),
             page.getRecords()
         );
@@ -140,7 +144,7 @@ public class PageResponse<T> implements Serializable {
                 this.navigation = new PageNavigation();
             }
             this.navigation.setFirstPage(1);
-            this.navigation.setLastPage(Math.toIntExact(pages));
+            this.navigation.setLastPage(pages != null ? pages.intValue() : 0);
             this.navigation.setNextPage(hasNext ? current + 1 : null);
             this.navigation.setPreviousPage(hasPrevious ? current - 1 : null);
         }
@@ -226,7 +230,7 @@ public class PageResponse<T> implements Serializable {
         if (current == null || pageSize == null || current <= 0 || pageSize <= 0) {
             return 0L;
         }
-        return (current - 1) * pageSize + 1;
+        return (long) ((current - 1) * pageSize + 1);
     }
 
     /**
@@ -238,7 +242,7 @@ public class PageResponse<T> implements Serializable {
         if (current == null || pageSize == null || total == null || current <= 0 || pageSize <= 0) {
             return 0L;
         }
-        long endIndex = current * pageSize;
+        long endIndex = (long) (current * pageSize);
         return Math.min(endIndex, total);
     }
 
@@ -281,7 +285,7 @@ public class PageResponse<T> implements Serializable {
      * @return 分页导航信息
      */
     public PageNavigation buildNavigation(int displayPages) {
-        return new PageNavigation(current, Math.toIntExact(pages), displayPages);
+        return new PageNavigation(current, pages != null ? pages.intValue() : 0, displayPages);
     }
 
     /**

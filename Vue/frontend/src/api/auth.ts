@@ -38,36 +38,36 @@ export interface RegisterRequest {
 // 登录
 export const login = (data: LoginRequest) => {
   console.log('🚀 发送登录请求:')
-  console.log('URL:', axios.defaults.baseURL + '/api/auth/login')
+  console.log('URL:', axios.defaults.baseURL + '/auth/login')
   console.log('数据:', data)
   console.log('Headers:', axios.defaults.headers)
   
-  return axios.post<LoginResponse>('/api/auth/login', data)
+  return axios.post<LoginResponse>('/auth/login', data)
 }
 
 // 注册
 export const register = (data: RegisterRequest) => {
-  return axios.post('/api/auth/register', data)
+  return axios.post('/auth/register', data)
 }
 
 // 登出
 export const logout = () => {
-  return axios.post('/api/auth/logout')
+  return axios.post('/auth/logout')
 }
 
 // 获取用户信息
 export const getUserInfo = () => {
-  return axios.get('/api/auth/user-info')
+  return axios.get('/auth/user-info')
 }
 
 // 刷新token
 export const refreshToken = () => {
-  return axios.post('/api/auth/refresh')
+  return axios.post('/auth/refresh')
 }
 
 // 获取验证码
 export const getCaptcha = () => {
-  return axios.get('/api/auth/captcha')
+  return axios.get('/auth/captcha')
 }
 
 // 修改密码

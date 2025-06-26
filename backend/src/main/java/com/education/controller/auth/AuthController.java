@@ -149,7 +149,7 @@ public class AuthController {
             System.out.println("📝 收到注册请求:");
             System.out.println("  - 用户名: " + request.getUsername());
             System.out.println("  - 邮箱: " + request.getEmail());
-            System.out.println("  - 用户类型: " + request.getUserType());
+            System.out.println("  - 用户角色: " + request.getRole());
             
             AuthDTO.LoginResponse authResponse = authService.register(request);
             

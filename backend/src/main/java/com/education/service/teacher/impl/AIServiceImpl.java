@@ -1,10 +1,15 @@
 package com.education.service.teacher.impl;
 
 import com.education.dto.AIDTO;
+import com.education.dto.ai.AICommonDTOs;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
 import com.education.service.teacher.AIService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 教师端AI服务实现类
@@ -13,9 +18,99 @@ import org.springframework.stereotype.Service;
 public class AIServiceImpl implements AIService {
 
     @Override
-    public AIDTO.QuestionGenerateResponse generateQuestions(AIDTO.QuestionGenerateRequest generateRequest, Long teacherId) {
-        // TODO: 实现AI生成试题功能
-        throw new UnsupportedOperationException("AI生成试题功能暂未实现");
+    public AICommonDTOs.AIGradeResponse intelligentGrading(AICommonDTOs.AIGradeRequest request) {
+        // TODO: 实现智能批改功能
+        throw new UnsupportedOperationException("智能批改功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AIBatchGradeResponse batchIntelligentGrading(AICommonDTOs.AIBatchGradeRequest request) {
+        // TODO: 实现批量智能批改功能
+        throw new UnsupportedOperationException("批量智能批改功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AIRecommendationResponse generateRecommendations(AICommonDTOs.AIRecommendationRequest request) {
+        // TODO: 实现生成学生推荐功能
+        throw new UnsupportedOperationException("生成学生推荐功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AIAbilityAnalysisResponse analyzeStudentAbility(AICommonDTOs.AIAbilityAnalysisRequest request) {
+        // TODO: 实现分析学生能力功能
+        throw new UnsupportedOperationException("分析学生能力功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AIKnowledgeGraphResponse generateKnowledgeGraph(AICommonDTOs.AIKnowledgeGraphRequest request) {
+        // TODO: 实现生成知识图谱功能
+        throw new UnsupportedOperationException("生成知识图谱功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AIQuestionGenerationResponse generateQuestions(AICommonDTOs.AIQuestionGenerationRequest request) {
+        // TODO: 实现智能题目生成功能
+        throw new UnsupportedOperationException("智能题目生成功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AILearningPathResponse optimizeLearningPath(AICommonDTOs.AILearningPathRequest request) {
+        // TODO: 实现学习路径优化功能
+        throw new UnsupportedOperationException("学习路径优化功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AIClassroomAnalysisResponse analyzeClassroomPerformance(AICommonDTOs.AIClassroomAnalysisRequest request) {
+        // TODO: 实现课堂表现分析功能
+        throw new UnsupportedOperationException("课堂表现分析功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AITeachingSuggestionResponse generateTeachingSuggestions(AICommonDTOs.AITeachingSuggestionRequest request) {
+        // TODO: 实现智能教学建议功能
+        throw new UnsupportedOperationException("智能教学建议功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AIDocumentAnalysisResponse analyzeDocument(MultipartFile file, String analysisType, Long userId) {
+        // TODO: 实现文档AI分析功能
+        throw new UnsupportedOperationException("文档AI分析功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AIAnalysisHistoryResponse getAnalysisHistory(String type, Long userId, Integer page, Integer size) {
+        // TODO: 实现获取分析历史功能
+        throw new UnsupportedOperationException("获取分析历史功能暂未实现");
+    }
+
+    @Override
+    public void configureAIModel(AICommonDTOs.AIModelConfigRequest request) {
+        // TODO: 实现AI模型配置功能
+        throw new UnsupportedOperationException("AI模型配置功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AIModelStatusResponse getAIModelStatus() {
+        // TODO: 实现获取AI模型状态功能
+        throw new UnsupportedOperationException("获取AI模型状态功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AIModelTrainingResponse trainPersonalizedModel(AICommonDTOs.AIModelTrainingRequest request) {
+        // TODO: 实现训练个性化模型功能
+        throw new UnsupportedOperationException("训练个性化模型功能暂未实现");
+    }
+
+    @Override
+    public AICommonDTOs.AITrainingProgressResponse getTrainingProgress(String trainingId) {
+        // TODO: 实现获取训练进度功能
+        throw new UnsupportedOperationException("获取训练进度功能暂未实现");
+    }
+
+    @Override
+    public AIDTO.QuestionGenerateResponse generateQuestionsOld(AIDTO.QuestionGenerateRequest generateRequest, Long teacherId) {
+        // TODO: 实现AI生成试题功能(旧接口)
+        throw new UnsupportedOperationException("AI生成试题功能(旧接口)暂未实现");
     }
 
     @Override
@@ -106,12 +201,6 @@ public class AIServiceImpl implements AIService {
     public AIDTO.LearningPathResponse generateLearningPath(AIDTO.LearningPathRequest pathRequest, Long teacherId) {
         // TODO: 实现AI生成学习路径功能
         throw new UnsupportedOperationException("AI生成学习路径功能暂未实现");
-    }
-
-    @Override
-    public AIDTO.AbilityAnalysisResponse analyzeStudentAbility(AIDTO.AbilityAnalysisRequest abilityRequest, Long teacherId) {
-        // TODO: 实现AI分析学生能力功能
-        throw new UnsupportedOperationException("AI分析学生能力功能暂未实现");
     }
 
     @Override
@@ -219,12 +308,17 @@ public class AIServiceImpl implements AIService {
     @Override
     public PageResponse<AIDTO.AIHistoryResponse> getAIHistory(Long teacherId, String functionType, PageRequest pageRequest) {
         // TODO: 实现获取AI功能历史记录功能
-        throw new UnsupportedOperationException("获取AI功能历史记录功能暂未实现");
+        return PageResponse.<AIDTO.AIHistoryResponse>builder()
+                .records(new ArrayList<>())
+                .total(0L)
+                .current(pageRequest.getCurrent())
+                .pageSize(pageRequest.getPageSize())
+                .build();
     }
 
     @Override
     public Boolean clearAIHistory(Long teacherId, String functionType) {
         // TODO: 实现清除AI功能历史记录功能
-        throw new UnsupportedOperationException("清除AI功能历史记录功能暂未实现");
+        return true;
     }
 }

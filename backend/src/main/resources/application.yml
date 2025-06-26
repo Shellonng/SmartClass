@@ -235,7 +235,7 @@ spring:
       on-profile: dev
   datasource:
     url: jdbc:mysql://localhost:3306/education_platform?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
-    username: root
+    username: rootsc
     password: 641641773
     hikari:
       # 开发环境连接池配置

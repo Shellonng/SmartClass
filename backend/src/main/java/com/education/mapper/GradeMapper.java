@@ -132,4 +132,22 @@ public interface GradeMapper extends BaseMapper<Grade> {
      * 更新成绩权重
      */
     int updateGradeWeight(@Param("taskType") String taskType, @Param("weight") Double weight, @Param("courseId") Long courseId);
+    
+    /**
+     * 查询课程中不及格的学生（分页）
+     * 
+     * @param courseId 课程ID
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @return 学生列表
+     */
+    List<Object> selectFailingStudentsByCourse(@Param("courseId") Long courseId, @Param("pageNum") Integer pageNum, @Param("pageSize") Integer pageSize);
+    
+    /**
+     * 统计课程中不及格的学生总数
+     * 
+     * @param courseId 课程ID
+     * @return 学生总数
+     */
+    Integer countFailingStudentsByCourse(@Param("courseId") Long courseId);
 }
