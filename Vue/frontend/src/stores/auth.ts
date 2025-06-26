@@ -99,14 +99,15 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // 登出
-  const logout = async () => {
+  const logoutUser = async () => {
     try {
-      await axios.post('/api/auth/logout')
+      await axios.post('/auth/logout')
     } catch (error) {
       console.error('登出请求失败:', error)
     } finally {
       clearToken()
       localStorage.removeItem('remember')
+      router.push('/login')
     }
   }
 
@@ -115,7 +116,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       if (!token.value) return null
       
-      const response = await axios.get('/api/auth/user-info')
+      const response = await axios.get('/auth/user-info')
       user.value = response.data.data
       return user.value
     } catch (error) {
@@ -128,7 +129,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 刷新token
   const refreshToken = async () => {
     try {
-      const response = await axios.post('/api/auth/refresh')
+      const response = await axios.post('/auth/refresh')
       const { token: newToken } = response.data.data
       setToken(newToken)
       return newToken
@@ -142,7 +143,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 修改密码
   const changePassword = async (oldPassword: string, newPassword: string) => {
     try {
-      await axios.post('/api/auth/change-password', {
+      await axios.post('/auth/change-password', {
         oldPassword,
         newPassword
       })
@@ -154,8 +155,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 忘记密码
   const forgotPassword = async (username: string, email: string) => {
     try {
-      await axios.post('/api/auth/forgot-password', {
-        username,
+      await axios.post('/auth/send-reset-email', {
         email
       })
     } catch (error: any) {
@@ -164,10 +164,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // 重置密码
-  const resetPassword = async (token: string, newPassword: string) => {
+  const resetPassword = async (email: string, code: string, newPassword: string) => {
     try {
-      await axios.post('/api/auth/reset-password', {
-        token,
+      await axios.post('/auth/reset-password', {
+        email,
+        code,
         newPassword
       })
     } catch (error: any) {
@@ -199,7 +200,7 @@ export const useAuthStore = defineStore('auth', () => {
     
     // 方法
     loginUser,
-    logout,
+    logoutUser,
     fetchUserInfo,
     refreshToken,
     changePassword,

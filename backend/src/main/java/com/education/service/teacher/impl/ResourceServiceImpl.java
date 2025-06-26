@@ -164,12 +164,12 @@ public class ResourceServiceImpl implements ResourceService {
                 .map(this::convertToResourceResponse)
                 .collect(Collectors.toList());
         
-        return new PageResponse<>(
-                resourcePage.getCurrent(),
-                resourcePage.getSize(),
-                resourcePage.getTotal(),
-                resourceResponses
-        );
+        return PageResponse.<ResourceResponse>builder()
+                .records(resourceResponses)
+                .total(resourcePage.getTotal())
+                .current(pageRequest.getCurrent())
+                .pageSize(pageRequest.getPageSize())
+                .<ResourceResponse>build();
     }
 
     @Override
@@ -376,9 +376,9 @@ public class ResourceServiceImpl implements ResourceService {
             return record;
         }).collect(Collectors.toList());
         
-        return new PageResponse<>(
-                resourcePage.getCurrent(),
-                resourcePage.getSize(),
+        return new PageResponse<ResourceShareRecordResponse>(
+                (int) resourcePage.getCurrent(),
+                (int) resourcePage.getSize(),
                 resourcePage.getTotal(),
                 records
         );

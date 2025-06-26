@@ -471,4 +471,89 @@ public interface CourseMapper extends BaseMapper<Course> {
             "FROM course " +
             "WHERE id = #{courseId} AND is_deleted = 0")
     Map<String, Object> getCourseProgress(@Param("courseId") Long courseId);
+
+    /**
+     * 获取课程的学生列表（分页）
+     * 
+     * @param courseId 课程ID
+     * @param pageRequest 分页请求
+     * @return 学生列表
+     */
+    List<Object> selectCourseStudents(@Param("courseId") Long courseId, @Param("pageRequest") com.education.dto.common.PageRequest pageRequest);
+
+    /**
+     * 统计课程学生总数
+     * 
+     * @param courseId 课程ID
+     * @return 学生总数
+     */
+    Long countCourseStudents(@Param("courseId") Long courseId);
+
+    /**
+     * 获取课程评价列表（分页）
+     * 
+     * @param courseId 课程ID
+     * @param pageRequest 分页请求
+     * @return 评价列表
+     */
+    List<Object> selectCourseReviews(@Param("courseId") Long courseId, @Param("pageRequest") com.education.dto.common.PageRequest pageRequest);
+
+    /**
+     * 统计课程评价总数
+     * 
+     * @param courseId 课程ID
+     * @return 评价总数
+     */
+    Long countCourseReviews(@Param("courseId") Long courseId);
+
+    /**
+     * 获取课程资源列表（分页）
+     * 
+     * @param courseId 课程ID
+     * @param pageRequest 分页请求
+     * @return 资源列表
+     */
+    List<Object> selectCourseResources(@Param("courseId") Long courseId, @Param("pageRequest") com.education.dto.common.PageRequest pageRequest);
+
+    /**
+     * 统计课程资源总数
+     * 
+     * @param courseId 课程ID
+     * @return 资源总数
+     */
+    Long countCourseResources(@Param("courseId") Long courseId);
+
+    /**
+     * 获取课程任务列表（分页）
+     * 
+     * @param courseId 课程ID
+     * @param pageRequest 分页请求
+     * @return 任务列表
+     */
+    List<Object> selectCourseTasks(@Param("courseId") Long courseId, @Param("pageRequest") com.education.dto.common.PageRequest pageRequest);
+
+    /**
+     * 统计课程任务总数
+     * 
+     * @param courseId 课程ID
+     * @return 任务总数
+     */
+    Long countCourseTasks(@Param("courseId") Long courseId);
+
+    /**
+     * 获取课程公告列表（分页）
+     * 
+     * @param courseId 课程ID
+     * @param pageRequest 分页请求
+     * @return 公告列表
+     */
+    List<Object> selectCourseAnnouncements(@Param("courseId") Long courseId, @Param("pageRequest") com.education.dto.common.PageRequest pageRequest);
+
+    /**
+     * 统计课程公告总数
+     * 
+     * @param courseId 课程ID
+     * @return 公告总数
+     */
+    Long countCourseAnnouncements(@Param("courseId") Long courseId);
 }

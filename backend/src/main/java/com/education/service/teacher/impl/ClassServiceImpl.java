@@ -52,9 +52,9 @@ public class ClassServiceImpl implements ClassService {
         Long teacherId = SecurityUtils.getCurrentUserId();
         
         // 构建查询条件
-        Long offset = (pageRequest.getCurrent() - 1) * pageRequest.getPageSize();
+        Long offset = (long) ((pageRequest.getCurrent() - 1) * pageRequest.getPageSize());
         List<Class> classes = classMapper.selectClassesByTeacherWithConditions(
-                teacherId, name, grade, status, offset, pageRequest.getPageSize());
+                teacherId, name, grade, status, offset, (long) pageRequest.getPageSize());
         
         Long total = classMapper.countClassesByTeacherWithConditions(teacherId, name, grade, status);
         
@@ -81,20 +81,20 @@ public class ClassServiceImpl implements ClassService {
         }
         
         Class clazz = new Class();
-        clazz.setName(request.getName());
-        clazz.setGrade(request.getGrade());
+        clazz.setClassName(request.getName());
+        clazz.setGrade(Integer.parseInt(request.getGrade()));
         clazz.setMajor(request.getMajor());
         clazz.setDescription(request.getDescription());
-        clazz.setCapacity(request.getCapacity());
+        clazz.setMaxStudentCount(request.getCapacity());
         clazz.setSemester(request.getSemester());
-        clazz.setTeacherId(teacherId);
+        clazz.setHeadTeacherId(teacherId);
         clazz.setStatus("ACTIVE");
         clazz.setCreateTime(LocalDateTime.now());
         clazz.setUpdateTime(LocalDateTime.now());
         
         classMapper.insert(clazz);
         
-        log.info("班级创建成功，班级ID：{}，名称：{}", clazz.getId(), clazz.getName());
+        log.info("班级创建成功，班级ID：{}，名称：{}", clazz.getId(), clazz.getClassName());
         return convertToClassResponse(clazz);
     }
 
@@ -132,10 +132,10 @@ public class ClassServiceImpl implements ClassService {
         
         // 更新字段
         if (request.getName() != null) {
-            clazz.setName(request.getName());
+            clazz.setClassName(request.getName());
         }
         if (request.getGrade() != null) {
-            clazz.setGrade(request.getGrade());
+            clazz.setGrade(Integer.parseInt(request.getGrade()));
         }
         if (request.getMajor() != null) {
             clazz.setMajor(request.getMajor());
@@ -144,7 +144,7 @@ public class ClassServiceImpl implements ClassService {
             clazz.setDescription(request.getDescription());
         }
         if (request.getCapacity() != null) {
-            clazz.setCapacity(request.getCapacity());
+            clazz.setMaxStudentCount(request.getCapacity());
         }
         if (request.getSemester() != null) {
             clazz.setSemester(request.getSemester());
@@ -189,8 +189,8 @@ public class ClassServiceImpl implements ClassService {
             throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
         }
         
-        Long offset = (pageRequest.getCurrent() - 1) * pageRequest.getPageSize();
-        List<User> students = classMapper.selectStudentsByClassId(classId, keyword, offset, pageRequest.getPageSize());
+        Long offset = (long) ((pageRequest.getCurrent() - 1) * pageRequest.getPageSize());
+        List<User> students = classMapper.selectStudentsByClassId(classId, keyword, offset, (long) pageRequest.getPageSize());
         Long total = classMapper.countStudentsByClassId(classId, keyword);
         
         List<ClassStudentResponse> responses = students.stream()
@@ -216,7 +216,9 @@ public class ClassServiceImpl implements ClassService {
         }
         
         // 批量添加学生
-        classMapper.batchAddStudents(classId, studentIds);
+        for (Long studentId : studentIds) {
+            classMapper.addStudent(classId, studentId);
+        }
         log.info("批量添加学生到班级成功，班级ID：{}，学生数量：{}", classId, studentIds.size());
     }
 
@@ -244,7 +246,9 @@ public class ClassServiceImpl implements ClassService {
             throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
         }
         
-        classMapper.batchRemoveStudents(classId, studentIds);
+        for (Long studentId : studentIds) {
+            classMapper.removeStudent(classId, studentId);
+        }
         log.info("批量从班级移除学生成功，班级ID：{}，学生数量：{}", classId, studentIds.size());
     }
 
@@ -293,13 +297,13 @@ public class ClassServiceImpl implements ClassService {
         }
         
         Class newClass = new Class();
-        newClass.setName(newName);
+        newClass.setClassName(newName);
         newClass.setGrade(originalClass.getGrade());
         newClass.setMajor(originalClass.getMajor());
         newClass.setDescription(originalClass.getDescription());
-        newClass.setCapacity(originalClass.getCapacity());
+        newClass.setMaxStudentCount(originalClass.getMaxStudentCount());
         newClass.setSemester(originalClass.getSemester());
-        newClass.setTeacherId(teacherId);
+        newClass.setHeadTeacherId(teacherId);
         newClass.setStatus("ACTIVE");
         newClass.setCreateTime(LocalDateTime.now());
         newClass.setUpdateTime(LocalDateTime.now());
@@ -327,15 +331,170 @@ public class ClassServiceImpl implements ClassService {
         return downloadUrl;
     }
 
+    @Override
+    public List<Object> getInviteCodes(Long classId, Long teacherId) {
+        // 验证班级权限
+        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+        }
+        
+        // 获取邀请码列表
+        return classMapper.selectInviteCodes(classId);
+    }
+
+    @Override
+    public Boolean disableInviteCode(Long inviteCodeId, Long teacherId) {
+        // 验证邀请码权限
+        if (!classMapper.isInviteCodeOwnedByTeacher(inviteCodeId, teacherId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权限操作该邀请码");
+        }
+        
+        // 禁用邀请码
+        return classMapper.disableInviteCode(inviteCodeId) > 0;
+    }
+
+    @Override
+    public List<Object> getClassCourses(Long classId, Long teacherId) {
+        // 验证班级权限
+        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+        }
+        
+        // 获取班级课程列表
+        return classMapper.selectClassCourses(classId);
+    }
+
+    @Override
+    public Boolean assignCourses(Long classId, List<Long> courseIds, Long teacherId) {
+        // 验证班级权限
+        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+        }
+        
+        // 分配课程
+        return classMapper.assignCourses(classId, courseIds) > 0;
+    }
+
+    @Override
+    public Boolean removeCourse(Long classId, Long courseId, Long teacherId) {
+        // 验证班级权限
+        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+        }
+        
+        // 移除课程
+        return classMapper.removeCourse(classId, courseId) > 0;
+    }
+
+    @Override
+    public PageResponse<Object> getClassTasks(Long classId, Long teacherId, PageRequest pageRequest) {
+        // 验证班级权限
+        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+        }
+        
+        // 获取班级任务列表
+        Long offset = (long) ((pageRequest.getCurrent() - 1) * pageRequest.getPageSize());
+        List<Object> tasks = classMapper.selectClassTasks(classId, offset, (long) pageRequest.getPageSize());
+        Long total = classMapper.countClassTasks(classId);
+        
+        return PageResponse.builder()
+                .records(tasks)
+                .total(total)
+                .current(pageRequest.getCurrent())
+                .pageSize(pageRequest.getPageSize())
+                .build();
+    }
+
+    @Override
+    public Object getClassGradeOverview(Long classId, Long teacherId) {
+        // 验证班级权限
+        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+        }
+        
+        // 获取班级成绩概览
+        return classMapper.selectClassGradeOverview(classId);
+    }
+
+    @Override
+    public Boolean sendClassNotification(Long classId, String title, String content, Long teacherId) {
+        // 验证班级权限
+        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+        }
+        
+        // 发送班级通知
+        return classMapper.insertClassNotification(classId, title, content, teacherId) > 0;
+    }
+
+    @Override
+    public PageResponse<Object> getClassNotifications(Long classId, Long teacherId, PageRequest pageRequest) {
+        // 验证班级权限
+        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+        }
+        
+        // 获取班级通知列表
+        Long offset = (long) ((pageRequest.getCurrent() - 1) * pageRequest.getPageSize());
+        List<Object> notifications = classMapper.selectClassNotifications(classId, offset, (long) pageRequest.getPageSize());
+        Long total = classMapper.countClassNotifications(classId);
+        
+        return PageResponse.builder()
+                .records(notifications)
+                .total(total)
+                .current(pageRequest.getCurrent())
+                .pageSize(pageRequest.getPageSize())
+                .build();
+    }
+
+    @Override
+    public Boolean archiveClass(Long classId, Long teacherId) {
+        // 验证班级权限
+        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+        }
+        
+        // 归档班级
+        Class clazz = classMapper.selectById(classId);
+        if (clazz == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND, "班级不存在");
+        }
+        
+        clazz.setStatus("ARCHIVED");
+        clazz.setUpdateTime(LocalDateTime.now());
+        
+        return classMapper.updateById(clazz) > 0;
+    }
+
+    @Override
+    public Boolean restoreClass(Long classId, Long teacherId) {
+        // 验证班级权限
+        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+        }
+        
+        // 恢复归档班级
+        Class clazz = classMapper.selectById(classId);
+        if (clazz == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND, "班级不存在");
+        }
+        
+        clazz.setStatus("ACTIVE");
+        clazz.setUpdateTime(LocalDateTime.now());
+        
+        return classMapper.updateById(clazz) > 0;
+    }
+
     // 私有辅助方法
     private ClassResponse convertToClassResponse(Class clazz) {
         ClassResponse response = new ClassResponse();
         response.setId(clazz.getId());
-        response.setName(clazz.getName());
-        response.setGrade(clazz.getGrade());
+        response.setName(clazz.getClassName());
+        response.setGrade(String.valueOf(clazz.getGrade()));
         response.setMajor(clazz.getMajor());
         response.setDescription(clazz.getDescription());
-        response.setCapacity(clazz.getCapacity());
+        response.setCapacity(clazz.getMaxStudentCount());
         response.setStudentCount(classMapper.getStudentCount(clazz.getId()));
         response.setSemester(clazz.getSemester());
         response.setStatus(clazz.getStatus());
@@ -343,7 +502,7 @@ public class ClassServiceImpl implements ClassService {
         response.setUpdateTime(clazz.getUpdateTime());
         
         // 获取教师姓名
-        User teacher = userMapper.selectById(clazz.getTeacherId());
+        User teacher = userMapper.selectById(clazz.getHeadTeacherId());
         if (teacher != null) {
             response.setTeacherName(teacher.getUsername());
         }
@@ -354,11 +513,11 @@ public class ClassServiceImpl implements ClassService {
     private ClassDetailResponse convertToClassDetailResponse(Class clazz) {
         ClassDetailResponse response = new ClassDetailResponse();
         response.setId(clazz.getId());
-        response.setName(clazz.getName());
-        response.setGrade(clazz.getGrade());
+        response.setName(clazz.getClassName());
+        response.setGrade(String.valueOf(clazz.getGrade()));
         response.setMajor(clazz.getMajor());
         response.setDescription(clazz.getDescription());
-        response.setCapacity(clazz.getCapacity());
+        response.setCapacity(clazz.getMaxStudentCount());
         response.setStudentCount(classMapper.getStudentCount(clazz.getId()));
         response.setSemester(clazz.getSemester());
         response.setStatus(clazz.getStatus());
@@ -366,7 +525,7 @@ public class ClassServiceImpl implements ClassService {
         response.setUpdateTime(clazz.getUpdateTime());
         
         // 获取教师姓名
-        User teacher = userMapper.selectById(clazz.getTeacherId());
+        User teacher = userMapper.selectById(clazz.getHeadTeacherId());
         if (teacher != null) {
             response.setTeacherName(teacher.getUsername());
         }
@@ -377,11 +536,19 @@ public class ClassServiceImpl implements ClassService {
     private ClassStudentResponse convertToClassStudentResponse(User student) {
         ClassStudentResponse response = new ClassStudentResponse();
         response.setId(student.getId());
-        response.setStudentId(student.getStudentId());
+        response.setStudentId(student.getId().toString());  // Convert Long to String
         response.setName(student.getUsername());
         response.setEmail(student.getEmail());
         response.setPhone(student.getPhone());
-        response.setGender(student.getGender());
+        
+        // Default gender to "未知" as User entity doesn't have gender field
+        response.setGender("未知");
+        
+        // Try to get extField1 as gender if available
+        if (student.getExtField1() != null && !student.getExtField1().isEmpty()) {
+            response.setGender(student.getExtField1());
+        }
+        
         response.setJoinTime(student.getCreateTime());
         response.setStatus("ACTIVE");
         
@@ -400,7 +567,7 @@ public class ClassServiceImpl implements ClassService {
         
         // TODO: 实现真实的统计逻辑
         statistics.setTotalStudents(classMapper.getStudentCount(classId));
-        statistics.setActiveStudents(classMapper.getActiveStudentCount(classId));
+        statistics.setActiveStudents(classMapper.getStudentCount(classId));
         statistics.setTotalCourses(0);
         statistics.setTotalAssignments(0);
         statistics.setAverageScore(0.0);

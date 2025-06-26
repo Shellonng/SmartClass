@@ -44,7 +44,12 @@ public class GradeServiceImpl implements GradeService {
             .map(this::convertToGradeResponse)
             .collect(Collectors.toList());
         
-        return new PageResponse<>(pageRequest.getPageNum().longValue(), pageRequest.getPageSize().longValue(), (long)total, gradeResponses);
+        return PageResponse.<GradeDTO.GradeResponse>builder()
+            .records(gradeResponses)
+            .total((long)total)
+            .current(pageRequest.getCurrent())
+            .pageSize(pageRequest.getPageSize())
+            .build();
     }
 
     @Override
@@ -473,12 +478,16 @@ public class GradeServiceImpl implements GradeService {
 
     @Override
     public PageResponse<Object> getFailingStudents(Long courseId, Long teacherId, PageRequest pageRequest) {
-        // 实现获取不及格学生逻辑
-        // TODO: Add selectFailingGradesByCourse method to GradeMapper
-        // List<Grade> failingGrades = gradeMapper.selectFailingGradesByCourse(courseId);
-        List<Object> failingStudents = new ArrayList<>();
-        // 转换为学生信息
-        return new PageResponse<>(pageRequest.getPage().longValue(), pageRequest.getSize().longValue(), 0L, failingStudents);
+        // 获取未通过的学生
+        List<Object> failingStudents = gradeMapper.selectFailingStudentsByCourse(courseId, pageRequest.getPageNum(), pageRequest.getPageSize());
+        int total = gradeMapper.countFailingStudentsByCourse(courseId);
+        
+        return PageResponse.<Object>builder()
+            .records(failingStudents)
+            .total((long)total)
+            .current(pageRequest.getCurrent())
+            .pageSize(pageRequest.getPageSize())
+            .<Object>build();
     }
 
     @Override

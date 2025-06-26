@@ -11,7 +11,7 @@ import router from './router'
 import { useAuthStore } from './stores/auth'
 
 // 配置axios
-axios.defaults.baseURL = 'http://localhost:8080'
+axios.defaults.baseURL = 'http://localhost:8080/api'
 axios.defaults.timeout = 10000
 
 // 请求拦截器

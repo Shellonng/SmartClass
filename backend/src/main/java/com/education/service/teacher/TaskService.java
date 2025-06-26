@@ -1,5 +1,6 @@
 package com.education.service.teacher;
 
+import com.education.dto.TaskDTO;
 import com.education.dto.task.TaskCommonDTOs.*;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
@@ -90,7 +91,7 @@ public interface TaskService {
     /**
      * 复制任务
      */
-    TaskResponse copyTask(Long taskId, TaskCopyRequest copyRequest);
+    com.education.dto.task.TaskCommonDTOs.TaskResponse copyTask(Long taskId, TaskCopyRequest copyRequest);
 
     /**
      * 延长任务截止时间

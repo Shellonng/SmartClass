@@ -269,8 +269,8 @@ public class AuthDTO {
         @Size(min = 2, max = 10, message = "真实姓名长度必须在2-10位之间")
         private String realName;
 
-        @NotBlank(message = "用户类型不能为空")
-        private String userType; // STUDENT, TEACHER
+        @NotBlank(message = "用户角色不能为空")
+        private String role; // STUDENT, TEACHER
 
         private String captcha;
         private String captchaKey;
@@ -316,12 +316,12 @@ public class AuthDTO {
             this.realName = realName;
         }
 
-        public String getUserType() {
-            return userType;
+        public String getRole() {
+            return role;
         }
 
-        public void setUserType(String userType) {
-            this.userType = userType;
+        public void setRole(String role) {
+            this.role = role;
         }
 
         public String getCaptcha() {

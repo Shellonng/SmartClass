@@ -727,6 +727,10 @@ onMounted(() => {
   min-height: 100vh;
   background: #f5f7fa;
   padding: 24px;
+  /* 性能优化 */
+  transform: translate3d(0, 0, 0);
+  will-change: scroll-position;
+  backface-visibility: hidden;
 }
 
 /* 页面头部 */
@@ -745,7 +749,7 @@ onMounted(() => {
   box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
 }
 
-/* 装饰性背景元素 */
+/* 装饰性背景元素 - 简化版 */
 .bg-decoration {
   position: absolute;
   top: 0;
@@ -759,8 +763,9 @@ onMounted(() => {
 .floating-shape {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
+  /* 移除所有动画 */
 }
 
 .shape-1 {
@@ -768,7 +773,7 @@ onMounted(() => {
   height: 120px;
   top: -60px;
   right: -60px;
-  animation: float-1 20s ease-in-out infinite;
+  /* 移除动画 */
 }
 
 .shape-2 {
@@ -776,7 +781,7 @@ onMounted(() => {
   height: 80px;
   top: 50%;
   right: 10%;
-  animation: float-2 15s ease-in-out infinite reverse;
+  /* 移除动画 */
 }
 
 .shape-3 {
@@ -784,7 +789,7 @@ onMounted(() => {
   height: 60px;
   bottom: -30px;
   left: 20%;
-  animation: float-3 18s ease-in-out infinite;
+  /* 移除动画 */
 }
 
 .shape-4 {
@@ -792,29 +797,7 @@ onMounted(() => {
   height: 40px;
   top: 20%;
   left: -20px;
-  animation: float-4 12s ease-in-out infinite reverse;
-}
-
-@keyframes float-1 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  33% { transform: translate(-20px, -20px) rotate(120deg); }
-  66% { transform: translate(20px, -10px) rotate(240deg); }
-}
-
-@keyframes float-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-15px, 15px) scale(1.1); }
-}
-
-@keyframes float-3 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(10px, -20px) rotate(180deg); }
-}
-
-@keyframes float-4 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(15px, -10px) scale(0.9); }
-  75% { transform: translate(-10px, 15px) scale(1.1); }
+  /* 移除动画 */
 }
 
 .welcome-content {
@@ -861,12 +844,13 @@ onMounted(() => {
   height: 8px;
   background: #52c41a;
   border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
+  /* 移除脉冲动画 */
 }
 
+/* 简化脉冲动画，降低频率 */
 @keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.2); }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .status-text {
@@ -924,24 +908,15 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
 }
 
-.action-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
-}
-
-.action-btn:hover::before {
-  left: 100%;
+/* 简化按钮效果，移除复杂的before动画 */
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .action-btn.primary {
@@ -954,8 +929,6 @@ onMounted(() => {
 
 .action-btn.primary:hover {
   background: rgba(255, 255, 255, 0.35);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .action-btn.secondary {
@@ -968,8 +941,6 @@ onMounted(() => {
 
 .action-btn.secondary:hover {
   background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 .action-btn.ai {
@@ -982,8 +953,6 @@ onMounted(() => {
 
 .action-btn.ai:hover {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
-  transform: translateY(-3px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 /* 学习数据统计 */
@@ -1475,7 +1444,7 @@ onMounted(() => {
   height: 8px;
   border-radius: 50%;
   background: #52c41a;
-  animation: pulse 2s ease-in-out infinite;
+  /* 移除脉冲动画 */
 }
 
 .status-indicator.online {
@@ -1506,8 +1475,8 @@ onMounted(() => {
 }
 
 .ai-suggestion:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: translate3d(0, -1px, 0);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 .suggestion-icon {
@@ -1612,8 +1581,8 @@ onMounted(() => {
 }
 
 .ai-chat-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  transform: translate3d(0, -1px, 0);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 /* 今日学习计划 */
@@ -1643,7 +1612,8 @@ onMounted(() => {
 
 .schedule-item:hover {
   border-color: #d9d9d9;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translate3d(0, 0, 0);
 }
 
 .schedule-item.current {
@@ -1676,7 +1646,6 @@ onMounted(() => {
 .time-dot.current {
   background: #1890ff;
   box-shadow: 0 0 0 4px rgba(24, 144, 255, 0.2);
-  animation: pulse 2s ease-in-out infinite;
 }
 
 .time-dot.completed {

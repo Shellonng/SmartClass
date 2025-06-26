@@ -177,7 +177,7 @@ public class AuthServiceImpl implements AuthService {
         newUser.setPassword(passwordUtils.encode(registerRequest.getPassword())); // 加密密码
         newUser.setEmail(registerRequest.getEmail());
         newUser.setRealName(registerRequest.getRealName());
-        newUser.setRole(registerRequest.getUserType().toUpperCase()); // STUDENT 或 TEACHER
+        newUser.setRole(registerRequest.getRole().toUpperCase()); // STUDENT 或 TEACHER
         newUser.setCreateTime(LocalDateTime.now());
         newUser.setUpdateTime(LocalDateTime.now());
         newUser.setIsDeleted(false);
@@ -531,35 +531,40 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Object getCurrentUserInfo(Long userId) {
-        // 1. 根据用户ID查询用户基本信息
+        log.info("获取用户信息: userId={}", userId);
+        try {
+            // 1. 查询用户基本信息
         User user = userMapper.selectById(userId);
         if (user == null) {
             throw new BusinessException(ResultCode.USER_NOT_FOUND);
         }
         
-        // 2. 根据用户类型查询详细信息（学生/教师）
+            // 2. 构建用户信息响应
         Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("userId", user.getId());
+            userInfo.put("id", user.getId());
         userInfo.put("username", user.getUsername());
+            userInfo.put("realName", user.getRealName());
         userInfo.put("email", user.getEmail());
         userInfo.put("phone", user.getPhone());
-        userInfo.put("realName", user.getRealName());
         userInfo.put("avatar", user.getAvatar());
-        userInfo.put("role", user.getRole());
+            userInfo.put("role", user.getRole().toLowerCase());
         userInfo.put("status", user.getStatus());
         userInfo.put("lastLoginTime", user.getLastLoginTime());
         
-        if ("STUDENT".equals(user.getRole())) {
+            // 3. 根据角色获取额外信息
+            if (user.isStudent()) {
+                // 获取学生信息
             QueryWrapper<Student> studentQuery = new QueryWrapper<>();
             studentQuery.eq("user_id", userId);
             Student student = studentMapper.selectOne(studentQuery);
             if (student != null) {
                 userInfo.put("studentNo", student.getStudentNo());
-                userInfo.put("classId", student.getClassId());
                 userInfo.put("major", student.getMajor());
                 userInfo.put("grade", student.getGrade());
+                    userInfo.put("classId", student.getClassId());
             }
-        } else if ("TEACHER".equals(user.getRole())) {
+            } else if (user.isTeacher()) {
+                // 获取教师信息
             QueryWrapper<Teacher> teacherQuery = new QueryWrapper<>();
             teacherQuery.eq("user_id", userId);
             Teacher teacher = teacherMapper.selectOne(teacherQuery);
@@ -567,125 +572,150 @@ public class AuthServiceImpl implements AuthService {
                 userInfo.put("teacherNo", teacher.getTeacherNo());
                 userInfo.put("department", teacher.getDepartment());
                 userInfo.put("title", teacher.getTitle());
+                    userInfo.put("specialty", teacher.getSpecialization());
             }
         }
         
-        // 3. 脱敏处理敏感信息（密码已在User实体中用@JsonIgnore处理）
-        // 4. 返回用户信息
         return userInfo;
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("获取用户信息失败: userId={}", userId, e);
+            throw new BusinessException(ResultCode.INTERNAL_SERVER_ERROR, "获取用户信息失败");
+        }
     }
 
     @Override
     public Boolean validateToken(String token) {
         try {
-            // 1. 检查Token格式和验证Token签名、检查Token是否过期
+            // 1. 检查token是否为空
+            if (token == null || token.isEmpty()) {
+                return false;
+            }
+            
+            // 2. 检查token是否在黑名单中
+            if (redisUtils.hasKey("blacklist:" + token)) {
+                return false;
+            }
+            
+            // 3. 从token中获取用户名
             String username = jwtUtils.getUsernameFromToken(token);
-            if (username == null || jwtUtils.getExpirationDateFromToken(token).before(new Date())) {
+            if (username == null) {
                 return false;
             }
             
-            // 2. 检查Token是否在黑名单中
-            Boolean isBlacklisted = (Boolean) redisUtils.get("blacklist:" + token);
-            if (isBlacklisted != null && isBlacklisted) {
+            // 4. 检查token是否过期
+            if (jwtUtils.getExpirationDateFromToken(token).before(new Date())) {
                 return false;
             }
             
-            // 3. 检查用户是否被强制登出
+            // 5. 验证用户是否存在
             QueryWrapper<User> userQuery = new QueryWrapper<>();
             userQuery.eq("username", username);
             User user = userMapper.selectOne(userQuery);
+            if (user == null) {
+                return false;
+            }
             
-            if (user != null) {
-                Boolean forceLogout = (Boolean) redisUtils.get("force_logout:" + user.getId());
-                if (forceLogout != null && forceLogout) {
+            // 6. 检查用户状态
+            if (user.getIsDeleted() != null && user.getIsDeleted()) {
                     return false;
-                }
             }
             
             return true;
         } catch (Exception e) {
+            log.error("Token验证失败", e);
             return false;
         }
     }
 
     @Override
     public Boolean checkUserExists(String username) {
-        // 1. 查询用户表
         QueryWrapper<User> userQuery = new QueryWrapper<>();
         userQuery.eq("username", username);
-        User user = userMapper.selectOne(userQuery);
-        
-        // 2. 返回是否存在
-        return user != null;
+        return userMapper.selectCount(userQuery) > 0;
     }
 
     @Override
     public Boolean checkEmailExists(String email) {
-        // 1. 查询用户表中的邮箱字段
-        QueryWrapper<User> userQuery = new QueryWrapper<>();
-        userQuery.eq("email", email);
-        User user = userMapper.selectOne(userQuery);
-        
-        // 2. 返回是否存在
-        return user != null;
+        QueryWrapper<User> emailQuery = new QueryWrapper<>();
+        emailQuery.eq("email", email);
+        return userMapper.selectCount(emailQuery) > 0;
     }
 
     @Override
     public void recordLoginLog(Long userId, String ip, String userAgent, Boolean success) {
+        // 这里应该记录登录日志到数据库
+        // 简单实现：记录到Redis中
         try {
-            // 1. 创建登录日志记录
-            Map<String, Object> loginLog = new HashMap<>();
-            loginLog.put("userId", userId);
-            loginLog.put("ip", ip);
-            loginLog.put("userAgent", userAgent);
-            loginLog.put("success", success);
-            loginLog.put("loginTime", new Date());
+            Map<String, Object> logInfo = new HashMap<>();
+            logInfo.put("userId", userId);
+            logInfo.put("ip", ip);
+            logInfo.put("userAgent", userAgent);
+            logInfo.put("success", success);
+            logInfo.put("time", LocalDateTime.now().toString());
             
-            // 2. 保存到Redis（简化处理，实际项目中可能需要专门的日志表）
             String logKey = "login_log:" + userId + ":" + System.currentTimeMillis();
-            redisUtils.set(logKey, loginLog, 30, TimeUnit.DAYS);
+            redisUtils.set(logKey, logInfo, 7, TimeUnit.DAYS);
             
-            // 3. 记录日志
-            log.info("用户登录日志记录 - 用户ID: {}, IP: {}, 成功: {}", userId, ip, success);
+            // 更新最后一次登录信息
+            if (success) {
+                User user = new User();
+                user.setId(userId);
+                user.setLastLoginTime(LocalDateTime.now());
+                user.setLastLoginIp(ip);
+                userMapper.updateById(user);
+            }
         } catch (Exception e) {
-            log.error("记录登录日志失败", e);
+            log.error("记录登录日志失败: userId={}", userId, e);
         }
     }
 
     @Override
     public Object getUserPermissions(Long userId) {
-        // 1. 根据用户类型获取基础权限
+        try {
+            // 1. 查询用户信息
         User user = userMapper.selectById(userId);
         if (user == null) {
             throw new BusinessException(ResultCode.USER_NOT_FOUND);
         }
         
-        Map<String, Object> permissions = new HashMap<>();
-        permissions.put("userId", userId);
-        permissions.put("role", user.getRole());
+            // 2. 构建权限信息
+            Map<String, Object> permissionInfo = new HashMap<>();
+            List<String> permissions = new ArrayList<>();
+            List<String> roles = new ArrayList<>();
+            
+            // 3. 添加基本角色
+            roles.add(user.getRole());
         
-        // 2. 根据用户角色设置权限
-        if ("ADMIN".equals(user.getRole())) {
-            permissions.put("permissions", java.util.Arrays.asList(
-                "user:read", "user:write", "user:delete",
-                "course:read", "course:write", "course:delete",
-                "system:read", "system:write", "system:delete"
-            ));
+            // 4. 根据角色添加权限
+            if ("STUDENT".equals(user.getRole())) {
+                permissions.add("course:view");
+                permissions.add("task:view");
+                permissions.add("task:submit");
+                permissions.add("resource:view");
+                permissions.add("grade:view");
         } else if ("TEACHER".equals(user.getRole())) {
-            permissions.put("permissions", java.util.Arrays.asList(
-                "course:read", "course:write",
-                "student:read", "grade:write"
-            ));
-        } else if ("STUDENT".equals(user.getRole())) {
-            permissions.put("permissions", java.util.Arrays.asList(
-                "course:read", "profile:read", "profile:write"
-            ));
-        } else {
-            permissions.put("permissions", java.util.Arrays.asList());
+                permissions.add("course:*");
+                permissions.add("task:*");
+                permissions.add("resource:*");
+                permissions.add("grade:*");
+                permissions.add("class:*");
+                permissions.add("student:view");
+            } else if ("ADMIN".equals(user.getRole())) {
+                permissions.add("*:*");  // 管理员拥有所有权限
+            }
+            
+            permissionInfo.put("roles", roles);
+            permissionInfo.put("permissions", permissions);
+            
+            return permissionInfo;
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("获取用户权限失败: userId={}", userId, e);
+            throw new BusinessException(ResultCode.INTERNAL_SERVER_ERROR, "获取用户权限失败");
         }
-        
-        // 3. 返回权限信息
-        return permissions;
     }
 
     @Override
@@ -701,14 +731,25 @@ public class AuthServiceImpl implements AuthService {
             Map<String, Object> userPermissions = (Map<String, Object>) userPermissionsObj;
             Object permissionsObj = userPermissions.get("permissions");
             
-            if (!(permissionsObj instanceof java.util.List)) {
+            if (!(permissionsObj instanceof List)) {
                 return false;
             }
             
             @SuppressWarnings("unchecked")
-            java.util.List<String> permissions = (java.util.List<String>) permissionsObj;
+            List<String> permissions = (List<String>) permissionsObj;
             
-            // 2. 检查是否包含指定权限
+            // 2. 检查是否包含通配符权限
+            if (permissions.contains("*:*")) {
+                return true;
+            }
+            
+            // 3. 检查是否包含模块通配符权限
+            String module = permission.split(":")[0];
+            if (permissions.contains(module + ":*")) {
+                return true;
+            }
+            
+            // 4. 检查是否包含指定权限
             return permissions.contains(permission);
         } catch (Exception e) {
             log.error("检查用户权限失败", e);
@@ -719,134 +760,152 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public Boolean lockUser(Long userId, String reason) {
         try {
-            // 1. 更新用户状态为锁定
+            // 1. 查询用户信息
             User user = userMapper.selectById(userId);
             if (user == null) {
                 throw new BusinessException(ResultCode.USER_NOT_FOUND);
             }
             
-            user.setStatus("LOCKED");
+            // 2. 更新用户状态为锁定
+            user.setStatus(User.Status.LOCKED.getCode());
+            user.setUpdateTime(LocalDateTime.now());
+            
+            // 3. 记录锁定原因
+            if (reason != null && !reason.isEmpty()) {
+                // 可以将锁定原因存储在扩展字段中
+                user.setExtField1(reason);
+            }
+            
+            // 4. 更新用户信息
             int result = userMapper.updateById(user);
             
+            // 5. 记录操作日志
             if (result > 0) {
-                // 2. 记录锁定原因和时间
+                // 记录锁定信息到Redis
                 Map<String, Object> lockInfo = new HashMap<>();
                 lockInfo.put("userId", userId);
                 lockInfo.put("reason", reason);
-                lockInfo.put("lockTime", new Date());
-                redisUtils.set("user_lock:" + userId, lockInfo, 365, TimeUnit.DAYS);
+                lockInfo.put("lockTime", LocalDateTime.now().toString());
                 
-                // 3. 使所有现有Token失效
-                redisUtils.set("force_logout:" + userId, true, 24, TimeUnit.HOURS);
+                redisUtils.set("user_lock:" + userId, lockInfo);
                 
-                // 4. 发送账户锁定通知
-                try {
-                    emailService.sendSimpleEmail(
-                        user.getEmail(),
-                        "账户锁定通知",
-                        "您的账户已被锁定。锁定原因：" + reason + "。如有疑问，请联系管理员。"
-                    );
-                } catch (Exception e) {
-                    log.error("发送账户锁定通知邮件失败", e);
-                }
-                
-                log.info("用户账户已锁定 - 用户ID: {}, 原因: {}", userId, reason);
                 return true;
             }
+            
             return false;
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("锁定用户账户失败", e);
-            return false;
+            log.error("锁定用户失败: userId={}", userId, e);
+            throw new BusinessException(ResultCode.INTERNAL_SERVER_ERROR, "锁定用户失败");
         }
     }
 
     @Override
     public Boolean unlockUser(Long userId) {
         try {
-            // 1. 更新用户状态为正常
+            // 1. 查询用户信息
             User user = userMapper.selectById(userId);
             if (user == null) {
                 throw new BusinessException(ResultCode.USER_NOT_FOUND);
             }
             
-            user.setStatus("ACTIVE");
+            // 2. 更新用户状态为正常
+            user.setStatus(User.Status.ACTIVE.getCode());
+            user.setUpdateTime(LocalDateTime.now());
+            
+            // 3. 清除锁定原因
+            user.setExtField1(null);
+            
+            // 4. 更新用户信息
             int result = userMapper.updateById(user);
             
+            // 5. 记录操作日志
             if (result > 0) {
-                // 2. 清除锁定记录
+                // 删除Redis中的锁定信息
                 redisUtils.delete("user_lock:" + userId);
-                redisUtils.delete("force_logout:" + userId);
                 
-                // 3. 发送账户解锁通知
-                try {
-                    emailService.sendSimpleEmail(
-                        user.getEmail(),
-                        "账户解锁通知",
-                        "您的账户已被解锁，现在可以正常使用。如有疑问，请联系管理员。"
-                    );
-                } catch (Exception e) {
-                    log.error("发送账户解锁通知邮件失败", e);
-                }
-                
-                log.info("用户账户已解锁 - 用户ID: {}", userId);
                 return true;
             }
+            
             return false;
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("解锁用户账户失败", e);
-            return false;
+            log.error("解锁用户失败: userId={}", userId, e);
+            throw new BusinessException(ResultCode.INTERNAL_SERVER_ERROR, "解锁用户失败");
         }
     }
 
     @Override
     public Boolean isUserLocked(Long userId) {
         try {
-            // 1. 查询用户状态
+            // 1. 查询用户信息
             User user = userMapper.selectById(userId);
             if (user == null) {
-                return false;
+                throw new BusinessException(ResultCode.USER_NOT_FOUND);
             }
             
-            // 2. 检查用户状态是否为锁定
-            if ("LOCKED".equals(user.getStatus())) {
-                return true;
-            }
-            
-            // 3. 检查Redis中的锁定记录
-            Object lockInfo = redisUtils.get("user_lock:" + userId);
-            return lockInfo != null;
+            // 2. 检查用户状态
+            return User.Status.LOCKED.getCode().equals(user.getStatus());
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("检查用户锁定状态失败", e);
-            return false;
+            log.error("检查用户锁定状态失败: userId={}", userId, e);
+            throw new BusinessException(ResultCode.INTERNAL_SERVER_ERROR, "检查用户锁定状态失败");
         }
     }
 
     @Override
     public void updateLastLoginTime(Long userId) {
-        // 更新用户表中的最后登录时间
+        try {
         User user = new User();
         user.setId(userId);
         user.setLastLoginTime(LocalDateTime.now());
-        user.setUpdateTime(LocalDateTime.now());
         userMapper.updateById(user);
+        } catch (Exception e) {
+            log.error("更新最后登录时间失败: userId={}", userId, e);
+        }
     }
 
     @Override
     public Long getOnlineUserCount() {
-        // TODO: 实现获取在线用户数量逻辑
-        // 1. 从Redis获取在线用户信息
-        // 2. 统计在线用户数量
-        // 3. 返回统计结果
-        throw new RuntimeException("方法未实现");
+        try {
+            // 简单实现：通过Redis中的活跃用户会话数量来统计
+            // 实际应用中，可能需要更复杂的逻辑
+            return Long.valueOf(redisUtils.keys("user_session:*").size());
+        } catch (Exception e) {
+            log.error("获取在线用户数量失败", e);
+            return 0L;
+        }
     }
 
     @Override
     public Boolean forceLogout(Long userId) {
-        // TODO: 实现强制用户下线逻辑
-        // 1. 将用户所有Token加入黑名单
-        // 2. 清除Redis中的用户会话信息
-        // 3. 记录强制下线日志
-        // 4. 发送下线通知
-        throw new RuntimeException("方法未实现");
+        try {
+            // 1. 查询用户信息
+            User user = userMapper.selectById(userId);
+            if (user == null) {
+                throw new BusinessException(ResultCode.USER_NOT_FOUND);
+            }
+            
+            // 2. 清除用户会话
+            redisUtils.delete("user_session:" + user.getUsername());
+            
+            // 3. 记录操作日志
+            Map<String, Object> logoutInfo = new HashMap<>();
+            logoutInfo.put("userId", userId);
+            logoutInfo.put("time", LocalDateTime.now().toString());
+            logoutInfo.put("type", "force");
+            
+            redisUtils.set("logout_log:" + userId + ":" + System.currentTimeMillis(), logoutInfo, 7, TimeUnit.DAYS);
+            
+            return true;
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("强制用户下线失败: userId={}", userId, e);
+            throw new BusinessException(ResultCode.INTERNAL_SERVER_ERROR, "强制用户下线失败");
+        }
     }
 }

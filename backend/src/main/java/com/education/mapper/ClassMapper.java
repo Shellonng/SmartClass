@@ -2,6 +2,7 @@ package com.education.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.education.entity.Class;
+import com.education.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -21,6 +22,181 @@ import java.util.Map;
 public interface ClassMapper extends BaseMapper<Class> {
 
     /**
+     * 获取班级学生数量
+     * 
+     * @param classId 班级ID
+     * @return 学生数量
+     */
+    @Select("SELECT COUNT(*) FROM student WHERE class_id = #{classId} AND is_deleted = 0")
+    Integer getStudentCount(@Param("classId") Long classId);
+
+    /**
+     * 检查班级是否属于指定教师
+     * 
+     * @param classId 班级ID
+     * @param teacherId 教师ID
+     * @return 是否存在
+     */
+    @Select("SELECT COUNT(*) FROM class WHERE id = #{classId} AND head_teacher_id = #{teacherId} AND is_deleted = 0")
+    boolean existsByIdAndTeacherId(@Param("classId") Long classId, @Param("teacherId") Long teacherId);
+
+    /**
+     * 根据ID和教师ID查询班级
+     * 
+     * @param classId 班级ID
+     * @param teacherId 教师ID
+     * @return 班级信息
+     */
+    @Select("SELECT * FROM class WHERE id = #{classId} AND head_teacher_id = #{teacherId} AND is_deleted = 0")
+    Class selectByIdAndTeacherId(@Param("classId") Long classId, @Param("teacherId") Long teacherId);
+
+    /**
+     * 检查班级名称是否存在于指定教师的班级中
+     * 
+     * @param name 班级名称
+     * @param teacherId 教师ID
+     * @return 是否存在
+     */
+    @Select("SELECT COUNT(*) FROM class WHERE class_name = #{name} AND head_teacher_id = #{teacherId} AND is_deleted = 0")
+    boolean existsByNameAndTeacherId(@Param("name") String name, @Param("teacherId") Long teacherId);
+
+    /**
+     * 查询班级任务列表
+     * 
+     * @param classId 班级ID
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 任务列表
+     */
+    @Select("SELECT t.*, u.username as creator_name FROM task t " +
+            "LEFT JOIN user u ON t.creator_id = u.id " +
+            "WHERE t.class_id = #{classId} AND t.is_deleted = 0 " +
+            "ORDER BY t.create_time DESC LIMIT #{offset}, #{limit}")
+    List<Object> selectClassTasks(@Param("classId") Long classId, @Param("offset") Long offset, @Param("limit") Long limit);
+
+    /**
+     * 统计班级任务数量
+     * 
+     * @param classId 班级ID
+     * @return 任务数量
+     */
+    @Select("SELECT COUNT(*) FROM task WHERE class_id = #{classId} AND is_deleted = 0")
+    Long countClassTasks(@Param("classId") Long classId);
+
+    /**
+     * 获取班级成绩概览
+     * 
+     * @param classId 班级ID
+     * @return 成绩概览
+     */
+    @Select("SELECT " +
+            "AVG(score) as average_score, " +
+            "MAX(score) as max_score, " +
+            "MIN(score) as min_score, " +
+            "COUNT(*) as total_grades, " +
+            "SUM(CASE WHEN score >= 60 THEN 1 ELSE 0 END) as pass_count, " +
+            "SUM(CASE WHEN score >= 90 THEN 1 ELSE 0 END) as excellent_count " +
+            "FROM grade WHERE class_id = #{classId} AND is_deleted = 0")
+    Map<String, Object> selectClassGradeOverview(@Param("classId") Long classId);
+
+    /**
+     * 查询班级通知列表
+     * 
+     * @param classId 班级ID
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 通知列表
+     */
+    @Select("SELECT n.*, u.username as creator_name FROM notification n " +
+            "LEFT JOIN user u ON n.creator_id = u.id " +
+            "WHERE n.class_id = #{classId} AND n.is_deleted = 0 " +
+            "ORDER BY n.create_time DESC LIMIT #{offset}, #{limit}")
+    List<Object> selectClassNotifications(@Param("classId") Long classId, @Param("offset") Long offset, @Param("limit") Long limit);
+
+    /**
+     * 统计班级通知数量
+     * 
+     * @param classId 班级ID
+     * @return 通知数量
+     */
+    @Select("SELECT COUNT(*) FROM notification WHERE class_id = #{classId} AND is_deleted = 0")
+    Long countClassNotifications(@Param("classId") Long classId);
+
+    /**
+     * 发送班级通知
+     * 
+     * @param classId 班级ID
+     * @param title 通知标题
+     * @param content 通知内容
+     * @param teacherId 教师ID
+     * @return 更新结果
+     */
+    int insertClassNotification(@Param("classId") Long classId, @Param("title") String title, @Param("content") String content, @Param("teacherId") Long teacherId);
+
+    /**
+     * 获取班级邀请码列表
+     * 
+     * @param classId 班级ID
+     * @return 邀请码列表
+     */
+    @Select("SELECT * FROM class_invite_code WHERE class_id = #{classId} AND is_deleted = 0 ORDER BY create_time DESC")
+    List<Object> selectInviteCodes(@Param("classId") Long classId);
+
+    /**
+     * 检查邀请码是否属于指定教师
+     * 
+     * @param inviteCodeId 邀请码ID
+     * @param teacherId 教师ID
+     * @return 是否属于
+     */
+    @Select("SELECT COUNT(*) FROM class_invite_code cic " +
+            "JOIN class c ON cic.class_id = c.id " +
+            "WHERE cic.id = #{inviteCodeId} AND c.head_teacher_id = #{teacherId} " +
+            "AND cic.is_deleted = 0 AND c.is_deleted = 0")
+    boolean isInviteCodeOwnedByTeacher(@Param("inviteCodeId") Long inviteCodeId, @Param("teacherId") Long teacherId);
+
+    /**
+     * 禁用邀请码
+     * 
+     * @param inviteCodeId 邀请码ID
+     * @return 更新结果
+     */
+    @Update("UPDATE class_invite_code SET status = 'DISABLED', update_time = NOW() WHERE id = #{inviteCodeId} AND is_deleted = 0")
+    int disableInviteCode(@Param("inviteCodeId") Long inviteCodeId);
+
+    /**
+     * 查询班级课程列表
+     * 
+     * @param classId 班级ID
+     * @return 课程列表
+     */
+    @Select("SELECT c.*, u.username as teacher_name FROM course c " +
+            "LEFT JOIN user u ON c.teacher_id = u.id " +
+            "WHERE c.class_id = #{classId} AND c.is_deleted = 0 " +
+            "ORDER BY c.create_time DESC")
+    List<Object> selectClassCourses(@Param("classId") Long classId);
+
+    /**
+     * 为班级分配课程
+     * 
+     * @param classId 班级ID
+     * @param courseIds 课程ID列表
+     * @return 更新结果
+     */
+    int assignCourses(@Param("classId") Long classId, @Param("courseIds") List<Long> courseIds);
+
+    /**
+     * 移除班级课程
+     * 
+     * @param classId 班级ID
+     * @param courseId 课程ID
+     * @return 更新结果
+     */
+    @Update("UPDATE class_course SET is_deleted = 1, update_time = NOW() " +
+            "WHERE class_id = #{classId} AND course_id = #{courseId} AND is_deleted = 0")
+    int removeCourse(@Param("classId") Long classId, @Param("courseId") Long courseId);
+
+    /**
      * 根据班级代码查询班级信息
      * 
      * @param classCode 班级代码
@@ -35,7 +211,7 @@ public interface ClassMapper extends BaseMapper<Class> {
      * @param teacherId 班主任ID
      * @return 班级列表
      */
-    @Select("SELECT * FROM class WHERE teacher_id = #{teacherId} AND is_deleted = 0 ORDER BY create_time DESC")
+    @Select("SELECT * FROM class WHERE head_teacher_id = #{teacherId} AND is_deleted = 0 ORDER BY create_time DESC")
     List<Class> selectByTeacherId(@Param("teacherId") Long teacherId);
 
     /**
@@ -156,7 +332,7 @@ public interface ClassMapper extends BaseMapper<Class> {
      */
     @Select("SELECT c.*, u.real_name as teacher_name " +
             "FROM class c " +
-            "LEFT JOIN user u ON c.teacher_id = u.id " +
+            "LEFT JOIN user u ON c.head_teacher_id = u.id " +
             "WHERE c.is_deleted = 0 " +
             "AND (c.class_name LIKE CONCAT('%', #{keyword}, '%') " +
             "OR c.class_code LIKE CONCAT('%', #{keyword}, '%') " +
@@ -234,55 +410,16 @@ public interface ClassMapper extends BaseMapper<Class> {
      * @param teacherId 班主任ID
      * @return 更新结果
      */
-    @Update("UPDATE class SET teacher_id = #{teacherId}, update_time = NOW() WHERE id = #{classId} AND is_deleted = 0")
+    @Update("UPDATE class SET head_teacher_id = #{teacherId}, update_time = NOW() WHERE id = #{classId} AND is_deleted = 0")
     int updateTeacher(@Param("classId") Long classId, @Param("teacherId") Long teacherId);
 
     /**
      * 获取班级详细统计信息
      * 
+     * @param classId 班级ID
      * @return 统计信息
      */
-    @Select("SELECT " +
-            "COUNT(*) as total_classes, " +
-            "SUM(CASE WHEN status = 'ACTIVE' THEN 1 ELSE 0 END) as active_classes, " +
-            "SUM(CASE WHEN status = 'PREPARING' THEN 1 ELSE 0 END) as preparing_classes, " +
-            "SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as completed_classes, " +
-            "SUM(CASE WHEN status = 'SUSPENDED' THEN 1 ELSE 0 END) as suspended_classes, " +
-            "SUM(student_count) as total_students, " +
-            "AVG(student_count) as average_students_per_class, " +
-            "MAX(student_count) as max_students_in_class, " +
-            "MIN(student_count) as min_students_in_class, " +
-            "COUNT(DISTINCT major) as major_count, " +
-            "COUNT(DISTINCT grade) as grade_count, " +
-            "COUNT(DISTINCT teacher_id) as teacher_count " +
-            "FROM class WHERE is_deleted = 0")
-    Map<String, Object> getClassStatistics();
-
-    /**
-     * 获取班级的学生列表
-     * 
-     * @param classId 班级ID
-     * @return 学生列表
-     */
-    @Select("SELECT s.*, u.username, u.real_name, u.email, u.phone " +
-            "FROM student s " +
-            "JOIN user u ON s.user_id = u.id " +
-            "WHERE s.class_id = #{classId} AND s.is_deleted = 0 " +
-            "ORDER BY s.student_number")
-    List<Map<String, Object>> getClassStudents(@Param("classId") Long classId);
-
-    /**
-     * 获取班级的课程列表
-     * 
-     * @param classId 班级ID
-     * @return 课程列表
-     */
-    @Select("SELECT c.*, u.real_name as teacher_name " +
-            "FROM course c " +
-            "LEFT JOIN user u ON c.teacher_id = u.id " +
-            "WHERE c.class_id = #{classId} AND c.is_deleted = 0 " +
-            "ORDER BY c.create_time DESC")
-    List<Map<String, Object>> getClassCourses(@Param("classId") Long classId);
+    Map<String, Object> getClassDetailStatistics(@Param("classId") Long classId);
 
     /**
      * 获取班级容量使用率统计
@@ -291,10 +428,10 @@ public interface ClassMapper extends BaseMapper<Class> {
      */
     @Select("SELECT " +
             "id, class_name, class_code, " +
-            "student_count, max_capacity, " +
-            "ROUND((student_count * 100.0 / NULLIF(max_capacity, 0)), 2) as usage_rate " +
+            "student_count, max_student_count as max_capacity, " +
+            "ROUND((student_count * 100.0 / NULLIF(max_student_count, 0)), 2) as usage_rate " +
             "FROM class " +
-            "WHERE is_deleted = 0 AND max_capacity > 0 " +
+            "WHERE is_deleted = 0 AND max_student_count > 0 " +
             "ORDER BY usage_rate DESC")
     List<Map<String, Object>> getClassCapacityUsage();
 
@@ -304,9 +441,9 @@ public interface ClassMapper extends BaseMapper<Class> {
      * @return 班级列表
      */
     @Select("SELECT * FROM class " +
-            "WHERE is_deleted = 0 AND max_capacity > 0 " +
-            "AND student_count > max_capacity " +
-            "ORDER BY (student_count - max_capacity) DESC")
+            "WHERE is_deleted = 0 AND max_student_count > 0 " +
+            "AND student_count > max_student_count " +
+            "ORDER BY (student_count - max_student_count) DESC")
     List<Class> selectOvercrowdedClasses();
 
     /**
@@ -316,7 +453,7 @@ public interface ClassMapper extends BaseMapper<Class> {
      */
     @Select("SELECT * FROM class " +
             "WHERE is_deleted = 0 AND status = 'ACTIVE' " +
-            "AND (max_capacity IS NULL OR student_count < max_capacity) " +
+            "AND (max_student_count IS NULL OR student_count < max_student_count) " +
             "ORDER BY grade DESC, class_name")
     List<Class> selectAvailableClasses();
 
@@ -382,16 +519,87 @@ public interface ClassMapper extends BaseMapper<Class> {
      * @param classId 班级ID
      * @return 进度信息
      */
-    @Select("SELECT " +
-            "id, class_name, start_date, end_date, status, " +
-            "DATEDIFF(NOW(), start_date) as running_days, " +
-            "DATEDIFF(end_date, start_date) as total_days, " +
-            "CASE " +
-            "WHEN start_date > NOW() THEN 0 " +
-            "WHEN end_date < NOW() THEN 100 " +
-            "ELSE ROUND((DATEDIFF(NOW(), start_date) * 100.0 / NULLIF(DATEDIFF(end_date, start_date), 0)), 2) " +
-            "END as progress_percentage " +
-            "FROM class " +
-            "WHERE id = #{classId} AND is_deleted = 0")
-    Map<String, Object> getClassProgress(@Param("classId") Long classId);
+    Map<String, Object> getClassProgressInfo(@Param("classId") Long classId);
+    
+    /**
+     * 根据教师ID和条件查询班级列表
+     * 
+     * @param teacherId 教师ID
+     * @param name 班级名称（可选）
+     * @param grade 年级（可选）
+     * @param status 状态（可选）
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 班级列表
+     */
+    List<Class> selectClassesByTeacherWithConditions(
+            @Param("teacherId") Long teacherId, 
+            @Param("name") String name, 
+            @Param("grade") String grade, 
+            @Param("status") String status, 
+            @Param("offset") Long offset, 
+            @Param("limit") Long limit);
+    
+    /**
+     * 统计教师ID和条件查询的班级数量
+     * 
+     * @param teacherId 教师ID
+     * @param name 班级名称（可选）
+     * @param grade 年级（可选）
+     * @param status 状态（可选）
+     * @return 班级数量
+     */
+    Long countClassesByTeacherWithConditions(
+            @Param("teacherId") Long teacherId, 
+            @Param("name") String name, 
+            @Param("grade") String grade, 
+            @Param("status") String status);
+    
+    /**
+     * 查询班级学生列表
+     * 
+     * @param classId 班级ID
+     * @param keyword 关键词（可选）
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 学生列表
+     */
+    List<User> selectStudentsByClassId(
+            @Param("classId") Long classId, 
+            @Param("keyword") String keyword, 
+            @Param("offset") Long offset, 
+            @Param("limit") Long limit);
+    
+    /**
+     * 统计班级学生数量
+     * 
+     * @param classId 班级ID
+     * @param keyword 关键词（可选）
+     * @return 学生数量
+     */
+    Long countStudentsByClassId(
+            @Param("classId") Long classId, 
+            @Param("keyword") String keyword);
+    
+    /**
+     * 添加学生到班级
+     * 
+     * @param classId 班级ID
+     * @param studentId 学生ID
+     * @return 添加结果
+     */
+    int addStudent(
+            @Param("classId") Long classId, 
+            @Param("studentId") Long studentId);
+    
+    /**
+     * 从班级移除学生
+     * 
+     * @param classId 班级ID
+     * @param studentId 学生ID
+     * @return 移除结果
+     */
+    int removeStudent(
+            @Param("classId") Long classId, 
+            @Param("studentId") Long studentId);
 }

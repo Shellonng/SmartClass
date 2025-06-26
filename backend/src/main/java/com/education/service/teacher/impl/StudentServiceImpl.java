@@ -70,11 +70,12 @@ public class StudentServiceImpl implements StudentService {
                 .map(this::convertToStudentResponse)
                 .collect(Collectors.toList());
         
-        return new PageResponse<>(
-                (long) pageRequest.getPageNum(),
-                (long) pageRequest.getPageSize(),
-                studentPage.getTotal(),
-                studentResponses);
+        return PageResponse.<StudentDTO.StudentResponse>builder()
+                .records(studentResponses)
+                .total(studentPage.getTotal())
+                .current(pageRequest.getCurrent())
+                .pageSize(pageRequest.getPageSize())
+                .build();
     }
 
     @Override
@@ -179,11 +180,12 @@ public class StudentServiceImpl implements StudentService {
                 .map(this::convertToSubmissionResponse)
                 .collect(Collectors.toList());
         
-        return new PageResponse<>(
-                (long) pageRequest.getPageNum(),
-                (long) pageRequest.getPageSize(),
-                submissionPage.getTotal(),
-                submissionResponses);
+        return PageResponse.<StudentDTO.StudentSubmissionResponse>builder()
+                .records(submissionResponses)
+                .total(submissionPage.getTotal())
+                .current(pageRequest.getCurrent())
+                .pageSize(pageRequest.getPageSize())
+                .build();
     }
 
     @Override

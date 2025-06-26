@@ -107,22 +107,16 @@ const router = createRouter({
     
     // 认证相关路由
     {
-      path: '/auth',
-      component: AuthLayout,
-      children: [
-        {
-          path: '/login',
-          name: 'Login',
-          component: Login,
-          meta: { requiresAuth: false }
-        },
-        {
-          path: '/register',
-          name: 'Register',
-          component: Login, // 可以复用Login组件，通过参数区分
-          meta: { requiresAuth: false }
-        }
-      ]
+      path: '/login',
+      name: 'Login',
+      component: Login,
+      meta: { requiresAuth: false, mode: 'login' }
+    },
+    {
+      path: '/register',
+      name: 'Register',
+      component: Login,
+      meta: { requiresAuth: false, mode: 'register' }
     },
 
     // 教师端路由
@@ -285,6 +279,7 @@ const router = createRouter({
           children: [
             {
               path: '',
+              name: 'StudentAssignmentsDefault',
               redirect: '/student/assignments/all'
             },
             {
@@ -326,6 +321,7 @@ const router = createRouter({
           children: [
             {
               path: '',
+              name: 'StudentResourcesDefault',
               redirect: '/student/resources/library'
             },
             {
@@ -376,6 +372,7 @@ const router = createRouter({
           children: [
             {
               path: '',
+              name: 'StudentClassesDefault',
               redirect: '/student/classes/info'
             },
             {

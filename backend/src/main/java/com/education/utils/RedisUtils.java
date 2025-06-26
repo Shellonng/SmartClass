@@ -332,4 +332,14 @@ public class RedisUtils {
     public Long lRemove(String key, long count, Object value) {
         return redisTemplate.opsForList().remove(key, count, value);
     }
+
+    /**
+     * 获取匹配指定模式的所有键
+     * 
+     * @param pattern 匹配模式
+     * @return 匹配的键集合
+     */
+    public Set<String> keys(String pattern) {
+        return redisTemplate.keys(pattern);
+    }
 }
