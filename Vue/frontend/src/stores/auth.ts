@@ -52,6 +52,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 登录
   const loginUser = async (loginData: LoginRequest, skipRedirect = false) => {
     try {
+      isLoading.value = true
       const response = await login(loginData)
       
       if (response.data.code === 200) {
@@ -61,14 +62,19 @@ export const useAuthStore = defineStore('auth', () => {
         setToken(token)
         user.value = userInfo as User
         
+        // 保存记住登录状态
+        if (loginData.remember) {
+          localStorage.setItem('remember', 'true')
+        }
+        
         message.success('登录成功')
         
         // 根据参数决定是否跳转
         if (!skipRedirect) {
           if (userInfo.role === 'student') {
-            router.push('/student')
+            router.push('/student/dashboard')
           } else if (userInfo.role === 'teacher') {
-            router.push('/teacher')
+            router.push('/teacher/dashboard')
           }
         }
         
@@ -87,6 +93,8 @@ export const useAuthStore = defineStore('auth', () => {
         success: false,
         message: errorMessage
       }
+    } finally {
+      isLoading.value = false
     }
   }
 
@@ -171,7 +179,10 @@ export const useAuthStore = defineStore('auth', () => {
   const initAuth = async () => {
     if (token.value) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
-      await fetchUserInfo()
+      // 如果有token但没有用户信息，尝试获取用户信息
+      if (!user.value) {
+        await fetchUserInfo()
+      }
     }
   }
 

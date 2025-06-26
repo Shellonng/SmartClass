@@ -1,101 +1,147 @@
 <template>
   <div class="student-dashboard">
-    <!-- 页面头部 -->
+    <!-- 顶部欢迎区域 -->
     <div class="dashboard-header">
       <div class="welcome-section">
-        <div class="user-greeting">
-          <div class="avatar-container">
-            <a-avatar :size="64" :src="userStore.user?.avatar || ''" class="user-avatar">
-              <template #icon>
-                <UserOutlined />
-              </template>
-            </a-avatar>
-            <div class="online-indicator"></div>
-          </div>
-          
-          <div class="greeting-content">
-            <h1 class="greeting-title">
-              {{ getGreeting() }}，{{ userStore.user?.realName || '同学' }}！
-            </h1>
-            <p class="greeting-subtitle">
-              {{ formatDate(new Date()) }} · 今天也要加油学习哦
-            </p>
-          </div>
+        <!-- 装饰性背景元素 -->
+        <div class="bg-decoration">
+          <div class="floating-shape shape-1"></div>
+          <div class="floating-shape shape-2"></div>
+          <div class="floating-shape shape-3"></div>
+          <div class="floating-shape shape-4"></div>
         </div>
         
-        <div class="quick-actions">
-          <a-button 
-            type="primary" 
-            size="large" 
-            @click="$router.push('/student/courses')"
-            class="action-btn primary"
-          >
-            <BookOutlined />
-            我的课程
-          </a-button>
-          <a-button 
-            size="large" 
-            @click="$router.push('/student/assignments')"
-            class="action-btn secondary"
-          >
-            <EditOutlined />
-            作业中心
-          </a-button>
-          <a-button 
-            size="large" 
-            @click="openAIAssistant"
-            class="action-btn ai"
-          >
-            <RobotOutlined />
-            AI助手
-          </a-button>
+        <div class="welcome-content">
+          <div class="user-info">
+            <div class="avatar-container">
+              <a-avatar :size="80" :src="userStore.user?.avatar || ''" class="user-avatar">
+                <template #icon>
+                  <UserOutlined />
+                </template>
+              </a-avatar>
+              <div class="online-status">
+                <div class="status-dot"></div>
+                <span class="status-text">在线学习</span>
+              </div>
+            </div>
+            
+            <div class="greeting-text">
+              <h1 class="greeting-title">
+                {{ getGreeting() }}，{{ userStore.user?.realName || '同学' }}！
+              </h1>
+              <p class="greeting-subtitle">
+                {{ formatDate(new Date()) }} · 让我们一起创造美好的学习时光
+              </p>
+              <div class="achievement-badge">
+                <TrophyOutlined />
+                <span>连续学习 {{ studyStreak }} 天</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="quick-actions">
+            <a-button 
+              type="primary" 
+              size="large" 
+              @click="$router.push('/student/courses')"
+              class="action-btn primary"
+            >
+              <BookOutlined />
+              <span>我的课程</span>
+            </a-button>
+            <a-button 
+              size="large" 
+              @click="$router.push('/student/assignments')"
+              class="action-btn secondary"
+            >
+              <EditOutlined />
+              <span>作业中心</span>
+            </a-button>
+            <a-button 
+              size="large" 
+              @click="openAIAssistant"
+              class="action-btn ai"
+            >
+              <RobotOutlined />
+              <span>AI学习助手</span>
+            </a-button>
+          </div>
         </div>
       </div>
       
-      <!-- 学习概览卡片 -->
+      <!-- 学习数据统计 -->
       <div class="stats-overview">
         <div class="stat-card study-time">
-          <div class="stat-icon">
-            <ClockCircleOutlined />
+          <div class="stat-header">
+            <div class="stat-icon">
+              <ClockCircleOutlined />
+            </div>
+            <div class="stat-meta">
+              <span class="stat-label">今日学习时长</span>
+              <div class="stat-trend positive">
+                <ArrowUpOutlined />
+                <span>+15%</span>
+              </div>
+            </div>
           </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ todayStudyTime }}h</div>
-            <div class="stat-label">今日学习</div>
-            <div class="stat-trend">+15% 较昨日</div>
+          <div class="stat-value">{{ todayStudyTime }}<span class="unit">小时</span></div>
+          <div class="stat-progress">
+            <a-progress 
+              :percent="(todayStudyTime / 8) * 100" 
+              :stroke-color="{ '0%': '#667eea', '100%': '#764ba2' }"
+              :show-info="false"
+              :stroke-width="6"
+            />
+            <span class="progress-text">目标：8小时</span>
           </div>
         </div>
         
         <div class="stat-card assignments">
-          <div class="stat-icon">
-            <CheckCircleOutlined />
+          <div class="stat-header">
+            <div class="stat-icon">
+              <CheckCircleOutlined />
+            </div>
+            <div class="stat-meta">
+              <span class="stat-label">本周作业</span>
+              <div class="stat-trend positive">
+                <span>{{ assignmentCompletionRate }}%</span>
+              </div>
+            </div>
           </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ completedAssignments }}/{{ totalAssignments }}</div>
-            <div class="stat-label">本周作业</div>
-            <div class="stat-trend">完成率 {{ assignmentCompletionRate }}%</div>
-          </div>
+          <div class="stat-value">{{ completedAssignments }}<span class="unit">/{{ totalAssignments }}</span></div>
+          <div class="stat-description">已完成 {{ completedAssignments }} 项作业</div>
         </div>
         
         <div class="stat-card grade">
-          <div class="stat-icon">
-            <TrophyOutlined />
+          <div class="stat-header">
+            <div class="stat-icon">
+              <TrophyOutlined />
+            </div>
+            <div class="stat-meta">
+              <span class="stat-label">平均成绩</span>
+              <div class="stat-trend positive">
+                <span>{{ ranking }}</span>
+              </div>
+            </div>
           </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ averageGrade }}</div>
-            <div class="stat-label">平均成绩</div>
-            <div class="stat-trend">排名 {{ ranking }}</div>
-          </div>
+          <div class="stat-value">{{ averageGrade }}<span class="unit">分</span></div>
+          <div class="stat-description">班级排名前5%</div>
         </div>
         
         <div class="stat-card streak">
-          <div class="stat-icon">
-            <FireOutlined />
+          <div class="stat-header">
+            <div class="stat-icon">
+              <FireOutlined />
+            </div>
+            <div class="stat-meta">
+              <span class="stat-label">学习打卡</span>
+              <div class="stat-trend">
+                <span>坚持中</span>
+              </div>
+            </div>
           </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ studyStreak }}</div>
-            <div class="stat-label">连续学习天数</div>
-            <div class="stat-trend">再接再厉！</div>
-          </div>
+          <div class="stat-value">{{ studyStreak }}<span class="unit">天</span></div>
+          <div class="stat-description">连续学习天数</div>
         </div>
       </div>
     </div>
@@ -266,13 +312,20 @@
             </div>
           </div>
           
-          <!-- AI学习建议 -->
+          <!-- AI学习助手 -->
           <div class="content-card ai-card">
             <div class="card-header">
-              <h3 class="card-title">
-                <RobotOutlined class="title-icon ai-icon" />
-                AI学习建议
-              </h3>
+              <div class="header-left">
+                <h3 class="card-title">
+                  <RobotOutlined class="title-icon ai-icon" />
+                  AI学习助手
+                </h3>
+                <p class="card-subtitle">个性化学习建议与智能分析</p>
+              </div>
+              <div class="ai-status">
+                <div class="status-indicator online"></div>
+                <span class="status-text">在线</span>
+              </div>
             </div>
             
             <div class="ai-suggestions">
@@ -283,23 +336,47 @@
                 <div class="suggestion-content">
                   <h4>{{ suggestion.title }}</h4>
                   <p>{{ suggestion.description }}</p>
+                  <div class="suggestion-actions">
+                    <a-button type="link" size="small">了解更多</a-button>
+                  </div>
                 </div>
               </div>
               
-              <a-button type="primary" block class="ai-chat-btn" @click="openAIAssistant">
-                <RobotOutlined />
-                与AI助手对话
-              </a-button>
+              <div class="ai-chat-section">
+                <div class="chat-preview">
+                  <div class="chat-avatar">
+                    <RobotOutlined />
+                  </div>
+                  <div class="chat-message">
+                    <p>你好！我是你的AI学习助手，有什么可以帮助你的吗？</p>
+                  </div>
+                </div>
+                <a-button type="primary" block class="ai-chat-btn" @click="openAIAssistant">
+                  <RobotOutlined />
+                  开始对话
+                </a-button>
+              </div>
             </div>
           </div>
           
-          <!-- 今日计划 -->
+          <!-- 今日学习计划 -->
           <div class="content-card schedule-card">
             <div class="card-header">
-              <h3 class="card-title">
-                <CalendarOutlined class="title-icon" />
-                今日计划
-              </h3>
+              <div class="header-left">
+                <h3 class="card-title">
+                  <CalendarOutlined class="title-icon" />
+                  今日学习计划
+                </h3>
+                <p class="card-subtitle">合理安排时间，高效学习</p>
+              </div>
+              <div class="schedule-progress">
+                <a-progress 
+                  type="circle" 
+                  :percent="scheduleCompletionRate" 
+                  :width="40"
+                  :stroke-color="{ '0%': '#667eea', '100%': '#764ba2' }"
+                />
+              </div>
             </div>
             
             <div class="schedule-list">
@@ -316,12 +393,43 @@
                 <div class="schedule-content">
                   <h4>{{ item.title }}</h4>
                   <p>{{ item.description }}</p>
+                  <div class="schedule-tags" v-if="item.tags">
+                    <a-tag 
+                      v-for="tag in item.tags" 
+                      :key="tag" 
+                      size="small"
+                      :color="getTagColor(tag)"
+                    >
+                      {{ tag }}
+                    </a-tag>
+                  </div>
                 </div>
-                <a-checkbox 
-                  v-model:checked="item.completed"
-                  @change="updateScheduleItem(item)"
-                  class="schedule-checkbox"
-                />
+                <div class="schedule-actions">
+                  <a-checkbox 
+                    v-model:checked="item.completed"
+                    @change="updateScheduleItem(item)"
+                    class="schedule-checkbox"
+                  />
+                  <a-button 
+                    v-if="item.isCurrent && !item.completed" 
+                    type="primary" 
+                    size="small"
+                    @click="startTask(item)"
+                  >
+                    开始
+                  </a-button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="schedule-summary">
+              <div class="summary-item">
+                <span class="summary-label">已完成</span>
+                <span class="summary-value">{{ completedTasks }}/{{ todaySchedule.length }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">预计用时</span>
+                <span class="summary-value">{{ totalEstimatedTime }}h</span>
               </div>
             </div>
           </div>
@@ -344,11 +452,15 @@ import {
   TrophyOutlined,
   FireOutlined,
   ArrowRightOutlined,
+  ArrowUpOutlined,
   BarChartOutlined,
   CalendarOutlined,
   BulbOutlined,
   AimOutlined,
-  LineChartOutlined
+  LineChartOutlined,
+  StarOutlined,
+  HeartOutlined,
+  ThunderboltOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -445,20 +557,20 @@ const aiSuggestions = ref([
   {
     id: 1,
     icon: 'BulbOutlined',
-    title: '学习建议',
-    description: '建议加强英语语法练习，可以提升整体成绩'
+    title: '个性化学习建议',
+    description: '根据你的学习数据分析，建议加强英语语法练习，重点关注时态和语态的运用'
   },
   {
     id: 2,
     icon: 'AimOutlined',
-    title: '学习计划',
-    description: '制定数学复习计划，准备下周的章节测试'
+    title: '智能学习规划',
+    description: '为你制定了数学复习计划，建议每天练习30分钟函数题型，准备下周测试'
   },
   {
     id: 3,
     icon: 'LineChartOutlined',
-    title: '进度分析',
-    description: '本周学习效率较高，建议保持当前学习节奏'
+    title: '学习效率分析',
+    description: '本周学习效率提升15%，建议保持当前学习节奏，适当增加难题练习'
   }
 ])
 
@@ -470,7 +582,9 @@ const todaySchedule = ref([
     title: '数学课',
     description: '函数图像与性质',
     completed: true,
-    isCurrent: false
+    isCurrent: false,
+    tags: ['必修', '重点'],
+    estimatedTime: 1.5
   },
   {
     id: 2,
@@ -478,7 +592,9 @@ const todaySchedule = ref([
     title: '完成英语作业',
     description: '阅读理解练习',
     completed: false,
-    isCurrent: true
+    isCurrent: true,
+    tags: ['作业', '紧急'],
+    estimatedTime: 1
   },
   {
     id: 3,
@@ -486,7 +602,9 @@ const todaySchedule = ref([
     title: '物理实验',
     description: '光学实验操作',
     completed: false,
-    isCurrent: false
+    isCurrent: false,
+    tags: ['实验', '选修'],
+    estimatedTime: 2
   },
   {
     id: 4,
@@ -494,9 +612,25 @@ const todaySchedule = ref([
     title: '复习总结',
     description: '整理今日学习笔记',
     completed: false,
-    isCurrent: false
+    isCurrent: false,
+    tags: ['复习'],
+    estimatedTime: 0.5
   }
 ])
+
+// 计算属性
+const scheduleCompletionRate = computed(() => {
+  const completed = todaySchedule.value.filter(item => item.completed).length
+  return Math.round((completed / todaySchedule.value.length) * 100)
+})
+
+const completedTasks = computed(() => 
+  todaySchedule.value.filter(item => item.completed).length
+)
+
+const totalEstimatedTime = computed(() => 
+  todaySchedule.value.reduce((total, item) => total + item.estimatedTime, 0)
+)
 
 // 方法函数
 const getGreeting = () => {
@@ -563,6 +697,24 @@ const updateScheduleItem = (item: any) => {
   message.success(`已${item.completed ? '完成' : '取消完成'}：${item.title}`)
 }
 
+const getTagColor = (tag: string) => {
+  const colorMap: { [key: string]: string } = {
+    '必修': 'blue',
+    '选修': 'green',
+    '重点': 'red',
+    '作业': 'orange',
+    '紧急': 'volcano',
+    '实验': 'purple',
+    '复习': 'geekblue'
+  }
+  return colorMap[tag] || 'default'
+}
+
+const startTask = (item: any) => {
+  message.info(`开始执行任务：${item.title}`)
+  // 这里可以跳转到具体的学习页面
+}
+
 // 页面初始化
 onMounted(() => {
   // 这里可以调用API获取数据
@@ -579,166 +731,322 @@ onMounted(() => {
 
 /* 页面头部 */
 .dashboard-header {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .welcome-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
-  padding: 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  border-radius: 24px;
+  padding: 40px;
   color: white;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
   position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+}
+
+/* 装饰性背景元素 */
+.bg-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
   overflow: hidden;
 }
 
-.welcome-section::before {
-  content: '';
+.floating-shape {
   position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>') repeat;
-  animation: float 20s linear infinite;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
 }
 
-@keyframes float {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  100% { transform: translate(-50px, -50px) rotate(360deg); }
+.shape-1 {
+  width: 120px;
+  height: 120px;
+  top: -60px;
+  right: -60px;
+  animation: float-1 20s ease-in-out infinite;
 }
 
-.user-greeting {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 32px;
+.shape-2 {
+  width: 80px;
+  height: 80px;
+  top: 50%;
+  right: 10%;
+  animation: float-2 15s ease-in-out infinite reverse;
+}
+
+.shape-3 {
+  width: 60px;
+  height: 60px;
+  bottom: -30px;
+  left: 20%;
+  animation: float-3 18s ease-in-out infinite;
+}
+
+.shape-4 {
+  width: 40px;
+  height: 40px;
+  top: 20%;
+  left: -20px;
+  animation: float-4 12s ease-in-out infinite reverse;
+}
+
+@keyframes float-1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-20px, -20px) rotate(120deg); }
+  66% { transform: translate(20px, -10px) rotate(240deg); }
+}
+
+@keyframes float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-15px, 15px) scale(1.1); }
+}
+
+@keyframes float-3 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(10px, -20px) rotate(180deg); }
+}
+
+@keyframes float-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(15px, -10px) scale(0.9); }
+  75% { transform: translate(-10px, 15px) scale(1.1); }
+}
+
+.welcome-content {
   position: relative;
   z-index: 2;
 }
 
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
 .avatar-container {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .user-avatar {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
-.online-indicator {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  width: 16px;
-  height: 16px;
+.online-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
   background: #52c41a;
   border-radius: 50%;
-  border: 3px solid white;
+  animation: pulse 2s ease-in-out infinite;
 }
 
-.greeting-content {
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.2); }
+}
+
+.status-text {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.greeting-text {
   flex: 1;
 }
 
 .greeting-title {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-  background: linear-gradient(45deg, #ffffff, #e3f2fd);
+  font-size: 36px;
+  font-weight: 800;
+  margin: 0 0 12px 0;
+  background: linear-gradient(45deg, #ffffff, #f0f8ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .greeting-subtitle {
   font-size: 16px;
-  margin: 0;
+  margin: 0 0 16px 0;
   opacity: 0.9;
+  line-height: 1.5;
+}
+
+.achievement-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .quick-actions {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   position: relative;
   z-index: 2;
 }
 
 .action-btn {
-  height: 48px;
-  padding: 0 24px;
-  border-radius: 12px;
+  height: 56px;
+  padding: 0 28px;
+  border-radius: 16px;
   font-weight: 600;
+  font-size: 15px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
+  gap: 10px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.action-btn:hover::before {
+  left: 100%;
 }
 
 .action-btn.primary {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .action-btn.primary:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
-.action-btn.secondary,
-.action-btn.ai {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+.action-btn.secondary {
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   color: white;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.action-btn.secondary:hover,
+.action-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn.ai {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
 .action-btn.ai:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
-/* 统计概览卡片 */
+/* 学习数据统计 */
 .stats-overview {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
 }
 
 .stat-card {
   background: white;
-  border-radius: 16px;
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  border: 1px solid #f0f0f0;
-  transition: all 0.3s ease;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card:hover::before {
+  transform: scaleX(1);
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
 .stat-icon {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
   color: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .stat-card.study-time .stat-icon {
-  background: linear-gradient(135deg, #1890ff, #36cfc9);
+  background: linear-gradient(135deg, #667eea, #764ba2);
 }
 
 .stat-card.assignments .stat-icon {
@@ -753,27 +1061,65 @@ onMounted(() => {
   background: linear-gradient(135deg, #ff4d4f, #ff7875);
 }
 
-.stat-content {
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 4px;
+.stat-meta {
+  text-align: right;
 }
 
 .stat-label {
   font-size: 14px;
   color: #666;
+  font-weight: 500;
   margin-bottom: 4px;
 }
 
 .stat-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: rgba(82, 196, 26, 0.1);
   color: #52c41a;
+}
+
+.stat-trend.positive {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #333;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.stat-value .unit {
+  font-size: 16px;
   font-weight: 500;
+  color: #999;
+  margin-left: 4px;
+}
+
+.stat-description {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 16px;
+}
+
+.stat-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
 }
 
 /* 主要内容区域 */
@@ -1117,113 +1463,231 @@ onMounted(() => {
   color: #999;
 }
 
-/* AI建议 */
+/* AI学习助手 */
+.ai-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #52c41a;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-indicator.online {
+  background: #52c41a;
+}
+
+.status-text {
+  font-size: 12px;
+  color: #52c41a;
+  font-weight: 500;
+}
+
 .ai-suggestions {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .ai-suggestion {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
-  background: linear-gradient(135deg, #fff7e6, #fff2e8);
-  border-radius: 12px;
-  border: 1px solid #ffe7ba;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f6f9ff, #e8f4f8);
+  border-radius: 16px;
+  border: 1px solid #e6f7ff;
+  transition: all 0.3s ease;
+}
+
+.ai-suggestion:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .suggestion-icon {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #fa541c, #faad14);
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 12px;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 16px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.suggestion-content {
+  flex: 1;
 }
 
 .suggestion-content h4 {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #333;
-  margin: 0 0 4px 0;
+  margin: 0 0 8px 0;
 }
 
 .suggestion-content p {
-  font-size: 12px;
+  font-size: 13px;
   color: #666;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.suggestion-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ai-chat-section {
+  background: linear-gradient(135deg, #f0f8ff, #e6f7ff);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #b3e0ff;
+}
+
+.chat-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.chat-avatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.chat-message {
+  background: white;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.chat-message::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 12px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid white;
+}
+
+.chat-message p {
+  font-size: 14px;
+  color: #333;
   margin: 0;
   line-height: 1.4;
 }
 
 .ai-chat-btn {
-  background: linear-gradient(135deg, #fa541c, #faad14);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   border: none;
-  height: 40px;
-  border-radius: 8px;
-  font-weight: 500;
+  height: 44px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
 }
 
-/* 今日计划 */
+.ai-chat-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* 今日学习计划 */
+.schedule-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .schedule-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .schedule-item {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px;
-  border-radius: 8px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
   transition: all 0.3s ease;
+  background: white;
 }
 
 .schedule-item:hover {
-  background: #fafafa;
+  border-color: #d9d9d9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .schedule-item.current {
-  background: #e6f7ff;
-  border: 1px solid #91d5ff;
+  background: linear-gradient(135deg, #e6f7ff, #f0f8ff);
+  border-color: #91d5ff;
+  box-shadow: 0 4px 20px rgba(24, 144, 255, 0.15);
 }
 
 .schedule-item.completed {
-  opacity: 0.6;
+  background: #f6ffed;
+  border-color: #b7eb8f;
+  opacity: 0.8;
 }
 
 .schedule-time {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-width: 80px;
+  gap: 12px;
+  min-width: 90px;
 }
 
 .time-dot {
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: #d9d9d9;
+  transition: all 0.3s ease;
 }
 
 .time-dot.current {
   background: #1890ff;
-  box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.2);
+  box-shadow: 0 0 0 4px rgba(24, 144, 255, 0.2);
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .time-dot.completed {
   background: #52c41a;
+  box-shadow: 0 0 0 4px rgba(82, 196, 26, 0.2);
 }
 
 .time-text {
-  font-size: 12px;
+  font-size: 13px;
   color: #666;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .schedule-content {
@@ -1232,20 +1696,62 @@ onMounted(() => {
 }
 
 .schedule-content h4 {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   color: #333;
-  margin: 0 0 4px 0;
+  margin: 0 0 6px 0;
 }
 
 .schedule-content p {
-  font-size: 12px;
+  font-size: 13px;
   color: #666;
-  margin: 0;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.schedule-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.schedule-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .schedule-checkbox {
-  margin-left: auto;
+  transform: scale(1.1);
+}
+
+.schedule-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #f6f9ff, #e8f4f8);
+  border-radius: 12px;
+  border: 1px solid #e6f7ff;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
 }
 
 /* 空状态 */
@@ -1279,10 +1785,10 @@ onMounted(() => {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .user-greeting {
+  .user-info {
     flex-direction: column;
     text-align: center;
-    gap: 16px;
+    gap: 20px;
   }
   
   .quick-actions {
@@ -1297,21 +1803,32 @@ onMounted(() => {
   }
   
   .welcome-section {
-    padding: 24px 20px;
+    padding: 32px 24px;
+    border-radius: 20px;
   }
   
   .greeting-title {
-    font-size: 24px;
+    font-size: 28px;
   }
   
   .stats-overview {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .stat-card {
+    padding: 20px;
+  }
+  
+  .stat-value {
+    font-size: 28px;
   }
   
   .assignment-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 16px;
+    padding: 16px;
   }
   
   .assignment-left {
@@ -1333,24 +1850,86 @@ onMounted(() => {
   .action-btn {
     width: 100%;
     justify-content: center;
+    height: 48px;
+    font-size: 14px;
+  }
+  
+  .content-card {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .ai-suggestion {
+    padding: 16px;
+  }
+  
+  .chat-preview {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
   }
 }
 
 @media (max-width: 480px) {
+  .student-dashboard {
+    padding: 12px;
+  }
+  
+  .welcome-section {
+    padding: 24px 20px;
+    border-radius: 16px;
+  }
+  
+  .greeting-title {
+    font-size: 24px;
+  }
+  
+  .user-avatar {
+    width: 64px !important;
+    height: 64px !important;
+  }
+  
   .card-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
   
-  .stat-card {
+  .stat-header {
     flex-direction: column;
-    text-align: center;
-    gap: 12px;
+    align-items: flex-start;
+    gap: 8px;
   }
   
-  .greeting-content {
+  .stat-meta {
+    text-align: left;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+  
+  .greeting-text {
     text-align: center;
+  }
+  
+  .achievement-badge {
+    align-self: center;
+  }
+  
+  .floating-shape {
+    display: none;
+  }
+  
+  .ai-chat-section {
+    padding: 16px;
+  }
+  
+  .suggestion-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
   }
 }
 </style>

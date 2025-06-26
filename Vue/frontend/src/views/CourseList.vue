@@ -84,7 +84,8 @@ const getMockCourses = (): Course[] => [
     description: '本课程系统讲解高等数学的基本概念、理论和方法，包括极限、导数、积分等内容。',
     tags: ['数学', '基础课程', '理工科'],
     price: 0,
-    originalPrice: 299
+    originalPrice: 299,
+    startDate: '2024-03-01'
   },
   {
     id: 2,
@@ -95,7 +96,9 @@ const getMockCourses = (): Course[] => [
     level: 'beginner',
     students: 12350,
     rating: 4.9,
+    reviewCount: 980,
     duration: '12周',
+    effort: '每周3-5小时',
     image: '',
     description: '面向零基础学员的编程入门课程，通过Python语言学习编程思维和基本技能。',
     tags: ['编程', 'Python', '入门'],
@@ -111,7 +114,9 @@ const getMockCourses = (): Course[] => [
     level: 'intermediate',
     students: 18900,
     rating: 4.7,
+    reviewCount: 1560,
     duration: '20周',
+    effort: '每周2-4小时',
     image: '',
     description: '提升英语听说读写综合能力，涵盖语法、词汇、阅读理解和写作技巧。',
     tags: ['英语', '语言学习', '四六级'],
@@ -127,7 +132,9 @@ const getMockCourses = (): Course[] => [
     level: 'intermediate',
     students: 9800,
     rating: 4.6,
+    reviewCount: 720,
     duration: '14周',
+    effort: '每周4-6小时',
     image: '',
     description: '深入学习线性代数的核心概念，包括矩阵运算、向量空间、特征值等。',
     tags: ['数学', '线性代数', '理工科'],
@@ -143,7 +150,9 @@ const getMockCourses = (): Course[] => [
     level: 'advanced',
     students: 8750,
     rating: 4.9,
+    reviewCount: 650,
     duration: '18周',
+    effort: '每周6-8小时',
     image: '',
     description: '系统学习常用数据结构和算法设计技巧，提升编程能力和问题解决能力。',
     tags: ['算法', '数据结构', '编程'],
@@ -159,7 +168,9 @@ const getMockCourses = (): Course[] => [
     level: 'beginner',
     students: 11200,
     rating: 4.5,
+    reviewCount: 890,
     duration: '16周',
+    effort: '每周3-4小时',
     image: '',
     description: '介绍微观经济学的基本理论，包括供需关系、市场结构、消费者行为等。',
     tags: ['经济学', '微观经济', '商科'],
@@ -226,7 +237,11 @@ const filteredCourses = computed(() => {
       result.sort((a, b) => b.rating - a.rating)
       break
     case 'newest':
-      result.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+      result.sort((a, b) => {
+        const dateA = a.startDate ? new Date(a.startDate).getTime() : 0
+        const dateB = b.startDate ? new Date(b.startDate).getTime() : 0
+        return dateB - dateA
+      })
       break
     case 'price_low':
       result.sort((a, b) => a.price - b.price)
@@ -439,7 +454,7 @@ onMounted(async () => {
             :page-size="pageSize"
             :show-size-changer="false"
             :show-quick-jumper="true"
-            :show-total="(total, range) => `共 ${total} 门课程，当前显示 ${range[0]}-${range[1]} 门`"
+            :show-total="(total: number, range: [number, number]) => `共 ${total} 门课程，当前显示 ${range[0]}-${range[1]} 门`"
             @change="onPageChange"
           />
         </div>
@@ -630,6 +645,7 @@ onMounted(async () => {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  line-clamp: 2;
   overflow: hidden;
 }
 

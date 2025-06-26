@@ -34,12 +34,12 @@ public class KnowledgeDTOExtension {
         public String getDescription() { return description; }
         public void setDescription(String description) { this.description = description; }
 
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
         public String getGraphType() { return graphType; }
         public void setGraphType(String graphType) { this.graphType = graphType; }
         public Map<String, Object> getMetadata() { return metadata; }
         public void setMetadata(Map<String, Object> metadata) { this.metadata = metadata; }
-        public Long getCourseId() { return courseId; }
-        public void setCourseId(Long courseId) { this.courseId = courseId; }
         public String getStatus() { return status; }
         public void setStatus(String status) { this.status = status; }
         public Long getCreatorId() { return creatorId; }

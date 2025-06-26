@@ -72,7 +72,7 @@ public class StudentGradeServiceImpl implements StudentGradeService {
                 .map(this::convertToGradeListResponse)
                 .collect(Collectors.toList());
         
-        return PageResponse.of((long) pageRequest.getPageNum(), (long) pageRequest.getPageSize(), submissionPage.getTotal(), responses);
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), submissionPage.getTotal(), responses);
     }
 
     @Override
@@ -620,7 +620,7 @@ public class StudentGradeServiceImpl implements StudentGradeService {
         }
         
         // 这里可以实现错题分析的逻辑
-        return PageResponse.of((long) pageRequest.getPageNum(), (long) pageRequest.getPageSize(), 0L, List.of());
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), 0L, List.of());
     }
 
     @Override
@@ -718,7 +718,7 @@ public class StudentGradeServiceImpl implements StudentGradeService {
         }
         
         // 这里可以实现获取通知的逻辑
-        return PageResponse.of((long) pageRequest.getPageNum(), (long) pageRequest.getPageSize(), 0L, List.of());
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), 0L, List.of());
     }
 
     @Override
@@ -745,7 +745,7 @@ public class StudentGradeServiceImpl implements StudentGradeService {
         }
         
         // 这里可以实现获取申诉记录的逻辑
-        return PageResponse.of((long) pageRequest.getPageNum(), (long) pageRequest.getPageSize(), 0L, List.of());
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), 0L, List.of());
     }
 
     @Override

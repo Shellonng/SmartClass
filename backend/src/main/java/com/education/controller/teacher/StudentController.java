@@ -189,16 +189,16 @@ public class StudentController {
 
     private PageRequest buildPageRequest(Integer page, Integer size, Long classId, String keyword) {
         PageRequest pageRequest = new PageRequest();
-        pageRequest.setPage(page);
-        pageRequest.setSize(size);
+        pageRequest.setPageNum(page);
+        pageRequest.setPageSize(size);
         // 可以根据需要添加其他查询条件
         return pageRequest;
     }
 
     private PageRequest buildSubmissionPageRequest(Integer page, Integer size, Long taskId) {
         PageRequest pageRequest = new PageRequest();
-        pageRequest.setPage(page);
-        pageRequest.setSize(size);
+        pageRequest.setPageNum(page);
+        pageRequest.setPageSize(size);
         // 可以根据需要添加taskId等查询条件
         return pageRequest;
     }

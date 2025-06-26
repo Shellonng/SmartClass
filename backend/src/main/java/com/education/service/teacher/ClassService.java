@@ -3,6 +3,7 @@ package com.education.service.teacher;
 import com.education.dto.ClassDTO;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
+import com.education.dto.clazz.*;
 
 import java.util.List;
 
@@ -16,127 +17,69 @@ import java.util.List;
 public interface ClassService {
 
     /**
-     * 创建班级
-     * 
-     * @param createRequest 创建班级请求
-     * @param teacherId 教师ID
-     * @return 班级信息
+     * 分页查询班级列表
      */
-    ClassDTO.ClassResponse createClass(ClassDTO.ClassCreateRequest createRequest, Long teacherId);
+    PageResponse<ClassResponse> getClassList(PageRequest pageRequest, String name, String grade, String status);
 
     /**
-     * 获取教师的班级列表
-     * 
-     * @param teacherId 教师ID
-     * @param pageRequest 分页请求
-     * @return 班级列表
+     * 创建班级
      */
-    PageResponse<ClassDTO.ClassResponse> getClassList(Long teacherId, PageRequest pageRequest);
+    ClassResponse createClass(ClassCreateRequest request);
 
     /**
      * 获取班级详情
-     * 
-     * @param classId 班级ID
-     * @param teacherId 教师ID
-     * @return 班级详情
      */
-    ClassDTO.ClassResponse getClassDetail(Long classId, Long teacherId);
+    ClassDetailResponse getClassDetail(Long classId);
 
     /**
      * 更新班级信息
-     * 
-     * @param classId 班级ID
-     * @param updateRequest 更新请求
-     * @param teacherId 教师ID
-     * @return 更新后的班级信息
      */
-    ClassDTO.ClassResponse updateClass(Long classId, ClassDTO.ClassUpdateRequest updateRequest, Long teacherId);
+    ClassResponse updateClass(Long classId, ClassUpdateRequest request);
 
     /**
      * 删除班级
-     * 
-     * @param classId 班级ID
-     * @param teacherId 教师ID
-     * @return 操作结果
      */
-    Boolean deleteClass(Long classId, Long teacherId);
+    void deleteClass(Long classId);
 
     /**
      * 获取班级学生列表
-     * 
-     * @param classId 班级ID
-     * @param teacherId 教师ID
-     * @param pageRequest 分页请求
-     * @return 学生列表
      */
-    PageResponse<Object> getClassStudents(Long classId, Long teacherId, PageRequest pageRequest);
-
-    /**
-     * 从班级移除学生
-     * 
-     * @param classId 班级ID
-     * @param studentId 学生ID
-     * @param teacherId 教师ID
-     * @return 操作结果
-     */
-    Boolean removeStudent(Long classId, Long studentId, Long teacherId);
-
-    /**
-     * 批量移除学生
-     * 
-     * @param classId 班级ID
-     * @param studentIds 学生ID列表
-     * @param teacherId 教师ID
-     * @return 操作结果
-     */
-    Boolean removeStudents(Long classId, List<Long> studentIds, Long teacherId);
-
-    /**
-     * 生成班级邀请码
-     * 
-     * @param classId 班级ID
-     * @param teacherId 教师ID
-     * @param expireHours 过期小时数
-     * @return 邀请码信息
-     */
-    Object generateInviteCode(Long classId, Long teacherId, Integer expireHours);
-
-    /**
-     * 获取班级统计信息
-     * 
-     * @param classId 班级ID
-     * @param teacherId 教师ID
-     * @return 统计信息
-     */
-    Object getClassStatistics(Long classId, Long teacherId);
-
-    /**
-     * 导出班级学生信息
-     * 
-     * @param classId 班级ID
-     * @param teacherId 教师ID
-     * @return 导出文件路径
-     */
-    String exportClassStudents(Long classId, Long teacherId);
+    PageResponse<ClassStudentResponse> getClassStudents(Long classId, PageRequest pageRequest, String keyword);
 
     /**
      * 添加学生到班级
-     * 
-     * @param classId 班级ID
-     * @param studentIds 学生ID列表
-     * @param teacherId 教师ID
-     * @return 操作结果
      */
-    Boolean addStudents(Long classId, List<Long> studentIds, Long teacherId);
+    void addStudentsToClass(Long classId, List<Long> studentIds);
 
     /**
-     * 通过邀请码加入班级
-     * 
-     * @param inviteCode 邀请码
-     * @param studentId 学生ID
-     * @return 操作结果
+     * 从班级移除学生
      */
-    Boolean joinClassByInviteCode(String inviteCode, Long studentId);
+    void removeStudentFromClass(Long classId, Long studentId);
+
+    /**
+     * 批量从班级移除学生
+     */
+    void removeStudentsFromClass(Long classId, List<Long> studentIds);
+
+    /**
+     * 获取班级统计信息
+     */
+    Object getClassStatistics(Long classId);
+
+    /**
+     * 设置班级状态
+     */
+    void updateClassStatus(Long classId, String status);
+
+    /**
+     * 复制班级
+     */
+    ClassResponse copyClass(Long classId, String newName);
+
+    /**
+     * 导出班级学生名单
+     */
+    String exportClassStudents(Long classId);
 
     /**
      * 获取班级邀请码列表
@@ -155,26 +98,6 @@ public interface ClassService {
      * @return 操作结果
      */
     Boolean disableInviteCode(Long inviteCodeId, Long teacherId);
-
-    /**
-     * 设置班级状态
-     * 
-     * @param classId 班级ID
-     * @param status 状态
-     * @param teacherId 教师ID
-     * @return 操作结果
-     */
-    Boolean setClassStatus(Long classId, String status, Long teacherId);
-
-    /**
-     * 复制班级
-     * 
-     * @param classId 班级ID
-     * @param newClassName 新班级名称
-     * @param teacherId 教师ID
-     * @return 新班级信息
-     */
-    ClassDTO.ClassResponse copyClass(Long classId, String newClassName, Long teacherId);
 
     /**
      * 获取班级课程列表

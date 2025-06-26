@@ -20,6 +20,14 @@ public interface AuthService {
     AuthDTO.LoginResponse login(AuthDTO.LoginRequest loginRequest);
 
     /**
+     * 用户注册
+     * 
+     * @param registerRequest 注册请求
+     * @return 注册响应
+     */
+    AuthDTO.LoginResponse register(AuthDTO.RegisterRequest registerRequest);
+
+    /**
      * 用户登出
      * 
      * @param token JWT令牌
@@ -34,6 +42,13 @@ public interface AuthService {
      * @return 新的Token信息
      */
     AuthDTO.LoginResponse refreshToken(AuthDTO.RefreshTokenRequest refreshTokenRequest);
+
+    /**
+     * 生成验证码
+     * 
+     * @return 验证码响应
+     */
+    Object generateCaptcha();
 
     /**
      * 修改密码

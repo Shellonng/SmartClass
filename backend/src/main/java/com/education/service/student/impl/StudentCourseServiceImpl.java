@@ -70,7 +70,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
                 .map(this::convertToCourseListResponse)
                 .collect(Collectors.toList());
         
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), coursePage.getTotal(), responses);
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), coursePage.getTotal(), responses);
     }
 
     @Override
@@ -319,7 +319,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
         }
         
         // 这里可以实现获取课程公告的逻辑
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), 0L, List.of());
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), 0L, List.of());
     }
 
     @Override
@@ -345,7 +345,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
                 .map(this::convertToResourceResponse)
                 .collect(Collectors.toList());
         
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), resourcePage.getTotal(), responses);
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), resourcePage.getTotal(), responses);
     }
 
 
@@ -360,7 +360,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
         }
         
         // 这里可以实现获取课程讨论的逻辑
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), 0L, List.of());
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), 0L, List.of());
     }
 
     @Override
@@ -429,7 +429,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
         }
         
         // 这里可以实现获取收藏课程的逻辑
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), 0L, List.of());
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), 0L, List.of());
     }
 
     @Override
@@ -474,7 +474,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
         }
         
         // 这里可以实现获取推荐课程的逻辑
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), 0L, List.of());
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), 0L, List.of());
     }
 
     @Override
@@ -542,7 +542,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
         }
         
         // 这里可以实现获取课程评价的逻辑
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), 0L, List.of());
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), 0L, List.of());
     }
 
     @Override
@@ -555,7 +555,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
         }
         
         // 这里可以实现搜索课程的逻辑
-        return PageResponse.of(1L, 10L, 0L, List.of());
+        return PageResponse.of(1, 10, 0L, List.of());
     }
 
     @Override
@@ -600,7 +600,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
         }
         
         // 这里可以实现获取课程笔记的逻辑
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), 0L, List.of());
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), 0L, List.of());
     }
 
     @Override

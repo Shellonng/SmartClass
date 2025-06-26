@@ -1,0 +1,1 @@
+<template><div><h1>学习资源</h1><p>学习资源功能开发中...</p><router-view /></div></template><script setup lang="ts"></script> 
