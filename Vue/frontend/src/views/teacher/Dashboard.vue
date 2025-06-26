@@ -842,9 +842,9 @@ const assignments = ref<Assignment[]>([])
 const displayCourses = computed(() => {
   let filtered = courses.value
   if (courseFilter.value === 'active') {
-    filtered = filtered.filter(course => course.status === 'ACTIVE')
+    filtered = filtered.filter(course => course.status === 'active')
   } else if (courseFilter.value === 'completed') {
-    filtered = filtered.filter(course => course.status === 'COMPLETED')
+    filtered = filtered.filter(course => course.status === 'inactive')
   }
   return filtered.slice(0, 6) // 显示前6个
 })
@@ -852,9 +852,9 @@ const displayCourses = computed(() => {
 const displayAssignments = computed(() => {
   let filtered = assignments.value
   if (assignmentFilter.value === 'pending') {
-    filtered = filtered.filter(assignment => assignment.status === 'PUBLISHED')
+    filtered = filtered.filter(assignment => assignment.status === 'published')
   } else if (assignmentFilter.value === 'graded') {
-    filtered = filtered.filter(assignment => assignment.status === 'GRADED')
+    filtered = filtered.filter(assignment => assignment.status === 'closed')
   }
   return filtered.slice(0, 5) // 显示前5个
 })
@@ -952,7 +952,7 @@ const isUrgent = (dateStr: string) => {
 }
 
 const getCourseGradient = (subject: string) => {
-  const gradients = {
+  const gradients: Record<string, string> = {
     '计算机科学': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     '数学': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     '物理': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
@@ -966,7 +966,7 @@ const getCourseGradient = (subject: string) => {
 }
 
 const getCourseColor = (subject: string) => {
-  const colors = {
+  const colors: Record<string, string> = {
     '计算机科学': '#667eea',
     '数学': '#f5576c',
     '物理': '#4facfe',
@@ -992,7 +992,11 @@ const onDateSelect = (date: Dayjs) => {
 const handleCreateCourse = async () => {
   try {
     loading.value = true
-    await createCourse(courseForm)
+    await createCourse({
+      name: courseForm.name,
+      description: courseForm.description,
+      status: 'active' as const
+    })
     message.success('课程创建成功')
     showCreateCourseModal.value = false
     Object.assign(courseForm, {
@@ -1037,7 +1041,15 @@ const handleCreateClass = async () => {
 const handleCreateTask = async () => {
   try {
     loading.value = true
-    await createAssignment(taskForm)
+    await createAssignment({
+      title: taskForm.title,
+      description: taskForm.requirements,
+      courseId: taskForm.courseId || 0,
+      courseName: '',
+      dueDate: taskForm.endTime?.format('YYYY-MM-DD HH:mm:ss') || '',
+      maxScore: taskForm.totalScore,
+      status: 'draft' as const
+    })
     message.success('作业布置成功')
     showCreateTaskModal.value = false
     Object.assign(taskForm, {

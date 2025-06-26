@@ -7093,3 +7093,9 @@ Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8
 2025-06-26 08:55:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 空闲连接: 3
 2025-06-26 08:55:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 总连接数: 3
 2025-06-26 08:55:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 等待连接的线程: 0
+2025-06-26 09:00:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - === 连接池监控报告 ===
+2025-06-26 09:00:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 连接池名称: HikariPool-Education
+2025-06-26 09:00:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 活跃连接: 0/10
+2025-06-26 09:00:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 空闲连接: 3
+2025-06-26 09:00:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 总连接数: 3
+2025-06-26 09:00:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 等待连接的线程: 0
