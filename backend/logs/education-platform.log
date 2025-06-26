@@ -6991,3 +6991,105 @@ Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8
 	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
 	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:751)
 	... 111 common frames omitted
+2025-06-26 08:50:48.994 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.7 with PID 33652 (D:\大二下实训3.0\SmartClass\backend\target\classes started by admin in D:\大二下实训3.0\SmartClass\backend)
+2025-06-26 08:50:48.995 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
+2025-06-26 08:50:48.996 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
+2025-06-26 08:50:50.069 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-06-26 08:50:50.071 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-06-26 08:50:50.112 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 33 ms. Found 0 Redis repository interfaces.
+2025-06-26 08:50:50.190 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\AIFeatureMapper.class]
+2025-06-26 08:50:50.190 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ChapterMapper.class]
+2025-06-26 08:50:50.190 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ClassMapper.class]
+2025-06-26 08:50:50.190 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\CourseMapper.class]
+2025-06-26 08:50:50.190 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\GradeMapper.class]
+2025-06-26 08:50:50.190 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeGraphMapper.class]
+2025-06-26 08:50:50.190 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeNodeMapper.class]
+2025-06-26 08:50:50.190 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeRelationMapper.class]
+2025-06-26 08:50:50.190 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\LearningProgressMapper.class]
+2025-06-26 08:50:50.190 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\QuestionBankMapper.class]
+2025-06-26 08:50:50.190 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ResourceMapper.class]
+2025-06-26 08:50:50.191 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\StudentMapper.class]
+2025-06-26 08:50:50.191 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskMapper.class]
+2025-06-26 08:50:50.191 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskSubmissionMapper.class]
+2025-06-26 08:50:50.191 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TeacherMapper.class]
+2025-06-26 08:50:50.191 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\UserMapper.class]
+2025-06-26 08:50:50.191 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'AIFeatureMapper' and 'com.education.mapper.AIFeatureMapper' mapperInterface
+2025-06-26 08:50:50.194 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'chapterMapper' and 'com.education.mapper.ChapterMapper' mapperInterface
+2025-06-26 08:50:50.194 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'classMapper' and 'com.education.mapper.ClassMapper' mapperInterface
+2025-06-26 08:50:50.195 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'courseMapper' and 'com.education.mapper.CourseMapper' mapperInterface
+2025-06-26 08:50:50.195 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'gradeMapper' and 'com.education.mapper.GradeMapper' mapperInterface
+2025-06-26 08:50:50.196 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeGraphMapper' and 'com.education.mapper.KnowledgeGraphMapper' mapperInterface
+2025-06-26 08:50:50.196 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeNodeMapper' and 'com.education.mapper.KnowledgeNodeMapper' mapperInterface
+2025-06-26 08:50:50.197 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeRelationMapper' and 'com.education.mapper.KnowledgeRelationMapper' mapperInterface
+2025-06-26 08:50:50.197 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'learningProgressMapper' and 'com.education.mapper.LearningProgressMapper' mapperInterface
+2025-06-26 08:50:50.198 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'questionBankMapper' and 'com.education.mapper.QuestionBankMapper' mapperInterface
+2025-06-26 08:50:50.199 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'resourceMapper' and 'com.education.mapper.ResourceMapper' mapperInterface
+2025-06-26 08:50:50.199 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'studentMapper' and 'com.education.mapper.StudentMapper' mapperInterface
+2025-06-26 08:50:50.200 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskMapper' and 'com.education.mapper.TaskMapper' mapperInterface
+2025-06-26 08:50:50.201 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskSubmissionMapper' and 'com.education.mapper.TaskSubmissionMapper' mapperInterface
+2025-06-26 08:50:50.202 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'teacherMapper' and 'com.education.mapper.TeacherMapper' mapperInterface
+2025-06-26 08:50:50.202 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'userMapper' and 'com.education.mapper.UserMapper' mapperInterface
+2025-06-26 08:50:51.025 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+2025-06-26 08:50:51.032 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-06-26 08:50:51.032 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2025-06-26 08:50:51.145 [main] INFO  o.a.c.c.ContainerBase.[Tomcat].[localhost].[/api] - Initializing Spring embedded WebApplicationContext
+2025-06-26 08:50:51.146 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2117 ms
+2025-06-26 08:50:51.733 [main] DEBUG com.education.security.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2025-06-26 08:50:54.030 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
+2025-06-26 08:50:54.095 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7f1b2f07, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@674d2b8b, org.springframework.security.web.context.SecurityContextHolderFilter@70f0c352, org.springframework.security.web.header.HeaderWriterFilter@318a81a0, org.springframework.security.web.authentication.logout.LogoutFilter@5b4ce00, com.education.security.JwtAuthenticationFilter@77a9ac36, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@743b7025, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@28b16193, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@399a5a52, org.springframework.security.web.session.SessionManagementFilter@7cc842b0, org.springframework.security.web.access.ExceptionTranslationFilter@d6879bf, org.springframework.security.web.access.intercept.AuthorizationFilter@202fd4c4]
+2025-06-26 08:50:54.786 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path '/api'
+2025-06-26 08:50:54.796 [scheduling-1] WARN  com.education.monitor.DataSourceMonitor - 连接池监控跳过: HikariCP连接池尚未完全初始化
+2025-06-26 08:50:54.797 [main] INFO  com.education.EducationApplication - Started EducationApplication in 6.111 seconds (process running for 6.892)
+2025-06-26 08:50:55.080 [RMI TCP Connection(5)-192.168.135.1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-Education - Starting...
+2025-06-26 08:50:55.222 [RMI TCP Connection(5)-192.168.135.1] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-Education - Added connection com.mysql.cj.jdbc.ConnectionImpl@2b8f8f65
+2025-06-26 08:50:55.223 [RMI TCP Connection(5)-192.168.135.1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-Education - Start completed.
+2025-06-26 08:50:57.471 [http-nio-8080-exec-1] INFO  o.a.c.c.ContainerBase.[Tomcat].[localhost].[/api] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-06-26 08:50:57.471 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-06-26 08:50:57.475 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 4 ms
+2025-06-26 08:50:57.484 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /auth/login
+2025-06-26 08:50:57.488 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-06-26 08:50:57.490 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /auth/login
+2025-06-26 08:50:57.546 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-06-26 08:50:57.546 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/auth/login
+2025-06-26 08:50:57.546 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求方法: POST
+2025-06-26 08:50:57.546 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-06-26 08:50:57.546 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.login
+2025-06-26 08:50:57.546 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求参数: [com.education.dto.AuthDTO$LoginRequest@4c2de7c0, SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@755b0b77]]
+2025-06-26 08:50:57.627 [http-nio-8080-exec-1] WARN  o.s.security.crypto.bcrypt.BCryptPasswordEncoder - Encoded password does not look like BCrypt
+2025-06-26 08:50:57.743 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 197ms
+2025-06-26 08:50:57.746 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"userInfo":{"realName":"张教授","role":"teacher","id":3,"avatar":null,"email":"teacher1@education.com","username":"teacher1"},"token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMSIsImlhdCI6MTc1MDg5OTA1NywiZXhwIjoxNzUwOTA2MjU3fQ.Ltg1Po_DoWqoEcJ1GPXdcrYGfGy30yjO7R3-YnmrFajwscdhbp8otZb7wutKjUyYm2_W9C8oIxjoMaSiIkqo0g"},"timestamp":[2025,6,26,8,50,57,743134500],"success":true,"error":false}
+2025-06-26 08:50:57.750 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-06-26 08:51:08.944 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /auth/user-info
+2025-06-26 08:51:08.944 [http-nio-8080-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-06-26 08:51:08.945 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured OPTIONS /auth/user-info
+2025-06-26 08:51:08.945 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /auth/user-info
+2025-06-26 08:51:08.945 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-06-26 08:51:08.946 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured OPTIONS /auth/user-info
+2025-06-26 08:51:08.953 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /auth/user-info
+2025-06-26 08:51:08.976 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /auth/user-info
+2025-06-26 08:51:08.981 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-06-26 08:51:08.981 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/auth/user-info
+2025-06-26 08:51:08.981 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-06-26 08:51:08.981 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-06-26 08:51:08.981 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-06-26 08:51:08.981 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求参数: [Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMSIsImlhdCI6MTc1MDg5OTA1NywiZXhwIjoxNzUwOTA2MjU3fQ.Ltg1Po_DoWqoEcJ1GPXdcrYGfGy30yjO7R3-YnmrFajwscdhbp8otZb7wutKjUyYm2_W9C8oIxjoMaSiIkqo0g]
+2025-06-26 08:51:08.986 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 5ms
+2025-06-26 08:51:08.986 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"获取用户信息失败: 用户不存在","timestamp":[2025,6,26,8,51,8,986657600],"success":false,"error":true}
+2025-06-26 08:51:08.986 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-06-26 08:51:08.990 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /auth/user-info
+2025-06-26 08:51:08.998 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /auth/user-info
+2025-06-26 08:51:08.999 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-06-26 08:51:08.999 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/auth/user-info
+2025-06-26 08:51:08.999 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-06-26 08:51:08.999 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-06-26 08:51:08.999 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-06-26 08:51:08.999 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求参数: [Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMSIsImlhdCI6MTc1MDg5OTA1NywiZXhwIjoxNzUwOTA2MjU3fQ.Ltg1Po_DoWqoEcJ1GPXdcrYGfGy30yjO7R3-YnmrFajwscdhbp8otZb7wutKjUyYm2_W9C8oIxjoMaSiIkqo0g]
+2025-06-26 08:51:09.002 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 3ms
+2025-06-26 08:51:09.002 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"获取用户信息失败: 用户不存在","timestamp":[2025,6,26,8,51,9,2339400],"success":false,"error":true}
+2025-06-26 08:51:09.002 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-06-26 08:55:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - === 连接池监控报告 ===
+2025-06-26 08:55:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 连接池名称: HikariPool-Education
+2025-06-26 08:55:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 活跃连接: 0/10
+2025-06-26 08:55:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 空闲连接: 3
+2025-06-26 08:55:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 总连接数: 3
+2025-06-26 08:55:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 等待连接的线程: 0
