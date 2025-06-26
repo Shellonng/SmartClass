@@ -19,8 +19,18 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
       meta: {
-        requiresAuth: true
+        title: '智慧课堂 - 精品在线课程学习平台'
       }
+    },
+    {
+      path: '/courses',
+      name: 'courses',
+      component: () => import('../views/CourseList.vue')
+    },
+    {
+      path: '/course/:id',
+      name: 'course-detail',
+      component: () => import('../views/CourseDetail.vue')
     },
     {
       path: '/teacher',

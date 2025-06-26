@@ -1,216 +1,352 @@
 <template>
   <div class="teacher-dashboard">
-    <div class="dashboard-header">
-      <div class="welcome-section">
-        <h1 class="welcome-title">
-          欢迎回来，{{ authStore.user?.realName || '老师' }}！
-        </h1>
-        <p class="welcome-subtitle">
-          今天是 {{ currentDate }}，祝您工作愉快
-        </p>
-      </div>
-      
-      <div class="quick-actions">
-        <a-button type="primary" size="large" @click="showCreateClassModal = true">
-          <PlusOutlined />
-          创建班级
-        </a-button>
+    <a-spin :spinning="loading" tip="加载中...">
+      <!-- 顶部横幅 -->
+      <div class="dashboard-header">
+        <div class="header-content">
+          <div class="welcome-section">
+            <h1 class="welcome-title">
+              <span class="greeting">{{ greeting }}</span>
+              <span class="teacher-name">{{ authStore.user?.name || '老师' }}</span>
+            </h1>
+            <p class="welcome-subtitle">{{ formatDate(currentDate) }} · 让每一次教学都充满智慧</p>
+          </div>
+          
+          <div class="quick-actions">
+            <a-button 
+              type="primary" 
+              size="large" 
+              @click="showCreateClassModal = true"
+              class="action-btn create-class"
+            >
+              <template #icon><PlusOutlined /></template>
+              创建班级
+            </a-button>
+            <a-button 
+              size="large" 
+              @click="showAssignmentModal = true"
+              class="action-btn assign-task"
+            >
+              <template #icon><FileTextOutlined /></template>
+              布置作业
+            </a-button>
+          </div>
+        </div>
         
-        <a-button size="large" @click="showCreateTaskModal = true">
-          <FileAddOutlined />
-          布置作业
-        </a-button>
+        <!-- 教学概览卡片 -->
+        <div class="overview-cards">
+          <div class="overview-card">
+            <div class="card-icon classes">
+              <BookOutlined />
+            </div>
+            <div class="card-content">
+              <div class="card-number">{{ stats.classCount }}</div>
+              <div class="card-label">管理班级</div>
+            </div>
+          </div>
+          
+          <div class="overview-card">
+            <div class="card-icon students">
+              <UserOutlined />
+            </div>
+            <div class="card-content">
+              <div class="card-number">{{ stats.studentCount }}</div>
+              <div class="card-label">学生总数</div>
+            </div>
+          </div>
+          
+          <div class="overview-card">
+            <div class="card-icon tasks">
+              <FileTextOutlined />
+            </div>
+            <div class="card-content">
+              <div class="card-number">{{ stats.taskCount }}</div>
+              <div class="card-label">布置作业</div>
+            </div>
+          </div>
+          
+          <div class="overview-card">
+            <div class="card-icon pending">
+              <ClockCircleOutlined />
+            </div>
+            <div class="card-content">
+              <div class="card-number">{{ stats.pendingCount }}</div>
+              <div class="card-label">待批改</div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
 
+    <!-- 主要内容区域 -->
     <div class="dashboard-content">
-      <!-- 统计卡片 -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon class-icon">
-            <TeamOutlined />
-          </div>
-          <div class="stat-info">
-            <div class="stat-number">{{ stats.classCount }}</div>
-            <div class="stat-label">管理班级</div>
-          </div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-icon student-icon">
-            <UserOutlined />
-          </div>
-          <div class="stat-info">
-            <div class="stat-number">{{ stats.studentCount }}</div>
-            <div class="stat-label">学生总数</div>
-          </div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-icon task-icon">
+      <!-- 快速统计 -->
+      <div class="quick-stats">
+        <div class="stat-item teaching">
+          <div class="stat-icon">
             <FileTextOutlined />
           </div>
-          <div class="stat-info">
+          <div class="stat-content">
             <div class="stat-number">{{ stats.taskCount }}</div>
             <div class="stat-label">布置作业</div>
           </div>
+          <div class="stat-trend">
+            <span class="trend-value">+12%</span>
+            <ArrowUpOutlined class="trend-icon up" />
+          </div>
         </div>
         
-        <div class="stat-card">
-          <div class="stat-icon pending-icon">
-            <ClockCircleOutlined />
+        <div class="stat-item grading">
+          <div class="stat-icon">
+            <EditOutlined />
           </div>
-          <div class="stat-info">
+          <div class="stat-content">
             <div class="stat-number">{{ stats.pendingCount }}</div>
             <div class="stat-label">待批改</div>
+          </div>
+          <div class="stat-trend">
+            <span class="trend-value">-5%</span>
+            <ArrowDownOutlined class="trend-icon down" />
+          </div>
+        </div>
+        
+        <div class="stat-item performance">
+          <div class="stat-icon">
+            <TrophyOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ averageScore }}</div>
+            <div class="stat-label">平均分</div>
+          </div>
+          <div class="stat-trend">
+            <span class="trend-value">+8%</span>
+            <ArrowUpOutlined class="trend-icon up" />
           </div>
         </div>
       </div>
 
-      <!-- 主要内容区域 -->
-      <div class="main-content">
-        <!-- 左侧内容 -->
-        <div class="left-content">
-          <!-- 最近班级 -->
-          <div class="content-card">
-            <div class="card-header">
-              <h3>我的班级</h3>
-              <a-button type="link" @click="$router.push('/teacher/classes')">
-                查看全部
-                <ArrowRightOutlined />
-              </a-button>
-            </div>
-            
-            <div class="class-list">
-              <div 
-                v-for="classItem in recentClasses" 
-                :key="classItem.id"
-                class="class-item"
-                @click="$router.push(`/teacher/classes/${classItem.id}`)"
-              >
-                <div class="class-avatar">
+      <!-- 内容网格 -->
+      <div class="content-grid">
+        <!-- 我的班级 -->
+        <div class="content-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <TeamOutlined />
+              我的班级
+            </h3>
+            <a-button type="link" @click="$router.push('/teacher/classes')">
+              查看全部
+              <ArrowRightOutlined />
+            </a-button>
+          </div>
+          
+          <div class="class-grid">
+            <div 
+              v-for="classItem in recentClasses" 
+              :key="classItem.id"
+              class="class-card"
+              @click="$router.push(`/teacher/classes/${classItem.id}`)"
+            >
+              <div class="class-header">
+                <div class="class-avatar" :style="{ background: getClassColor(classItem.subject) }">
                   {{ classItem.name.charAt(0) }}
                 </div>
-                <div class="class-info">
-                  <div class="class-name">{{ classItem.name }}</div>
-                  <div class="class-meta">
-                    {{ classItem.studentCount }}名学生 · {{ classItem.subject }}
+                <div class="class-actions">
+                  <a-dropdown>
+                    <a-button type="text" size="small">
+                      <MoreOutlined />
+                    </a-button>
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item key="edit">编辑班级</a-menu-item>
+                        <a-menu-item key="students">学生管理</a-menu-item>
+                        <a-menu-item key="settings">班级设置</a-menu-item>
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
+                </div>
+              </div>
+              
+              <div class="class-content">
+                <h4 class="class-name">{{ classItem.name }}</h4>
+                <p class="class-subject">{{ classItem.subject }}</p>
+                
+                <div class="class-stats">
+                  <div class="stat-item">
+                    <UserOutlined />
+                    <span>{{ classItem.studentCount }}名学生</span>
+                  </div>
+                  <div class="stat-item">
+                    <FileTextOutlined />
+                    <span>{{ classItem.taskCount }}个作业</span>
                   </div>
                 </div>
-                <div class="class-status">
-                  <a-badge :count="classItem.pendingTasks" />
+                
+                <div class="class-progress">
+                  <div class="progress-info">
+                    <span>学习进度</span>
+                    <span>{{ classItem.progress }}%</span>
+                  </div>
+                  <a-progress :percent="classItem.progress" size="small" :show-info="false" />
                 </div>
+              </div>
+              
+              <div class="class-footer">
+                <a-button type="primary" size="small" block>
+                  进入班级
+                </a-button>
+              </div>
+            </div>
+            
+            <!-- 创建新班级卡片 -->
+            <div class="class-card create-card" @click="showCreateClassModal = true">
+              <div class="create-content">
+                <PlusOutlined class="create-icon" />
+                <h4>创建新班级</h4>
+                <p>开始新的教学旅程</p>
+              </div>
+            </div>
+          </div>
+        </div>
+          
+        <!-- 最近作业 -->
+        <div class="content-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <FileTextOutlined />
+              最近作业
+            </h3>
+            <a-button type="link" @click="$router.push('/teacher/tasks')">
+              查看全部
+              <ArrowRightOutlined />
+            </a-button>
+          </div>
+          
+          <div class="task-list">
+            <div 
+              v-for="task in recentTasks" 
+              :key="task.id"
+              class="task-card"
+              @click="$router.push(`/teacher/tasks/${task.id}`)"
+            >
+              <div class="task-header">
+                <div class="task-priority">
+                  <div class="priority-indicator" :class="task.priority"></div>
+                  <span class="task-subject">{{ task.className }}</span>
+                </div>
+                <div class="task-deadline" :class="{ urgent: isUrgent(task.deadline) }">
+                  <ClockCircleOutlined />
+                  {{ formatDate(task.deadline) }}
+                </div>
+              </div>
+              
+              <h4 class="task-title">{{ task.title }}</h4>
+              <p class="task-description">{{ task.description }}</p>
+              
+              <div class="task-progress">
+                <div class="progress-info">
+                  <span>提交进度</span>
+                  <span>{{ task.submittedCount }}/{{ task.totalCount }}</span>
+                </div>
+                <a-progress 
+                  :percent="task.completionRate" 
+                  size="small" 
+                  :show-info="false"
+                />
+              </div>
+              
+              <div class="task-actions">
+                <a-button size="small" type="primary">
+                  查看详情
+                </a-button>
+              </div>
+            </div>
+            
+            <div v-if="recentTasks.length === 0" class="empty-state">
+              <FileTextOutlined />
+              <p>暂无作业</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- AI教学助手 -->
+        <div class="content-section ai-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <RobotOutlined />
+              AI教学助手
+            </h3>
+          </div>
+          
+          <div class="ai-features">
+            <div class="ai-feature-card" @click="handleAIFeature('recommend')">
+              <div class="feature-icon">
+                <BulbOutlined />
+              </div>
+              <div class="feature-content">
+                <div class="feature-title">智能作业推荐</div>
+                <div class="feature-desc">根据学生学习情况，推荐个性化作业内容</div>
+              </div>
+            </div>
+            
+            <div class="ai-feature-card" @click="handleAIFeature('analysis')">
+              <div class="feature-icon">
+                <BarChartOutlined />
+              </div>
+              <div class="feature-content">
+                <div class="feature-title">学情分析报告</div>
+                <div class="feature-desc">生成班级学习情况分析和改进建议</div>
+              </div>
+            </div>
+            
+            <div class="ai-feature-card" @click="handleAIFeature('grading')">
+              <div class="feature-icon">
+                <EditOutlined />
+              </div>
+              <div class="feature-content">
+                <div class="feature-title">智能批改助手</div>
+                <div class="feature-desc">AI辅助批改作业，提高批改效率</div>
               </div>
             </div>
           </div>
           
-          <!-- 最近作业 -->
-          <div class="content-card">
-            <div class="card-header">
-              <h3>最近作业</h3>
-              <a-button type="link" @click="$router.push('/teacher/tasks')">
-                查看全部
-                <ArrowRightOutlined />
-              </a-button>
-            </div>
-            
-            <div class="task-list">
-              <div 
-                v-for="task in recentTasks" 
-                :key="task.id"
-                class="task-item"
-                @click="$router.push(`/teacher/tasks/${task.id}`)"
-              >
-                <div class="task-icon">
-                  <FileTextOutlined />
-                </div>
-                <div class="task-info">
-                  <div class="task-title">{{ task.title }}</div>
-                  <div class="task-meta">
-                    {{ task.className }} · 截止：{{ formatDate(task.deadline) }}
-                  </div>
-                </div>
-                <div class="task-progress">
-                  <a-progress 
-                    :percent="task.completionRate" 
-                    size="small" 
-                    :show-info="false"
-                  />
-                  <span class="progress-text">
-                    {{ task.submittedCount }}/{{ task.totalCount }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <a-button type="primary" block class="ai-action-btn">
+            开启AI助手
+          </a-button>
         </div>
         
-        <!-- 右侧内容 -->
-        <div class="right-content">
-          <!-- 待办事项 -->
-          <div class="content-card">
-            <div class="card-header">
-              <h3>待办事项</h3>
-              <a-button type="link" size="small">
-                <SettingOutlined />
-              </a-button>
-            </div>
-            
-            <div class="todo-list">
-              <div 
-                v-for="todo in todoList" 
-                :key="todo.id"
-                class="todo-item"
-                :class="{ completed: todo.completed }"
-              >
-                <a-checkbox 
-                  v-model:checked="todo.completed"
-                  @change="updateTodo(todo)"
-                />
+        <!-- 待办事项 -->
+        <div class="content-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <CheckCircleOutlined />
+              待办事项
+            </h3>
+            <a-button type="link" size="small">
+              <SettingOutlined />
+            </a-button>
+          </div>
+          
+          <div class="todo-list">
+            <div 
+              v-for="todo in todoList" 
+              :key="todo.id"
+              class="todo-item"
+              :class="{ completed: todo.completed }"
+            >
+              <a-checkbox 
+                v-model:checked="todo.completed"
+                @change="updateTodo(todo)"
+              />
+              <div class="todo-content">
                 <span class="todo-text">{{ todo.text }}</span>
                 <span class="todo-time">{{ todo.time }}</span>
               </div>
             </div>
-          </div>
-          
-          <!-- AI助手 -->
-          <div class="content-card ai-card">
-            <div class="card-header">
-              <h3>
-                <RobotOutlined />
-                AI教学助手
-              </h3>
-            </div>
             
-            <div class="ai-suggestions">
-              <div class="ai-suggestion">
-                <div class="suggestion-icon">
-                  <BulbOutlined />
-                </div>
-                <div class="suggestion-content">
-                  <div class="suggestion-title">智能作业推荐</div>
-                  <div class="suggestion-desc">
-                    根据学生学习情况，推荐个性化作业内容
-                  </div>
-                </div>
-              </div>
-              
-              <div class="ai-suggestion">
-                <div class="suggestion-icon">
-                  <BarChartOutlined />
-                </div>
-                <div class="suggestion-content">
-                  <div class="suggestion-title">学情分析报告</div>
-                  <div class="suggestion-desc">
-                    生成班级学习情况分析和改进建议
-                  </div>
-                </div>
-              </div>
+            <div v-if="todoList.length === 0" class="empty-state">
+              <CheckCircleOutlined />
+              <p>暂无待办事项</p>
             </div>
-            
-            <a-button type="primary" block class="ai-action-btn">
-              开启AI助手
-            </a-button>
           </div>
         </div>
       </div>
@@ -280,6 +416,7 @@
         </a-form-item>
       </a-form>
     </a-modal>
+    </a-spin>
   </div>
 </template>
 
@@ -297,11 +434,32 @@ import {
   SettingOutlined,
   RobotOutlined,
   BulbOutlined,
-  BarChartOutlined
+  BarChartOutlined,
+  EditOutlined,
+  TrophyOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+  MoreOutlined,
+  CheckCircleOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/stores/auth'
+import {
+  getDashboardData,
+  getCourses,
+  getAssignments,
+  getStudents,
+  getStatistics
+} from '@/api/teacher'
+import type {
+  Course,
+  Assignment,
+  Student
+} from '@/api/teacher'
 
 const authStore = useAuthStore()
+
+// 响应式数据
+const loading = ref(false)
 
 // 当前日期
 const currentDate = computed(() => {
@@ -315,80 +473,28 @@ const currentDate = computed(() => {
 
 // 统计数据
 const stats = reactive({
-  classCount: 5,
-  studentCount: 156,
-  taskCount: 23,
-  pendingCount: 12
+  classCount: 0,
+  studentCount: 0,
+  taskCount: 0,
+  pendingCount: 0
 })
 
+// 平均分
+const averageScore = ref(0)
+
 // 最近班级
-const recentClasses = ref([
-  {
-    id: 1,
-    name: '高一(1)班',
-    subject: '数学',
-    studentCount: 45,
-    pendingTasks: 3
-  },
-  {
-    id: 2,
-    name: '高一(2)班',
-    subject: '数学',
-    studentCount: 43,
-    pendingTasks: 1
-  },
-  {
-    id: 3,
-    name: '高二(1)班',
-    subject: '数学',
-    studentCount: 42,
-    pendingTasks: 2
-  }
-])
+const recentClasses = ref<Course[]>([])
 
 // 最近作业
-const recentTasks = ref([
-  {
-    id: 1,
-    title: '函数与方程练习',
-    className: '高一(1)班',
-    deadline: new Date('2024-01-20'),
-    completionRate: 75,
-    submittedCount: 34,
-    totalCount: 45
-  },
-  {
-    id: 2,
-    title: '三角函数应用',
-    className: '高一(2)班',
-    deadline: new Date('2024-01-22'),
-    completionRate: 60,
-    submittedCount: 26,
-    totalCount: 43
-  }
-])
+const recentTasks = ref<Assignment[]>([])
 
 // 待办事项
-const todoList = ref([
-  {
-    id: 1,
-    text: '批改高一(1)班数学作业',
-    time: '今天',
-    completed: false
-  },
-  {
-    id: 2,
-    text: '准备明天的课件',
-    time: '明天',
-    completed: false
-  },
-  {
-    id: 3,
-    text: '家长会材料准备',
-    time: '本周',
-    completed: true
-  }
-])
+const todoList = ref<Array<{
+  id: number
+  text: string
+  time: string
+  completed: boolean
+}>>([])
 
 // 弹窗状态
 const showCreateClassModal = ref(false)
@@ -414,6 +520,43 @@ const formatDate = (date: Date) => {
     month: 'short',
     day: 'numeric'
   })
+}
+
+// 判断是否紧急
+const isUrgent = (deadline: Date) => {
+  const now = new Date()
+  const diffTime = deadline.getTime() - now.getTime()
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  return diffDays <= 2
+}
+
+// 获取班级颜色
+const getClassColor = (subject: string) => {
+  const colors: Record<string, string> = {
+    '数学': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    '语文': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    '英语': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    '物理': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+    '化学': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+  }
+  return colors[subject] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+}
+
+// 处理AI功能
+const handleAIFeature = (feature: string) => {
+  switch (feature) {
+    case 'recommend':
+      message.info('正在生成智能作业推荐...')
+      break
+    case 'analysis':
+      message.info('正在生成学情分析报告...')
+      break
+    case 'grading':
+      message.info('正在启动智能批改助手...')
+      break
+    default:
+      message.info('功能开发中...')
+  }
 }
 
 // 更新待办事项
@@ -446,44 +589,177 @@ const handleCreateTask = () => {
   })
 }
 
+// 数据加载函数
+const loadDashboardData = async () => {
+  try {
+    const response = await getDashboardData()
+    const data = response.data || response
+    stats.classCount = data.classCount || 0
+    stats.studentCount = data.studentCount || 0
+    stats.taskCount = data.taskCount || 0
+    stats.pendingCount = data.pendingCount || 0
+    averageScore.value = data.averageScore || 0
+  } catch (error) {
+    console.error('加载仪表盘数据失败:', error)
+    message.error('加载仪表盘数据失败')
+    // 如果API调用失败，使用默认值
+    stats.classCount = 0
+    stats.studentCount = 0
+    stats.taskCount = 0
+    stats.pendingCount = 0
+    averageScore.value = 0
+  }
+}
+
+const loadRecentClasses = async () => {
+  try {
+    const response = await getCourses()
+    const data = response.data || response
+    recentClasses.value = (Array.isArray(data) ? data.slice(0, 3) : []).map(course => ({
+      ...course,
+      subject: course.name, // 使用课程名称作为科目
+      students: course.studentCount || 0,
+      taskCount: Math.floor(Math.random() * 10) + 1, // 临时随机数据
+      progress: Math.floor(Math.random() * 100) + 1,
+      pendingTasks: Math.floor(Math.random() * 5)
+    }))
+  } catch (error) {
+    console.error('加载班级数据失败:', error)
+    message.error('加载班级数据失败')
+  }
+}
+
+const loadRecentTasks = async () => {
+  try {
+    const response = await getAssignments({ page: 1, size: 3 })
+    const data = response.data || response
+    recentTasks.value = (Array.isArray(data) ? data : []).map(assignment => ({
+      ...assignment,
+      className: assignment.courseName || '未知班级',
+      deadline: new Date(assignment.dueDate),
+      priority: assignment.status === 'published' ? 'high' : 'medium',
+      completionRate: Math.floor((assignment.submissionCount / assignment.totalStudents) * 100) || 0,
+      submittedCount: assignment.submissionCount || 0,
+      totalCount: assignment.totalStudents || 0
+    }))
+  } catch (error) {
+    console.error('加载作业数据失败:', error)
+    message.error('加载作业数据失败')
+  }
+}
+
+const loadTodoList = async () => {
+  try {
+    // 这里应该有专门的待办事项API，暂时使用模拟数据
+    todoList.value = [
+      {
+        id: 1,
+        text: '批改待审核作业',
+        time: '今天',
+        completed: false
+      },
+      {
+        id: 2,
+        text: '准备明天的课件',
+        time: '明天',
+        completed: false
+      }
+    ]
+  } catch (error) {
+    console.error('加载待办事项失败:', error)
+  }
+}
+
+// 初始化数据
+const initializeData = async () => {
+  loading.value = true
+  try {
+    await Promise.all([
+      loadDashboardData(),
+      loadRecentClasses(),
+      loadRecentTasks(),
+      loadTodoList()
+    ])
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(() => {
-  // 加载数据
+  initializeData()
 })
 </script>
 
 <style scoped>
 .teacher-dashboard {
-  padding: 24px;
-  background: #f5f5f5;
+  background: #f8fafc;
   min-height: 100vh;
 }
 
-.dashboard-header {
+/* 顶部横幅样式 */
+.dashboard-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 32px 0;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+  pointer-events: none;
+}
+
+.banner-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 32px;
-  background: white;
-  padding: 32px;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  align-items: center;
+  gap: 48px;
 }
 
 .welcome-section {
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-info {
+  flex: 1;
 }
 
 .welcome-title {
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: 700;
-  color: #333;
   margin: 0 0 8px 0;
+  background: linear-gradient(45deg, #ffffff, #e3f2fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .welcome-subtitle {
-  font-size: 16px;
-  color: #666;
+  font-size: 1rem;
   margin: 0;
+  opacity: 0.9;
 }
 
 .quick-actions {
@@ -491,26 +767,100 @@ onMounted(() => {
   gap: 12px;
 }
 
-.stats-grid {
+.quick-actions .ant-btn {
+  height: 48px;
+  border-radius: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.teaching-overview {
+  display: flex;
+  gap: 24px;
+}
+
+.overview-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 120px;
+}
+
+.overview-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+
+.overview-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.overview-label {
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+/* 主要内容区域 */
+.dashboard-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* 快速统计 */
+.quick-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
   margin-bottom: 32px;
 }
 
-.stat-card {
+.stat-item {
   background: white;
   padding: 24px;
   border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
   gap: 16px;
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
+.stat-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.stat-item.teaching::before {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.stat-item.grading::before {
+  background: linear-gradient(90deg, #f093fb, #f5576c);
+}
+
+.stat-item.performance::before {
+  background: linear-gradient(90deg, #43e97b, #38f9d7);
+}
+
+.stat-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 .stat-icon {
@@ -524,30 +874,26 @@ onMounted(() => {
   color: white;
 }
 
-.class-icon {
+.teaching .stat-icon {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.student-icon {
+.grading .stat-icon {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
-.task-icon {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.pending-icon {
+.performance .stat-icon {
   background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }
 
-.stat-info {
+.stat-content {
   flex: 1;
 }
 
 .stat-number {
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: 700;
-  color: #333;
+  color: #1a1a1a;
   line-height: 1;
   margin-bottom: 4px;
 }
@@ -555,64 +901,98 @@ onMounted(() => {
 .stat-label {
   font-size: 14px;
   color: #666;
+  font-weight: 500;
 }
 
-.main-content {
+.stat-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.trend-value {
+  font-weight: 600;
+}
+
+.trend-icon.up {
+  color: #52c41a;
+}
+
+.trend-icon.down {
+  color: #ff4d4f;
+}
+
+/* 内容网格 */
+.content-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 24px;
+  gap: 32px;
 }
 
-.content-card {
+.content-section {
   background: white;
   border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   margin-bottom: 24px;
   overflow: hidden;
 }
 
-.card-header {
+.section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 24px 0 24px;
-  margin-bottom: 20px;
+  padding: 24px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.card-header h3 {
-  font-size: 18px;
+.section-title {
+  font-size: 1.25rem;
   font-weight: 600;
-  color: #333;
+  color: #1a1a1a;
   margin: 0;
-}
-
-.class-list,
-.task-list {
-  padding: 0 24px 24px 24px;
-}
-
-.class-item,
-.task-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  margin-bottom: 8px;
+  gap: 8px;
 }
 
-.class-item:hover,
-.task-item:hover {
-  background: #f8f9fa;
+/* 班级网格 */
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 24px;
+}
+
+.class-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.class-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.class-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px 0 20px;
 }
 
 .class-avatar {
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -621,50 +1001,268 @@ onMounted(() => {
   font-size: 18px;
 }
 
-.task-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: #f0f8ff;
+.class-content {
+  padding: 16px 20px;
+}
+
+.class-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+.class-subject {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0 0 16px 0;
+}
+
+.class-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.class-stats .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.class-progress {
+  margin-bottom: 16px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.class-footer {
+  padding: 0 20px 20px 20px;
+}
+
+.create-card {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1890ff;
-  font-size: 20px;
+  min-height: 280px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%);
+  border: 2px dashed #d0d7de;
+  transition: all 0.3s ease;
 }
 
-.class-info,
-.task-info {
-  flex: 1;
+.create-card:hover {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f0f8ff 100%);
 }
 
-.class-name,
-.task-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
-}
-
-.class-meta,
-.task-meta {
-  font-size: 14px;
+.create-content {
+  text-align: center;
   color: #666;
+}
+
+.create-icon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+  color: #667eea;
+}
+
+.create-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #333;
+}
+
+.create-content p {
+  font-size: 0.875rem;
+  margin: 0;
+  color: #666;
+}
+
+/* 作业列表 */
+.task-list {
+  padding: 24px;
+}
+
+.task-card {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border-left: 4px solid #667eea;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.task-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.task-priority {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.priority-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #52c41a;
+}
+
+.priority-indicator.high {
+  background: #ff4d4f;
+}
+
+.priority-indicator.medium {
+  background: #faad14;
+}
+
+.priority-indicator.low {
+  background: #52c41a;
+}
+
+.task-subject {
+  font-size: 0.75rem;
+  color: #666;
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.task-deadline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.task-deadline.urgent {
+  color: #ff4d4f;
+  font-weight: 500;
+}
+
+.task-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.task-description {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
 }
 
 .task-progress {
+  margin-bottom: 16px;
+}
+
+.task-actions {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  min-width: 100px;
+  justify-content: flex-end;
 }
 
-.progress-text {
-  font-size: 12px;
-  color: #666;
+/* AI功能区域 */
+.ai-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
+.ai-section .section-header {
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+.ai-section .section-title {
+  color: white;
+}
+
+.ai-features {
+  padding: 0 24px;
+  display: grid;
+  gap: 12px;
+}
+
+.ai-feature-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  gap: 12px;
+}
+
+.ai-feature-card:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.feature-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.feature-content {
+  flex: 1;
+}
+
+.feature-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.feature-desc {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.ai-action-btn {
+  margin: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.ai-action-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+/* 待办事项 */
 .todo-list {
   padding: 0 24px 24px 24px;
 }
@@ -686,8 +1284,14 @@ onMounted(() => {
   color: #999;
 }
 
-.todo-text {
+.todo-content {
   flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.todo-text {
   font-size: 14px;
   color: #333;
 }
@@ -697,69 +1301,74 @@ onMounted(() => {
   color: #999;
 }
 
-.ai-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
 }
 
-.ai-card .card-header h3 {
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.empty-state .anticon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  opacity: 0.5;
 }
 
-.ai-suggestions {
-  padding: 0 24px;
-}
-
-.ai-suggestion {
-  display: flex;
-  gap: 12px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  margin-bottom: 12px;
-}
-
-.suggestion-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-}
-
-.suggestion-title {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.suggestion-desc {
-  font-size: 12px;
-  opacity: 0.8;
-  line-height: 1.4;
-}
-
-.ai-action-btn {
-  margin: 0 24px 24px 24px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-}
-
-.ai-action-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
+.empty-state p {
+  margin: 0;
+  font-size: 0.875rem;
 }
 
 @media (max-width: 1200px) {
-  .main-content {
+  .content-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .class-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .banner-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 24px;
+  }
+  
+  .teaching-overview {
+    justify-content: center;
+  }
+  
+  .quick-actions {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .dashboard-content {
+    padding: 0 16px;
+  }
+  
+  .quick-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .class-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .overview-card {
+    min-width: 100px;
+    padding: 16px;
+  }
+  
+  .overview-value {
+    font-size: 1.25rem;
+  }
+  
+  .stat-number {
+    font-size: 1.5rem;
   }
 }
 

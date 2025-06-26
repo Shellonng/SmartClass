@@ -65,6 +65,9 @@ public class CourseDTO {
         private LocalDateTime createTime;
         private String teacherName;
         private Integer studentCount;
+        private Integer chapterCount;
+        private Integer taskCount;
+        private Double averageScore;
         
         // Getters and Setters
         public Long getCourseId() { return courseId; }
@@ -192,6 +195,11 @@ public class CourseDTO {
         public void setProgress(Double progress) { this.progress = progress; }
         public Boolean getIsFavorite() { return isFavorite; }
         public void setIsFavorite(Boolean isFavorite) { this.isFavorite = isFavorite; }
+        
+        // Additional setter for createTime compatibility
+        private LocalDateTime createdTime;
+        public LocalDateTime getCreatedTime() { return createdTime; }
+        public void setCreatedTime(LocalDateTime createdTime) { this.createdTime = createdTime; }
     }
 
     /**
@@ -266,6 +274,13 @@ public class CourseDTO {
         private Integer duration;
         private Boolean isLearned;
         private LocalDateTime createTime;
+        private Long courseId;
+        private String title;
+        private Integer sortOrder;
+        private Integer estimatedDuration;
+        private LocalDateTime createdTime;
+        private String status;
+        private Boolean isRequired;
         
         // Getters and Setters
         public Long getChapterId() { return chapterId; }
@@ -286,6 +301,31 @@ public class CourseDTO {
         public void setIsLearned(Boolean isLearned) { this.isLearned = isLearned; }
         public LocalDateTime getCreateTime() { return createTime; }
         public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+       
+        public Integer getEstimatedDuration() { return estimatedDuration; }
+        public void setEstimatedDuration(Integer estimatedDuration) { this.estimatedDuration = estimatedDuration; }
+        public LocalDateTime getCreatedTime() { return createdTime; }
+        public void setCreatedTime(LocalDateTime createdTime) { this.createdTime = createdTime; }
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
+        public Boolean getIsRequired() { return isRequired; }
+        public void setIsRequired(Boolean isRequired) { this.isRequired = isRequired; }
+        
+        // Additional fields for study progress
+        private Integer studyTime;
+        private LocalDateTime lastAccessTime;
+        public Integer getStudyTime() { return studyTime; }
+        public void setStudyTime(Integer studyTime) { this.studyTime = studyTime; }
+        
+        // Compatibility methods for legacy code
+        public void setTitle(String title) { this.chapterName = title; }
+        public String getTitle() { return this.chapterName; }
+        public void setSortOrder(Integer sortOrder) { this.orderIndex = sortOrder; }
+        public Integer getSortOrder() { return this.orderIndex; }
+        public LocalDateTime getLastAccessTime() { return lastAccessTime; }
+        public void setLastAccessTime(LocalDateTime lastAccessTime) { this.lastAccessTime = lastAccessTime; }
     }
 
     /**
@@ -327,6 +367,12 @@ public class CourseDTO {
         public void setLastAccessTime(LocalDateTime lastAccessTime) { this.lastAccessTime = lastAccessTime; }
         public Integer getStudyTime() { return studyTime; }
         public void setStudyTime(Integer studyTime) { this.studyTime = studyTime; }
+        
+        // Compatibility methods for legacy code
+        public void setTitle(String title) { this.chapterName = title; }
+        public String getTitle() { return this.chapterName; }
+        public void setSortOrder(Integer sortOrder) { this.orderIndex = sortOrder; }
+        public Integer getSortOrder() { return this.orderIndex; }
     }
 
     /**
@@ -339,8 +385,11 @@ public class CourseDTO {
         private Integer completedChapters;
         private Integer totalChapters;
         private Integer studyTime;
+        private Integer totalStudyDuration;
         private LocalDateTime lastAccessTime;
         private LocalDateTime startTime;
+        private String chapterName;
+        private Integer orderIndex;
         
         // Getters and Setters
         public Long getCourseId() { return courseId; }
@@ -355,6 +404,14 @@ public class CourseDTO {
         public void setTotalChapters(Integer totalChapters) { this.totalChapters = totalChapters; }
         public Integer getStudyTime() { return studyTime; }
         public void setStudyTime(Integer studyTime) { this.studyTime = studyTime; }
+        
+        // Compatibility methods for legacy code
+        public void setTitle(String title) { this.chapterName = title; }
+        public String getTitle() { return this.chapterName; }
+        public void setSortOrder(Integer sortOrder) { this.orderIndex = sortOrder; }
+        public Integer getSortOrder() { return this.orderIndex; }
+        public Integer getTotalStudyDuration() { return totalStudyDuration; }
+        public void setTotalStudyDuration(Integer totalStudyDuration) { this.totalStudyDuration = totalStudyDuration; }
         public LocalDateTime getLastAccessTime() { return lastAccessTime; }
         public void setLastAccessTime(LocalDateTime lastAccessTime) { this.lastAccessTime = lastAccessTime; }
         public LocalDateTime getStartTime() { return startTime; }
@@ -368,7 +425,11 @@ public class CourseDTO {
         private Long courseId;
         private Long chapterId;
         private Integer studyTime;
+        private Integer studyDuration;
+        private Double progressPercentage;
         private Boolean isCompleted;
+        private String chapterName;
+        private Integer orderIndex;
         
         // Getters and Setters
         public Long getCourseId() { return courseId; }
@@ -377,6 +438,16 @@ public class CourseDTO {
         public void setChapterId(Long chapterId) { this.chapterId = chapterId; }
         public Integer getStudyTime() { return studyTime; }
         public void setStudyTime(Integer studyTime) { this.studyTime = studyTime; }
+        
+        // Compatibility methods for legacy code
+        public void setTitle(String title) { this.chapterName = title; }
+        public String getTitle() { return this.chapterName; }
+        public void setSortOrder(Integer sortOrder) { this.orderIndex = sortOrder; }
+        public Integer getSortOrder() { return this.orderIndex; }
+        public Integer getStudyDuration() { return studyDuration; }
+        public void setStudyDuration(Integer studyDuration) { this.studyDuration = studyDuration; }
+        public Double getProgressPercentage() { return progressPercentage; }
+        public void setProgressPercentage(Double progressPercentage) { this.progressPercentage = progressPercentage; }
         public Boolean getIsCompleted() { return isCompleted; }
         public void setIsCompleted(Boolean isCompleted) { this.isCompleted = isCompleted; }
     }
@@ -450,6 +521,10 @@ public class CourseDTO {
         public String getFileType() { return fileType; }
         public void setFileType(String fileType) { this.fileType = fileType; }
         public void setCreatedTime(LocalDateTime createdTime) { this.uploadTime = createdTime; }
+        
+        // Additional setter for createTime compatibility
+        public LocalDateTime getCreateTime() { return uploadTime; }
+        public void setCreateTime(LocalDateTime createTime) { this.uploadTime = createTime; }
     }
 
     /**
@@ -718,6 +793,8 @@ public class CourseDTO {
         private Integer studyTime;
         private LocalDateTime startTime;
         private LocalDateTime endTime;
+        private String chapterName;
+        private Integer orderIndex;
         
         // Getters and Setters
         public Long getCourseId() { return courseId; }
@@ -726,6 +803,12 @@ public class CourseDTO {
         public void setChapterId(Long chapterId) { this.chapterId = chapterId; }
         public Integer getStudyTime() { return studyTime; }
         public void setStudyTime(Integer studyTime) { this.studyTime = studyTime; }
+        
+        // Compatibility methods for legacy code
+        public void setTitle(String title) { this.chapterName = title; }
+        public String getTitle() { return this.chapterName; }
+        public void setSortOrder(Integer sortOrder) { this.orderIndex = sortOrder; }
+        public Integer getSortOrder() { return this.orderIndex; }
         public LocalDateTime getStartTime() { return startTime; }
         public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
         public LocalDateTime getEndTime() { return endTime; }
@@ -1063,6 +1146,8 @@ public class CourseDTO {
         private Double currentScore;
         private String status;
         private LocalDateTime lastAccessTime;
+        private String chapterName;
+        private Integer orderIndex;
         
         // Getters and Setters
         public Long getCourseId() { return courseId; }
@@ -1073,6 +1158,12 @@ public class CourseDTO {
         public void setProgressPercentage(Double progressPercentage) { this.progressPercentage = progressPercentage; }
         public Integer getStudyTime() { return studyTime; }
         public void setStudyTime(Integer studyTime) { this.studyTime = studyTime; }
+        
+        // Compatibility methods for legacy code
+        public void setTitle(String title) { this.chapterName = title; }
+        public String getTitle() { return this.chapterName; }
+        public void setSortOrder(Integer sortOrder) { this.orderIndex = sortOrder; }
+        public Integer getSortOrder() { return this.orderIndex; }
         public Double getCurrentScore() { return currentScore; }
         public void setCurrentScore(Double currentScore) { this.currentScore = currentScore; }
         public String getStatus() { return status; }
@@ -1170,6 +1261,8 @@ public class CourseDTO {
         private String content;
         private String videoUrl;
         private Integer duration;
+        private Boolean isRequired;
+        private Integer estimatedDuration;
         
         // Getters and Setters
         public String getChapterName() { return chapterName; }
@@ -1184,6 +1277,10 @@ public class CourseDTO {
         public void setVideoUrl(String videoUrl) { this.videoUrl = videoUrl; }
         public Integer getDuration() { return duration; }
         public void setDuration(Integer duration) { this.duration = duration; }
+        public Boolean getIsRequired() { return isRequired; }
+        public void setIsRequired(Boolean isRequired) { this.isRequired = isRequired; }
+        public Integer getEstimatedDuration() { return estimatedDuration; }
+        public void setEstimatedDuration(Integer estimatedDuration) { this.estimatedDuration = estimatedDuration; }
     }
 
     /**
@@ -1196,6 +1293,8 @@ public class CourseDTO {
         private String content;
         private String videoUrl;
         private Integer duration;
+        private Boolean isRequired;
+        private Integer estimatedDuration;
         
         // Getters and Setters
         public String getChapterName() { return chapterName; }
@@ -1210,6 +1309,10 @@ public class CourseDTO {
         public void setVideoUrl(String videoUrl) { this.videoUrl = videoUrl; }
         public Integer getDuration() { return duration; }
         public void setDuration(Integer duration) { this.duration = duration; }
+        public Boolean getIsRequired() { return isRequired; }
+        public void setIsRequired(Boolean isRequired) { this.isRequired = isRequired; }
+        public Integer getEstimatedDuration() { return estimatedDuration; }
+        public void setEstimatedDuration(Integer estimatedDuration) { this.estimatedDuration = estimatedDuration; }
     }
 
     /**
@@ -1229,6 +1332,18 @@ public class CourseDTO {
     }
 
     /**
+     * 课程复制请求DTO
+     */
+    public static class CourseCopyRequest {
+        @NotBlank(message = "新课程名称不能为空")
+        private String newCourseName;
+        
+        // Getters and Setters
+        public String getNewCourseName() { return newCourseName; }
+        public void setNewCourseName(String newCourseName) { this.newCourseName = newCourseName; }
+    }
+
+    /**
      * 课程统计响应DTO
      */
     public static class CourseStatisticsResponse {
@@ -1242,6 +1357,10 @@ public class CourseDTO {
         private Double completionRate;
         private Integer totalStudyTime;
         private LocalDateTime lastUpdateTime;
+        private Integer studentCount;
+        private Integer chapterCount;
+        private Integer taskCount;
+        private Double averageScore;
         
         // Getters and Setters
         public Long getCourseId() { return courseId; }
@@ -1264,5 +1383,13 @@ public class CourseDTO {
         public void setTotalStudyTime(Integer totalStudyTime) { this.totalStudyTime = totalStudyTime; }
         public LocalDateTime getLastUpdateTime() { return lastUpdateTime; }
         public void setLastUpdateTime(LocalDateTime lastUpdateTime) { this.lastUpdateTime = lastUpdateTime; }
+        public Integer getStudentCount() { return studentCount; }
+        public void setStudentCount(Integer studentCount) { this.studentCount = studentCount; }
+        public Integer getChapterCount() { return chapterCount; }
+        public void setChapterCount(Integer chapterCount) { this.chapterCount = chapterCount; }
+        public Integer getTaskCount() { return taskCount; }
+        public void setTaskCount(Integer taskCount) { this.taskCount = taskCount; }
+        public Double getAverageScore() { return averageScore; }
+        public void setAverageScore(Double averageScore) { this.averageScore = averageScore; }
     }
 }

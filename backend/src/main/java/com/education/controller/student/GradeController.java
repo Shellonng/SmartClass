@@ -1,8 +1,10 @@
 package com.education.controller.student;
 
 import com.education.dto.common.Result;
+import com.education.service.student.StudentGradeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,9 +19,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/student/grades")
 public class GradeController {
 
-    // TODO: 注入StudentGradeService
-    // @Autowired
-    // private StudentGradeService studentGradeService;
+    @Autowired
+    private StudentGradeService studentGradeService;
 
     @Operation(summary = "获取我的成绩列表", description = "获取学生的成绩列表")
     @GetMapping

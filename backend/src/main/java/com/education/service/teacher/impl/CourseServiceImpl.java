@@ -1,17 +1,19 @@
 package com.education.service.teacher.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.education.dto.CourseDTO;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
 import com.education.entity.Course;
 import com.education.entity.Teacher;
+import com.education.entity.Chapter;
 import com.education.entity.User;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.education.mapper.CourseMapper;
 import com.education.mapper.TeacherMapper;
 import com.education.mapper.UserMapper;
+import com.education.mapper.ChapterMapper;
 import com.education.service.teacher.CourseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,11 +42,32 @@ public class CourseServiceImpl implements CourseService {
     private final CourseMapper courseMapper;
     private final TeacherMapper teacherMapper;
     private final UserMapper userMapper;
+    private final ChapterMapper chapterMapper;
+    
+    /**
+     * 转换课程实体为响应对象
+     */
+    private CourseDTO.CourseResponse convertToCourseResponse(Course course) {
+        CourseDTO.CourseResponse response = new CourseDTO.CourseResponse();
+        BeanUtils.copyProperties(course, response);
+        
+        // 获取教师信息
+        Teacher teacher = teacherMapper.selectById(course.getTeacherId());
+        if (teacher != null) {
+            User user = userMapper.selectById(teacher.getUserId());
+            if (user != null) {
+                response.setTeacherName(user.getRealName());
+            }
+        }
+        
+        return response;
+    }
     
     @Override
     @Transactional
-    public CourseDTO.CourseResponse createCourse(CourseDTO.CourseCreateRequest createRequest, Long teacherId) {
-        log.info("创建课程，教师ID: {}, 课程名称: {}", teacherId, createRequest.getCourseName());
+    public CourseDTO.CourseResponse createCourse(Object createRequest, Long teacherId) {
+        CourseDTO.CourseCreateRequest request = (CourseDTO.CourseCreateRequest) createRequest;
+        log.info("创建课程，教师ID: {}, 课程名称: {}", teacherId, request.getCourseName());
         
         // 验证教师是否存在
         Teacher teacher = teacherMapper.selectById(teacherId);
@@ -64,7 +87,7 @@ public class CourseServiceImpl implements CourseService {
         
         // 创建课程实体
         Course course = new Course();
-        BeanUtils.copyProperties(createRequest, course);
+        BeanUtils.copyProperties(request, course);
         course.setTeacherId(teacherId);
         course.setStatus("DRAFT"); // 默认为草稿状态
         course.setCreateTime(LocalDateTime.now());
@@ -212,7 +235,29 @@ public class CourseServiceImpl implements CourseService {
     public Boolean publishCourse(Long courseId, Long teacherId) {
         log.info("发布课程，课程ID: {}, 教师ID: {}", courseId, teacherId);
         
-        return updateCourseStatus(courseId, teacherId, "PUBLISHED");
+        // 查询课程
+        Course course = courseMapper.selectById(courseId);
+        if (course == null || course.getIsDeleted()) {
+            throw new RuntimeException("课程不存在");
+        }
+        
+        // 验证权限
+        if (!course.getTeacherId().equals(teacherId)) {
+            throw new RuntimeException("无权限发布该课程");
+        }
+        
+        // 检查课程是否可以发布（至少有基本信息）
+        if (!StringUtils.hasText(course.getCourseName()) || 
+            !StringUtils.hasText(course.getDescription())) {
+            throw new RuntimeException("课程信息不完整，无法发布");
+        }
+        
+        // 更新课程状态为已发布
+        course.setStatus("PUBLISHED");
+        course.setUpdateTime(LocalDateTime.now());
+        courseMapper.updateById(course);
+        
+        return true;
     }
     
     @Override
@@ -230,22 +275,45 @@ public class CourseServiceImpl implements CourseService {
         // 验证课程权限
         validateCourseAccess(courseId, teacherId);
         
-        // TODO: 实现章节查询逻辑
-        // 这里返回空列表，实际应该查询章节表
-        return new ArrayList<>();
+        // 查询课程章节
+        List<Chapter> chapters = chapterMapper.selectByCourseId(courseId);
+        
+        // 转换为响应对象
+        return chapters.stream()
+                .map(this::convertToChapterResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
     @Transactional
-    public CourseDTO.ChapterResponse createChapter(Long courseId, CourseDTO.ChapterCreateRequest chapterRequest, Long teacherId) {
+    public CourseDTO.ChapterResponse createChapter(Long courseId, CourseDTO.ChapterCreateRequest createRequest, Long teacherId) {
+        CourseDTO.ChapterCreateRequest chapterRequest = createRequest;
         log.info("创建课程章节，课程ID: {}, 教师ID: {}, 章节标题: {}", courseId, teacherId, chapterRequest.getChapterName());
         
         // 验证课程权限
         validateCourseAccess(courseId, teacherId);
         
-        // TODO: 实现章节创建逻辑
-        // 这里返回null，实际应该创建章节并返回响应对象
-        return null;
+        // 获取下一个排序号
+        Integer maxSortOrder = chapterMapper.getMaxSortOrderByCourseId(courseId);
+        int nextSortOrder = (maxSortOrder != null ? maxSortOrder : 0) + 1;
+        
+        // 创建章节
+        Chapter chapter = new Chapter();
+        chapter.setCourseId(courseId);
+        chapter.setTitle(chapterRequest.getChapterName());
+        chapter.setDescription(chapterRequest.getDescription());
+        chapter.setContent(chapterRequest.getContent());
+        chapter.setSortOrder(nextSortOrder);
+        chapter.setStatus("DRAFT"); // 默认为草稿状态
+        chapter.setIsRequired(chapterRequest.getIsRequired() != null ? chapterRequest.getIsRequired() : true);
+        chapter.setEstimatedDuration(chapterRequest.getEstimatedDuration());
+        chapter.setCreateTime(LocalDateTime.now());
+        chapter.setUpdateTime(LocalDateTime.now());
+        chapter.setIsDeleted(false);
+        
+        chapterMapper.insert(chapter);
+        
+        return convertToChapterResponse(chapter);
     }
     
     @Override
@@ -253,8 +321,36 @@ public class CourseServiceImpl implements CourseService {
     public CourseDTO.ChapterResponse updateChapter(Long chapterId, CourseDTO.ChapterUpdateRequest chapterRequest, Long teacherId) {
         log.info("更新课程章节，章节ID: {}, 教师ID: {}", chapterId, teacherId);
         
-        // TODO: 实现章节更新逻辑
-        return null;
+        // 查询章节
+        Chapter chapter = chapterMapper.selectById(chapterId);
+        if (chapter == null || chapter.getIsDeleted()) {
+            throw new RuntimeException("章节不存在");
+        }
+        
+        // 验证课程权限
+        validateCourseAccess(chapter.getCourseId(), teacherId);
+        
+        // 更新章节信息
+        if (chapterRequest.getChapterName() != null) {
+            chapter.setTitle(chapterRequest.getChapterName());
+        }
+        if (chapterRequest.getDescription() != null) {
+            chapter.setDescription(chapterRequest.getDescription());
+        }
+        if (chapterRequest.getContent() != null) {
+            chapter.setContent(chapterRequest.getContent());
+        }
+        if (chapterRequest.getIsRequired() != null) {
+            chapter.setIsRequired(chapterRequest.getIsRequired());
+        }
+        if (chapterRequest.getEstimatedDuration() != null) {
+            chapter.setEstimatedDuration(chapterRequest.getEstimatedDuration());
+        }
+        chapter.setUpdateTime(LocalDateTime.now());
+        
+        chapterMapper.updateById(chapter);
+        
+        return convertToChapterResponse(chapter);
     }
     
     @Override
@@ -262,27 +358,25 @@ public class CourseServiceImpl implements CourseService {
     public Boolean deleteChapter(Long chapterId, Long teacherId) {
         log.info("删除课程章节，章节ID: {}, 教师ID: {}", chapterId, teacherId);
         
-        // TODO: 实现章节删除逻辑
-        return false;
+        // 查询章节
+        Chapter chapter = chapterMapper.selectById(chapterId);
+        if (chapter == null || chapter.getIsDeleted()) {
+            throw new RuntimeException("章节不存在");
+        }
+        
+        // 验证课程权限
+        validateCourseAccess(chapter.getCourseId(), teacherId);
+        
+        // 软删除章节
+        chapter.setIsDeleted(true);
+        chapter.setUpdateTime(LocalDateTime.now());
+        
+        return chapterMapper.updateById(chapter) > 0;
     }
     
     // 私有辅助方法
     
-    /**
-     * 转换课程实体为响应对象
-     */
-    private CourseDTO.CourseResponse convertToCourseResponse(Course course) {
-        CourseDTO.CourseResponse response = new CourseDTO.CourseResponse();
-        BeanUtils.copyProperties(course, response);
-        
-        // 获取教师姓名
-        Teacher teacher = teacherMapper.selectById(course.getTeacherId());
-        if (teacher != null && teacher.getUser() != null) {
-            response.setTeacherName(teacher.getUser().getRealName());
-        }
-        
-        return response;
-    }
+
     
     /**
      * 更新课程状态
@@ -318,6 +412,23 @@ public class CourseServiceImpl implements CourseService {
         }
     }
     
+    /**
+     * 转换为章节响应对象
+     */
+    private CourseDTO.ChapterResponse convertToChapterResponse(Chapter chapter) {
+        CourseDTO.ChapterResponse response = new CourseDTO.ChapterResponse();
+        response.setChapterId(chapter.getId());
+        response.setCourseId(chapter.getCourseId());
+        response.setTitle(chapter.getTitle());
+        response.setDescription(chapter.getDescription());
+        response.setSortOrder(chapter.getSortOrder());
+        response.setEstimatedDuration(chapter.getEstimatedDuration());
+        response.setCreatedTime(chapter.getCreateTime());
+        response.setStatus(chapter.getStatus());
+        response.setIsRequired(chapter.getIsRequired());
+        return response;
+    }
+    
     // 以下方法暂时返回默认值，待后续完善
     
     @Override
@@ -332,8 +443,18 @@ public class CourseServiceImpl implements CourseService {
     public CourseDTO.CourseStatisticsResponse getCourseStatistics(Long courseId, Long teacherId) {
         log.info("获取课程统计信息，课程ID: {}, 教师ID: {}", courseId, teacherId);
         validateCourseAccess(courseId, teacherId);
-        // TODO: 实现统计信息查询
-        return new CourseDTO.CourseStatisticsResponse();
+        
+        CourseDTO.CourseStatisticsResponse response = new CourseDTO.CourseStatisticsResponse();
+        response.setCourseId(courseId);
+        
+        // TODO: 统计学生数量、章节数量、任务数量等
+        response.setStudentCount(0);
+        response.setChapterCount(0);
+        response.setTaskCount(0);
+        response.setCompletionRate(0.0);
+        response.setAverageScore(0.0);
+        
+        return response;
     }
     
     @Override
@@ -353,9 +474,33 @@ public class CourseServiceImpl implements CourseService {
     @Transactional
     public CourseDTO.CourseResponse copyCourse(Long courseId, String newCourseName, Long teacherId) {
         log.info("复制课程，课程ID: {}, 新课程名称: {}, 教师ID: {}", courseId, newCourseName, teacherId);
-        validateCourseAccess(courseId, teacherId);
-        // TODO: 实现课程复制逻辑
-        return null;
+        
+        // 查询原课程
+        Course originalCourse = courseMapper.selectById(courseId);
+        if (originalCourse == null || originalCourse.getIsDeleted()) {
+            throw new RuntimeException("原课程不存在");
+        }
+        
+        // 验证权限
+        if (!originalCourse.getTeacherId().equals(teacherId)) {
+            throw new RuntimeException("无权限复制该课程");
+        }
+        
+        // 创建新课程
+        Course newCourse = new Course();
+        BeanUtils.copyProperties(originalCourse, newCourse);
+        newCourse.setCourseId(null); // 清空ID，让数据库自动生成
+        newCourse.setCourseName(newCourseName);
+        newCourse.setStatus("DRAFT"); // 复制的课程默认为草稿状态
+        newCourse.setCreateTime(LocalDateTime.now());
+        newCourse.setUpdateTime(LocalDateTime.now());
+        
+        // 保存新课程
+        courseMapper.insert(newCourse);
+        
+        // TODO: 复制章节、任务等相关数据
+        
+        return convertToCourseResponse(newCourse);
     }
     
     @Override
@@ -547,5 +692,15 @@ public class CourseServiceImpl implements CourseService {
         validateCourseAccess(courseId, teacherId);
         // TODO: 实现保存课程为模板逻辑
         return true;
+    }
+    
+
+    
+
+    
+    public Object getMyCourses(Object queryParams) {
+        log.info("获取我的课程列表");
+        // TODO: 实现获取我的课程列表逻辑
+        return null;
     }
 }

@@ -6,9 +6,12 @@ import com.education.service.auth.AuthService;
 import com.education.utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 认证控制器
@@ -19,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Tag(name = "认证管理", description = "用户登录、注册、密码管理等认证相关接口")
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
@@ -30,11 +33,35 @@ public class AuthController {
 
     @Operation(summary = "用户登录", description = "支持学生和教师登录")
     @PostMapping("/login")
-    public Result<AuthDTO.LoginResponse> login(@Valid @RequestBody AuthDTO.LoginRequest request) {
+    public Result<Object> login(@Valid @RequestBody AuthDTO.LoginRequest request, HttpServletRequest httpRequest) {
         try {
-            AuthDTO.LoginResponse response = authService.login(request);
-            return Result.success(response);
+            System.out.println("🔐 收到登录请求:");
+            System.out.println("  - 用户名: " + request.getUsername());
+            System.out.println("  - 请求路径: " + httpRequest.getRequestURI());
+            System.out.println("  - 请求方法: " + httpRequest.getMethod());
+            System.out.println("  - Origin: " + httpRequest.getHeader("Origin"));
+            System.out.println("  - Content-Type: " + httpRequest.getContentType());
+            
+            AuthDTO.LoginResponse authResponse = authService.login(request);
+            
+            // 构建前端期望的响应结构
+            Map<String, Object> data = new HashMap<>();
+            data.put("token", authResponse.getToken());
+            
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("id", authResponse.getUserId());
+            userInfo.put("username", authResponse.getUsername());
+            userInfo.put("realName", authResponse.getRealName());
+            userInfo.put("email", authResponse.getEmail());
+            userInfo.put("role", authResponse.getUserType());
+            userInfo.put("avatar", null); // 如果没有头像字段，设为null
+            
+            data.put("userInfo", userInfo);
+            
+            System.out.println("✅ 登录成功，返回响应");
+            return Result.success(data);
         } catch (Exception e) {
+            System.out.println("❌ 登录失败: " + e.getMessage());
             throw e; // 让全局异常处理器处理
         }
     }

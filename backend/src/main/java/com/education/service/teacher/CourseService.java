@@ -22,7 +22,7 @@ public interface CourseService {
      * @param teacherId 教师ID
      * @return 课程信息
      */
-    CourseDTO.CourseResponse createCourse(CourseDTO.CourseCreateRequest createRequest, Long teacherId);
+    CourseDTO.CourseResponse createCourse(Object createRequest, Long teacherId);
 
     /**
      * 获取教师的课程列表
@@ -92,11 +92,11 @@ public interface CourseService {
      * 创建课程章节
      * 
      * @param courseId 课程ID
-     * @param chapterRequest 章节请求
+     * @param createRequest 章节请求
      * @param teacherId 教师ID
      * @return 章节信息
      */
-    CourseDTO.ChapterResponse createChapter(Long courseId, CourseDTO.ChapterCreateRequest chapterRequest, Long teacherId);
+    CourseDTO.ChapterResponse createChapter(Long courseId, CourseDTO.ChapterCreateRequest createRequest, Long teacherId);
 
     /**
      * 更新课程章节

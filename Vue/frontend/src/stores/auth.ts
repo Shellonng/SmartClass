@@ -50,7 +50,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // 登录
-  const loginUser = async (loginData: LoginRequest) => {
+  const loginUser = async (loginData: LoginRequest, skipRedirect = false) => {
     try {
       const response = await login(loginData)
       
@@ -63,14 +63,16 @@ export const useAuthStore = defineStore('auth', () => {
         
         message.success('登录成功')
         
-        // 根据用户角色跳转
-        if (userInfo.role === 'student') {
-          router.push('/student')
-        } else if (userInfo.role === 'teacher') {
-          router.push('/teacher')
+        // 根据参数决定是否跳转
+        if (!skipRedirect) {
+          if (userInfo.role === 'student') {
+            router.push('/student')
+          } else if (userInfo.role === 'teacher') {
+            router.push('/teacher')
+          }
         }
         
-        return { success: true }
+        return { success: true, userInfo }
       } else {
         message.error(response.data.message || '登录失败')
         return {
@@ -105,7 +107,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       if (!token.value) return null
       
-      const response = await axios.get('/api/auth/me')
+      const response = await axios.get('/api/auth/user-info')
       user.value = response.data.data
       return user.value
     } catch (error) {

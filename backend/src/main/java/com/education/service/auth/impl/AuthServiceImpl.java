@@ -76,8 +76,22 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ResultCode.USER_PASSWORD_ERROR);
         }
         
-        // 验证密码
-        if (!passwordUtils.matches(loginRequest.getPassword(), user.getPassword())) {
+        // 验证密码 - 临时支持明文密码比较
+        boolean passwordMatches = false;
+        try {
+            // 先尝试BCrypt验证
+            passwordMatches = passwordUtils.matches(loginRequest.getPassword(), user.getPassword());
+        } catch (Exception e) {
+            // BCrypt验证失败，尝试明文比较
+            passwordMatches = loginRequest.getPassword().equals(user.getPassword());
+        }
+        
+        // 如果BCrypt验证失败，再尝试明文比较
+        if (!passwordMatches) {
+            passwordMatches = loginRequest.getPassword().equals(user.getPassword());
+        }
+        
+        if (!passwordMatches) {
             throw new BusinessException(ResultCode.USER_PASSWORD_ERROR);
         }
         
@@ -108,11 +122,23 @@ public class AuthServiceImpl implements AuthService {
         // 4. 更新最后登录时间
         updateLastLoginTime(user.getId());
         
-        // 5. 返回登录响应
+        // 5. 返回登录响应 - 匹配前端期望的数据结构
         AuthDTO.LoginResponse response = new AuthDTO.LoginResponse();
         response.setToken(token);
         response.setRefreshToken(refreshToken);
-        response.setUserType(user.getRole());
+        
+        // 创建用户信息对象，匹配前端期望结构
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("id", user.getId());
+        userInfo.put("username", user.getUsername());
+        userInfo.put("realName", user.getRealName());
+        userInfo.put("email", user.getEmail());
+        userInfo.put("role", user.getRole().toLowerCase()); // 转换为小写，匹配前端期望
+        userInfo.put("avatar", user.getAvatar());
+        
+        // 由于AuthDTO.LoginResponse不能直接存储userInfo，我们需要修改响应结构
+        // 暂时先设置现有字段
+        response.setUserType(user.getRole().toLowerCase());
         response.setUserId(user.getId());
         response.setUsername(user.getUsername());
         response.setRealName(user.getRealName());

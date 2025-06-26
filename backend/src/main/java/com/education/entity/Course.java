@@ -34,6 +34,15 @@ public class Course implements Serializable {
     @Schema(description = "课程ID")
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
+    
+    // 兼容方法
+    public void setCourseId(Long courseId) {
+        this.id = courseId;
+    }
+    
+    public Long getCourseId() {
+        return this.id;
+    }
 
     @Schema(description = "课程名称", example = "Java程序设计")
     @TableField("course_name")
@@ -160,12 +169,12 @@ public class Course implements Serializable {
     private String coverImage;
 
     @Schema(description = "创建时间")
-    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    @TableField(value = "created_time", fill = FieldFill.INSERT)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     @Schema(description = "更新时间")
-    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "updated_time", fill = FieldFill.INSERT_UPDATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 

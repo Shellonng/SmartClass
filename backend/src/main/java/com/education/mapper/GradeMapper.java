@@ -82,4 +82,54 @@ public interface GradeMapper extends BaseMapper<Grade> {
      * 批量更新成绩
      */
     int batchUpdate(@Param("grades") List<Grade> grades);
+    
+    /**
+     * 插入成绩记录
+     */
+    int insertGrade(Grade grade);
+    
+    /**
+     * 根据ID查询成绩
+     */
+    Grade selectGradeById(@Param("gradeId") Long gradeId);
+    
+    /**
+     * 统计成绩数量
+     */
+    int countGrades(@Param("filters") Map<String, Object> filters);
+    
+    /**
+     * 分页查询成绩
+     */
+    List<Grade> selectGradesByPage(@Param("page") Integer page, @Param("size") Integer size, @Param("filters") Map<String, Object> filters);
+    
+    /**
+     * 更新成绩
+     */
+    int updateGrade(Grade grade);
+    
+    /**
+     * 删除成绩
+     */
+    int deleteGrade(@Param("gradeId") Long gradeId);
+    
+    /**
+     * 根据课程和任务查询成绩
+     */
+    List<Grade> selectGradesByCourseAndTask(@Param("courseId") Long courseId, @Param("taskId") Long taskId);
+    
+    /**
+     * 根据课程查询成绩
+     */
+    List<Grade> selectGradesByCourse(@Param("courseId") Long courseId);
+    
+    /**
+     * 根据学生和课程查询成绩
+     */
+    List<Grade> selectGradesByStudentCourse(@Param("studentId") Long studentId, @Param("courseId") Long courseId);
+    
+    /**
+     * 更新成绩权重
+     */
+    int updateGradeWeight(@Param("taskType") String taskType, @Param("weight") Double weight, @Param("courseId") Long courseId);
 }

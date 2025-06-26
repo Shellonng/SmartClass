@@ -505,6 +505,25 @@ public class TaskSubmission implements Serializable {
         this.graderId = graderId;
         this.gradeTime = LocalDateTime.now();
         this.status = Status.GRADED.getCode();
+        this.updateTime = LocalDateTime.now();
+    }
+
+    /**
+     * 设置评分教师ID（兼容性方法）
+     * 
+     * @param gradedBy 评分教师ID
+     */
+    public void setGradedBy(Long gradedBy) {
+        this.graderId = gradedBy;
+    }
+
+    /**
+     * 获取评分教师ID（兼容性方法）
+     * 
+     * @return 评分教师ID
+     */
+    public Long getGradedBy() {
+        return this.graderId;
     }
 
     /**
@@ -517,7 +536,7 @@ public class TaskSubmission implements Serializable {
         this.originalScore = originalScore;
         this.deduction = deduction;
         if (originalScore != null && deduction != null) {
-            this.score = originalScore.subtract(deduction).max(BigDecimal.ZERO);
+            this.score = originalScore.subtract(deduction);
         }
     }
 
