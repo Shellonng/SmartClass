@@ -1,15 +1,18 @@
 package com.education.controller.teacher;
+
 import com.education.dto.common.Result;
 import com.education.dto.common.PageRequest;
-import com.education.dto.TaskDTO;
+import com.education.dto.common.PageResponse;
+import com.education.dto.task.TaskCommonDTOs.*;
 import com.education.service.teacher.TaskService;
-import com.education.utils.JwtUtils;
+import com.education.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 /**
@@ -19,306 +22,243 @@ import java.util.List;
  * @version 1.0.0
  * @since 2024
  */
-@Tag(name = "教师端-任务管理", description = "教师任务创建、管理、批改等接口")
-@RestController("teacherTaskController")
+@Tag(name = "教师端任务管理", description = "任务的创建、发布、批阅、统计等功能")
+@RestController
 @RequestMapping("/api/teacher/tasks")
+@RequiredArgsConstructor
+@Slf4j
 public class TaskController {
 
-    @Autowired
-    private TaskService taskService;
+    private final TaskService taskService;
 
-    @Operation(summary = "创建任务", description = "教师创建新任务")
-    @PostMapping
-    public Result<Object> createTask(@RequestBody TaskDTO.TaskCreateRequest createRequest) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层创建任务
-            Object result = taskService.createTask(createRequest, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("创建任务失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "获取任务列表", description = "获取教师创建的任务列表")
+    /**
+     * 分页查询任务列表
+     */
+    @Operation(summary = "分页查询任务列表")
     @GetMapping
-    public Result<Object> getTasks(
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Long courseId,
-            @RequestParam(required = false) String status) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 构建分页请求
-            PageRequest pageRequest = new PageRequest();
-            pageRequest.setPageNum(page);
-            pageRequest.setPageSize(size);
-            pageRequest.setKeyword(keyword);
-            
-            // 3. 调用服务层查询任务列表
-            Object result = taskService.getTaskList(teacherId, pageRequest);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("获取任务列表失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "获取任务详情", description = "获取指定任务的详细信息")
-    @GetMapping("/{taskId}")
-    public Result<Object> getTaskDetail(@PathVariable Long taskId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层获取任务详情
-            Object result = taskService.getTaskDetail(taskId, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("获取任务详情失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "更新任务信息", description = "更新任务基本信息")
-    @PutMapping("/{taskId}")
-    public Result<Object> updateTask(@PathVariable Long taskId, @RequestBody TaskDTO.TaskUpdateRequest updateRequest) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层更新任务
-            Object result = taskService.updateTask(taskId, updateRequest, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("更新任务失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "删除任务", description = "删除指定任务")
-    @DeleteMapping("/{taskId}")
-    public Result<Void> deleteTask(@PathVariable Long taskId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层删除任务
-            Boolean result = taskService.deleteTask(taskId, teacherId);
-            
-            if (result) {
-                return Result.success();
-            } else {
-                return Result.error("删除任务失败");
-            }
-        } catch (Exception e) {
-            return Result.error("删除任务失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "发布任务", description = "发布任务供学生完成")
-    @PostMapping("/{taskId}/publish")
-    public Result<Void> publishTask(@PathVariable Long taskId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层发布任务
-            Boolean result = taskService.publishTask(taskId, teacherId);
-            
-            if (result) {
-                return Result.success();
-            } else {
-                return Result.error("发布任务失败");
-            }
-        } catch (Exception e) {
-            return Result.error("发布任务失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "关闭任务", description = "关闭任务，不再接受提交")
-    @PostMapping("/{taskId}/close")
-    public Result<Void> closeTask(@PathVariable Long taskId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层关闭任务
-            Boolean result = taskService.closeTask(taskId, teacherId);
-            
-            if (result) {
-                return Result.success();
-            } else {
-                return Result.error("关闭任务失败");
-            }
-        } catch (Exception e) {
-            return Result.error("关闭任务失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "获取任务提交列表", description = "获取任务的所有学生提交")
-    @GetMapping("/{taskId}/submissions")
-    public Result<Object> getTaskSubmissions(
-            @PathVariable Long taskId,
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
+    public Result<PageResponse<TaskListResponse>> getTaskList(
+            @Valid PageRequest pageRequest,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String type,
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) String keyword) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 构建分页请求
-            PageRequest pageRequest = new PageRequest();
-            pageRequest.setPageNum(page);
-            pageRequest.setPageSize(size);
-            pageRequest.setKeyword(keyword);
-            
-            // 3. 调用服务层获取提交列表
-            Object result = taskService.getTaskSubmissions(taskId, teacherId, pageRequest);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("获取任务提交列表失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "批改任务提交", description = "对学生的任务提交进行批改")
-    @PostMapping("/{taskId}/submissions/{submissionId}/grade")
-    public Result<Object> gradeSubmission(
-            @PathVariable Long taskId,
-            @PathVariable Long submissionId,
-            @RequestBody Object gradeRequest) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层批改提交
-            Object result = taskService.gradeSubmission(submissionId, gradeRequest, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("批改任务提交失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "批量批改", description = "批量批改多个学生的提交")
-    @PostMapping("/{taskId}/submissions/batch-grade")
-    public Result<Object> batchGradeSubmissions(
-            @PathVariable Long taskId,
-            @RequestBody List<Object> batchGradeRequest) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层批量批改
-            Object result = taskService.batchGradeSubmissions(batchGradeRequest, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("批量批改失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "获取任务统计", description = "获取任务的统计数据")
-    @GetMapping("/{taskId}/statistics")
-    public Result<Object> getTaskStatistics(@PathVariable Long taskId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层获取任务统计
-            Object result = taskService.getTaskStatistics(taskId, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("获取任务统计失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "导出任务成绩", description = "导出任务成绩到Excel")
-    @GetMapping("/{taskId}/export-grades")
-    public Result<Object> exportTaskGrades(@PathVariable Long taskId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层导出成绩
-            Object result = taskService.exportTaskGrades(taskId, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("导出任务成绩失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "复制任务", description = "复制现有任务创建新任务")
-    @PostMapping("/{taskId}/copy")
-    public Result<Object> copyTask(@PathVariable Long taskId, @RequestBody String newTaskTitle) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层复制任务
-            Object result = taskService.copyTask(taskId, newTaskTitle, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("复制任务失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "获取抄袭检测结果", description = "获取任务的抄袭检测结果")
-    @GetMapping("/{taskId}/plagiarism")
-    public Result<Object> getPlagiarismResults(@PathVariable Long taskId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层获取抄袭检测结果
-            Object result = taskService.getPlagiarismDetectionResult(taskId, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("获取抄袭检测结果失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "启动抄袭检测", description = "对任务提交启动抄袭检测")
-    @PostMapping("/{taskId}/plagiarism/start")
-    public Result<Void> startPlagiarismDetection(@PathVariable Long taskId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层启动抄袭检测
-            Boolean result = taskService.startPlagiarismDetection(taskId, teacherId);
-            
-            if (result) {
-                return Result.success();
-            } else {
-                return Result.error("启动抄袭检测失败");
-            }
-        } catch (Exception e) {
-            return Result.error("启动抄袭检测失败: " + e.getMessage());
-        }
+            @RequestParam(required = false) Long courseId,
+            @RequestParam(required = false) Long classId) {
+        log.info("分页查询任务列表，页码：{}，页大小：{}，标题：{}，类型：{}，状态：{}", 
+                pageRequest.getPageNum(), pageRequest.getPageSize(), title, type, status);
+        
+        PageResponse<TaskListResponse> response = taskService.getTaskList(pageRequest, title, status, type, courseId, classId);
+        return Result.success(response);
     }
 
     /**
-     * 获取当前教师ID
-     * 从JWT token或session中获取当前登录教师的ID
+     * 创建任务
      */
-    private Long getCurrentTeacherId() {
-        // TODO: 实际项目中应该从JWT token或session中获取
-        // 这里暂时返回模拟数据
-        return 1L;
+    @Operation(summary = "创建任务")
+    @PostMapping
+    public Result<TaskResponse> createTask(@Valid @RequestBody TaskCreateRequest request) {
+        log.info("创建任务，标题：{}，类型：{}，截止时间：{}", 
+                request.getTitle(), request.getType(), request.getDeadline());
+        
+        TaskResponse response = taskService.createTask(request);
+        return Result.success(response);
     }
 
+    /**
+     * 获取任务详情
+     */
+    @Operation(summary = "获取任务详情")
+    @GetMapping("/{taskId}")
+    public Result<TaskDetailResponse> getTaskDetail(@PathVariable Long taskId) {
+        log.info("获取任务详情，任务ID：{}", taskId);
+        
+        TaskDetailResponse response = taskService.getTaskDetail(taskId);
+        return Result.success(response);
+    }
 
+    /**
+     * 更新任务信息
+     */
+    @Operation(summary = "更新任务信息")
+    @PutMapping("/{taskId}")
+    public Result<TaskResponse> updateTask(
+            @PathVariable Long taskId,
+            @Valid @RequestBody TaskUpdateRequest request) {
+        log.info("更新任务信息，任务ID：{}，标题：{}", taskId, request.getTitle());
+        
+        TaskResponse response = taskService.updateTask(taskId, request);
+        return Result.success(response);
+    }
+
+    /**
+     * 删除任务
+     */
+    @Operation(summary = "删除任务")
+    @DeleteMapping("/{taskId}")
+    public Result<Void> deleteTask(@PathVariable Long taskId) {
+        log.info("删除任务，任务ID：{}", taskId);
+        
+        taskService.deleteTask(taskId);
+        return Result.success("任务删除成功");
+    }
+
+    /**
+     * 发布任务
+     */
+    @Operation(summary = "发布任务")
+    @PostMapping("/{taskId}/publish")
+    public Result<Void> publishTask(@PathVariable Long taskId) {
+        log.info("发布任务，任务ID：{}", taskId);
+        
+        taskService.publishTask(taskId);
+        return Result.success("任务发布成功");
+    }
+
+    /**
+     * 取消发布任务
+     */
+    @Operation(summary = "取消发布任务")  
+    @PostMapping("/{taskId}/unpublish")
+    public Result<Void> unpublishTask(@PathVariable Long taskId) {
+        log.info("取消发布任务，任务ID：{}", taskId);
+        
+        taskService.unpublishTask(taskId);
+        return Result.success("任务已取消发布");
+    }
+
+    /**
+     * 获取任务提交列表
+     */
+    @Operation(summary = "获取任务提交列表")
+    @GetMapping("/{taskId}/submissions")
+    public Result<PageResponse<TaskSubmissionResponse>> getTaskSubmissions(
+            @PathVariable Long taskId,
+            @Valid PageRequest pageRequest,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String studentName) {
+        log.info("获取任务提交列表，任务ID：{}，状态：{}，学生姓名：{}", taskId, status, studentName);
+        
+        PageResponse<TaskSubmissionResponse> response = taskService.getTaskSubmissions(taskId, pageRequest, studentName, status);
+        return Result.success(response);
+    }
+
+    /**
+     * 批阅任务提交
+     */
+    @Operation(summary = "批阅任务提交")
+    @PostMapping("/{taskId}/submissions/{submissionId}/grade")
+    public Result<Void> gradeSubmission(
+            @PathVariable Long taskId,
+            @PathVariable Long submissionId,
+            @Valid @RequestBody TaskGradeRequest request) {
+        log.info("批阅任务提交，任务ID：{}，提交ID：{}，分数：{}", taskId, submissionId, request.getScore());
+        
+        taskService.gradeSubmission(submissionId, request);
+        return Result.success("批阅完成");
+    }
+
+    /**
+     * 批量批阅
+     */
+    @Operation(summary = "批量批阅")
+    @PostMapping("/{taskId}/submissions/batch-grade")
+    public Result<Void> batchGradeSubmissions(
+            @PathVariable Long taskId,
+            @RequestBody List<TaskBatchGradeRequest> requests) {
+        log.info("批量批阅，任务ID：{}，批阅数量：{}", taskId, requests.size());
+        
+        taskService.batchGradeSubmissions(requests);
+        return Result.success("批量批阅完成");
+    }
+
+    /**
+     * 获取任务统计信息
+     */
+    @Operation(summary = "获取任务统计信息")
+    @GetMapping("/{taskId}/statistics")
+    public Result<TaskStatisticsResponse> getTaskStatistics(@PathVariable Long taskId) {
+        log.info("获取任务统计信息，任务ID：{}", taskId);
+        
+        TaskStatisticsResponse response = taskService.getTaskStatistics(taskId);
+        return Result.success(response);
+    }
+
+    /**
+     * 导出任务成绩
+     */
+    @Operation(summary = "导出任务成绩")
+    @GetMapping("/{taskId}/export")
+    public Result<String> exportTaskGrades(@PathVariable Long taskId) {
+        log.info("导出任务成绩，任务ID：{}", taskId);
+        
+        String downloadUrl = taskService.exportTaskGrades(taskId);
+        return Result.success(downloadUrl);
+    }
+
+    /**
+     * 复制任务
+     */
+    @Operation(summary = "复制任务")
+    @PostMapping("/{taskId}/copy")
+    public Result<TaskResponse> copyTask(
+            @PathVariable Long taskId,
+            @RequestBody TaskCopyRequest request) {
+        log.info("复制任务，原任务ID：{}，新标题：{}", taskId, request.getNewTitle());
+        
+        TaskResponse response = taskService.copyTask(taskId, request);
+        return Result.success(response);
+    }
+
+    /**
+     * 设置任务扩展时间
+     */
+    @Operation(summary = "设置任务扩展时间")
+    @PostMapping("/{taskId}/extend")
+    public Result<Void> extendTaskDeadline(
+            @PathVariable Long taskId,
+            @RequestBody TaskExtendRequest request) {
+        log.info("扩展任务截止时间，任务ID：{}，新截止时间：{}", taskId, request.getNewDeadline());
+        
+        taskService.extendTaskDeadline(taskId, request);
+        return Result.success("截止时间已扩展");
+    }
+
+    /**
+     * 启用AI自动批阅
+     */
+    @Operation(summary = "启用AI自动批阅")
+    @PostMapping("/{taskId}/ai-grade")
+    public Result<Void> enableAIGrading(@PathVariable Long taskId) {
+        log.info("启用AI自动批阅，任务ID：{}", taskId);
+        
+        taskService.enableAIGrading(taskId);
+        return Result.success("AI自动批阅已启用");
+    }
+
+    /**
+     * 获取任务模板列表
+     */
+    @Operation(summary = "获取任务模板列表")
+    @GetMapping("/templates")
+    public Result<PageResponse<TaskTemplateResponse>> getTaskTemplates(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String subject) {
+        log.info("获取任务模板列表，类型：{}，学科：{}", type, subject);
+        
+        PageResponse<TaskTemplateResponse> response = taskService.getTaskTemplates(type, subject);
+        return Result.success(response);
+    }
+
+    /**
+     * 从模板创建任务
+     */
+    @Operation(summary = "从模板创建任务")
+    @PostMapping("/from-template/{templateId}")
+    public Result<TaskResponse> createTaskFromTemplate(
+            @PathVariable Long templateId,
+            @Valid @RequestBody TaskFromTemplateRequest request) {
+        log.info("从模板创建任务，模板ID：{}，标题：{}", templateId, request.getTitle());
+        
+        TaskResponse response = taskService.createTaskFromTemplate(templateId, request);
+        return Result.success(response);
+    }
 }

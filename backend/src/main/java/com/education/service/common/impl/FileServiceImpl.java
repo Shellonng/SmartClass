@@ -551,8 +551,8 @@ public class FileServiceImpl implements FileService {
         PageResponse<FileDTO.FileListResponse> response = new PageResponse<>();
         response.setRecords(fileList);
         response.setTotal(resourcePage.getTotal());
-        response.setCurrent((long) listRequest.getPageNum());
-        response.setSize((long) listRequest.getPageSize());
+        response.setCurrent(listRequest.getPageNum());
+        response.setPageSize(listRequest.getPageSize());
         response.setPages((long) Math.ceil((double) resourcePage.getTotal() / listRequest.getPageSize()));
         
         log.info("File list retrieved, count: {}", fileList.size());
@@ -895,8 +895,8 @@ public class FileServiceImpl implements FileService {
         
         PageResponse<FileDTO.FileListResponse> response = new PageResponse<>();
         response.setRecords(fileList);
-        response.setCurrent(resourcePage.getCurrent());
-        response.setSize(resourcePage.getSize());
+        response.setCurrent((int) resourcePage.getCurrent());
+        response.setPageSize((int) resourcePage.getSize());
         response.setTotal(resourcePage.getTotal());
         response.setPages(resourcePage.getPages());
         
@@ -1110,8 +1110,8 @@ public class FileServiceImpl implements FileService {
         
         PageResponse<FileDTO.FileListResponse> response = new PageResponse<>();
         response.setRecords(fileList);
-        response.setCurrent(resourcePage.getCurrent());
-        response.setSize(resourcePage.getSize());
+        response.setCurrent((int) resourcePage.getCurrent());
+        response.setPageSize((int) resourcePage.getSize());
         response.setTotal(resourcePage.getTotal());
         response.setPages(resourcePage.getPages());
         
@@ -1147,8 +1147,8 @@ public class FileServiceImpl implements FileService {
         
         PageResponse<FileDTO.FileAccessRecordResponse> response = new PageResponse<>();
         response.setRecords(records);
-        response.setCurrent(1L);
-        response.setSize((long) pageRequest.getPageSize());
+        response.setCurrent(1);
+        response.setPageSize(pageRequest.getPageSize());
         response.setTotal((long) records.size());
         response.setPages(1L);
         
@@ -1363,8 +1363,8 @@ public class FileServiceImpl implements FileService {
         
         PageResponse<FileDTO.FileListResponse> response = new PageResponse<>();
         response.setRecords(fileList);
-        response.setCurrent(resourcePage.getCurrent());
-        response.setSize(resourcePage.getSize());
+        response.setCurrent((int) resourcePage.getCurrent());
+        response.setPageSize((int) resourcePage.getSize());
         response.setTotal(resourcePage.getTotal());
         response.setPages(resourcePage.getPages());
         
@@ -1441,8 +1441,8 @@ public class FileServiceImpl implements FileService {
             
             PageResponse<FileDTO.FileListResponse> response = new PageResponse<>();
             response.setRecords(fileList);
-            response.setCurrent(resourcePage.getCurrent());
-            response.setSize(resourcePage.getSize());
+            response.setCurrent((int) resourcePage.getCurrent());
+            response.setPageSize((int) resourcePage.getSize());
             response.setTotal(resourcePage.getTotal());
             response.setPages(resourcePage.getPages());
             
@@ -1454,8 +1454,8 @@ public class FileServiceImpl implements FileService {
             // 返回空结果而不是抛出异常
             PageResponse<FileDTO.FileListResponse> emptyResponse = new PageResponse<>();
             emptyResponse.setRecords(new ArrayList<>());
-            emptyResponse.setCurrent(1L);
-            emptyResponse.setSize((long) pageRequest.getPageSize());
+            emptyResponse.setCurrent(1);
+            emptyResponse.setPageSize(pageRequest.getPageSize());
             emptyResponse.setTotal(0L);
             emptyResponse.setPages(0L);
             return emptyResponse;
@@ -1725,8 +1725,8 @@ public class FileServiceImpl implements FileService {
         
         PageResponse<FileDTO.RecycleBinFileResponse> response = new PageResponse<>();
         response.setRecords(fileList);
-        response.setCurrent(resourcePage.getCurrent());
-        response.setSize(resourcePage.getSize());
+        response.setCurrent((int) resourcePage.getCurrent());
+        response.setPageSize((int) resourcePage.getSize());
         response.setTotal(resourcePage.getTotal());
         response.setPages(resourcePage.getPages());
         

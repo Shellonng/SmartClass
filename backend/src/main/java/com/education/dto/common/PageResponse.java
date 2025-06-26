@@ -3,6 +3,8 @@ package com.education.dto.common;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,50 +20,55 @@ import java.util.List;
  * @param <T> 数据类型
  */
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "分页响应结果")
 public class PageResponse<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Schema(description = "当前页码", example = "1")
-    private Long current;
-
-    @Schema(description = "每页大小", example = "20")
-    private Long size;
+    @Schema(description = "数据列表")
+    private List<T> records;
 
     @Schema(description = "总记录数", example = "100")
     private Long total;
 
-    @Schema(description = "总页数", example = "5")
+    @Schema(description = "当前页码", example = "1")
+    private Integer current;
+
+    @Schema(description = "每页大小", example = "10")
+    private Integer pageSize;
+
+    @Schema(description = "总页数", example = "10")
     private Long pages;
-
-    @Schema(description = "数据列表")
-    private List<T> records;
-
-    @Schema(description = "是否有上一页")
-    private Boolean hasPrevious;
 
     @Schema(description = "是否有下一页")
     private Boolean hasNext;
 
-    @Schema(description = "是否为第一页")
-    private Boolean isFirst;
+    @Schema(description = "是否有上一页")
+    private Boolean hasPrevious;
 
-    @Schema(description = "是否为最后一页")
-    private Boolean isLast;
+    @Schema(description = "分页导航信息")
+    private PageNavigation navigation;
 
-    public PageResponse(Long current, Long size, Long total, List<T> records) {
+    /**
+     * 构造函数 - 兼容旧版本
+     */
+    public PageResponse(Integer current, Integer pageSize, Long total, List<T> records) {
         this.current = current;
-        this.size = size;
+        this.pageSize = pageSize;
         this.total = total;
-        this.records = records != null ? records : Collections.emptyList();
-        this.pages = calculatePages(total, size);
+        this.records = records;
+        this.pages = (total + pageSize - 1) / pageSize;
+        this.hasNext = current < pages;
         this.hasPrevious = current > 1;
-        this.hasNext = current < this.pages;
-        this.isFirst = current == 1;
-        this.isLast = current.equals(this.pages) || this.pages == 0;
+        this.navigation = new PageNavigation();
+        this.navigation.setFirstPage(1);
+        this.navigation.setLastPage(Math.toIntExact(pages));
+        this.navigation.setNextPage(hasNext ? current + 1 : null);
+        this.navigation.setPreviousPage(hasPrevious ? current - 1 : null);
     }
 
     /**
@@ -73,7 +80,7 @@ public class PageResponse<T> implements Serializable {
      */
     public static <T> PageResponse<T> of(IPage<T> page) {
         return new PageResponse<>(
-            page.getCurrent(),
+            page.getCurrent().intValue(),
             page.getSize(),
             page.getTotal(),
             page.getRecords()
@@ -88,23 +95,88 @@ public class PageResponse<T> implements Serializable {
      * @param <T> 数据类型
      * @return 空的分页响应对象
      */
-    public static <T> PageResponse<T> empty(Long current, Long size) {
+    public static <T> PageResponse<T> empty(Integer current, Integer size) {
         return new PageResponse<>(current, size, 0L, Collections.emptyList());
     }
 
-    // Compatibility setters for legacy code
+    /**
+     * 获取列表 - 兼容方法
+     */
+    public List<T> getList() {
+        return this.records;
+    }
+
+    /**
+     * 设置列表 - 兼容方法
+     */
     public void setList(List<T> list) {
         this.records = list;
     }
-    
+
+    /**
+     * 获取页码 - 兼容方法
+     */
+    public Integer getPageNum() {
+        return this.current;
+    }
+
+    /**
+     * 设置页码 - 兼容方法
+     */
     public void setPageNum(Integer pageNum) {
-        this.current = pageNum != null ? pageNum.longValue() : 1L;
+        this.current = pageNum;
     }
-    
+
+    /**
+     * 计算并设置分页信息
+     */
+    private void calculatePageInfo() {
+        if (total != null && pageSize != null && pageSize > 0) {
+            this.pages = (total + pageSize - 1) / pageSize;
+            this.hasNext = current != null && current < pages;
+            this.hasPrevious = current != null && current > 1;
+            
+            if (this.navigation == null) {
+                this.navigation = new PageNavigation();
+            }
+            this.navigation.setFirstPage(1);
+            this.navigation.setLastPage(Math.toIntExact(pages));
+            this.navigation.setNextPage(hasNext ? current + 1 : null);
+            this.navigation.setPreviousPage(hasPrevious ? current - 1 : null);
+        }
+    }
+
+    /**
+     * 设置总数时自动计算分页信息
+     */
+    public void setTotal(Long total) {
+        this.total = total;
+        calculatePageInfo();
+    }
+
+    /**
+     * 设置当前页时自动计算分页信息
+     */
+    public void setCurrent(Integer current) {
+        this.current = current;
+        calculatePageInfo();
+    }
+
+    /**
+     * 设置页面大小时自动计算分页信息
+     */
     public void setPageSize(Integer pageSize) {
-        this.size = pageSize != null ? pageSize.longValue() : 20L;
+        this.pageSize = pageSize;
+        calculatePageInfo();
     }
-    
+
+    /**
+     * 静态builder方法 - 兼容链式调用
+     */
+    public static <T> PageResponseBuilder<T> builder() {
+        return new PageResponseBuilder<T>();
+    }
+
     /**
      * 创建单页响应
      * 
@@ -113,8 +185,8 @@ public class PageResponse<T> implements Serializable {
      * @return 单页响应对象
      */
     public static <T> PageResponse<T> of(List<T> records) {
-        long total = records != null ? records.size() : 0;
-        return new PageResponse<>(1L, total, total, records);
+        int total = records != null ? records.size() : 0;
+        return new PageResponse<>(1, total, (long) total, records);
     }
 
     /**
@@ -127,7 +199,7 @@ public class PageResponse<T> implements Serializable {
      * @param <T> 数据类型
      * @return 分页响应对象
      */
-    public static <T> PageResponse<T> of(Long current, Long size, Long total, List<T> records) {
+    public static <T> PageResponse<T> of(Integer current, Integer size, Long total, List<T> records) {
         return new PageResponse<>(current, size, total, records);
     }
 
@@ -142,21 +214,7 @@ public class PageResponse<T> implements Serializable {
         List<R> mappedRecords = this.records.stream()
             .map(mapper)
             .collect(java.util.stream.Collectors.toList());
-        return new PageResponse<>(this.current, this.size, this.total, mappedRecords);
-    }
-
-    /**
-     * 计算总页数
-     * 
-     * @param total 总记录数
-     * @param size 每页大小
-     * @return 总页数
-     */
-    private Long calculatePages(Long total, Long size) {
-        if (total == null || total <= 0 || size == null || size <= 0) {
-            return 0L;
-        }
-        return (total + size - 1) / size;
+        return new PageResponse<>(this.current, this.pageSize, this.total, mappedRecords);
     }
 
     /**
@@ -165,10 +223,10 @@ public class PageResponse<T> implements Serializable {
      * @return 开始记录索引
      */
     public Long getStartIndex() {
-        if (current == null || size == null || current <= 0 || size <= 0) {
+        if (current == null || pageSize == null || current <= 0 || pageSize <= 0) {
             return 0L;
         }
-        return (current - 1) * size + 1;
+        return (current - 1) * pageSize + 1;
     }
 
     /**
@@ -177,10 +235,10 @@ public class PageResponse<T> implements Serializable {
      * @return 结束记录索引
      */
     public Long getEndIndex() {
-        if (current == null || size == null || total == null || current <= 0 || size <= 0) {
+        if (current == null || pageSize == null || total == null || current <= 0 || pageSize <= 0) {
             return 0L;
         }
-        long endIndex = current * size;
+        long endIndex = current * pageSize;
         return Math.min(endIndex, total);
     }
 
@@ -223,50 +281,38 @@ public class PageResponse<T> implements Serializable {
      * @return 分页导航信息
      */
     public PageNavigation buildNavigation(int displayPages) {
-        return new PageNavigation(current, pages, displayPages);
+        return new PageNavigation(current, Math.toIntExact(pages), displayPages);
     }
 
     /**
      * 分页导航信息
      */
     @Data
-    @Schema(description = "分页导航信息")
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class PageNavigation {
-        @Schema(description = "当前页码")
-        private Long current;
-        
-        @Schema(description = "总页数")
-        private Long total;
-        
-        @Schema(description = "开始页码")
-        private Long start;
-        
-        @Schema(description = "结束页码")
-        private Long end;
-        
-        @Schema(description = "页码列表")
-        private List<Long> pages;
+        private Integer firstPage;
+        private Integer lastPage;
+        private Integer nextPage;
+        private Integer previousPage;
 
-        public PageNavigation(Long current, Long total, int displayPages) {
-            this.current = current;
-            this.total = total;
-            
+        public PageNavigation(Integer current, Integer total, int displayPages) {
             if (total <= displayPages) {
-                this.start = 1L;
-                this.end = total;
+                this.firstPage = 1;
+                this.lastPage = total;
             } else {
-                long half = displayPages / 2;
-                this.start = Math.max(1, current - half);
-                this.end = Math.min(total, this.start + displayPages - 1);
+                int half = displayPages / 2;
+                this.firstPage = Math.max(1, current - half);
+                this.lastPage = Math.min(total, this.firstPage + displayPages - 1);
                 
-                if (this.end - this.start + 1 < displayPages) {
-                    this.start = Math.max(1, this.end - displayPages + 1);
+                if (this.lastPage - this.firstPage + 1 < displayPages) {
+                    this.firstPage = Math.max(1, this.lastPage - displayPages + 1);
                 }
             }
             
-            this.pages = java.util.stream.LongStream.rangeClosed(start, end)
-                .boxed()
-                .collect(java.util.stream.Collectors.toList());
+            this.nextPage = current < total ? current + 1 : null;
+            this.previousPage = current > 1 ? current - 1 : null;
         }
     }
 }

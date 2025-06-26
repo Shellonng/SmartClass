@@ -1,8 +1,10 @@
 package com.education.service.teacher;
 
 import com.education.dto.AIDTO;
+import com.education.dto.ai.AICommonDTOs;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -18,13 +20,84 @@ import java.util.List;
 public interface AIService {
 
     /**
-     * AI生成试题
-     * 
-     * @param generateRequest 生成请求
-     * @param teacherId 教师ID
-     * @return 生成的试题
+     * 智能批改
      */
-    AIDTO.QuestionGenerateResponse generateQuestions(AIDTO.QuestionGenerateRequest generateRequest, Long teacherId);
+    AICommonDTOs.AIGradeResponse intelligentGrading(AICommonDTOs.AIGradeRequest request);
+
+    /**
+     * 批量智能批改
+     */
+    AICommonDTOs.AIBatchGradeResponse batchIntelligentGrading(AICommonDTOs.AIBatchGradeRequest request);
+
+    /**
+     * 生成学生推荐
+     */
+    AICommonDTOs.AIRecommendationResponse generateRecommendations(AICommonDTOs.AIRecommendationRequest request);
+
+    /**
+     * 分析学生能力（新接口）
+     */
+    AICommonDTOs.AIAbilityAnalysisResponse analyzeStudentAbility(AICommonDTOs.AIAbilityAnalysisRequest request);
+
+    /**
+     * 生成知识图谱
+     */
+    AICommonDTOs.AIKnowledgeGraphResponse generateKnowledgeGraph(AICommonDTOs.AIKnowledgeGraphRequest request);
+
+    /**
+     * 智能题目生成（新接口）
+     */
+    AICommonDTOs.AIQuestionGenerationResponse generateQuestions(AICommonDTOs.AIQuestionGenerationRequest request);
+
+    /**
+     * 学习路径优化
+     */
+    AICommonDTOs.AILearningPathResponse optimizeLearningPath(AICommonDTOs.AILearningPathRequest request);
+
+    /**
+     * 课堂表现分析
+     */
+    AICommonDTOs.AIClassroomAnalysisResponse analyzeClassroomPerformance(AICommonDTOs.AIClassroomAnalysisRequest request);
+
+    /**
+     * 智能教学建议
+     */
+    AICommonDTOs.AITeachingSuggestionResponse generateTeachingSuggestions(AICommonDTOs.AITeachingSuggestionRequest request);
+
+    /**
+     * 文档AI分析
+     */
+    AICommonDTOs.AIDocumentAnalysisResponse analyzeDocument(MultipartFile file, String analysisType, Long userId);
+
+    /**
+     * 获取分析历史
+     */
+    AICommonDTOs.AIAnalysisHistoryResponse getAnalysisHistory(String type, Long userId, Integer page, Integer size);
+
+    /**
+     * AI模型配置
+     */
+    void configureAIModel(AICommonDTOs.AIModelConfigRequest request);
+
+    /**
+     * 获取AI模型状态
+     */
+    AICommonDTOs.AIModelStatusResponse getAIModelStatus();
+
+    /**
+     * 训练个性化模型
+     */
+    AICommonDTOs.AIModelTrainingResponse trainPersonalizedModel(AICommonDTOs.AIModelTrainingRequest request);
+
+    /**
+     * 获取训练进度
+     */
+    AICommonDTOs.AITrainingProgressResponse getTrainingProgress(String trainingId);
+
+    /**
+     * AI生成试题（旧接口）
+     */
+    AIDTO.QuestionGenerateResponse generateQuestionsOld(AIDTO.QuestionGenerateRequest generateRequest, Long teacherId);
 
     /**
      * AI批改作业
@@ -160,15 +233,6 @@ public interface AIService {
      * @return 学习路径
      */
     AIDTO.LearningPathResponse generateLearningPath(AIDTO.LearningPathRequest pathRequest, Long teacherId);
-
-    /**
-     * AI分析学生能力
-     * 
-     * @param abilityRequest 能力分析请求
-     * @param teacherId 教师ID
-     * @return 能力分析结果
-     */
-    AIDTO.AbilityAnalysisResponse analyzeStudentAbility(AIDTO.AbilityAnalysisRequest abilityRequest, Long teacherId);
 
     /**
      * AI生成个性化练习

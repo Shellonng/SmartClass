@@ -428,6 +428,7 @@ import {
   LogoutOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/stores/auth'
+import { login, register } from '@/api/auth'
 import type { LoginRequest } from '@/api/auth'
 
 const router = useRouter()
@@ -600,12 +601,45 @@ const handleRegister = async () => {
       return
     }
     
-    // 这里应该调用注册API
-    message.success('注册成功，请登录')
-    showRegisterModal.value = false
-    showLoginModal.value = true
+    // 调用注册API
+    const registerData = {
+      username: registerForm.username,
+      password: registerForm.password,
+      confirmPassword: registerForm.confirmPassword,
+      email: registerForm.email,
+      realName: registerForm.realName,
+      role: selectedRole.value // 使用选择的角色
+    }
+    
+    const response = await register(registerData)
+    
+    if (response.data.code === 200) {
+      message.success('注册成功！已自动登录')
+      
+      // 保存token和用户信息
+      const { token, userInfo } = response.data.data
+      authStore.setToken(token)
+      authStore.user = userInfo
+      
+      // 关闭注册模态框
+      showRegisterModal.value = false
+      
+      // 根据用户角色跳转到对应页面
+      if (userInfo.role === 'student') {
+        router.push('/student/dashboard')
+      } else if (userInfo.role === 'teacher') {
+        router.push('/teacher/dashboard')
+      }
+    } else {
+      message.error(response.data.message || '注册失败')
+    }
   } catch (error: any) {
-    message.error(error.message || '注册失败')
+    console.error('注册失败:', error)
+    if (error.response?.data?.message) {
+      message.error(error.response.data.message)
+    } else {
+      message.error('注册失败，请稍后重试')
+    }
   } finally {
     loading.value = false
   }

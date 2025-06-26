@@ -149,6 +149,101 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public AuthDTO.LoginResponse register(AuthDTO.RegisterRequest registerRequest) {
+        // 1. 验证密码一致性
+        if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "两次输入的密码不一致");
+        }
+        
+        // 2. 检查用户名是否已存在
+        QueryWrapper<User> usernameQuery = new QueryWrapper<>();
+        usernameQuery.eq("username", registerRequest.getUsername());
+        User existingUser = userMapper.selectOne(usernameQuery);
+        if (existingUser != null) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "用户名已存在");
+        }
+        
+        // 3. 检查邮箱是否已存在
+        QueryWrapper<User> emailQuery = new QueryWrapper<>();
+        emailQuery.eq("email", registerRequest.getEmail());
+        User existingEmail = userMapper.selectOne(emailQuery);
+        if (existingEmail != null) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "邮箱已被注册");
+        }
+        
+        // 4. 创建新用户
+        User newUser = new User();
+        newUser.setUsername(registerRequest.getUsername());
+        newUser.setPassword(passwordUtils.encode(registerRequest.getPassword())); // 加密密码
+        newUser.setEmail(registerRequest.getEmail());
+        newUser.setRealName(registerRequest.getRealName());
+        newUser.setRole(registerRequest.getUserType().toUpperCase()); // STUDENT 或 TEACHER
+        newUser.setCreateTime(LocalDateTime.now());
+        newUser.setUpdateTime(LocalDateTime.now());
+        newUser.setIsDeleted(false);
+        
+        // 5. 保存用户到数据库
+        int result = userMapper.insert(newUser);
+        if (result <= 0) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "用户注册失败");
+        }
+        
+        // 6. 根据用户类型创建对应的学生或教师记录
+        if ("STUDENT".equals(newUser.getRole())) {
+            Student student = new Student();
+            student.setUserId(newUser.getId());
+            student.setStudentNo(generateStudentNumber());
+            student.setCreateTime(LocalDateTime.now());
+            student.setUpdateTime(LocalDateTime.now());
+            studentMapper.insert(student);
+        } else if ("TEACHER".equals(newUser.getRole())) {
+            Teacher teacher = new Teacher();
+            teacher.setUserId(newUser.getId());
+            teacher.setTeacherNo(generateTeacherNumber());
+            teacher.setCreateTime(LocalDateTime.now());
+            teacher.setUpdateTime(LocalDateTime.now());
+            teacherMapper.insert(teacher);
+        }
+        
+        // 7. 自动登录，生成Token
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        if ("STUDENT".equals(newUser.getRole())) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_STUDENT"));
+        } else if ("TEACHER".equals(newUser.getRole())) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_TEACHER"));
+        }
+        
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(newUser.getUsername())
+                .password(newUser.getPassword())
+                .authorities(authorities)
+                .build();
+        
+        String token = jwtUtils.generateToken(userDetails);
+        String refreshToken = jwtUtils.generateRefreshToken(userDetails);
+        
+        // 8. 返回注册响应
+        AuthDTO.LoginResponse response = new AuthDTO.LoginResponse();
+        response.setToken(token);
+        response.setRefreshToken(refreshToken);
+        response.setUserType(newUser.getRole().toLowerCase());
+        response.setUserId(newUser.getId());
+        response.setUsername(newUser.getUsername());
+        response.setRealName(newUser.getRealName());
+        response.setEmail(newUser.getEmail());
+        response.setExpiresIn(3600L);
+        
+        log.info("用户注册成功: username={}, email={}, role={}", 
+                newUser.getUsername(), newUser.getEmail(), newUser.getRole());
+        
+        return response;
+    }
+    
+  
+    
+    
+
+    @Override
     public Boolean logout(String token) {
         try {
             // 1. 验证Token有效性和获取用户信息
@@ -229,6 +324,43 @@ public class AuthServiceImpl implements AuthService {
         response.setExpiresIn(3600L);
         
         return response;
+    }
+    
+    
+    @Override
+    public Object generateCaptcha() {
+        // 简单的验证码实现，返回一个4位数字验证码
+        String captcha = String.format("%04d", new Random().nextInt(10000));
+        
+        // 这里可以将验证码存储到Redis中，设置过期时间
+        // redisUtils.set("captcha:" + sessionId, captcha, 300, TimeUnit.SECONDS);
+        
+        // 返回验证码信息
+        Map<String, Object> result = new HashMap<>();
+        result.put("captcha", captcha);
+        result.put("timestamp", System.currentTimeMillis());
+        
+        return result;
+    }
+
+    /**
+     * 生成学生学号
+     */
+    private String generateStudentNumber() {
+        // 生成格式: S + 年份 + 6位随机数
+        String year = String.valueOf(LocalDateTime.now().getYear());
+        String randomNum = String.format("%06d", new Random().nextInt(1000000));
+        return "S" + year + randomNum;
+    }
+    
+    /**
+     * 生成教师工号
+     */
+    private String generateTeacherNumber() {
+        // 生成格式: T + 年份 + 6位随机数
+        String year = String.valueOf(LocalDateTime.now().getYear());
+        String randomNum = String.format("%06d", new Random().nextInt(1000000));
+        return "T" + year + randomNum;
     }
 
     @Override

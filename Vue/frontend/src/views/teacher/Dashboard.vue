@@ -7,11 +7,11 @@
           <div class="welcome-section">
             <div class="avatar-section">
               <a-avatar :size="64" :src="authStore.user?.avatar" class="teacher-avatar">
-                {{ authStore.user?.name?.charAt(0) || 'T' }}
+                {{ (authStore.user?.realName || authStore.user?.username || 'T').charAt(0) }}
               </a-avatar>
               <div class="welcome-info">
                 <h1 class="welcome-title">
-                  {{ greeting }}，{{ authStore.user?.name || '老师' }}
+                  {{ greeting }}，{{ authStore.user?.realName || authStore.user?.username || '老师' }}
                 </h1>
                 <p class="welcome-subtitle">
                   {{ formatDate(currentDate) }} · 今天也要充满活力地教学哦！
@@ -136,7 +136,7 @@
                     <a-select-option value="active">进行中</a-select-option>
                     <a-select-option value="completed">已结束</a-select-option>
                   </a-select>
-                  <a-button type="link" @click="$router.push('/teacher/courses')">
+                  <a-button type="link">
                     查看全部 <ArrowRightOutlined />
                   </a-button>
                 </div>
@@ -144,15 +144,14 @@
               
               <div class="course-grid">
                 <div 
-                  v-for="course in displayCourses" 
+                  v-for="course in mockCourses" 
                   :key="course.id"
                   class="course-card"
-                  @click="$router.push(`/teacher/courses/${course.id}`)"
                 >
                   <div class="course-header">
                     <div class="course-cover" :style="{ background: getCourseGradient(course.subject) }">
                       <div class="course-category">{{ course.subject }}</div>
-                      <div class="course-level">{{ course.difficulty || '中级' }}</div>
+                      <div class="course-level">{{ course.difficulty }}</div>
                     </div>
                     <div class="course-actions">
                       <a-dropdown>
@@ -186,7 +185,7 @@
                       </div>
                       <div class="meta-item">
                         <StarOutlined />
-                        <span>{{ course.rating || 4.8 }}分</span>
+                        <span>{{ course.rating }}分</span>
                       </div>
                     </div>
                     
@@ -255,7 +254,7 @@
                     <a-select-option value="pending">待批改</a-select-option>
                     <a-select-option value="graded">已批改</a-select-option>
                   </a-select>
-                  <a-button type="link" @click="$router.push('/teacher/assignments')">
+                  <a-button type="link">
                     查看全部 <ArrowRightOutlined />
                   </a-button>
                 </div>
@@ -263,10 +262,9 @@
               
               <div class="assignment-list">
                 <div 
-                  v-for="assignment in displayAssignments" 
+                  v-for="assignment in mockAssignments" 
                   :key="assignment.id"
                   class="assignment-card"
-                  @click="$router.push(`/teacher/assignments/${assignment.id}`)"
                 >
                   <div class="assignment-header">
                     <div class="assignment-priority">
@@ -293,7 +291,7 @@
                         <span class="label">总人数</span>
                       </div>
                       <div class="stat">
-                        <span class="number">{{ assignment.gradedCount || 0 }}</span>
+                        <span class="number">{{ assignment.gradedCount }}</span>
                         <span class="label">已批改</span>
                       </div>
                     </div>
@@ -325,7 +323,7 @@
                   </div>
                 </div>
                 
-                <div v-if="displayAssignments.length === 0" class="empty-state">
+                <div v-if="mockAssignments.length === 0" class="empty-state">
                   <FileTextOutlined />
                   <p>暂无作业</p>
                   <a-button type="primary" @click="showCreateTaskModal = true">
@@ -351,25 +349,11 @@
                 <a-calendar 
                   v-model:value="selectedDate"
                   :fullscreen="false"
-                  @select="onDateSelect"
-                >
-                  <template #dateCellRender="{ current }">
-                    <div class="calendar-cell">
-                      <div v-if="getDateEvents(current).length > 0" class="event-indicators">
-                        <div 
-                          v-for="event in getDateEvents(current).slice(0, 2)" 
-                          :key="event.id"
-                          class="event-dot"
-                          :class="event.type"
-                        ></div>
-                      </div>
-                    </div>
-                  </template>
-                </a-calendar>
+                />
                 
                 <div class="calendar-events">
                   <h4>今日安排</h4>
-                  <div v-if="todayEvents.length > 0" class="event-list">
+                  <div class="event-list">
                     <div 
                       v-for="event in todayEvents" 
                       :key="event.id"
@@ -381,10 +365,6 @@
                         <div class="event-desc">{{ event.description }}</div>
                       </div>
                     </div>
-                  </div>
-                  <div v-else class="no-events">
-                    <CalendarOutlined />
-                    <p>今日暂无安排</p>
                   </div>
                 </div>
               </div>
@@ -503,23 +483,23 @@
                   <FileTextOutlined />
                   <span>布置作业</span>
                 </div>
-                <div class="quick-action" @click="$router.push('/teacher/grading')">
+                <div class="quick-action">
                   <EditOutlined />
                   <span>批改作业</span>
                 </div>
-                <div class="quick-action" @click="$router.push('/teacher/students')">
+                <div class="quick-action">
                   <UserOutlined />
                   <span>学生管理</span>
                 </div>
-                <div class="quick-action" @click="$router.push('/teacher/analytics')">
+                <div class="quick-action">
                   <BarChartOutlined />
                   <span>数据分析</span>
                 </div>
-                <div class="quick-action" @click="$router.push('/teacher/resources')">
+                <div class="quick-action">
                   <FolderOutlined />
                   <span>资源库</span>
                 </div>
-                <div class="quick-action" @click="$router.push('/teacher/settings')">
+                <div class="quick-action">
                   <SettingOutlined />
                   <span>设置</span>
                 </div>
@@ -576,44 +556,11 @@
             </a-col>
           </a-row>
           
-          <a-row :gutter="16">
-            <a-col :span="12">
-              <a-form-item label="学分">
-                <a-input-number 
-                  v-model:value="courseForm.credits" 
-                  :min="1" 
-                  :max="10" 
-                  placeholder="学分"
-                  style="width: 100%"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="12">
-              <a-form-item label="预计课时">
-                <a-input-number 
-                  v-model:value="courseForm.hours" 
-                  :min="1" 
-                  placeholder="课时"
-                  style="width: 100%"
-                />
-              </a-form-item>
-            </a-col>
-          </a-row>
-          
           <a-form-item label="课程描述">
             <a-textarea 
               v-model:value="courseForm.description" 
               placeholder="请输入课程描述，包括课程目标、内容概述等"
               :rows="4"
-            />
-          </a-form-item>
-          
-          <a-form-item label="课程标签">
-            <a-select 
-              v-model:value="courseForm.tags" 
-              mode="tags" 
-              placeholder="输入标签后按回车添加"
-              style="width: 100%"
             />
           </a-form-item>
         </a-form>
@@ -642,15 +589,6 @@
               <a-select-option value="2022">2022级</a-select-option>
               <a-select-option value="2021">2021级</a-select-option>
             </a-select>
-          </a-form-item>
-          <a-form-item label="最大人数">
-            <a-input-number 
-              v-model:value="classForm.maxStudents" 
-              :min="1" 
-              :max="200" 
-              placeholder="最大学生人数"
-              style="width: 100%"
-            />
           </a-form-item>
           <a-form-item label="班级描述">
             <a-textarea v-model:value="classForm.description" placeholder="请输入班级描述" />
@@ -689,7 +627,7 @@
               <a-form-item label="选择课程" required>
                 <a-select v-model:value="taskForm.courseId" placeholder="请选择课程">
                   <a-select-option 
-                    v-for="course in courses" 
+                    v-for="course in mockCourses" 
                     :key="course.id"
                     :value="course.id"
                   >
@@ -747,17 +685,6 @@
               <a-radio value="BOTH">文本+文件</a-radio>
             </a-radio-group>
           </a-form-item>
-          
-          <a-form-item label="高级设置">
-            <a-space direction="vertical" style="width: 100%">
-              <a-checkbox v-model:checked="taskForm.allowLateSubmit">
-                允许迟交（会扣分）
-              </a-checkbox>
-              <a-checkbox v-model:checked="taskForm.autoGrade">
-                启用AI智能批改
-              </a-checkbox>
-            </a-space>
-          </a-form-item>
         </a-form>
       </a-modal>
     </a-spin>
@@ -794,17 +721,6 @@ import {
   SettingOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/stores/auth'
-import {
-  getDashboardData,
-  getCourses,
-  getAssignments,
-  createCourse,
-  createAssignment
-} from '@/api/teacher'
-import type {
-  Course,
-  Assignment
-} from '@/api/teacher'
 
 const authStore = useAuthStore()
 
@@ -825,39 +741,97 @@ const greeting = computed(() => {
 
 // 统计数据
 const stats = reactive({
-  courseCount: 0,
-  studentCount: 0,
-  assignmentCount: 0,
-  pendingCount: 0,
-  courseGrowth: 0,
-  studentGrowth: 0,
-  weeklyAssignments: 0
+  courseCount: 6,
+  studentCount: 148,
+  assignmentCount: 12,
+  pendingCount: 8,
+  courseGrowth: 15,
+  studentGrowth: 12,
+  weeklyAssignments: 3
 })
 
-// 课程和作业数据
-const courses = ref<Course[]>([])
-const assignments = ref<Assignment[]>([])
-
-// 显示的课程和作业（根据筛选）
-const displayCourses = computed(() => {
-  let filtered = courses.value
-  if (courseFilter.value === 'active') {
-    filtered = filtered.filter(course => course.status === 'active')
-  } else if (courseFilter.value === 'completed') {
-    filtered = filtered.filter(course => course.status === 'inactive')
+// 模拟课程数据
+const mockCourses = ref([
+  {
+    id: 1,
+    name: '高等数学A',
+    description: '本课程是理工科学生的必修课程，主要讲授微积分、线性代数等内容',
+    subject: '数学',
+    difficulty: '中级',
+    studentCount: 45,
+    chapterCount: 12,
+    rating: '4.8',
+    progress: 75,
+    weeklyActive: 38,
+    completionRate: 85,
+    avgScore: '82.5'
+  },
+  {
+    id: 2,
+    name: '数据结构与算法',
+    description: '深入学习各种数据结构和算法设计思想，培养编程思维',
+    subject: '计算机科学',
+    difficulty: '高级',
+    studentCount: 32,
+    chapterCount: 15,
+    rating: '4.9',
+    progress: 60,
+    weeklyActive: 28,
+    completionRate: 78,
+    avgScore: '85.2'
+  },
+  {
+    id: 3,
+    name: '大学英语',
+    description: '提升英语听说读写能力，培养国际化视野',
+    subject: '英语',
+    difficulty: '中级',
+    studentCount: 52,
+    chapterCount: 10,
+    rating: '4.6',
+    progress: 90,
+    weeklyActive: 45,
+    completionRate: 92,
+    avgScore: '78.9'
   }
-  return filtered.slice(0, 6) // 显示前6个
-})
+])
 
-const displayAssignments = computed(() => {
-  let filtered = assignments.value
-  if (assignmentFilter.value === 'pending') {
-    filtered = filtered.filter(assignment => assignment.status === 'published')
-  } else if (assignmentFilter.value === 'graded') {
-    filtered = filtered.filter(assignment => assignment.status === 'closed')
+// 模拟作业数据
+const mockAssignments = ref([
+  {
+    id: 1,
+    title: '微积分练习题集',
+    description: '完成第三章导数相关练习题，包括基础题和提高题',
+    courseName: '高等数学A',
+    dueDate: '2024-12-30',
+    priority: 'high',
+    submittedCount: 38,
+    totalStudents: 45,
+    gradedCount: 25
+  },
+  {
+    id: 2,
+    title: '二叉树遍历算法实现',
+    description: '用Java或Python实现二叉树的前序、中序、后序遍历',
+    courseName: '数据结构与算法',
+    dueDate: '2025-01-05',
+    priority: 'medium',
+    submittedCount: 28,
+    totalStudents: 32,
+    gradedCount: 15
+  },
+  {
+    id: 3,
+    title: '英语口语展示',
+    description: '准备5分钟的英语口语展示，主题自选',
+    courseName: '大学英语',
+    dueDate: '2025-01-08',
+    priority: 'low',
+    submittedCount: 48,
+    totalStudents: 52,
+    gradedCount: 40
   }
-  return filtered.slice(0, 5) // 显示前5个
-})
+])
 
 // 今日事件
 const todayEvents = ref([
@@ -865,22 +839,19 @@ const todayEvents = ref([
     id: 1,
     time: '09:00',
     title: '高等数学课程',
-    description: '第三章 导数与微分',
-    type: 'course'
+    description: '第三章 导数与微分'
   },
   {
     id: 2,
     time: '14:30',
     title: '作业批改',
-    description: '线性代数作业批改',
-    type: 'grading'
+    description: '数据结构作业批改'
   },
   {
     id: 3,
     time: '16:00',
     title: '学生答疑',
-    description: '在线答疑时间',
-    type: 'consultation'
+    description: '在线答疑时间'
   }
 ])
 
@@ -895,10 +866,7 @@ const courseForm = reactive({
   code: '',
   subject: '',
   difficulty: '中级',
-  credits: 3,
-  hours: 48,
-  description: '',
-  tags: []
+  description: ''
 })
 
 const classForm = reactive({
@@ -906,7 +874,6 @@ const classForm = reactive({
   code: '',
   major: '',
   grade: '',
-  maxStudents: 50,
   description: ''
 })
 
@@ -918,9 +885,7 @@ const taskForm = reactive({
   startTime: null,
   endTime: null,
   requirements: '',
-  submitType: 'BOTH',
-  allowLateSubmit: false,
-  autoGrade: false
+  submitType: 'BOTH'
 })
 
 // 工具函数
@@ -979,97 +944,44 @@ const getCourseColor = (subject: string) => {
   return colors[subject] || '#667eea'
 }
 
-const getDateEvents = (date: Dayjs) => {
-  // 模拟获取日期事件
-  return []
-}
-
-const onDateSelect = (date: Dayjs) => {
-  selectedDate.value = date
-}
-
 // 事件处理
 const handleCreateCourse = async () => {
-  try {
-    loading.value = true
-    await createCourse({
-      name: courseForm.name,
-      description: courseForm.description,
-      status: 'active' as const
-    })
-    message.success('课程创建成功')
-    showCreateCourseModal.value = false
-    Object.assign(courseForm, {
-      name: '',
-      code: '',
-      subject: '',
-      difficulty: '中级',
-      credits: 3,
-      hours: 48,
-      description: '',
-      tags: []
-    })
-    await loadData()
-  } catch (error) {
-    message.error('创建课程失败')
-  } finally {
-    loading.value = false
-  }
+  message.success('课程创建成功')
+  showCreateCourseModal.value = false
+  Object.assign(courseForm, {
+    name: '',
+    code: '',
+    subject: '',
+    difficulty: '中级',
+    description: ''
+  })
 }
 
 const handleCreateClass = async () => {
-  try {
-    loading.value = true
-    // TODO: 调用创建班级API
-    message.success('班级创建成功')
-    showCreateClassModal.value = false
-    Object.assign(classForm, {
-      name: '',
-      code: '',
-      major: '',
-      grade: '',
-      maxStudents: 50,
-      description: ''
-    })
-  } catch (error) {
-    message.error('创建班级失败')
-  } finally {
-    loading.value = false
-  }
+  message.success('班级创建成功')
+  showCreateClassModal.value = false
+  Object.assign(classForm, {
+    name: '',
+    code: '',
+    major: '',
+    grade: '',
+    description: ''
+  })
 }
 
 const handleCreateTask = async () => {
-  try {
-    loading.value = true
-    await createAssignment({
-      title: taskForm.title,
-      description: taskForm.requirements,
-      courseId: taskForm.courseId || 0,
-      courseName: '',
-      dueDate: taskForm.endTime?.format('YYYY-MM-DD HH:mm:ss') || '',
-      maxScore: taskForm.totalScore,
-      status: 'draft' as const
-    })
-    message.success('作业布置成功')
-    showCreateTaskModal.value = false
-    Object.assign(taskForm, {
-      title: '',
-      type: 'HOMEWORK',
-      courseId: null,
-      totalScore: 100,
-      startTime: null,
-      endTime: null,
-      requirements: '',
-      submitType: 'BOTH',
-      allowLateSubmit: false,
-      autoGrade: false
-    })
-    await loadData()
-  } catch (error) {
-    message.error('布置作业失败')
-  } finally {
-    loading.value = false
-  }
+  message.success('作业布置成功')
+  showCreateTaskModal.value = false
+  Object.assign(taskForm, {
+    title: '',
+    type: 'HOMEWORK',
+    courseId: null,
+    totalScore: 100,
+    startTime: null,
+    endTime: null,
+    requirements: '',
+    submitType: 'BOTH'
+  })
 }
 
 const handleAIRecommendation = () => {
@@ -1080,73 +992,29 @@ const handleAIFeature = (type: string) => {
   message.info(`AI${type}功能开发中...`)
 }
 
-// 数据加载
-const loadData = async () => {
-  try {
-    loading.value = true
-    
-    // 并行加载数据
-    const [dashboardResponse, coursesResponse, assignmentsResponse] = await Promise.all([
-      getDashboardData(),
-      getCourses({ page: 1, size: 10 }),
-      getAssignments({ page: 1, size: 10 })
-    ])
-    
-    // 更新统计数据
-    if (dashboardResponse.data) {
-      Object.assign(stats, dashboardResponse.data.stats || {})
-    }
-    
-    // 更新课程数据
-    if (coursesResponse.data) {
-      courses.value = coursesResponse.data.map(course => ({
-        ...course,
-        progress: Math.floor(Math.random() * 100),
-        weeklyActive: Math.floor(Math.random() * 50) + 10,
-        completionRate: Math.floor(Math.random() * 100),
-        avgScore: (Math.random() * 40 + 60).toFixed(1),
-        chapterCount: Math.floor(Math.random() * 20) + 5,
-        rating: (Math.random() * 1 + 4).toFixed(1)
-      }))
-      stats.courseCount = courses.value.length
-    }
-    
-    // 更新作业数据
-    if (assignmentsResponse.data) {
-      assignments.value = assignmentsResponse.data.map(assignment => ({
-        ...assignment,
-        priority: ['high', 'medium', 'low'][Math.floor(Math.random() * 3)],
-        gradedCount: Math.floor(Math.random() * assignment.submittedCount)
-      }))
-      stats.assignmentCount = assignments.value.length
-      stats.pendingCount = assignments.value.filter(a => a.status === 'PUBLISHED').length
-    }
-    
-  } catch (error) {
-    console.error('加载数据失败:', error)
-    message.error('加载数据失败')
-  } finally {
-    loading.value = false
-  }
-}
-
 // 初始化
 onMounted(() => {
-  loadData()
+  // 模拟数据加载
+  loading.value = true
+  setTimeout(() => {
+    loading.value = false
+  }, 1000)
 })
 </script>
 
 <style scoped>
+/* 全局样式 */
 .teacher-dashboard {
-  background: #f8fafc;
   min-height: 100vh;
+  background: #f5f7fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* 顶部欢迎区域样式 */
 .dashboard-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 32px 0;
+  padding: 40px 0;
   margin-bottom: 32px;
   position: relative;
   overflow: hidden;
@@ -1159,33 +1027,33 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
-  pointer-events: none;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" style="stop-color:rgb(255,255,255);stop-opacity:0.1" /><stop offset="100%" style="stop-color:rgb(255,255,255);stop-opacity:0" /></radialGradient></defs><rect width="100" height="20" fill="url(%23a)" /></svg>') repeat-x;
+  opacity: 0.3;
 }
 
 .header-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
-  position: relative;
-  z-index: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 48px;
-}
-
-.welcome-section {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 24px;
+  position: relative;
+  z-index: 1;
 }
 
 .avatar-section {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
+}
+
+.teacher-avatar {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  font-size: 24px;
+  font-weight: 600;
 }
 
 .welcome-info {
@@ -1196,62 +1064,138 @@ onMounted(() => {
   font-size: 2rem;
   font-weight: 700;
   margin: 0 0 8px 0;
-  background: linear-gradient(45deg, #ffffff, #e3f2fd);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: -0.02em;
 }
 
 .welcome-subtitle {
   font-size: 1rem;
-  margin: 0;
   opacity: 0.9;
+  margin: 0 0 16px 0;
+  font-weight: 400;
 }
 
-.quick-actions {
+.teacher-badges {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.quick-actions .ant-btn {
-  height: 48px;
-  border-radius: 12px;
-  font-weight: 500;
+.header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+  transform: translateY(-2px);
 }
 
 /* 核心统计卡片样式 */
 .stats-overview {
   background: white;
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.04);
   margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-overview::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 32px;
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  padding: 24px;
   border-radius: 16px;
-  padding: 20px;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  min-width: 120px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.stat-card.courses::before {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.stat-card.students::before {
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+}
+
+.stat-card.assignments::before {
+  background: linear-gradient(90deg, #43e97b, #38f9d7);
+}
+
+.stat-card.pending::before {
+  background: linear-gradient(90deg, #fa709a, #fee140);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
 
 .stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 24px;
-  margin-bottom: 8px;
-  opacity: 0.9;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.stat-card.courses .stat-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-card.students .stat-icon {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stat-card.assignments .stat-icon {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.stat-card.pending .stat-icon {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
 }
 
 .stat-content {
@@ -1259,38 +1203,39 @@ onMounted(() => {
 }
 
 .stat-number {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #1a202c;
   line-height: 1;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #666;
+  font-size: 0.875rem;
+  color: #64748b;
   font-weight: 500;
+  margin-bottom: 12px;
 }
 
 .stat-trend {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
 .trend-up {
-  color: #52c41a;
+  color: #10b981;
 }
 
 .trend-down {
-  color: #ff4d4f;
+  color: #ef4444;
 }
 
 .trend-urgent {
-  color: #ff4d4f;
-  font-weight: 500;
+  color: #f59e0b;
+  font-weight: 600;
 }
 
 /* 主要内容区域样式 */
@@ -1300,31 +1245,41 @@ onMounted(() => {
   padding: 0 24px;
 }
 
+/* 内容区块通用样式 */
 .content-section {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.04);
-  margin-bottom: 24px;
+  margin-bottom: 32px;
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.content-section:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 .section-header {
+  padding: 24px 32px 0 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 24px;
 }
 
 .section-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
+  color: #1a202c;
   display: flex;
   align-items: center;
   gap: 8px;
+  margin: 0;
+}
+
+.section-title .anticon {
+  color: #667eea;
 }
 
 .section-actions {
@@ -1333,69 +1288,116 @@ onMounted(() => {
   gap: 12px;
 }
 
+/* 课程网格样式 */
 .course-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-  padding: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  padding: 0 32px 32px 32px;
 }
 
 .course-card {
   background: white;
   border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
   overflow: hidden;
-  cursor: pointer;
   transition: all 0.3s ease;
+  cursor: pointer;
   position: relative;
 }
 
 .course-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
 }
 
 .course-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 20px 0 20px;
+  position: relative;
+  height: 120px;
+  overflow: hidden;
 }
 
 .course-cover {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 100%;
+  height: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
   color: white;
-  font-weight: 600;
-  font-size: 18px;
+  position: relative;
+}
+
+.course-cover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.course-category {
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 6px;
+  align-self: flex-start;
+  backdrop-filter: blur(10px);
+  z-index: 1;
+  position: relative;
+}
+
+.course-level {
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 6px;
+  align-self: flex-end;
+  backdrop-filter: blur(10px);
+  z-index: 1;
+  position: relative;
+}
+
+.course-actions {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
 }
 
 .course-content {
-  padding: 16px 20px;
+  padding: 20px;
 }
 
 .course-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 4px 0;
+  color: #1a202c;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
 }
 
 .course-description {
   font-size: 0.875rem;
-  color: #666;
+  color: #64748b;
   margin: 0 0 16px 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .course-meta {
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .meta-item {
@@ -1403,7 +1405,11 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   font-size: 0.75rem;
-  color: #666;
+  color: #64748b;
+}
+
+.meta-item .anticon {
+  color: #94a3b8;
 }
 
 .course-progress {
@@ -1416,21 +1422,36 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 8px;
   font-size: 0.75rem;
-  color: #666;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .course-stats {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
 }
 
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.course-stats .stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a202c;
+  line-height: 1;
+}
+
+.stat-label {
+  display: block;
   font-size: 0.75rem;
-  color: #666;
+  color: #64748b;
 }
 
 .course-footer {
@@ -1438,68 +1459,71 @@ onMounted(() => {
 }
 
 .create-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 2px dashed #cbd5e0;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 280px;
-  background: linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%);
-  border: 2px dashed #d0d7de;
+  min-height: 300px;
   transition: all 0.3s ease;
 }
 
 .create-card:hover {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
   border-color: #667eea;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f0f8ff 100%);
+  transform: translateY(-4px);
 }
 
 .create-content {
   text-align: center;
-  color: #666;
+  color: #64748b;
 }
 
 .create-icon {
-  font-size: 2rem;
-  margin-bottom: 12px;
-  color: #667eea;
+  font-size: 3rem;
+  margin-bottom: 16px;
+  color: #94a3b8;
 }
 
 .create-content h4 {
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  margin: 0 0 4px 0;
-  color: #333;
+  margin: 0 0 8px 0;
+  color: #475569;
 }
 
 .create-content p {
   font-size: 0.875rem;
   margin: 0;
-  color: #666;
+  color: #64748b;
 }
 
 /* 作业列表样式 */
 .assignment-list {
-  padding: 24px;
+  padding: 0 32px 32px 32px;
 }
 
 .assignment-card {
   background: #f8fafc;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 20px;
   margin-bottom: 16px;
-  border-left: 4px solid #667eea;
+  border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .assignment-card:hover {
   transform: translateX(4px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+  border-color: #667eea;
+  background: white;
 }
 
 .assignment-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 12px;
 }
 
@@ -1513,27 +1537,24 @@ onMounted(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #52c41a;
 }
 
 .priority-indicator.high {
-  background: #ff4d4f;
+  background: #ef4444;
 }
 
 .priority-indicator.medium {
-  background: #faad14;
+  background: #f59e0b;
 }
 
 .priority-indicator.low {
-  background: #52c41a;
+  background: #10b981;
 }
 
 .assignment-course {
   font-size: 0.75rem;
-  color: #666;
-  background: #f0f0f0;
-  padding: 2px 8px;
-  border-radius: 4px;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .assignment-deadline {
@@ -1541,26 +1562,32 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   font-size: 0.75rem;
-  color: #666;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .assignment-deadline.urgent {
-  color: #ff4d4f;
-  font-weight: 500;
+  color: #ef4444;
+  font-weight: 600;
 }
 
 .assignment-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #1a202c;
   margin: 0 0 8px 0;
+  line-height: 1.4;
 }
 
 .assignment-description {
   font-size: 0.875rem;
-  color: #666;
+  color: #64748b;
   margin: 0 0 16px 0;
-  line-height: 1.4;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .assignment-progress {
@@ -1569,16 +1596,27 @@ onMounted(() => {
 
 .progress-stats {
   display: flex;
-  gap: 16px;
-  margin-bottom: 8px;
+  gap: 24px;
+  margin-bottom: 12px;
 }
 
-.stat {
+.progress-stats .stat {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 4px;
+}
+
+.progress-stats .number {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a202c;
+  line-height: 1;
+}
+
+.progress-stats .label {
   font-size: 0.75rem;
-  color: #666;
+  color: #64748b;
 }
 
 .progress-bar {
@@ -1591,12 +1629,14 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 8px;
   font-size: 0.75rem;
-  color: #666;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .assignment-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
 }
 
 /* AI教学助手样式 */
@@ -1606,58 +1646,65 @@ onMounted(() => {
 }
 
 .ai-section .section-header {
-  border-bottom-color: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 .ai-section .section-title {
   color: white;
 }
 
+.ai-section .section-title .anticon {
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .ai-recommendations {
-  padding: 0 24px;
-  display: grid;
-  gap: 12px;
+  padding: 0 32px 32px 32px;
 }
 
 .ai-card {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  display: flex;
-  gap: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .ai-card:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .ai-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .ai-icon {
-  font-size: 24px;
+  font-size: 20px;
   margin-right: 8px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .ai-title {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
-.ai-content {
-  flex: 1;
+.ai-content p {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
 }
 
 .ai-features-grid {
   display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
@@ -1665,94 +1712,160 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .ai-feature:hover {
+  background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
+}
+
+.ai-feature .anticon {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* 数据洞察样式 */
 .insights-widget {
-  padding: 24px;
+  padding: 32px;
 }
 
 .insight-item {
+  padding: 20px;
+  border-radius: 12px;
+  background: #f8fafc;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.insight-item:hover {
+  background: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.insight-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 }
 
-.insight-header {
-  display: flex;
-  flex-direction: column;
-}
-
 .insight-title {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 4px;
+  color: #1a202c;
 }
 
 .insight-trend {
   font-size: 0.75rem;
-  color: #666;
+  font-weight: 500;
+}
+
+.insight-trend.up {
+  color: #10b981;
+}
+
+.insight-trend.down {
+  color: #ef4444;
+}
+
+.insight-chart {
+  height: 40px;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+}
+
+.mini-chart {
+  display: flex;
+  align-items: end;
+  gap: 3px;
+  height: 100%;
+}
+
+.chart-bar {
+  width: 6px;
+  background: linear-gradient(to top, #667eea, #764ba2);
+  border-radius: 3px;
+  transition: all 0.3s ease;
 }
 
 .insight-value {
-  display: flex;
-  flex-direction: column;
+  text-align: center;
 }
 
 .value {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #1a202c;
   line-height: 1;
   margin-bottom: 4px;
 }
 
 .unit {
-  font-size: 0.875rem;
-  color: #666;
+  font-size: 0.75rem;
+  color: #64748b;
 }
 
 .insight-rating {
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .rating-value {
   font-size: 1.25rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-left: 8px;
+  font-weight: 600;
+  color: #1a202c;
 }
 
 /* 快速操作样式 */
 .quick-actions-grid {
   display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
+  padding: 32px;
 }
 
 .quick-action {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
 }
 
 .quick-action:hover {
+  background: white;
   transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.quick-action .anticon {
+  font-size: 18px;
+  color: #667eea;
 }
 
 /* 日历样式 */
 .calendar-widget {
-  padding: 24px;
+  padding: 32px;
 }
 
 .calendar-cell {
@@ -1761,16 +1874,16 @@ onMounted(() => {
 
 .event-indicators {
   position: absolute;
-  top: 50%;
+  bottom: 2px;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   display: flex;
-  gap: 4px;
+  gap: 2px;
 }
 
 .event-dot {
-  width: 8px;
-  height: 8px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: #667eea;
 }
@@ -1789,50 +1902,60 @@ onMounted(() => {
 
 .calendar-events {
   margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.calendar-events h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 16px 0;
 }
 
 .event-list {
-  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .event-item {
   display: flex;
-  align-items: center;
   gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.event-item:last-child {
-  border-bottom: none;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
 }
 
 .event-time {
-  font-size: 12px;
-  color: #999;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #667eea;
+  min-width: 40px;
 }
 
 .event-content {
   flex: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .event-title {
-  font-size: 14px;
-  color: #333;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1a202c;
+  margin: 0 0 4px 0;
 }
 
 .event-desc {
-  font-size: 12px;
-  color: #666;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0;
 }
 
 .no-events {
   text-align: center;
   padding: 40px 20px;
-  color: #999;
+  color: #94a3b8;
 }
 
 .no-events .anticon {
@@ -1846,13 +1969,54 @@ onMounted(() => {
   font-size: 0.875rem;
 }
 
-@media (max-width: 1200px) {
-  .content-grid {
-    grid-template-columns: 1fr;
+/* 空状态样式 */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+}
+
+.empty-state .anticon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  margin: 0 0 20px 0;
+  font-size: 0.875rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .dashboard-content {
+    padding: 0 16px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
   
   .course-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    padding: 0 16px 24px 16px;
+  }
+  
+  .section-header {
+    padding: 16px 16px 0 16px;
+  }
+  
+  .assignment-list {
+    padding: 0 16px 24px 16px;
+  }
+  
+  .ai-recommendations,
+  .insights-widget,
+  .quick-actions-grid,
+  .calendar-widget {
+    padding: 16px;
   }
 }
 
@@ -1863,28 +2027,177 @@ onMounted(() => {
     gap: 24px;
   }
   
-  .quick-actions {
-    width: 100%;
-    justify-content: center;
+  .avatar-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
   }
   
-  .dashboard-content {
-    padding: 0 16px;
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
   
   .course-grid {
     grid-template-columns: 1fr;
   }
+  
+  .course-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .progress-stats {
+    gap: 16px;
+  }
+  
+  .ai-features-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 480px) {
-  .stat-card {
-    min-width: 100px;
-    padding: 16px;
+  .welcome-title {
+    font-size: 1.5rem;
   }
   
   .stat-number {
-    font-size: 1.25rem;
+    font-size: 2rem;
   }
+  
+  .course-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .progress-stats {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .assignment-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content-section {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.stat-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.course-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.assignment-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* 加载状态 */
+.ant-spin-container {
+  min-height: 200px;
+}
+
+/* 模态框样式优化 */
+:deep(.ant-modal-content) {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+:deep(.ant-modal-header) {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px 24px;
+}
+
+:deep(.ant-modal-title) {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+:deep(.ant-modal-body) {
+  padding: 24px;
+}
+
+:deep(.ant-form-item-label > label) {
+  font-weight: 500;
+  color: #374151;
+}
+
+:deep(.ant-input),
+:deep(.ant-select-selector),
+:deep(.ant-picker) {
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  transition: all 0.3s ease;
+}
+
+:deep(.ant-input:focus),
+:deep(.ant-select-focused .ant-select-selector),
+:deep(.ant-picker-focused) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+:deep(.ant-btn-primary) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+:deep(.ant-btn-primary:hover) {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+:deep(.ant-progress-bg) {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+:deep(.ant-tag) {
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 2px 8px;
 }
 </style>
