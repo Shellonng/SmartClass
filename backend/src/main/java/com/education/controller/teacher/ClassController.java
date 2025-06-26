@@ -1,16 +1,21 @@
 package com.education.controller.teacher;
 
-import com.education.dto.ClassDTO;
-import com.education.dto.common.PageRequest;
 import com.education.dto.common.Result;
+import com.education.dto.common.PageRequest;
+import com.education.dto.common.PageResponse;
+import com.education.dto.clazz.ClassCreateRequest;
+import com.education.dto.clazz.ClassUpdateRequest;
+import com.education.dto.clazz.ClassResponse;
+import com.education.dto.clazz.ClassDetailResponse;
+import com.education.dto.clazz.ClassStudentResponse;
 import com.education.service.teacher.ClassService;
-import com.education.utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 /**
@@ -20,196 +25,189 @@ import java.util.List;
  * @version 1.0.0
  * @since 2024
  */
-@Tag(name = "教师端-班级管理", description = "教师班级创建、管理、学生管理等接口")
+@Tag(name = "教师端班级管理", description = "班级的创建、编辑、删除、查询等功能")
 @RestController
 @RequestMapping("/api/teacher/classes")
+@RequiredArgsConstructor
+@Slf4j
 public class ClassController {
 
-    @Autowired
-    private ClassService classService;
-    
-    @Autowired
-    private JwtUtils jwtUtils;
-    
-    @Autowired
-    private HttpServletRequest request;
+    private final ClassService classService;
 
-    @Operation(summary = "创建班级", description = "教师创建新班级")
-    @PostMapping
-    public Result<ClassDTO.ClassResponse> createClass(@RequestBody ClassDTO.ClassCreateRequest createRequest) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层创建班级
-            ClassDTO.ClassResponse result = classService.createClass(createRequest, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("创建班级失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "获取我的班级列表", description = "获取当前教师创建的所有班级")
+    /**
+     * 分页查询班级列表
+     */
+    @Operation(summary = "分页查询班级列表")
     @GetMapping
-    public Result<Object> getMyClasses(
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 构建查询参数
-            PageRequest pageRequest = new PageRequest();
-            pageRequest.setPageNum(page);
-            pageRequest.setPageSize(size);
-            
-            // 3. 调用服务层获取班级列表
-            Object result = classService.getClassList(teacherId, pageRequest);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("获取班级列表失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "获取班级详情", description = "获取指定班级的详细信息")
-    @GetMapping("/{classId}")
-    public Result<ClassDTO.ClassResponse> getClassDetail(@PathVariable Long classId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层获取班级详情
-            ClassDTO.ClassResponse result = classService.getClassDetail(classId, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("获取班级详情失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "更新班级信息", description = "更新班级基本信息")
-    @PutMapping("/{classId}")
-    public Result<ClassDTO.ClassResponse> updateClass(@PathVariable Long classId, @RequestBody ClassDTO.ClassUpdateRequest updateRequest) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层更新班级
-            ClassDTO.ClassResponse result = classService.updateClass(classId, updateRequest, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("更新班级失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "删除班级", description = "删除指定班级")
-    @DeleteMapping("/{classId}")
-    public Result<Void> deleteClass(@PathVariable Long classId) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            classService.deleteClass(classId, teacherId);
-            return Result.success();
-        } catch (Exception e) {
-            return Result.error("删除班级失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "获取班级学生列表", description = "获取班级内所有学生信息")
-    @GetMapping("/{classId}/students")
-    public Result<Object> getClassStudents(
-            @PathVariable Long classId,
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
-            @RequestParam(required = false) String keyword) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            PageRequest pageRequest = new PageRequest();
-            pageRequest.setPageNum(page);
-            pageRequest.setPageSize(size);
-            pageRequest.setKeyword(keyword);
-            Object students = classService.getClassStudents(classId, teacherId, pageRequest);
-            return Result.success(students);
-        } catch (Exception e) {
-            return Result.error("获取班级学生列表失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "移除班级学生", description = "将学生从班级中移除")
-    @DeleteMapping("/{classId}/students/{studentId}")
-    public Result<Void> removeStudent(@PathVariable Long classId, @PathVariable Long studentId) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            classService.removeStudent(classId, studentId, teacherId);
-            return Result.success();
-        } catch (Exception e) {
-            return Result.error("移除学生失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "批量移除学生", description = "批量将学生从班级中移除")
-    @DeleteMapping("/{classId}/students")
-    public Result<Void> removeStudents(@PathVariable Long classId, @RequestBody List<Long> studentIds) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            classService.removeStudents(classId, studentIds, teacherId);
-            return Result.success();
-        } catch (Exception e) {
-            return Result.error("批量移除学生失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "生成班级邀请码", description = "重新生成班级邀请码")
-    @PostMapping("/{classId}/invite-code")
-    public Result<Object> generateInviteCode(@PathVariable Long classId) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            Object inviteCode = classService.generateInviteCode(classId, teacherId, 24); // 默认24小时过期
-            return Result.success(inviteCode);
-        } catch (Exception e) {
-            return Result.error("生成邀请码失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "获取班级统计信息", description = "获取班级的统计数据")
-    @GetMapping("/{classId}/statistics")
-    public Result<Object> getClassStatistics(@PathVariable Long classId) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            Object statistics = classService.getClassStatistics(classId, teacherId);
-            return Result.success(statistics);
-        } catch (Exception e) {
-            return Result.error("获取班级统计信息失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "导出班级学生信息", description = "导出班级学生信息到Excel")
-    @GetMapping("/{classId}/export")
-    public Result<Object> exportClassStudents(@PathVariable Long classId) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            Object exportResult = classService.exportClassStudents(classId, teacherId);
-            return Result.success(exportResult);
-        } catch (Exception e) {
-            return Result.error("导出学生信息失败: " + e.getMessage());
-        }
+    public Result<PageResponse<ClassResponse>> getClassList(
+            @Valid PageRequest pageRequest,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String grade,
+            @RequestParam(required = false) String status) {
+        log.info("分页查询班级列表，页码：{}，页大小：{}，班级名称：{}，年级：{}，状态：{}", 
+                pageRequest.getCurrent(), pageRequest.getPageSize(), name, grade, status);
+        
+        PageResponse<ClassResponse> response = classService.getClassList(pageRequest, name, grade, status);
+        return Result.success(response);
     }
 
     /**
-     * 获取当前教师ID
-     * 从JWT token或session中获取当前登录教师的ID
+     * 创建班级
      */
-    private Long getCurrentTeacherId() {
-        try {
-            String token = JwtUtils.getTokenFromRequest(request);
-            if (token != null) {
-                return jwtUtils.getUserIdFromToken(token);
-            }
-            throw new RuntimeException("未找到有效的认证令牌");
-        } catch (Exception e) {
-            throw new RuntimeException("获取当前用户信息失败: " + e.getMessage());
-        }
+    @Operation(summary = "创建班级")
+    @PostMapping
+    public Result<ClassResponse> createClass(@Valid @RequestBody ClassCreateRequest request) {
+        log.info("创建班级，班级名称：{}，年级：{}，专业：{}", 
+                request.getName(), request.getGrade(), request.getMajor());
+        
+        ClassResponse response = classService.createClass(request);
+        return Result.success("班级创建成功", response);
+    }
+
+    /**
+     * 获取班级详情
+     */
+    @Operation(summary = "获取班级详情")
+    @GetMapping("/{classId}")
+    public Result<ClassDetailResponse> getClassDetail(@PathVariable Long classId) {
+        log.info("获取班级详情，班级ID：{}", classId);
+        
+        ClassDetailResponse response = classService.getClassDetail(classId);
+        return Result.success(response);
+    }
+
+    /**
+     * 更新班级信息
+     */
+    @Operation(summary = "更新班级信息")
+    @PutMapping("/{classId}")
+    public Result<ClassResponse> updateClass(
+            @PathVariable Long classId, 
+            @Valid @RequestBody ClassUpdateRequest request) {
+        log.info("更新班级信息，班级ID：{}，班级名称：{}", classId, request.getName());
+        
+        ClassResponse response = classService.updateClass(classId, request);
+        return Result.success("班级信息更新成功", response);
+    }
+
+    /**
+     * 删除班级
+     */
+    @Operation(summary = "删除班级")
+    @DeleteMapping("/{classId}")
+    public Result<Void> deleteClass(@PathVariable Long classId) {
+        log.info("删除班级，班级ID：{}", classId);
+        
+        classService.deleteClass(classId);
+        return Result.success("班级删除成功");
+    }
+
+    /**
+     * 获取班级学生列表
+     */
+    @Operation(summary = "获取班级学生列表")
+    @GetMapping("/{classId}/students")
+    public Result<PageResponse<ClassStudentResponse>> getClassStudents(
+            @PathVariable Long classId,
+            @Valid PageRequest pageRequest,
+            @RequestParam(required = false) String keyword) {
+        log.info("获取班级学生列表，班级ID：{}，关键词：{}", classId, keyword);
+        
+        PageResponse<ClassStudentResponse> response = classService.getClassStudents(classId, pageRequest, keyword);
+        return Result.success(response);
+    }
+
+    /**
+     * 添加学生到班级
+     */
+    @Operation(summary = "添加学生到班级")
+    @PostMapping("/{classId}/students")
+    public Result<Void> addStudentsToClass(
+            @PathVariable Long classId,
+            @RequestBody List<Long> studentIds) {
+        log.info("添加学生到班级，班级ID：{}，学生数量：{}", classId, studentIds.size());
+        
+        classService.addStudentsToClass(classId, studentIds);
+        return Result.success("学生添加成功");
+    }
+
+    /**
+     * 从班级移除学生
+     */
+    @Operation(summary = "从班级移除学生")
+    @DeleteMapping("/{classId}/students/{studentId}")
+    public Result<Void> removeStudentFromClass(
+            @PathVariable Long classId,
+            @PathVariable Long studentId) {
+        log.info("从班级移除学生，班级ID：{}，学生ID：{}", classId, studentId);
+        
+        classService.removeStudentFromClass(classId, studentId);
+        return Result.success("学生移除成功");
+    }
+
+    /**
+     * 批量从班级移除学生
+     */
+    @Operation(summary = "批量从班级移除学生")
+    @DeleteMapping("/{classId}/students")
+    public Result<Void> removeStudentsFromClass(
+            @PathVariable Long classId,
+            @RequestBody List<Long> studentIds) {
+        log.info("批量从班级移除学生，班级ID：{}，学生数量：{}", classId, studentIds.size());
+        
+        classService.removeStudentsFromClass(classId, studentIds);
+        return Result.success("学生批量移除成功");
+    }
+
+    /**
+     * 获取班级统计信息
+     */
+    @Operation(summary = "获取班级统计信息")
+    @GetMapping("/{classId}/statistics")
+    public Result<Object> getClassStatistics(@PathVariable Long classId) {
+        log.info("获取班级统计信息，班级ID：{}", classId);
+        
+        Object statistics = classService.getClassStatistics(classId);
+        return Result.success(statistics);
+    }
+
+    /**
+     * 设置班级状态
+     */
+    @Operation(summary = "设置班级状态")
+    @PutMapping("/{classId}/status")
+    public Result<Void> updateClassStatus(
+            @PathVariable Long classId,
+            @RequestParam String status) {
+        log.info("设置班级状态，班级ID：{}，状态：{}", classId, status);
+        
+        classService.updateClassStatus(classId, status);
+        return Result.success("班级状态更新成功");
+    }
+
+    /**
+     * 复制班级
+     */
+    @Operation(summary = "复制班级")
+    @PostMapping("/{classId}/copy")
+    public Result<ClassResponse> copyClass(
+            @PathVariable Long classId,
+            @RequestParam String newName) {
+        log.info("复制班级，原班级ID：{}，新班级名称：{}", classId, newName);
+        
+        ClassResponse response = classService.copyClass(classId, newName);
+        return Result.success("班级复制成功", response);
+    }
+
+    /**
+     * 导出班级学生名单
+     */
+    @Operation(summary = "导出班级学生名单")
+    @GetMapping("/{classId}/export")
+    public Result<String> exportClassStudents(@PathVariable Long classId) {
+        log.info("导出班级学生名单，班级ID：{}", classId);
+        
+        String downloadUrl = classService.exportClassStudents(classId);
+        return Result.success("学生名单导出成功", downloadUrl);
     }
 }

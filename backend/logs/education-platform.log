@@ -7099,3 +7099,134 @@ Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8
 2025-06-26 09:00:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 空闲连接: 3
 2025-06-26 09:00:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 总连接数: 3
 2025-06-26 09:00:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 等待连接的线程: 0
+2025-06-26 09:05:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - === 连接池监控报告 ===
+2025-06-26 09:05:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 连接池名称: HikariPool-Education
+2025-06-26 09:05:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 活跃连接: 0/10
+2025-06-26 09:05:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 空闲连接: 3
+2025-06-26 09:05:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 总连接数: 3
+2025-06-26 09:05:54.798 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 等待连接的线程: 0
+2025-06-26 09:10:00.043 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /auth/user-info
+2025-06-26 09:10:00.043 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /auth/user-info
+2025-06-26 09:10:00.045 [http-nio-8080-exec-8] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-06-26 09:10:00.045 [http-nio-8080-exec-9] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-06-26 09:10:00.045 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Secured OPTIONS /auth/user-info
+2025-06-26 09:10:00.045 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Secured OPTIONS /auth/user-info
+2025-06-26 09:10:00.058 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /auth/user-info
+2025-06-26 09:10:00.104 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /auth/user-info
+2025-06-26 09:10:00.110 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-06-26 09:10:00.111 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/auth/user-info
+2025-06-26 09:10:00.111 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-06-26 09:10:00.111 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-06-26 09:10:00.111 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-06-26 09:10:00.111 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求参数: [Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMSIsImlhdCI6MTc1MDg5OTA1NywiZXhwIjoxNzUwOTA2MjU3fQ.Ltg1Po_DoWqoEcJ1GPXdcrYGfGy30yjO7R3-YnmrFajwscdhbp8otZb7wutKjUyYm2_W9C8oIxjoMaSiIkqo0g]
+2025-06-26 09:10:00.115 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 5ms
+2025-06-26 09:10:00.116 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"获取用户信息失败: 用户不存在","timestamp":[2025,6,26,9,10,0,115346600],"success":false,"error":true}
+2025-06-26 09:10:00.116 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-06-26 09:10:00.122 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /auth/user-info
+2025-06-26 09:10:00.126 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /auth/user-info
+2025-06-26 09:10:00.126 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-06-26 09:10:00.126 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/auth/user-info
+2025-06-26 09:10:00.126 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-06-26 09:10:00.126 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-06-26 09:10:00.126 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-06-26 09:10:00.126 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求参数: [Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMSIsImlhdCI6MTc1MDg5OTA1NywiZXhwIjoxNzUwOTA2MjU3fQ.Ltg1Po_DoWqoEcJ1GPXdcrYGfGy30yjO7R3-YnmrFajwscdhbp8otZb7wutKjUyYm2_W9C8oIxjoMaSiIkqo0g]
+2025-06-26 09:10:00.130 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 4ms
+2025-06-26 09:10:00.130 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"获取用户信息失败: 用户不存在","timestamp":[2025,6,26,9,10,0,130450400],"success":false,"error":true}
+2025-06-26 09:10:00.130 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-06-26 09:10:02.962 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /auth/login
+2025-06-26 09:10:02.962 [http-nio-8080-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-06-26 09:10:02.962 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured OPTIONS /auth/login
+2025-06-26 09:10:02.964 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /auth/login
+2025-06-26 09:10:02.970 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /auth/login
+2025-06-26 09:10:02.973 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-06-26 09:10:02.973 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/auth/login
+2025-06-26 09:10:02.973 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求方法: POST
+2025-06-26 09:10:02.973 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-06-26 09:10:02.973 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.login
+2025-06-26 09:10:02.974 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求参数: [com.education.dto.AuthDTO$LoginRequest@7f6630d, SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@a35e292]]
+2025-06-26 09:10:02.976 [http-nio-8080-exec-4] WARN  o.s.security.crypto.bcrypt.BCryptPasswordEncoder - Encoded password does not look like BCrypt
+2025-06-26 09:10:03.048 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 75ms
+2025-06-26 09:10:03.048 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"userInfo":{"realName":"张教授","role":"teacher","id":3,"avatar":null,"email":"teacher1@education.com","username":"teacher1"},"token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMSIsImlhdCI6MTc1MDkwMDIwMiwiZXhwIjoxNzUwOTA3NDAyfQ.OaI-k1oqBNWiSfam2Sg4UAIWw8Pk6QgZ7dxxi32-9VzZt7hmwpjDzmPtkC6DJncwHd0hGJrZX8dG0T0yg6gUeQ"},"timestamp":[2025,6,26,9,10,3,48243600],"success":true,"error":false}
+2025-06-26 09:10:03.048 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-06-26 09:10:20.026 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /auth/user-info
+2025-06-26 09:10:20.034 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /auth/user-info
+2025-06-26 09:10:20.035 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-06-26 09:10:20.035 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/auth/user-info
+2025-06-26 09:10:20.035 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-06-26 09:10:20.035 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-06-26 09:10:20.035 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-06-26 09:10:20.035 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求参数: [Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMSIsImlhdCI6MTc1MDkwMDIwMiwiZXhwIjoxNzUwOTA3NDAyfQ.OaI-k1oqBNWiSfam2Sg4UAIWw8Pk6QgZ7dxxi32-9VzZt7hmwpjDzmPtkC6DJncwHd0hGJrZX8dG0T0yg6gUeQ]
+2025-06-26 09:10:20.037 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 2ms
+2025-06-26 09:10:20.038 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"获取用户信息失败: 用户不存在","timestamp":[2025,6,26,9,10,20,37119100],"success":false,"error":true}
+2025-06-26 09:10:20.038 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-06-26 09:10:20.040 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /auth/user-info
+2025-06-26 09:10:20.046 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /auth/user-info
+2025-06-26 09:10:20.047 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-06-26 09:10:20.047 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/auth/user-info
+2025-06-26 09:10:20.047 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-06-26 09:10:20.047 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-06-26 09:10:20.047 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-06-26 09:10:20.047 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求参数: [Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMSIsImlhdCI6MTc1MDkwMDIwMiwiZXhwIjoxNzUwOTA3NDAyfQ.OaI-k1oqBNWiSfam2Sg4UAIWw8Pk6QgZ7dxxi32-9VzZt7hmwpjDzmPtkC6DJncwHd0hGJrZX8dG0T0yg6gUeQ]
+2025-06-26 09:10:20.050 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 3ms
+2025-06-26 09:10:20.050 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"获取用户信息失败: 用户不存在","timestamp":[2025,6,26,9,10,20,50844900],"success":false,"error":true}
+2025-06-26 09:10:20.050 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-06-26 09:10:24.793 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /auth/login
+2025-06-26 09:10:24.799 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /auth/login
+2025-06-26 09:10:24.800 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-06-26 09:10:24.800 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/auth/login
+2025-06-26 09:10:24.800 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求方法: POST
+2025-06-26 09:10:24.800 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-06-26 09:10:24.800 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.login
+2025-06-26 09:10:24.800 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求参数: [com.education.dto.AuthDTO$LoginRequest@46090084, SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@78b8c1eb]]
+2025-06-26 09:10:24.805 [http-nio-8080-exec-6] WARN  o.s.security.crypto.bcrypt.BCryptPasswordEncoder - Encoded password does not look like BCrypt
+2025-06-26 09:10:24.858 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 58ms
+2025-06-26 09:10:24.858 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"userInfo":{"realName":"张教授","role":"teacher","id":3,"avatar":null,"email":"teacher1@education.com","username":"teacher1"},"token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMSIsImlhdCI6MTc1MDkwMDIyNCwiZXhwIjoxNzUwOTA3NDI0fQ.Kv-yIy__70dSJmsEN54Auh4obzvPA952SPiE6o4zIqicHmVxQyFYNHTuHZETTwgUYgtuccxWQzZwDl027arozw"},"timestamp":[2025,6,26,9,10,24,858679300],"success":true,"error":false}
+2025-06-26 09:10:24.858 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-06-26 09:10:54.807 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - === 连接池监控报告 ===
+2025-06-26 09:10:54.807 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 连接池名称: HikariPool-Education
+2025-06-26 09:10:54.807 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 活跃连接: 0/10
+2025-06-26 09:10:54.807 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 空闲连接: 3
+2025-06-26 09:10:54.807 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 总连接数: 3
+2025-06-26 09:10:54.807 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 等待连接的线程: 0
+2025-06-26 09:14:37.382 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /auth/user-info
+2025-06-26 09:14:37.390 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /auth/user-info
+2025-06-26 09:14:37.391 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-06-26 09:14:37.391 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/auth/user-info
+2025-06-26 09:14:37.391 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-06-26 09:14:37.391 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-06-26 09:14:37.391 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-06-26 09:14:37.391 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求参数: [Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMSIsImlhdCI6MTc1MDkwMDIyNCwiZXhwIjoxNzUwOTA3NDI0fQ.Kv-yIy__70dSJmsEN54Auh4obzvPA952SPiE6o4zIqicHmVxQyFYNHTuHZETTwgUYgtuccxWQzZwDl027arozw]
+2025-06-26 09:14:37.393 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 2ms
+2025-06-26 09:14:37.394 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"获取用户信息失败: 用户不存在","timestamp":[2025,6,26,9,14,37,393935700],"success":false,"error":true}
+2025-06-26 09:14:37.394 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-06-26 09:14:37.396 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /auth/user-info
+2025-06-26 09:14:37.404 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /auth/user-info
+2025-06-26 09:14:37.405 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-06-26 09:14:37.405 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/auth/user-info
+2025-06-26 09:14:37.405 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-06-26 09:14:37.406 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-06-26 09:14:37.406 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-06-26 09:14:37.406 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求参数: [Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMSIsImlhdCI6MTc1MDkwMDIyNCwiZXhwIjoxNzUwOTA3NDI0fQ.Kv-yIy__70dSJmsEN54Auh4obzvPA952SPiE6o4zIqicHmVxQyFYNHTuHZETTwgUYgtuccxWQzZwDl027arozw]
+2025-06-26 09:14:37.409 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 4ms
+2025-06-26 09:14:37.409 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"获取用户信息失败: 用户不存在","timestamp":[2025,6,26,9,14,37,409849200],"success":false,"error":true}
+2025-06-26 09:14:37.409 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-06-26 09:15:54.799 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - === 连接池监控报告 ===
+2025-06-26 09:15:54.799 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 连接池名称: HikariPool-Education
+2025-06-26 09:15:54.799 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 活跃连接: 0/10
+2025-06-26 09:15:54.799 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 空闲连接: 3
+2025-06-26 09:15:54.799 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 总连接数: 3
+2025-06-26 09:15:54.799 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 等待连接的线程: 0
+2025-06-26 09:20:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - === 连接池监控报告 ===
+2025-06-26 09:20:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 连接池名称: HikariPool-Education
+2025-06-26 09:20:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 活跃连接: 0/10
+2025-06-26 09:20:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 空闲连接: 3
+2025-06-26 09:20:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 总连接数: 3
+2025-06-26 09:20:54.804 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 等待连接的线程: 0
+2025-06-26 09:25:54.799 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - === 连接池监控报告 ===
+2025-06-26 09:25:54.799 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 连接池名称: HikariPool-Education
+2025-06-26 09:25:54.799 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 活跃连接: 0/10
+2025-06-26 09:25:54.799 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 空闲连接: 3
+2025-06-26 09:25:54.799 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 总连接数: 3
+2025-06-26 09:25:54.799 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 等待连接的线程: 0
+2025-06-26 09:27:37.545 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-Education - Shutdown initiated...
+2025-06-26 09:27:37.549 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-Education - Shutdown completed.

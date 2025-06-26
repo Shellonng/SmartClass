@@ -5,6 +5,8 @@ export interface LoginRequest {
   username: string
   password: string
   captcha?: string
+  remember?: boolean
+  role?: string
 }
 
 export interface LoginResponse {

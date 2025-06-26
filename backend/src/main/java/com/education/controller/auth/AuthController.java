@@ -133,13 +133,45 @@ public class AuthController {
 
     @Operation(summary = "获取验证码", description = "获取图形验证码")
     @GetMapping("/captcha")
-    public Result<Object> getCaptcha() {
+    public Result<Map<String, String>> getCaptcha() {
         try {
-            // TODO: 实现验证码生成逻辑
-            // AuthService接口中没有generateCaptcha方法，需要添加或使用其他方式
-            return Result.error("验证码功能暂未实现");
+            Map<String, String> captchaInfo = (Map<String, String>) authService.generateCaptcha();
+            return Result.success(captchaInfo);
         } catch (Exception e) {
             return Result.error("获取验证码失败: " + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "用户注册", description = "支持学生和教师注册")
+    @PostMapping("/register")
+    public Result<Object> register(@Valid @RequestBody AuthDTO.RegisterRequest request) {
+        try {
+            System.out.println("📝 收到注册请求:");
+            System.out.println("  - 用户名: " + request.getUsername());
+            System.out.println("  - 邮箱: " + request.getEmail());
+            System.out.println("  - 用户类型: " + request.getUserType());
+            
+            AuthDTO.LoginResponse authResponse = authService.register(request);
+            
+            // 构建前端期望的响应结构
+            Map<String, Object> data = new HashMap<>();
+            data.put("token", authResponse.getToken());
+            
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("id", authResponse.getUserId());
+            userInfo.put("username", authResponse.getUsername());
+            userInfo.put("realName", authResponse.getRealName());
+            userInfo.put("email", authResponse.getEmail());
+            userInfo.put("role", authResponse.getUserType());
+            userInfo.put("avatar", null); // 如果没有头像字段，设为null
+            
+            data.put("userInfo", userInfo);
+            
+            System.out.println("✅ 注册成功，返回响应");
+            return Result.success(data);
+        } catch (Exception e) {
+            System.out.println("❌ 注册失败: " + e.getMessage());
+            return Result.error("注册失败: " + e.getMessage());
         }
     }
 

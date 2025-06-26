@@ -1,134 +1,215 @@
 package com.education.controller.teacher;
+
 import com.education.dto.common.Result;
+import com.education.dto.ai.AICommonDTOs.*;
+import com.education.service.teacher.AIService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.Valid;
+import java.util.List;
+
 /**
- * 教师端AI功能控制器
- * 注意：此模块暂时不实现，仅提供接口框架
- * 
- * @author Education Platform Team
- * @version 1.0.0
- * @since 2024
+ * 教师端AI工具控制器
  */
-@Tag(name = "教师端-AI功能", description = "教师AI辅助功能接口（暂未实现）")
+@Tag(name = "教师端AI工具", description = "智能批改、推荐、分析等AI功能")
 @RestController
 @RequestMapping("/api/teacher/ai")
+@RequiredArgsConstructor
+@Slf4j
 public class AIController {
 
-    // TODO: 注入AIService
-    // @Autowired
-    // private AIService aiService;
+    private final AIService aiService;
 
-    @Operation(summary = "AI生成试题", description = "基于课程内容AI生成试题（暂未实现）")
+    /**
+     * 智能批改作业
+     */
+    @Operation(summary = "智能批改作业")
+    @PostMapping("/grade")
+    public Result<AIGradeResponse> intelligentGrading(@Valid @RequestBody AIGradeRequest request) {
+        log.info("启动智能批改，任务ID：{}，提交ID：{}", request.getTaskId(), request.getSubmissionId());
+        
+        AIGradeResponse response = aiService.intelligentGrading(request);
+        return Result.success(response);
+    }
+
+    /**
+     * 批量智能批改
+     */
+    @Operation(summary = "批量智能批改")
+    @PostMapping("/batch-grade")
+    public Result<AIBatchGradeResponse> batchIntelligentGrading(@Valid @RequestBody AIBatchGradeRequest request) {
+        log.info("启动批量智能批改，任务ID：{}，提交数量：{}", request.getTaskId(), request.getSubmissionIds().size());
+        
+        AIBatchGradeResponse response = aiService.batchIntelligentGrading(request);
+        return Result.success(response);
+    }
+
+    /**
+     * 生成学生学习推荐
+     */
+    @Operation(summary = "生成学生学习推荐")
+    @PostMapping("/recommend")
+    public Result<AIRecommendationResponse> generateRecommendations(@Valid @RequestBody AIRecommendationRequest request) {
+        log.info("生成学习推荐，学生ID：{}，课程ID：{}", request.getStudentId(), request.getCourseId());
+        
+        AIRecommendationResponse response = aiService.generateRecommendations(request);
+        return Result.success(response);
+    }
+
+    /**
+     * 分析学生能力图谱
+     */
+    @Operation(summary = "分析学生能力图谱")
+    @PostMapping("/ability-analysis")
+    public Result<AIAbilityAnalysisResponse> analyzeStudentAbility(@Valid @RequestBody AIAbilityAnalysisRequest request) {
+        log.info("分析学生能力图谱，学生ID：{}，分析维度：{}", request.getStudentId(), request.getAnalysisDimensions());
+        
+        AIAbilityAnalysisResponse response = aiService.analyzeStudentAbility(request);
+        return Result.success(response);
+    }
+
+    /**
+     * 自动生成知识图谱
+     */
+    @Operation(summary = "自动生成知识图谱")
+    @PostMapping("/knowledge-graph")
+    public Result<AIKnowledgeGraphResponse> generateKnowledgeGraph(@Valid @RequestBody AIKnowledgeGraphRequest request) {
+        log.info("生成知识图谱，课程ID：{}，章节数：{}", request.getCourseId(), request.getChapterCount());
+        
+        AIKnowledgeGraphResponse response = aiService.generateKnowledgeGraph(request);
+        return Result.success(response);
+    }
+
+    /**
+     * 智能题目生成
+     */
+    @Operation(summary = "智能题目生成")
     @PostMapping("/generate-questions")
-    public Result<Object> generateQuestions(@RequestBody Object generateRequest) {
-        // TODO: 实现AI生成试题逻辑
-        // 注意：此功能暂时不实现，需要集成AI模型
-        // 1. 验证教师权限
-        // 2. 分析课程内容
-        // 3. 调用AI模型生成试题
-        // 4. 返回生成的试题
-        return Result.error("AI功能暂未实现");
+    public Result<AIQuestionGenerationResponse> generateQuestions(@Valid @RequestBody AIQuestionGenerationRequest request) {
+        log.info("生成智能题目，知识点：{}，题目类型：{}，数量：{}", 
+                request.getKnowledgePoints(), request.getQuestionType(), request.getQuestionCount());
+        
+        AIQuestionGenerationResponse response = aiService.generateQuestions(request);
+        return Result.success(response);
     }
 
-    @Operation(summary = "AI批改作业", description = "使用AI自动批改学生作业（暂未实现）")
-    @PostMapping("/grade-assignment")
-    public Result<Object> gradeAssignment(@RequestBody Object gradeRequest) {
-        // TODO: 实现AI批改作业逻辑
-        // 注意：此功能暂时不实现
-        return Result.error("AI功能暂未实现");
+    /**
+     * 学习路径优化
+     */
+    @Operation(summary = "学习路径优化")
+    @PostMapping("/optimize-path")
+    public Result<AILearningPathResponse> optimizeLearningPath(@Valid @RequestBody AILearningPathRequest request) {
+        log.info("优化学习路径，学生ID：{}，目标技能：{}", request.getStudentId(), request.getTargetSkills());
+        
+        AILearningPathResponse response = aiService.optimizeLearningPath(request);
+        return Result.success(response);
     }
 
-    @Operation(summary = "AI生成教学建议", description = "基于学生学习数据生成教学建议（暂未实现）")
+    /**
+     * 课堂表现分析
+     */
+    @Operation(summary = "课堂表现分析")
+    @PostMapping("/classroom-analysis")
+    public Result<AIClassroomAnalysisResponse> analyzeClassroomPerformance(@Valid @RequestBody AIClassroomAnalysisRequest request) {
+        log.info("分析课堂表现，班级ID：{}，时间范围：{}", request.getClassId(), request.getTimeRange());
+        
+        AIClassroomAnalysisResponse response = aiService.analyzeClassroomPerformance(request);
+        return Result.success(response);
+    }
+
+    /**
+     * 智能教学建议
+     */
+    @Operation(summary = "智能教学建议")
     @PostMapping("/teaching-suggestions")
-    public Result<Object> generateTeachingSuggestions(@RequestBody Object suggestionRequest) {
-        // TODO: 实现AI生成教学建议逻辑
-        // 注意：此功能暂时不实现
-        return Result.error("AI功能暂未实现");
+    public Result<AITeachingSuggestionResponse> generateTeachingSuggestions(@Valid @RequestBody AITeachingSuggestionRequest request) {
+        log.info("生成教学建议，课程ID：{}，学生群体：{}", request.getCourseId(), request.getStudentGroup());
+        
+        AITeachingSuggestionResponse response = aiService.generateTeachingSuggestions(request);
+        return Result.success(response);
     }
 
-    @Operation(summary = "AI分析学习行为", description = "分析学生学习行为模式（暂未实现）")
-    @PostMapping("/analyze-behavior")
-    public Result<Object> analyzeLearningBehavior(@RequestBody Object analysisRequest) {
-        // TODO: 实现AI学习行为分析逻辑
-        // 注意：此功能暂时不实现
-        return Result.error("AI功能暂未实现");
+    /**
+     * 上传文档进行AI分析
+     */
+    @Operation(summary = "上传文档进行AI分析")
+    @PostMapping("/analyze-document")
+    public Result<AIDocumentAnalysisResponse> analyzeDocument(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("analysisType") String analysisType,
+            @RequestParam(value = "courseId", required = false) Long courseId) {
+        log.info("上传文档进行AI分析，文件名：{}，分析类型：{}", file.getOriginalFilename(), analysisType);
+        
+        AIDocumentAnalysisResponse response = aiService.analyzeDocument(file, analysisType, courseId);
+        return Result.success(response);
     }
 
-    @Operation(summary = "AI内容推荐", description = "为学生推荐个性化学习内容（暂未实现）")
-    @PostMapping("/recommend-content")
-    public Result<Object> recommendContent(@RequestBody Object recommendRequest) {
-        // TODO: 实现AI内容推荐逻辑
-        // 注意：此功能暂时不实现
-        return Result.error("AI功能暂未实现");
+    /**
+     * 获取AI分析历史
+     */
+    @Operation(summary = "获取AI分析历史")
+    @GetMapping("/analysis-history")
+    public Result<List<AIAnalysisHistoryResponse>> getAnalysisHistory(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) Long courseId,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        log.info("获取AI分析历史，类型：{}，课程ID：{}", type, courseId);
+        
+        List<AIAnalysisHistoryResponse> response = (List<AIAnalysisHistoryResponse>) aiService.getAnalysisHistory(type, courseId, page, size);
+        return Result.success(response);
     }
 
-    @Operation(summary = "AI语音识别", description = "识别并转换语音为文本（暂未实现）")
-    @PostMapping("/speech-to-text")
-    public Result<Object> speechToText(@RequestParam("audio") MultipartFile audioFile) {
-        // TODO: 实现AI语音识别逻辑
-        // 注意：此功能暂时不实现
-        return Result.error("AI功能暂未实现");
+    /**
+     * 配置AI模型参数
+     */
+    @Operation(summary = "配置AI模型参数")
+    @PostMapping("/config")
+    public Result<Void> configureAIModel(@Valid @RequestBody AIModelConfigRequest request) {
+        log.info("配置AI模型参数，模型类型：{}，参数：{}", request.getModelType(), request.getParameters());
+        
+        aiService.configureAIModel(request);
+        return Result.success("AI模型配置成功");
     }
 
-    @Operation(summary = "AI文本生成语音", description = "将文本转换为语音（暂未实现）")
-    @PostMapping("/text-to-speech")
-    public Result<Object> textToSpeech(@RequestBody Object ttsRequest) {
-        // TODO: 实现AI文本转语音逻辑
-        // 注意：此功能暂时不实现
-        return Result.error("AI功能暂未实现");
+    /**
+     * 获取AI模型状态
+     */
+    @Operation(summary = "获取AI模型状态")
+    @GetMapping("/model-status")
+    public Result<AIModelStatusResponse> getAIModelStatus() {
+        log.info("获取AI模型状态");
+        
+        AIModelStatusResponse response = aiService.getAIModelStatus();
+        return Result.success(response);
     }
 
-    @Operation(summary = "AI图像识别", description = "识别图像中的文字或内容（暂未实现）")
-    @PostMapping("/image-recognition")
-    public Result<Object> imageRecognition(@RequestParam("image") MultipartFile imageFile) {
-        // TODO: 实现AI图像识别逻辑
-        // 注意：此功能暂时不实现
-        return Result.error("AI功能暂未实现");
+    /**
+     * 训练个性化模型
+     */
+    @Operation(summary = "训练个性化模型")
+    @PostMapping("/train-model")
+    public Result<AIModelTrainingResponse> trainPersonalizedModel(@Valid @RequestBody AIModelTrainingRequest request) {
+        log.info("训练个性化模型，数据集：{}，模型类型：{}", request.getDatasetId(), request.getModelType());
+        
+        AIModelTrainingResponse response = aiService.trainPersonalizedModel(request);
+        return Result.success(response);
     }
 
-    @Operation(summary = "AI智能问答", description = "基于课程内容的智能问答（暂未实现）")
-    @PostMapping("/qa")
-    public Result<Object> intelligentQA(@RequestBody Object qaRequest) {
-        // TODO: 实现AI智能问答逻辑
-        // 注意：此功能暂时不实现
-        return Result.error("AI功能暂未实现");
-    }
-
-    @Operation(summary = "AI学情预测", description = "预测学生学习情况和成绩趋势（暂未实现）")
-    @PostMapping("/predict-performance")
-    public Result<Object> predictPerformance(@RequestBody Object predictionRequest) {
-        // TODO: 实现AI学情预测逻辑
-        // 注意：此功能暂时不实现
-        return Result.error("AI功能暂未实现");
-    }
-
-    @Operation(summary = "AI抄袭检测", description = "检测作业或论文的抄袭情况（暂未实现）")
-    @PostMapping("/plagiarism-detection")
-    public Result<Object> plagiarismDetection(@RequestBody Object detectionRequest) {
-        // TODO: 实现AI抄袭检测逻辑
-        // 注意：此功能暂时不实现
-        return Result.error("AI功能暂未实现");
-    }
-
-    @Operation(summary = "AI课程大纲生成", description = "基于教学目标生成课程大纲（暂未实现）")
-    @PostMapping("/generate-syllabus")
-    public Result<Object> generateSyllabus(@RequestBody Object syllabusRequest) {
-        // TODO: 实现AI课程大纲生成逻辑
-        // 注意：此功能暂时不实现
-        return Result.error("AI功能暂未实现");
-    }
-
-    @Operation(summary = "获取AI功能使用统计", description = "获取AI功能的使用情况统计（暂未实现）")
-    @GetMapping("/usage-statistics")
-    public Result<Object> getAIUsageStatistics(
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
-        // TODO: 实现AI功能使用统计逻辑
-        // 注意：此功能暂时不实现
-        return Result.error("AI功能暂未实现");
+    /**
+     * 获取训练进度
+     */
+    @Operation(summary = "获取训练进度")
+    @GetMapping("/training-progress/{trainingId}")
+    public Result<AITrainingProgressResponse> getTrainingProgress(@PathVariable String trainingId) {
+        log.info("获取训练进度，训练ID：{}", trainingId);
+        
+        AITrainingProgressResponse response = aiService.getTrainingProgress(trainingId);
+        return Result.success(response);
     }
 }

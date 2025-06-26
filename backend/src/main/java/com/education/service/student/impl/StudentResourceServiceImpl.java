@@ -392,7 +392,7 @@ public class StudentResourceServiceImpl implements StudentResourceService {
         }
         
         // 暂时返回空列表，实际需要访问记录表
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), 0L, List.of());
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), 0L, List.of());
     }
 
 

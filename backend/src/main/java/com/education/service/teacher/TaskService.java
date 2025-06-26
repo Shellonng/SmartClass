@@ -1,6 +1,6 @@
 package com.education.service.teacher;
 
-import com.education.dto.TaskDTO;
+import com.education.dto.task.TaskCommonDTOs.*;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
 
@@ -16,22 +16,101 @@ import java.util.List;
 public interface TaskService {
 
     /**
-     * 创建任务
-     * 
-     * @param createRequest 创建任务请求
-     * @param teacherId 教师ID
-     * @return 任务信息
+     * 获取任务列表（支持多条件查询）
      */
-    TaskDTO.TaskResponse createTask(TaskDTO.TaskCreateRequest createRequest, Long teacherId);
+    PageResponse<TaskListResponse> getTaskList(
+        PageRequest pageRequest, 
+        String title, 
+        String status, 
+        String type, 
+        Long courseId, 
+        Long classId
+    );
 
     /**
-     * 获取任务列表
-     * 
-     * @param teacherId 教师ID
-     * @param pageRequest 分页请求
-     * @return 任务列表
+     * 创建任务
      */
-    PageResponse<TaskDTO.TaskResponse> getTaskList(Long teacherId, PageRequest pageRequest);
+    TaskResponse createTask(TaskCreateRequest createRequest);
+
+    /**
+     * 获取任务详情
+     */
+    TaskDetailResponse getTaskDetail(Long taskId);
+
+    /**
+     * 更新任务
+     */
+    TaskResponse updateTask(Long taskId, TaskUpdateRequest updateRequest);
+
+    /**
+     * 删除任务
+     */
+    Boolean deleteTask(Long taskId);
+
+    /**
+     * 发布任务
+     */
+    Boolean publishTask(Long taskId);
+
+    /**
+     * 取消发布任务
+     */
+    Boolean unpublishTask(Long taskId);
+
+    /**
+     * 获取任务提交列表
+     */
+    PageResponse<TaskSubmissionResponse> getTaskSubmissions(
+        Long taskId, 
+        PageRequest pageRequest, 
+        String studentName, 
+        String submissionStatus
+    );
+
+    /**
+     * 批改提交
+     */
+    Boolean gradeSubmission(Long submissionId, TaskGradeRequest gradeRequest);
+
+    /**
+     * 批量批改
+     */
+    Boolean batchGradeSubmissions(List<TaskBatchGradeRequest> gradeRequests);
+
+    /**
+     * 获取任务统计
+     */
+    TaskStatisticsResponse getTaskStatistics(Long taskId);
+
+    /**
+     * 导出任务成绩
+     */
+    String exportTaskGrades(Long taskId);
+
+    /**
+     * 复制任务
+     */
+    TaskResponse copyTask(Long taskId, TaskCopyRequest copyRequest);
+
+    /**
+     * 延长任务截止时间
+     */
+    Boolean extendTaskDeadline(Long taskId, TaskExtendRequest extendRequest);
+
+    /**
+     * 启用AI批改
+     */
+    Boolean enableAIGrading(Long taskId);
+
+    /**
+     * 获取任务模板
+     */
+    PageResponse<TaskTemplateResponse> getTaskTemplates(String category, String keyword);
+
+    /**
+     * 从模板创建任务
+     */
+    TaskResponse createTaskFromTemplate(Long templateId, TaskFromTemplateRequest fromTemplateRequest);
 
     /**
      * 获取任务详情
@@ -191,16 +270,6 @@ public interface TaskService {
      * @return 操作结果
      */
     Boolean setTaskWeight(Long taskId, Double weight, Long teacherId);
-
-    /**
-     * 延长任务截止时间
-     * 
-     * @param taskId 任务ID
-     * @param extendRequest 延长请求
-     * @param teacherId 教师ID
-     * @return 操作结果
-     */
-    Boolean extendTaskDeadline(Long taskId, Object extendRequest, Long teacherId);
 
     /**
      * 获取任务提交统计

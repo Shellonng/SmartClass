@@ -76,7 +76,7 @@ public class StudentTaskServiceImpl implements StudentTaskService {
                 .map(this::convertToTaskListResponse)
                 .collect(Collectors.toList());
         
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), taskPage.getTotal(), responseList);
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), taskPage.getTotal(), responseList);
     }
 
     @Override
@@ -382,7 +382,7 @@ public class StudentTaskServiceImpl implements StudentTaskService {
                 .map(this::convertToTaskListResponse)
                 .collect(Collectors.toList());
         
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), taskPage.getTotal(), responseList);
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), taskPage.getTotal(), responseList);
     }
 
     @Override
@@ -407,7 +407,7 @@ public class StudentTaskServiceImpl implements StudentTaskService {
                 .map(this::convertToTaskListResponse)
                 .collect(Collectors.toList());
         
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), taskPage.getTotal(), responseList);
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), taskPage.getTotal(), responseList);
     }
 
     @Override
@@ -434,7 +434,7 @@ public class StudentTaskServiceImpl implements StudentTaskService {
                 .map(this::convertToTaskListResponse)
                 .collect(Collectors.toList());
         
-        return PageResponse.of((long)pageRequest.getPageNum(), (long)pageRequest.getPageSize(), taskPage.getTotal(), responseList);
+        return PageResponse.of(pageRequest.getPageNum(), pageRequest.getPageSize(), taskPage.getTotal(), responseList);
     }
 
     @Override
@@ -474,8 +474,8 @@ public class StudentTaskServiceImpl implements StudentTaskService {
                 .collect(Collectors.toList());
         
         return PageResponse.of(
-                1L, // 默认第一页
-                10L, // 默认每页10条
+                1, // 默认第一页
+                10, // 默认每页10条
                 taskPage.getTotal(),
                 responseList
         );
@@ -592,10 +592,10 @@ public class StudentTaskServiceImpl implements StudentTaskService {
         // 这里可以实现获取收藏任务的逻辑
         // 暂时返回空列表
         return PageResponse.of(
-                (long) pageRequest.getPageNum(),
-                (long) pageRequest.getPageSize(),
+                pageRequest.getPageNum(),
+                pageRequest.getPageSize(),
                 0L,
-                List.of()
+                List.<TaskDTO.TaskListResponse>of()
         );
     }
 
@@ -656,10 +656,10 @@ public class StudentTaskServiceImpl implements StudentTaskService {
         // 这里可以实现获取讨论的逻辑
         // 暂时返回空列表
         return PageResponse.of(
-                (long) pageRequest.getPageNum(),
-                (long) pageRequest.getPageSize(),
+                pageRequest.getPageNum(),
+                pageRequest.getPageSize(),
                 0L,
-                List.of()
+                List.<TaskDTO.TaskDiscussionResponse>of()
         );
     }
 
@@ -799,10 +799,10 @@ public class StudentTaskServiceImpl implements StudentTaskService {
         // 这里可以实现获取需要同伴评价的任务逻辑
         // 暂时返回空列表
         return PageResponse.of(
-                (long) pageRequest.getPageNum(),
-                (long) pageRequest.getPageSize(),
+                pageRequest.getPageNum(),
+                pageRequest.getPageSize(),
                 0L,
-                List.of()
+                List.<TaskDTO.PeerReviewTaskResponse>of()
         );
     }
 

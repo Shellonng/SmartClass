@@ -1,68 +1,33 @@
-2025-06-25 21:57:42.187 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.7 with PID 36452 (D:\大二下实训3.0\SmartClass\backend\target\classes started by admin in D:\大二下实训3.0\SmartClass)
-2025-06-25 21:57:42.198 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
-2025-06-25 21:57:42.204 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
-2025-06-25 21:57:43.860 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-06-25 21:57:43.869 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-06-25 21:57:43.920 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 43 ms. Found 0 Redis repository interfaces.
-2025-06-25 21:57:44.032 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\AIFeatureMapper.class]
-2025-06-25 21:57:44.032 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ChapterMapper.class]
-2025-06-25 21:57:44.033 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ClassMapper.class]
-2025-06-25 21:57:44.033 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\CourseMapper.class]
-2025-06-25 21:57:44.033 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\GradeMapper.class]
-2025-06-25 21:57:44.033 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeGraphMapper.class]
-2025-06-25 21:57:44.033 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeNodeMapper.class]
-2025-06-25 21:57:44.033 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeRelationMapper.class]
-2025-06-25 21:57:44.033 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\LearningProgressMapper.class]
-2025-06-25 21:57:44.033 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\QuestionBankMapper.class]
-2025-06-25 21:57:44.034 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ResourceMapper.class]
-2025-06-25 21:57:44.034 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\StudentMapper.class]
-2025-06-25 21:57:44.034 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskMapper.class]
-2025-06-25 21:57:44.034 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskSubmissionMapper.class]
-2025-06-25 21:57:44.034 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TeacherMapper.class]
-2025-06-25 21:57:44.034 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\UserMapper.class]
-2025-06-25 21:57:44.034 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'AIFeatureMapper' and 'com.education.mapper.AIFeatureMapper' mapperInterface
-2025-06-25 21:57:44.039 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'chapterMapper' and 'com.education.mapper.ChapterMapper' mapperInterface
-2025-06-25 21:57:44.040 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'classMapper' and 'com.education.mapper.ClassMapper' mapperInterface
-2025-06-25 21:57:44.041 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'courseMapper' and 'com.education.mapper.CourseMapper' mapperInterface
-2025-06-25 21:57:44.042 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'gradeMapper' and 'com.education.mapper.GradeMapper' mapperInterface
-2025-06-25 21:57:44.043 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeGraphMapper' and 'com.education.mapper.KnowledgeGraphMapper' mapperInterface
-2025-06-25 21:57:44.044 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeNodeMapper' and 'com.education.mapper.KnowledgeNodeMapper' mapperInterface
-2025-06-25 21:57:44.045 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeRelationMapper' and 'com.education.mapper.KnowledgeRelationMapper' mapperInterface
-2025-06-25 21:57:44.045 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'learningProgressMapper' and 'com.education.mapper.LearningProgressMapper' mapperInterface
-2025-06-25 21:57:44.045 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'questionBankMapper' and 'com.education.mapper.QuestionBankMapper' mapperInterface
-2025-06-25 21:57:44.045 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'resourceMapper' and 'com.education.mapper.ResourceMapper' mapperInterface
-2025-06-25 21:57:44.048 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'studentMapper' and 'com.education.mapper.StudentMapper' mapperInterface
-2025-06-25 21:57:44.049 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskMapper' and 'com.education.mapper.TaskMapper' mapperInterface
-2025-06-25 21:57:44.050 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskSubmissionMapper' and 'com.education.mapper.TaskSubmissionMapper' mapperInterface
-2025-06-25 21:57:44.051 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'teacherMapper' and 'com.education.mapper.TeacherMapper' mapperInterface
-2025-06-25 21:57:44.051 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'userMapper' and 'com.education.mapper.UserMapper' mapperInterface
-2025-06-25 21:57:46.106 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
-2025-06-25 21:57:46.122 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-06-25 21:57:46.122 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
-2025-06-25 21:57:46.301 [main] INFO  o.a.c.c.ContainerBase.[Tomcat].[localhost].[/api] - Initializing Spring embedded WebApplicationContext
-2025-06-25 21:57:46.301 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 4045 ms
-2025-06-25 21:57:47.613 [main] DEBUG com.education.security.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
-2025-06-25 21:57:49.453 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'teacherResourceController': Unsatisfied dependency expressed through field 'resourceService': Error creating bean with name 'resourceServiceImpl' defined in file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\service\teacher\impl\ResourceServiceImpl.class]: Failed to instantiate [com.education.service.teacher.impl.ResourceServiceImpl]: Constructor threw exception
-2025-06-25 21:57:49.515 [main] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
-2025-06-25 21:57:49.537 [main] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
+2025-06-26 20:18:30.134 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 17.0.10 with PID 2204 (D:\大二下实训3.0\SmartClass\backend\target\classes started by admin in D:\大二下实训3.0\SmartClass)
+2025-06-26 20:18:30.146 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
+2025-06-26 20:18:30.147 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
+2025-06-26 20:18:32.722 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.CannotLoadBeanClassException: Error loading class [com.education.service.teacher.impl.TaskServiceImpl] for bean with name 'taskServiceImpl' defined in file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\service\teacher\impl\TaskServiceImpl.class]: problem with class file or dependent class
+2025-06-26 20:18:32.745 [main] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
 
 Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-06-25 21:57:49.565 [main] ERROR org.springframework.boot.SpringApplication - Application run failed
-org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'teacherResourceController': Unsatisfied dependency expressed through field 'resourceService': Error creating bean with name 'resourceServiceImpl' defined in file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\service\teacher\impl\ResourceServiceImpl.class]: Failed to instantiate [com.education.service.teacher.impl.ResourceServiceImpl]: Constructor threw exception
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:776)
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:756)
-	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:145)
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:497)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1414)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:595)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:518)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:973)
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:949)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:615)
+2025-06-26 20:18:32.764 [main] ERROR org.springframework.boot.SpringApplication - Application run failed
+org.springframework.beans.factory.CannotLoadBeanClassException: Error loading class [com.education.service.teacher.impl.TaskServiceImpl] for bean with name 'taskServiceImpl' defined in file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\service\teacher\impl\TaskServiceImpl.class]: problem with class file or dependent class
+	at org.springframework.beans.factory.support.AbstractBeanFactory.resolveBeanClass(AbstractBeanFactory.java:1510)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.determineTargetType(AbstractAutowireCapableBeanFactory.java:681)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.predictBeanType(AbstractAutowireCapableBeanFactory.java:649)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.isFactoryBean(AbstractBeanFactory.java:1638)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doGetBeanNamesForType(DefaultListableBeanFactory.java:560)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.getBeanNamesForType(DefaultListableBeanFactory.java:532)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.getBeanNamesForType(DefaultListableBeanFactory.java:526)
+	at com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration$AutoConfiguredMapperScannerRegistrar.getBeanNameForType(MybatisPlusAutoConfiguration.java:365)
+	at com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration$AutoConfiguredMapperScannerRegistrar.registerBeanDefinitions(MybatisPlusAutoConfiguration.java:339)
+	at org.springframework.context.annotation.ImportBeanDefinitionRegistrar.registerBeanDefinitions(ImportBeanDefinitionRegistrar.java:86)
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.lambda$loadBeanDefinitionsFromRegistrars$1(ConfigurationClassBeanDefinitionReader.java:372)
+	at java.base/java.util.LinkedHashMap.forEach(LinkedHashMap.java:721)
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitionsFromRegistrars(ConfigurationClassBeanDefinitionReader.java:371)
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitionsForConfigurationClass(ConfigurationClassBeanDefinitionReader.java:148)
+	at org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.loadBeanDefinitions(ConfigurationClassBeanDefinitionReader.java:120)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.processConfigBeanDefinitions(ConfigurationClassPostProcessor.java:427)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry(ConfigurationClassPostProcessor.java:287)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanDefinitionRegistryPostProcessors(PostProcessorRegistrationDelegate.java:344)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:115)
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:778)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:597)
 	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
 	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
 	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
@@ -70,392 +35,20 @@ org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1317)
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
 	at com.education.EducationApplication.main(EducationApplication.java:27)
-Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'resourceServiceImpl' defined in file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\service\teacher\impl\ResourceServiceImpl.class]: Failed to instantiate [com.education.service.teacher.impl.ResourceServiceImpl]: Constructor threw exception
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean(AbstractAutowireCapableBeanFactory.java:1312)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1197)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:558)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:518)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1417)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:773)
-	... 20 common frames omitted
-Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [com.education.service.teacher.impl.ResourceServiceImpl]: Constructor threw exception
-	at org.springframework.beans.BeanUtils.instantiateClass(BeanUtils.java:225)
-	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:87)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean(AbstractAutowireCapableBeanFactory.java:1306)
-	... 31 common frames omitted
-Caused by: java.lang.Error: Unresolved compilation problems: 
-	The type ResourceServiceImpl must implement the inherited abstract method ResourceService.shareResource(Long, ResourceShareRequest, Long)
-	The method setUploaderName(String) is undefined for the type ResourceDetailResponse
-	The method shareResource(Long, ResourceDTO.ResourceShareRequest, Long) of type ResourceServiceImpl must override or implement a supertype method
-	The method setResourceId(Long) is undefined for the type ResourceDTO.ResourceShareResponse
-	The method setShareTime(LocalDateTime) is undefined for the type ResourceDTO.ResourceShareResponse
-	The return type is incompatible with ResourceService.getResourceShareRecords(Long, Long, PageRequest)
-	The method getResourceId() is undefined for the type Resource
-	The method setDownloadCount(int) is undefined for the type ResourceDTO.ResourceShareRecordResponse
-	The return type is incompatible with ResourceService.getResourceStatistics(Long)
-	The method setTotalCount(int) is undefined for the type ResourceDTO.ResourceStatisticsResponse
-	The method setPublicCount(int) is undefined for the type ResourceDTO.ResourceStatisticsResponse
-	The method getTotalCount() is undefined for the type ResourceDTO.ResourceStatisticsResponse
-	The method getPublicCount() is undefined for the type ResourceDTO.ResourceStatisticsResponse
-	The method setTotalSize(long) is undefined for the type ResourceDTO.ResourceStatisticsResponse
-	The method setDocumentCount(int) is undefined for the type ResourceDTO.ResourceStatisticsResponse
-	The method setVideoCount(int) is undefined for the type ResourceDTO.ResourceStatisticsResponse
-	The method setImageCount(int) is undefined for the type ResourceDTO.ResourceStatisticsResponse
-	The method getTotalCount() is undefined for the type ResourceDTO.ResourceStatisticsResponse
-	The method getDocumentCount() is undefined for the type ResourceDTO.ResourceStatisticsResponse
-	The method getVideoCount() is undefined for the type ResourceDTO.ResourceStatisticsResponse
-	The method getImageCount() is undefined for the type ResourceDTO.ResourceStatisticsResponse
-	The method setTotalDownloads(Long) in the type ResourceDTO.ResourceStatisticsResponse is not applicable for the arguments (int)
-	Duplicate method batchUploadResources(List<ResourceUploadRequest>, Long) in type ResourceServiceImpl
-	The method setSuccessResources(List<ResourceResponse>) is undefined for the type BatchUploadResponse
-	The method setFailureMessages(List<String>) is undefined for the type BatchUploadResponse
-	The return type is incompatible with ResourceService.copyResource(Long, Long, Long)
-	The return type is incompatible with ResourceService.searchResources(String, Long, PageRequest)
-	The method getResourceId() is undefined for the type Resource
-	The method setIsPublic(Boolean) is undefined for the type FolderResponse
-	Duplicate method batchUploadResources(List<ResourceUploadRequest>, Long) in type ResourceServiceImpl
-	Type mismatch: cannot convert from ResourceResponse to ResourceDTO.ResourceResponse
-	The method add(ResourceResponse) in the type List<ResourceResponse> is not applicable for the arguments (ResourceDTO.ResourceResponse)
-	The method setSuccessResources(List<ResourceResponse>) is undefined for the type BatchUploadResponse
-	The method setFailureMessages(List<String>) is undefined for the type BatchUploadResponse
-
-	at com.education.service.teacher.impl.ResourceServiceImpl.<init>(ResourceServiceImpl.java:41)
-	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(Unknown Source)
-	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
-	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
-	at org.springframework.beans.BeanUtils.instantiateClass(BeanUtils.java:199)
-	... 33 common frames omitted
-2025-06-25 22:23:05.178 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.7 with PID 13492 (D:\大二下实训3.0\SmartClass\backend\target\classes started by admin in D:\大二下实训3.0\SmartClass)
-2025-06-25 22:23:05.179 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
-2025-06-25 22:23:05.180 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
-2025-06-25 22:23:07.098 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-06-25 22:23:07.098 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-06-25 22:23:07.157 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 51 ms. Found 0 Redis repository interfaces.
-2025-06-25 22:23:07.282 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\AIFeatureMapper.class]
-2025-06-25 22:23:07.282 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ChapterMapper.class]
-2025-06-25 22:23:07.282 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ClassMapper.class]
-2025-06-25 22:23:07.282 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\CourseMapper.class]
-2025-06-25 22:23:07.282 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\GradeMapper.class]
-2025-06-25 22:23:07.282 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeGraphMapper.class]
-2025-06-25 22:23:07.287 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeNodeMapper.class]
-2025-06-25 22:23:07.288 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeRelationMapper.class]
-2025-06-25 22:23:07.288 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\LearningProgressMapper.class]
-2025-06-25 22:23:07.288 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\QuestionBankMapper.class]
-2025-06-25 22:23:07.288 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ResourceMapper.class]
-2025-06-25 22:23:07.288 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\StudentMapper.class]
-2025-06-25 22:23:07.288 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskMapper.class]
-2025-06-25 22:23:07.288 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskSubmissionMapper.class]
-2025-06-25 22:23:07.288 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TeacherMapper.class]
-2025-06-25 22:23:07.288 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\UserMapper.class]
-2025-06-25 22:23:07.288 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'AIFeatureMapper' and 'com.education.mapper.AIFeatureMapper' mapperInterface
-2025-06-25 22:23:07.298 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'chapterMapper' and 'com.education.mapper.ChapterMapper' mapperInterface
-2025-06-25 22:23:07.299 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'classMapper' and 'com.education.mapper.ClassMapper' mapperInterface
-2025-06-25 22:23:07.299 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'courseMapper' and 'com.education.mapper.CourseMapper' mapperInterface
-2025-06-25 22:23:07.299 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'gradeMapper' and 'com.education.mapper.GradeMapper' mapperInterface
-2025-06-25 22:23:07.299 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeGraphMapper' and 'com.education.mapper.KnowledgeGraphMapper' mapperInterface
-2025-06-25 22:23:07.304 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeNodeMapper' and 'com.education.mapper.KnowledgeNodeMapper' mapperInterface
-2025-06-25 22:23:07.304 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeRelationMapper' and 'com.education.mapper.KnowledgeRelationMapper' mapperInterface
-2025-06-25 22:23:07.304 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'learningProgressMapper' and 'com.education.mapper.LearningProgressMapper' mapperInterface
-2025-06-25 22:23:07.304 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'questionBankMapper' and 'com.education.mapper.QuestionBankMapper' mapperInterface
-2025-06-25 22:23:07.304 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'resourceMapper' and 'com.education.mapper.ResourceMapper' mapperInterface
-2025-06-25 22:23:07.304 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'studentMapper' and 'com.education.mapper.StudentMapper' mapperInterface
-2025-06-25 22:23:07.304 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskMapper' and 'com.education.mapper.TaskMapper' mapperInterface
-2025-06-25 22:23:07.309 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskSubmissionMapper' and 'com.education.mapper.TaskSubmissionMapper' mapperInterface
-2025-06-25 22:23:07.310 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'teacherMapper' and 'com.education.mapper.TeacherMapper' mapperInterface
-2025-06-25 22:23:07.310 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'userMapper' and 'com.education.mapper.UserMapper' mapperInterface
-2025-06-25 22:23:08.716 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
-2025-06-25 22:23:08.739 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-06-25 22:23:08.739 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
-2025-06-25 22:23:08.948 [main] INFO  o.a.c.c.ContainerBase.[Tomcat].[localhost].[/api] - Initializing Spring embedded WebApplicationContext
-2025-06-25 22:23:08.950 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3729 ms
-2025-06-25 22:23:09.944 [main] DEBUG com.education.security.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
-2025-06-25 22:23:10.785 [main] ERROR c.baomidou.mybatisplus.core.MybatisConfiguration - mapper[com.education.mapper.LearningProgressMapper.calculateTotalStudyDuration] is ignored, because it exists, maybe from xml file
-2025-06-25 22:23:10.855 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'studentGradeController': Unsatisfied dependency expressed through field 'studentGradeService': Error creating bean with name 'studentGradeServiceImpl': Lookup method resolution failed
-2025-06-25 22:23:10.888 [main] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
-2025-06-25 22:23:10.898 [main] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
-
-Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-06-25 22:23:10.950 [main] ERROR org.springframework.boot.SpringApplication - Application run failed
-org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'studentGradeController': Unsatisfied dependency expressed through field 'studentGradeService': Error creating bean with name 'studentGradeServiceImpl': Lookup method resolution failed
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:776)
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:756)
-	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:145)
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:497)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1414)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:595)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:518)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:973)
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:949)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:615)
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:324)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1317)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
-	at com.education.EducationApplication.main(EducationApplication.java:27)
-Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'studentGradeServiceImpl': Lookup method resolution failed
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.checkLookupMethods(AutowiredAnnotationBeanPostProcessor.java:486)
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.determineCandidateConstructors(AutowiredAnnotationBeanPostProcessor.java:356)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.determineConstructorsFromBeanPostProcessors(AbstractAutowireCapableBeanFactory.java:1289)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1184)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:558)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:518)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1417)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:773)
-	... 20 common frames omitted
-Caused by: java.lang.IllegalStateException: Failed to introspect Class [com.education.service.student.impl.StudentGradeServiceImpl] from ClassLoader [jdk.internal.loader.ClassLoaders$AppClassLoader@5c647e05]
-	at org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:483)
-	at org.springframework.util.ReflectionUtils.doWithLocalMethods(ReflectionUtils.java:320)
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.checkLookupMethods(AutowiredAnnotationBeanPostProcessor.java:464)
-	... 33 common frames omitted
-Caused by: java.lang.NoClassDefFoundError: com/education/dto/GradeDTO$GradeDistributionResponse
-	at java.base/java.lang.Class.getDeclaredMethods0(Native Method)
-	at java.base/java.lang.Class.privateGetDeclaredMethods(Unknown Source)
-	at java.base/java.lang.Class.getDeclaredMethods(Unknown Source)
-	at org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:465)
-	... 35 common frames omitted
-Caused by: java.lang.ClassNotFoundException: com.education.dto.GradeDTO$GradeDistributionResponse
-	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(Unknown Source)
-	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(Unknown Source)
-	at java.base/java.lang.ClassLoader.loadClass(Unknown Source)
-	... 39 common frames omitted
-2025-06-25 22:44:55.924 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.7 with PID 12200 (D:\大二下实训3.0\SmartClass\backend\target\classes started by admin in D:\大二下实训3.0\SmartClass)
-2025-06-25 22:44:55.926 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
-2025-06-25 22:44:55.926 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
-2025-06-25 22:44:58.559 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-06-25 22:44:58.564 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-06-25 22:44:58.689 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 97 ms. Found 0 Redis repository interfaces.
-2025-06-25 22:44:58.877 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\AIFeatureMapper.class]
-2025-06-25 22:44:58.877 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ChapterMapper.class]
-2025-06-25 22:44:58.878 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ClassMapper.class]
-2025-06-25 22:44:58.879 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\CourseMapper.class]
-2025-06-25 22:44:58.879 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\GradeMapper.class]
-2025-06-25 22:44:58.879 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeGraphMapper.class]
-2025-06-25 22:44:58.880 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeNodeMapper.class]
-2025-06-25 22:44:58.880 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeRelationMapper.class]
-2025-06-25 22:44:58.880 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\LearningProgressMapper.class]
-2025-06-25 22:44:58.881 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\QuestionBankMapper.class]
-2025-06-25 22:44:58.881 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ResourceMapper.class]
-2025-06-25 22:44:58.881 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\StudentMapper.class]
-2025-06-25 22:44:58.882 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskMapper.class]
-2025-06-25 22:44:58.882 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskSubmissionMapper.class]
-2025-06-25 22:44:58.882 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TeacherMapper.class]
-2025-06-25 22:44:58.882 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\UserMapper.class]
-2025-06-25 22:44:58.885 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'AIFeatureMapper' and 'com.education.mapper.AIFeatureMapper' mapperInterface
-2025-06-25 22:44:58.891 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'chapterMapper' and 'com.education.mapper.ChapterMapper' mapperInterface
-2025-06-25 22:44:58.893 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'classMapper' and 'com.education.mapper.ClassMapper' mapperInterface
-2025-06-25 22:44:58.894 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'courseMapper' and 'com.education.mapper.CourseMapper' mapperInterface
-2025-06-25 22:44:58.896 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'gradeMapper' and 'com.education.mapper.GradeMapper' mapperInterface
-2025-06-25 22:44:58.897 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeGraphMapper' and 'com.education.mapper.KnowledgeGraphMapper' mapperInterface
-2025-06-25 22:44:58.899 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeNodeMapper' and 'com.education.mapper.KnowledgeNodeMapper' mapperInterface
-2025-06-25 22:44:58.901 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeRelationMapper' and 'com.education.mapper.KnowledgeRelationMapper' mapperInterface
-2025-06-25 22:44:58.903 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'learningProgressMapper' and 'com.education.mapper.LearningProgressMapper' mapperInterface
-2025-06-25 22:44:58.904 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'questionBankMapper' and 'com.education.mapper.QuestionBankMapper' mapperInterface
-2025-06-25 22:44:58.906 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'resourceMapper' and 'com.education.mapper.ResourceMapper' mapperInterface
-2025-06-25 22:44:58.907 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'studentMapper' and 'com.education.mapper.StudentMapper' mapperInterface
-2025-06-25 22:44:58.908 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskMapper' and 'com.education.mapper.TaskMapper' mapperInterface
-2025-06-25 22:44:58.909 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskSubmissionMapper' and 'com.education.mapper.TaskSubmissionMapper' mapperInterface
-2025-06-25 22:44:58.910 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'teacherMapper' and 'com.education.mapper.TeacherMapper' mapperInterface
-2025-06-25 22:44:58.912 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'userMapper' and 'com.education.mapper.UserMapper' mapperInterface
-2025-06-25 22:45:01.359 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
-2025-06-25 22:45:01.380 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-06-25 22:45:01.380 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
-2025-06-25 22:45:01.657 [main] INFO  o.a.c.c.ContainerBase.[Tomcat].[localhost].[/api] - Initializing Spring embedded WebApplicationContext
-2025-06-25 22:45:01.657 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5658 ms
-2025-06-25 22:45:03.613 [main] DEBUG com.education.security.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
-2025-06-25 22:45:11.307 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
-2025-06-25 22:45:11.516 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@237b54bc, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5263f554, org.springframework.security.web.context.SecurityContextHolderFilter@46f041cb, org.springframework.security.web.header.HeaderWriterFilter@4f9e9c21, org.springframework.security.web.authentication.logout.LogoutFilter@20dc763b, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@493489dd, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@77e261e3, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7d28efd5, org.springframework.security.web.session.SessionManagementFilter@3c7787a7, org.springframework.security.web.access.ExceptionTranslationFilter@2709e075, org.springframework.security.web.access.intercept.AuthorizationFilter@285ac29]
-2025-06-25 22:45:13.096 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path '/api'
-2025-06-25 22:45:13.123 [scheduling-1] WARN  com.education.monitor.DataSourceMonitor - 连接池监控跳过: HikariCP连接池尚未完全初始化
-2025-06-25 22:45:13.129 [main] INFO  com.education.EducationApplication - Started EducationApplication in 17.801 seconds (process running for 18.637)
-2025-06-25 23:16:11.113 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 17.0.10 with PID 36524 (D:\大二下实训3.0\SmartClass\backend\target\classes started by admin in D:\大二下实训3.0\SmartClass)
-2025-06-25 23:16:11.114 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
-2025-06-25 23:16:11.114 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
-2025-06-25 23:16:13.560 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-06-25 23:16:13.560 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-06-25 23:16:13.616 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 37 ms. Found 0 Redis repository interfaces.
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\AIFeatureMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ChapterMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ClassMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\CourseMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\GradeMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeGraphMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeNodeMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeRelationMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\LearningProgressMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\QuestionBankMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ResourceMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\StudentMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskSubmissionMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TeacherMapper.class]
-2025-06-25 23:16:13.803 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\UserMapper.class]
-2025-06-25 23:16:13.818 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'AIFeatureMapper' and 'com.education.mapper.AIFeatureMapper' mapperInterface
-2025-06-25 23:16:13.829 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'chapterMapper' and 'com.education.mapper.ChapterMapper' mapperInterface
-2025-06-25 23:16:13.830 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'classMapper' and 'com.education.mapper.ClassMapper' mapperInterface
-2025-06-25 23:16:13.832 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'courseMapper' and 'com.education.mapper.CourseMapper' mapperInterface
-2025-06-25 23:16:13.833 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'gradeMapper' and 'com.education.mapper.GradeMapper' mapperInterface
-2025-06-25 23:16:13.834 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeGraphMapper' and 'com.education.mapper.KnowledgeGraphMapper' mapperInterface
-2025-06-25 23:16:13.834 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeNodeMapper' and 'com.education.mapper.KnowledgeNodeMapper' mapperInterface
-2025-06-25 23:16:13.836 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeRelationMapper' and 'com.education.mapper.KnowledgeRelationMapper' mapperInterface
-2025-06-25 23:16:13.837 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'learningProgressMapper' and 'com.education.mapper.LearningProgressMapper' mapperInterface
-2025-06-25 23:16:13.837 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'questionBankMapper' and 'com.education.mapper.QuestionBankMapper' mapperInterface
-2025-06-25 23:16:13.839 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'resourceMapper' and 'com.education.mapper.ResourceMapper' mapperInterface
-2025-06-25 23:16:13.840 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'studentMapper' and 'com.education.mapper.StudentMapper' mapperInterface
-2025-06-25 23:16:13.842 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskMapper' and 'com.education.mapper.TaskMapper' mapperInterface
-2025-06-25 23:16:13.844 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskSubmissionMapper' and 'com.education.mapper.TaskSubmissionMapper' mapperInterface
-2025-06-25 23:16:13.845 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'teacherMapper' and 'com.education.mapper.TeacherMapper' mapperInterface
-2025-06-25 23:16:13.846 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'userMapper' and 'com.education.mapper.UserMapper' mapperInterface
-2025-06-25 23:16:14.255 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 17.0.10 with PID 12304 (D:\大二下实训3.0\SmartClass\backend\target\classes started by admin in D:\大二下实训3.0\SmartClass)
-2025-06-25 23:16:14.256 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
-2025-06-25 23:16:14.258 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
-2025-06-25 23:16:16.219 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
-2025-06-25 23:16:16.242 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-06-25 23:16:16.242 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
-2025-06-25 23:16:16.440 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-06-25 23:16:16.445 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-06-25 23:16:16.505 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 51 ms. Found 0 Redis repository interfaces.
-2025-06-25 23:16:16.577 [main] INFO  o.a.c.c.ContainerBase.[Tomcat].[localhost].[/api] - Initializing Spring embedded WebApplicationContext
-2025-06-25 23:16:16.577 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5413 ms
-2025-06-25 23:16:16.668 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\AIFeatureMapper.class]
-2025-06-25 23:16:16.668 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ChapterMapper.class]
-2025-06-25 23:16:16.669 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ClassMapper.class]
-2025-06-25 23:16:16.669 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\CourseMapper.class]
-2025-06-25 23:16:16.669 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\GradeMapper.class]
-2025-06-25 23:16:16.670 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeGraphMapper.class]
-2025-06-25 23:16:16.670 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeNodeMapper.class]
-2025-06-25 23:16:16.670 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeRelationMapper.class]
-2025-06-25 23:16:16.670 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\LearningProgressMapper.class]
-2025-06-25 23:16:16.671 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\QuestionBankMapper.class]
-2025-06-25 23:16:16.671 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ResourceMapper.class]
-2025-06-25 23:16:16.671 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\StudentMapper.class]
-2025-06-25 23:16:16.671 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskMapper.class]
-2025-06-25 23:16:16.672 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskSubmissionMapper.class]
-2025-06-25 23:16:16.672 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TeacherMapper.class]
-2025-06-25 23:16:16.672 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\UserMapper.class]
-2025-06-25 23:16:16.675 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'AIFeatureMapper' and 'com.education.mapper.AIFeatureMapper' mapperInterface
-2025-06-25 23:16:16.684 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'chapterMapper' and 'com.education.mapper.ChapterMapper' mapperInterface
-2025-06-25 23:16:16.685 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'classMapper' and 'com.education.mapper.ClassMapper' mapperInterface
-2025-06-25 23:16:16.687 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'courseMapper' and 'com.education.mapper.CourseMapper' mapperInterface
-2025-06-25 23:16:16.688 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'gradeMapper' and 'com.education.mapper.GradeMapper' mapperInterface
-2025-06-25 23:16:16.690 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeGraphMapper' and 'com.education.mapper.KnowledgeGraphMapper' mapperInterface
-2025-06-25 23:16:16.691 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeNodeMapper' and 'com.education.mapper.KnowledgeNodeMapper' mapperInterface
-2025-06-25 23:16:16.693 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeRelationMapper' and 'com.education.mapper.KnowledgeRelationMapper' mapperInterface
-2025-06-25 23:16:16.694 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'learningProgressMapper' and 'com.education.mapper.LearningProgressMapper' mapperInterface
-2025-06-25 23:16:16.695 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'questionBankMapper' and 'com.education.mapper.QuestionBankMapper' mapperInterface
-2025-06-25 23:16:16.697 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'resourceMapper' and 'com.education.mapper.ResourceMapper' mapperInterface
-2025-06-25 23:16:16.697 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'studentMapper' and 'com.education.mapper.StudentMapper' mapperInterface
-2025-06-25 23:16:16.699 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskMapper' and 'com.education.mapper.TaskMapper' mapperInterface
-2025-06-25 23:16:16.701 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskSubmissionMapper' and 'com.education.mapper.TaskSubmissionMapper' mapperInterface
-2025-06-25 23:16:16.702 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'teacherMapper' and 'com.education.mapper.TeacherMapper' mapperInterface
-2025-06-25 23:16:16.704 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'userMapper' and 'com.education.mapper.UserMapper' mapperInterface
-2025-06-25 23:16:19.125 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
-2025-06-25 23:16:19.150 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-06-25 23:16:19.151 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
-2025-06-25 23:16:19.242 [main] DEBUG com.education.security.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
-2025-06-25 23:16:19.497 [main] INFO  o.a.c.c.ContainerBase.[Tomcat].[localhost].[/api] - Initializing Spring embedded WebApplicationContext
-2025-06-25 23:16:19.498 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5167 ms
-2025-06-25 23:16:21.581 [main] DEBUG com.education.security.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
-2025-06-25 23:16:25.769 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
-2025-06-25 23:16:25.941 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@790ea58f, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@78a7fccd, org.springframework.security.web.context.SecurityContextHolderFilter@193792e6, org.springframework.security.web.header.HeaderWriterFilter@3284de45, org.springframework.security.web.authentication.logout.LogoutFilter@15d68a50, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@6ff87203, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2f2a5064, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@410e043b, org.springframework.security.web.session.SessionManagementFilter@a165c11, org.springframework.security.web.access.ExceptionTranslationFilter@6c4e11d0, org.springframework.security.web.access.intercept.AuthorizationFilter@7be85f15]
-2025-06-25 23:16:27.237 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-2025-06-25 23:16:27.367 [main] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
-2025-06-25 23:16:27.415 [main] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
-
-Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-06-25 23:16:27.472 [main] ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter - 
-
-***************************
-APPLICATION FAILED TO START
-***************************
-
-Description:
-
-Web server failed to start. Port 8080 was already in use.
-
-Action:
-
-Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
-
-2025-06-25 23:16:28.500 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
-2025-06-25 23:16:28.654 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@62ff3028, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@45e68fac, org.springframework.security.web.context.SecurityContextHolderFilter@78a7fccd, org.springframework.security.web.header.HeaderWriterFilter@1bcca516, org.springframework.security.web.authentication.logout.LogoutFilter@83bbab, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@5d3a238, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@4e7b89b6, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5fb0a09e, org.springframework.security.web.session.SessionManagementFilter@7be85f15, org.springframework.security.web.access.ExceptionTranslationFilter@28da5c4d, org.springframework.security.web.access.intercept.AuthorizationFilter@24d7c365]
-2025-06-25 23:16:29.858 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-2025-06-25 23:16:29.937 [main] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
-2025-06-25 23:16:29.969 [main] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
-
-Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-06-25 23:16:30.005 [main] ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter - 
-
-***************************
-APPLICATION FAILED TO START
-***************************
-
-Description:
-
-Web server failed to start. Port 8080 was already in use.
-
-Action:
-
-Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
-
-2025-06-25 23:21:50.027 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 17.0.10 with PID 43812 (D:\大二下实训3.0\SmartClass\backend\target\classes started by admin in D:\大二下实训3.0\SmartClass)
-2025-06-25 23:21:50.030 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
-2025-06-25 23:21:50.031 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
-2025-06-25 23:21:52.063 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-06-25 23:21:52.066 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-06-25 23:21:52.115 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 36 ms. Found 0 Redis repository interfaces.
-2025-06-25 23:21:52.254 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\AIFeatureMapper.class]
-2025-06-25 23:21:52.254 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ChapterMapper.class]
-2025-06-25 23:21:52.254 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ClassMapper.class]
-2025-06-25 23:21:52.254 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\CourseMapper.class]
-2025-06-25 23:21:52.255 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\GradeMapper.class]
-2025-06-25 23:21:52.255 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeGraphMapper.class]
-2025-06-25 23:21:52.255 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeNodeMapper.class]
-2025-06-25 23:21:52.255 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\KnowledgeRelationMapper.class]
-2025-06-25 23:21:52.256 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\LearningProgressMapper.class]
-2025-06-25 23:21:52.256 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\QuestionBankMapper.class]
-2025-06-25 23:21:52.256 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\ResourceMapper.class]
-2025-06-25 23:21:52.256 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\StudentMapper.class]
-2025-06-25 23:21:52.256 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskMapper.class]
-2025-06-25 23:21:52.256 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TaskSubmissionMapper.class]
-2025-06-25 23:21:52.257 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\TeacherMapper.class]
-2025-06-25 23:21:52.257 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\大二下实训3.0\SmartClass\backend\target\classes\com\education\mapper\UserMapper.class]
-2025-06-25 23:21:52.260 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'AIFeatureMapper' and 'com.education.mapper.AIFeatureMapper' mapperInterface
-2025-06-25 23:21:52.271 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'chapterMapper' and 'com.education.mapper.ChapterMapper' mapperInterface
-2025-06-25 23:21:52.272 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'classMapper' and 'com.education.mapper.ClassMapper' mapperInterface
-2025-06-25 23:21:52.274 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'courseMapper' and 'com.education.mapper.CourseMapper' mapperInterface
-2025-06-25 23:21:52.275 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'gradeMapper' and 'com.education.mapper.GradeMapper' mapperInterface
-2025-06-25 23:21:52.276 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeGraphMapper' and 'com.education.mapper.KnowledgeGraphMapper' mapperInterface
-2025-06-25 23:21:52.278 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeNodeMapper' and 'com.education.mapper.KnowledgeNodeMapper' mapperInterface
-2025-06-25 23:21:52.279 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeRelationMapper' and 'com.education.mapper.KnowledgeRelationMapper' mapperInterface
-2025-06-25 23:21:52.280 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'learningProgressMapper' and 'com.education.mapper.LearningProgressMapper' mapperInterface
-2025-06-25 23:21:52.282 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'questionBankMapper' and 'com.education.mapper.QuestionBankMapper' mapperInterface
-2025-06-25 23:21:52.284 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'resourceMapper' and 'com.education.mapper.ResourceMapper' mapperInterface
-2025-06-25 23:21:52.285 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'studentMapper' and 'com.education.mapper.StudentMapper' mapperInterface
-2025-06-25 23:21:52.286 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskMapper' and 'com.education.mapper.TaskMapper' mapperInterface
-2025-06-25 23:21:52.288 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskSubmissionMapper' and 'com.education.mapper.TaskSubmissionMapper' mapperInterface
-2025-06-25 23:21:52.290 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'teacherMapper' and 'com.education.mapper.TeacherMapper' mapperInterface
-2025-06-25 23:21:52.292 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'userMapper' and 'com.education.mapper.UserMapper' mapperInterface
-2025-06-25 23:21:55.221 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
-2025-06-25 23:21:55.262 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-06-25 23:21:55.263 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
-2025-06-25 23:21:55.571 [main] INFO  o.a.c.c.ContainerBase.[Tomcat].[localhost].[/api] - Initializing Spring embedded WebApplicationContext
-2025-06-25 23:21:55.572 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5464 ms
-2025-06-25 23:21:57.659 [main] DEBUG com.education.security.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+Caused by: java.lang.ClassFormatError: Duplicate method name "publishTask" with signature "(Ljava.lang.Long;)Ljava.lang.Boolean;" in class file com/education/service/teacher/impl/TaskServiceImpl
+	at java.base/java.lang.ClassLoader.defineClass1(Native Method)
+	at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1012)
+	at java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:150)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.defineClass(BuiltinClassLoader.java:862)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.findClassOnClassPathOrNull(BuiltinClassLoader.java:760)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClassOrNull(BuiltinClassLoader.java:681)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:639)
+	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:520)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:467)
+	at org.springframework.util.ClassUtils.forName(ClassUtils.java:291)
+	at org.springframework.beans.factory.support.AbstractBeanDefinition.resolveBeanClass(AbstractBeanDefinition.java:462)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doResolveBeanClass(AbstractBeanFactory.java:1575)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.resolveBeanClass(AbstractBeanFactory.java:1500)
+	... 27 common frames omitted

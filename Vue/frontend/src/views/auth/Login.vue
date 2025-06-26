@@ -1,98 +1,76 @@
 <template>
-  <div class="login-container">
-    <!-- 背景装饰 -->
-    <div class="background-decoration">
-      <div class="floating-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
-        <div class="shape shape-4"></div>
-      </div>
-    </div>
-
-    <!-- 主要内容区 -->
-    <div class="login-content">
-      <!-- 左侧品牌介绍 -->
-      <div class="brand-section">
-        <div class="brand-header">
-          <div class="logo-container">
-            <img src="/logo.svg" alt="SmartClass" class="logo" />
-            <h1 class="brand-name">SmartClass</h1>
+  <div class="login-page">
+    <!-- 左侧背景区域 -->
+    <div class="login-visual">
+      <div class="visual-content">
+        <div class="brand-section">
+          <div class="logo">
+            <img src="/logo.svg" alt="智慧课堂" class="logo-img" />
+            <span class="logo-text">智慧课堂</span>
           </div>
-          <h2 class="brand-slogan">智慧教育 · 无界学习</h2>
-          <p class="brand-description">
-            连接全球优质教育资源，为每位学习者定制专属学习路径
+          <h1 class="visual-title">开启智慧学习之旅</h1>
+          <p class="visual-subtitle">
+            汇聚全球优质教育资源<br />
+            为每一位学习者提供个性化学习体验
           </p>
         </div>
-
-        <div class="feature-showcase">
-          <div class="feature-item" v-for="(feature, index) in features" :key="index">
-            <div class="feature-icon">
-              <component :is="feature.icon" />
-            </div>
-            <div class="feature-content">
-              <h4>{{ feature.title }}</h4>
-              <p>{{ feature.description }}</p>
+        
+        <div class="feature-highlights">
+          <div class="feature-item">
+            <div class="feature-icon">🎓</div>
+            <div class="feature-text">
+              <h4>优质课程</h4>
+              <p>来自知名高校的精品课程</p>
             </div>
           </div>
-        </div>
-
-        <!-- 统计数据 -->
-        <div class="stats-section">
-          <div class="stat-item">
-            <span class="stat-number">10K+</span>
-            <span class="stat-label">注册用户</span>
+          <div class="feature-item">
+            <div class="feature-icon">🤖</div>
+            <div class="feature-text">
+              <h4>AI助学</h4>
+              <p>智能推荐个性化学习路径</p>
+            </div>
           </div>
-          <div class="stat-item">
-            <span class="stat-number">500+</span>
-            <span class="stat-label">精品课程</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">95%</span>
-            <span class="stat-label">满意度</span>
+          <div class="feature-item">
+            <div class="feature-icon">📊</div>
+            <div class="feature-text">
+              <h4>学习分析</h4>
+              <p>实时跟踪学习进度与效果</p>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+    
+    <!-- 右侧登录表单区域 -->
+    <div class="login-form-section">
+      <div class="form-container">
+        <div class="form-header">
+          <h2 class="form-title">欢迎回来</h2>
+          <p class="form-subtitle">请选择您的身份并登录账户</p>
+        </div>
 
-      <!-- 右侧登录表单 -->
-      <div class="form-section">
-        <div class="form-container">
-          <div class="form-header">
-            <h3>欢迎回来</h3>
-            <p>选择您的身份进行登录</p>
-          </div>
-
-          <!-- 角色切换 -->
-          <div class="role-switcher">
+        <!-- 身份选择 -->
+        <div class="role-selection">
+          <div class="role-tabs">
             <div 
-              class="role-option"
+              class="role-tab" 
               :class="{ active: selectedRole === 'student' }"
-              @click="selectedRole = 'student'"
+              @click="selectRole('student')"
             >
-              <div class="role-icon">
-                <BookOutlined />
-              </div>
-              <div class="role-info">
-                <span class="role-title">学生登录</span>
-                <span class="role-desc">探索知识的海洋</span>
-              </div>
+              <BookOutlined />
+              <span>学生登录</span>
             </div>
             <div 
-              class="role-option"
+              class="role-tab" 
               :class="{ active: selectedRole === 'teacher' }"
-              @click="selectedRole = 'teacher'"
+              @click="selectRole('teacher')"
             >
-              <div class="role-icon">
-                <UserOutlined />
-              </div>
-              <div class="role-info">
-                <span class="role-title">教师登录</span>
-                <span class="role-desc">传播智慧的力量</span>
-              </div>
+              <UserOutlined />
+              <span>教师登录</span>
             </div>
           </div>
-
-          <!-- 登录表单 -->
+        </div>
+          
           <a-form
             :model="loginForm"
             :rules="loginRules"
@@ -100,144 +78,101 @@
             layout="vertical"
             class="login-form"
           >
-            <a-form-item name="username">
+            <a-form-item name="username" label="用户名">
               <a-input
                 v-model:value="loginForm.username"
                 size="large"
-                placeholder="请输入用户名或邮箱"
-                class="custom-input"
+                placeholder="请输入用户名"
               >
                 <template #prefix>
-                  <UserOutlined class="input-icon" />
+                  <UserOutlined />
                 </template>
               </a-input>
             </a-form-item>
-
-            <a-form-item name="password">
+            
+            <a-form-item name="password" label="密码">
               <a-input-password
                 v-model:value="loginForm.password"
                 size="large"
                 placeholder="请输入密码"
-                class="custom-input"
               >
                 <template #prefix>
-                  <LockOutlined class="input-icon" />
+                  <LockOutlined />
                 </template>
               </a-input-password>
             </a-form-item>
+            
 
-            <div class="form-options">
-              <a-checkbox v-model:checked="loginForm.remember">
-                记住登录状态
-              </a-checkbox>
-              <a class="forgot-password" @click="showForgotModal = true">
-                忘记密码？
-              </a>
-            </div>
-
-            <a-button
-              type="primary"
-              html-type="submit"
-              size="large"
-              block
-              :loading="loading"
-              class="login-button"
-            >
-              <span v-if="!loading">
-                {{ selectedRole === 'student' ? '学生登录' : '教师登录' }}
-              </span>
-              <span v-else>登录中...</span>
-            </a-button>
-          </a-form>
-
-          <div class="form-footer">
-            <p>还没有账户？ 
-              <a class="register-link" @click="showRegisterModal = true">
-                立即注册
-              </a>
-            </p>
+          
+          <div class="form-options">
+            <a-checkbox v-model:checked="loginForm.remember">
+              记住我
+            </a-checkbox>
+            <a @click="showForgotModal = true" class="forgot-link">忘记密码？</a>
           </div>
-
-          <!-- 第三方登录 -->
-          <div class="social-login">
-            <div class="divider">
-              <span>或使用以下方式登录</span>
-            </div>
-            <div class="social-buttons">
-              <a-button class="social-btn wechat">
-                <WechatOutlined />
-                微信
-              </a-button>
-              <a-button class="social-btn qq">
-                <QqOutlined />
-                QQ
-              </a-button>
-            </div>
-          </div>
-        </div>
-
-        <!-- AI助手 -->
-        <div class="ai-assistant">
-          <a-tooltip title="智能登录助手">
-            <a-button
-              type="primary"
-              shape="circle"
-              size="large"
-              class="ai-button"
-              @click="openAIAssistant"
-            >
-              <RobotOutlined />
-            </a-button>
-          </a-tooltip>
+          
+          <a-button 
+            type="primary" 
+            html-type="submit" 
+            size="large" 
+            block
+            :loading="loading"
+            class="login-btn"
+          >
+            {{ selectedRole === 'teacher' ? '教师登录' : '学生登录' }}
+          </a-button>
+        </a-form>
+        
+        <div class="form-footer">
+          <p>还没有账户？ <a @click="showRegisterModal = true" class="register-link">立即注册</a></p>
         </div>
       </div>
+      
+      <!-- AI助手占位 -->
+      <div class="ai-assistant">
+        <a-button type="primary" shape="circle" size="large" class="ai-btn">
+          <RobotOutlined />
+        </a-button>
+        <span class="ai-text">智能登录助手</span>
+      </div>
     </div>
-
+    
     <!-- 忘记密码弹窗 -->
     <a-modal
       v-model:open="showForgotModal"
       title="找回密码"
       @ok="handleForgotPassword"
-      class="custom-modal"
     >
       <a-form :model="forgotForm" layout="vertical">
-        <a-form-item label="邮箱地址">
-          <a-input
-            v-model:value="forgotForm.email"
-            placeholder="请输入注册时的邮箱地址"
-          />
+        <a-form-item label="用户名">
+          <a-input v-model:value="forgotForm.username" placeholder="请输入用户名" />
+        </a-form-item>
+        <a-form-item label="邮箱">
+          <a-input v-model:value="forgotForm.email" placeholder="请输入邮箱" />
         </a-form-item>
       </a-form>
     </a-modal>
-
+    
     <!-- 注册弹窗 -->
     <a-modal
       v-model:open="showRegisterModal"
       title="用户注册"
       @ok="handleRegister"
-      width="500px"
-      class="custom-modal"
     >
       <a-form :model="registerForm" layout="vertical">
-        <a-form-item label="选择身份" required>
-          <a-radio-group v-model:value="registerForm.role">
-            <a-radio value="student">学生</a-radio>
-            <a-radio value="teacher">教师</a-radio>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item label="用户名" required>
+        <a-form-item label="用户名">
           <a-input v-model:value="registerForm.username" placeholder="请输入用户名" />
         </a-form-item>
-        <a-form-item label="邮箱" required>
-          <a-input v-model:value="registerForm.email" placeholder="请输入邮箱地址" />
-        </a-form-item>
-        <a-form-item label="密码" required>
+        <a-form-item label="密码">
           <a-input-password v-model:value="registerForm.password" placeholder="请输入密码" />
         </a-form-item>
-        <a-form-item label="确认密码" required>
+        <a-form-item label="确认密码">
           <a-input-password v-model:value="registerForm.confirmPassword" placeholder="请确认密码" />
         </a-form-item>
-        <a-form-item label="真实姓名" required>
+        <a-form-item label="邮箱">
+          <a-input v-model:value="registerForm.email" placeholder="请输入邮箱" />
+        </a-form-item>
+        <a-form-item label="真实姓名">
           <a-input v-model:value="registerForm.realName" placeholder="请输入真实姓名" />
         </a-form-item>
       </a-form>
@@ -252,90 +187,81 @@ import { message } from 'ant-design-vue'
 import {
   UserOutlined,
   BookOutlined,
+  ArrowRightOutlined,
+  ArrowLeftOutlined,
   LockOutlined,
-  RobotOutlined,
-  BulbOutlined,
-  TeamOutlined,
-  BarChartOutlined,
-  WechatOutlined,
-  QqOutlined
+  RobotOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import type { LoginRequest } from '@/api/auth'
+import { register } from '@/api/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
-// 功能特色数据
-const features = [
-  {
-    icon: 'BulbOutlined',
-    title: 'AI智能教学',
-    description: '个性化学习推荐，智能答疑辅导'
-  },
-  {
-    icon: 'TeamOutlined',
-    title: '互动课堂',
-    description: '实时在线互动，提升学习体验'
-  },
-  {
-    icon: 'BarChartOutlined',
-    title: '学习分析',
-    description: '数据驱动教学，精准把握学情'
-  }
-]
+// 选择的角色
+const selectedRole = ref<'teacher' | 'student' | ''>('student')
 
-// 表单数据
-const selectedRole = ref<'student' | 'teacher'>('student')
-const loading = ref(false)
-const showForgotModal = ref(false)
-const showRegisterModal = ref(false)
-
+// 登录表单
 const loginForm = reactive({
   username: '',
   password: '',
-  remember: false
+
+  remember: false,
+  role: ''
 })
 
+// 忘记密码表单
 const forgotForm = reactive({
+  username: '',
   email: ''
 })
 
+// 注册表单
 const registerForm = reactive({
-  role: 'student',
   username: '',
-  email: '',
   password: '',
   confirmPassword: '',
+  email: '',
   realName: ''
 })
 
 // 表单验证规则
 const loginRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+
 }
+
+// 状态
+const loading = ref(false)
+const showForgotModal = ref(false)
+const showRegisterModal = ref(false)
+
+
+// 选择角色
+const selectRole = (role: 'teacher' | 'student') => {
+  selectedRole.value = role
+}
+
+
 
 // 处理登录
 const handleLogin = async () => {
   try {
     loading.value = true
     
+    // 准备登录数据
     const loginData: LoginRequest = {
       username: loginForm.username,
-      password: loginForm.password
+      password: loginForm.password,
+
     }
     
-    await authStore.loginUser(loginData)
+    // 调用登录接口
+    const result = await authStore.loginUser(loginData)
     
-    message.success('登录成功！')
-    
-    // 根据角色跳转
-    if (selectedRole.value === 'student') {
-      router.push('/student/dashboard')
-    } else {
-      router.push('/teacher/dashboard')
-    }
+
     
   } catch (error: any) {
     message.error(error.message || '登录失败，请检查用户名和密码')
@@ -346,384 +272,435 @@ const handleLogin = async () => {
 
 // 处理忘记密码
 const handleForgotPassword = () => {
-  if (!forgotForm.email) {
-    message.warning('请输入邮箱地址')
-    return
-  }
-  
-  message.success('密码重置邮件已发送，请查收')
-  showForgotModal.value = false
-  forgotForm.email = ''
+  message.info('密码重置邮件已发送到您的邮箱')
 }
 
 // 处理注册
-const handleRegister = () => {
-  if (!registerForm.username || !registerForm.password || !registerForm.email || !registerForm.realName) {
-    message.warning('请填写完整信息')
-    return
+const handleRegister = async () => {
+  try {
+    if (registerForm.password !== registerForm.confirmPassword) {
+      message.error('两次输入的密码不一致')
+      return
+    }
+    
+    // 调用注册API
+    const registerData = {
+      username: registerForm.username,
+      password: registerForm.password,
+      confirmPassword: registerForm.confirmPassword,
+      email: registerForm.email,
+      realName: registerForm.realName,
+      role: 'student' // 默认注册为学生
+    }
+    
+    const response = await register(registerData)
+    
+    if (response.data.code === 200) {
+      message.success('注册成功！已自动登录')
+      
+      // 保存token和用户信息
+      const { token, userInfo } = response.data.data
+      authStore.setToken(token)
+      authStore.user = userInfo
+      
+      // 关闭注册模态框
+      showRegisterModal.value = false
+      
+      // 根据用户角色跳转到对应页面
+      if (userInfo.role === 'student') {
+        router.push('/student/dashboard')
+      } else if (userInfo.role === 'teacher') {
+        router.push('/teacher/dashboard')
+      }
+    } else {
+      message.error(response.data.message || '注册失败')
+    }
+  } catch (error: any) {
+    console.error('注册失败:', error)
+    if (error.response?.data?.message) {
+      message.error(error.response.data.message)
+    } else {
+      message.error('注册失败，请稍后重试')
+    }
   }
-  
-  if (registerForm.password !== registerForm.confirmPassword) {
-    message.warning('两次输入的密码不一致')
-    return
-  }
-  
-  message.success('注册成功，请登录')
-  showRegisterModal.value = false
-  
-  // 清空表单
-  Object.assign(registerForm, {
-    role: 'student',
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    realName: ''
-  })
 }
 
-// 打开AI助手
-const openAIAssistant = () => {
-  message.info('AI助手功能即将上线，敬请期待！')
+// 跳转到注册页面
+const goToRegister = () => {
+  router.push('/register')
 }
 
-// 页面加载时的动画
-onMounted(() => {
-  // 添加页面加载动画
-  const shapes = document.querySelectorAll('.shape')
-  shapes.forEach((shape, index) => {
-    setTimeout(() => {
-      shape.classList.add('animate')
-    }, index * 200)
-  })
-})
+
 </script>
 
 <style scoped>
-.login-container {
+.login-page {
   min-height: 100vh;
-  position: relative;
+  display: flex;
+  background: #ffffff;
+}
+
+/* 左侧视觉区域 */
+.login-visual {
+  flex: 1;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   overflow: hidden;
 }
 
-/* 背景装饰 */
-.background-decoration {
+.login-visual::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
   pointer-events: none;
 }
 
-.floating-shapes {
+.visual-content {
+  max-width: 480px;
+  padding: 48px;
   position: relative;
-  width: 100%;
-  height: 100%;
+  z-index: 1;
 }
 
-.shape {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  opacity: 0;
-  animation: float 6s ease-in-out infinite;
-  transition: opacity 0.5s ease;
-}
-
-.shape.animate {
-  opacity: 1;
-}
-
-.shape-1 {
-  width: 80px;
-  height: 80px;
-  top: 20%;
-  left: 10%;
-  animation-delay: 0s;
-}
-
-.shape-2 {
-  width: 120px;
-  height: 120px;
-  top: 60%;
-  left: 5%;
-  animation-delay: 2s;
-}
-
-.shape-3 {
-  width: 60px;
-  height: 60px;
-  top: 30%;
-  right: 15%;
-  animation-delay: 4s;
-}
-
-.shape-4 {
-  width: 100px;
-  height: 100px;
-  bottom: 20%;
-  right: 10%;
-  animation-delay: 1s;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(180deg);
-  }
-}
-
-/* 主要内容区 */
-.login-content {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  padding: 40px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-/* 左侧品牌区 */
 .brand-section {
-  flex: 1;
-  padding-right: 80px;
-  color: white;
-}
-
-.brand-header {
-  margin-bottom: 60px;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 64px;
 }
 
 .logo {
-  width: 48px;
-  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
 }
 
-.brand-name {
-  font-size: 32px;
+.logo-img {
+  width: 40px;
+  height: 40px;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+}
+
+.visual-title {
+  font-size: 3rem;
   font-weight: 700;
-  margin: 0;
+  line-height: 1.2;
+  margin-bottom: 24px;
   background: linear-gradient(45deg, #ffffff, #e3f2fd);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.brand-slogan {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 16px 0;
-  opacity: 0.95;
-}
-
-.brand-description {
-  font-size: 16px;
+.visual-subtitle {
+  font-size: 1.125rem;
   line-height: 1.6;
-  opacity: 0.8;
+  opacity: 0.9;
   margin: 0;
 }
 
-.feature-showcase {
-  margin-bottom: 60px;
+.feature-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .feature-item {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 32px;
-  padding: 24px;
+  gap: 16px;
+  padding: 20px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.feature-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
 }
 
 .feature-icon {
-  width: 56px;
-  height: 56px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
+  font-size: 32px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
 }
 
-.feature-content h4 {
-  font-size: 18px;
+.feature-text h4 {
+  font-size: 16px;
   font-weight: 600;
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
+  color: white;
 }
 
-.feature-content p {
+.feature-text p {
   font-size: 14px;
   margin: 0;
   opacity: 0.8;
 }
 
-.stats-section {
-  display: flex;
-  gap: 40px;
-}
-
-.stat-item {
-  text-align: center;
-}
-
-.stat-number {
-  display: block;
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.stat-label {
-  font-size: 14px;
-  opacity: 0.8;
-}
-
-/* 右侧表单区 */
-.form-section {
+/* 右侧表单区域 */
+.login-form-section {
   flex: 1;
-  max-width: 480px;
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background: #fafafa;
 }
 
 .form-container {
-  background: white;
-  border-radius: 24px;
-  padding: 48px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  width: 100%;
+  max-width: 400px;
 }
 
 .form-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
-.form-header h3 {
-  font-size: 28px;
+.form-title {
+  font-size: 2rem;
   font-weight: 700;
   color: #333;
-  margin: 0 0 8px 0;
+  margin-bottom: 8px;
 }
 
-.form-header p {
+.form-subtitle {
   color: #666;
   font-size: 16px;
   margin: 0;
 }
 
-/* 角色切换 */
-.role-switcher {
+/* 身份选择 */
+.role-selection {
   margin-bottom: 32px;
 }
 
-.role-option {
+.role-tabs {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
-  border: 2px solid #f0f0f0;
-  border-radius: 16px;
-  margin-bottom: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.role-option:last-child {
-  margin-bottom: 0;
-}
-
-.role-option:hover {
-  border-color: #d9d9d9;
-  background: #fafafa;
-}
-
-.role-option.active {
-  border-color: #1890ff;
-  background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%);
-}
-
-.role-icon {
-  width: 48px;
-  height: 48px;
   background: #f0f0f0;
   border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.role-tab {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  color: #666;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
   transition: all 0.3s ease;
+  font-weight: 500;
+  color: #666;
 }
 
-.role-option.active .role-icon {
+.role-tab:hover {
+  background: rgba(24, 144, 255, 0.1);
+  color: #1890ff;
+}
+
+.role-tab.active {
   background: #1890ff;
   color: white;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
 }
 
-.role-info {
-  flex: 1;
+.step-content {
+  animation: fadeInUp 0.5s ease-out;
 }
 
-.role-title {
-  display: block;
-  font-size: 16px;
+.step-title {
+  font-size: 24px;
   font-weight: 600;
+  text-align: center;
+  margin-bottom: 32px;
   color: #333;
-  margin-bottom: 4px;
 }
 
-.role-desc {
-  font-size: 14px;
-  color: #666;
-}
-
-/* 表单样式 */
-.login-form {
+.role-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
   margin-bottom: 32px;
 }
 
-.custom-input {
+.role-card {
+  padding: 24px 16px;
+  border: 2px solid #e8e8e8;
+  border-radius: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.role-card:hover {
+  border-color: #1890ff;
+  background: #f0f8ff;
+  transform: translateY(-2px);
+}
+
+.role-card.active {
+  border-color: #1890ff;
+  background: linear-gradient(135deg, #e6f7ff 0%, #f0f8ff 100%);
+  box-shadow: 0 4px 20px rgba(24, 144, 255, 0.2);
+}
+
+.role-icon {
+  font-size: 32px;
+  color: #1890ff;
+  margin-bottom: 12px;
+}
+
+.role-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.role-card p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 表单样式增强 */
+.login-form :deep(.ant-input) {
+  height: 48px;
   border-radius: 12px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #d9d9d9;
+  font-size: 16px;
   transition: all 0.3s ease;
 }
 
-.custom-input:hover {
-  border-color: #1890ff;
-}
-
-.custom-input:focus,
-.custom-input:focus-within {
+.login-form :deep(.ant-input:focus) {
   border-color: #1890ff;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 
-.input-icon {
-  color: #999;
+.login-form :deep(.ant-input-password) {
+  height: 48px;
+  border-radius: 12px;
 }
+
+.login-form :deep(.ant-checkbox-wrapper) {
+  font-size: 14px;
+  color: #666;
+}
+
+.login-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.login-btn:active {
+  transform: translateY(0);
+}
+
+.forgot-link {
+  color: #1890ff;
+  text-decoration: none;
+  font-size: 14px;
+  transition: opacity 0.3s ease;
+}
+
+.forgot-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.form-footer {
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.register-link {
+  color: #1890ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+}
+
+.continue-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.back-btn {
+  color: #666;
+  font-size: 14px;
+}
+
+.selected-role {
+  display: flex;
+  align-items: center;
+}
+
+.role-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.role-badge.teacher {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.role-badge.student {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.login-form {
+  margin-top: 24px;
+}
+
+
 
 .form-options {
   display: flex;
@@ -735,195 +712,200 @@ onMounted(() => {
 .forgot-password {
   color: #1890ff;
   text-decoration: none;
-  font-size: 14px;
 }
 
 .forgot-password:hover {
-  color: #40a9ff;
+  text-decoration: underline;
 }
 
-.login-button {
+.login-btn {
   height: 48px;
-  border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
-  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
-  border: none;
-  transition: all 0.3s ease;
+  border-radius: 12px;
 }
 
-.login-button:hover {
-  background: linear-gradient(135deg, #40a9ff 0%, #5cdbd3 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.3);
-}
-
-.form-footer {
+.login-footer {
   text-align: center;
-  margin-bottom: 32px;
-}
-
-.form-footer p {
+  margin-top: 24px;
   color: #666;
-  font-size: 14px;
-  margin: 0;
 }
 
-.register-link {
+.login-footer a {
   color: #1890ff;
   text-decoration: none;
-  font-weight: 500;
+  cursor: pointer;
 }
 
-.register-link:hover {
-  color: #40a9ff;
+.login-footer a:hover {
+  text-decoration: underline;
 }
 
-/* 第三方登录 */
-.social-login {
-  text-align: center;
-}
-
-.divider {
-  position: relative;
-  margin: 32px 0;
-  text-align: center;
-}
-
-.divider::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: #e0e0e0;
-}
-
-.divider span {
-  background: white;
-  padding: 0 16px;
-  color: #999;
-  font-size: 14px;
-}
-
-.social-buttons {
-  display: flex;
-  gap: 12px;
-}
-
-.social-btn {
-  flex: 1;
-  height: 44px;
-  border-radius: 12px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.social-btn.wechat {
-  background: #07c160;
-  border-color: #07c160;
-  color: white;
-}
-
-.social-btn.qq {
-  background: #12b7f5;
-  border-color: #12b7f5;
-  color: white;
-}
-
-/* AI助手 */
 .ai-assistant {
-  position: absolute;
+  position: fixed;
   bottom: 32px;
   right: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 3;
 }
 
-.ai-button {
+.ai-btn {
   width: 56px;
   height: 56px;
-  background: linear-gradient(135deg, #fa541c 0%, #faad14 100%);
-  border: none;
   font-size: 24px;
-  box-shadow: 0 8px 24px rgba(250, 84, 28, 0.3);
-  animation: pulse 2s infinite;
+  box-shadow: 0 4px 20px rgba(24, 144, 255, 0.3);
 }
 
-@keyframes pulse {
-  0% {
-    box-shadow: 0 8px 24px rgba(250, 84, 28, 0.3);
+.ai-text {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #333;
+  backdrop-filter: blur(10px);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  50% {
-    box-shadow: 0 8px 32px rgba(250, 84, 28, 0.5);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  100% {
-    box-shadow: 0 8px 24px rgba(250, 84, 28, 0.3);
-  }
-}
-
-/* 弹窗样式 */
-.custom-modal .ant-modal-content {
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.custom-modal .ant-modal-header {
-  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
-  border: none;
-  padding: 24px;
-}
-
-.custom-modal .ant-modal-title {
-  color: white;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.custom-modal .ant-modal-body {
-  padding: 32px 24px;
 }
 
 /* 响应式设计 */
-@media (max-width: 1200px) {
-  .login-content {
+@media (max-width: 1024px) {
+  .login-page {
     flex-direction: column;
+  }
+  
+  .login-visual {
+    min-height: 40vh;
+  }
+  
+  .visual-content {
+    padding: 32px;
     text-align: center;
   }
   
-  .brand-section {
-    padding-right: 0;
-    margin-bottom: 40px;
+  .visual-title {
+    font-size: 2.5rem;
   }
   
-  .stats-section {
+  .feature-highlights {
+    flex-direction: row;
     justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .feature-item {
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
   }
 }
 
 @media (max-width: 768px) {
-  .login-content {
-    padding: 20px;
-  }
-  
-  .form-container {
+  .login-form-section {
     padding: 32px 24px;
   }
   
-  .feature-item {
-    flex-direction: column;
-    text-align: center;
+  .visual-content {
+    padding: 24px;
   }
   
-  .stats-section {
-    flex-direction: column;
-    gap: 20px;
+  .visual-title {
+    font-size: 2rem;
   }
   
-  .social-buttons {
+  .feature-highlights {
     flex-direction: column;
+  }
+  
+  .role-tabs {
+    flex-direction: column;
+  }
+  
+  .role-selector {
+    grid-template-columns: 1fr;
   }
 }
+
+/* PC端大屏幕优化 */
+@media (min-width: 1024px) {
+  .step-title {
+    font-size: 28px;
+    margin-bottom: 32px;
+  }
+  
+  .role-selector {
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+  
+  .role-card {
+    padding: 32px 24px;
+    min-height: 160px;
+  }
+  
+  .role-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+  }
+  
+  .role-card h3 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+  
+  .role-card p {
+    font-size: 16px;
+  }
+  
+  .login-form .ant-form-item-label > label {
+    font-size: 16px;
+  }
+  
+  .login-form .ant-input-affix-wrapper,
+  .login-form .ant-input {
+    font-size: 16px;
+    height: 48px;
+  }
+  
+  .login-btn {
+    height: 52px;
+    font-size: 18px;
+  }
+}
+
+/* 超大屏幕优化 */
+@media (min-width: 1440px) {
+  .role-selector {
+    gap: 32px;
+  }
+  
+  .role-card {
+    padding: 40px 32px;
+    min-height: 180px;
+  }
+  
+  .role-icon {
+    font-size: 48px;
+  }
+  
+  .role-card h3 {
+    font-size: 22px;
+  }
+  
+  .role-card p {
+    font-size: 18px;
+  }
+}
+
+
 </style>

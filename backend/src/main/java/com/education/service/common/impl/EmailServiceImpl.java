@@ -186,7 +186,7 @@ public class EmailServiceImpl implements EmailService {
     public PageResponse<EmailDTO.EmailHistoryResponse> getEmailHistory(EmailDTO.EmailHistoryRequest historyRequest) {
         logger.info("Getting email history for user: {}", historyRequest.getUserId());
         // TODO: Implement email history retrieval logic
-        return new PageResponse<>(1L, 10L, 0L, new ArrayList<EmailDTO.EmailHistoryResponse>());
+        return new PageResponse<>(1, 10, 0L, new ArrayList<EmailDTO.EmailHistoryResponse>());
     }
     
     @Override
@@ -221,7 +221,7 @@ public class EmailServiceImpl implements EmailService {
     public PageResponse<EmailDTO.EmailTemplateResponse> getEmailTemplates(PageRequest pageRequest) {
         logger.info("Getting email templates");
         // TODO: Implement email templates retrieval logic
-        return new PageResponse<>(1L, 10L, 0L, new ArrayList<EmailDTO.EmailTemplateResponse>());
+        return new PageResponse<>(1, 10, 0L, new ArrayList<EmailDTO.EmailTemplateResponse>());
     }
     
     @Override
@@ -291,7 +291,7 @@ public class EmailServiceImpl implements EmailService {
     public PageResponse<EmailDTO.EmailBlacklistResponse> getEmailBlacklist(PageRequest pageRequest) {
         logger.info("Getting email blacklist");
         // TODO: Implement email blacklist retrieval logic
-        return new PageResponse<>(1L, 10L, 0L, new ArrayList<EmailDTO.EmailBlacklistResponse>());
+        return new PageResponse<>(1, 10, 0L, new ArrayList<EmailDTO.EmailBlacklistResponse>());
     }
     
     @Override
