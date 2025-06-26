@@ -238,5 +238,109 @@ public class ClassDTO {
         public void setAverageScore(Double averageScore) { this.averageScore = averageScore; }
         public Integer getTotalResources() { return totalResources; }
         public void setTotalResources(Integer totalResources) { this.totalResources = totalResources; }
+        
+        // Additional setter methods for compatibility
+        public void setMaxStudents(Integer maxStudents) { this.totalStudents = maxStudents; }
+        public void setInactiveStudents(int inactiveStudents) { 
+            this.activeStudents = this.totalStudents != null ? this.totalStudents - inactiveStudents : 0; 
+        }
+        public void setAverageGrade(double averageGrade) { this.averageScore = averageGrade; }
+        public void setAssignmentCompletionRate(double completionRate) { 
+            // Store completion rate as a percentage of completed tasks
+        }
+    }
+    
+    /**
+     * 学生响应DTO (用于班级学生列表)
+     */
+    public static class StudentResponse {
+        private Long studentId;
+        private String studentNumber;
+        private String realName;
+        private String email;
+        private String phone;
+        private String gender;
+        private String major;
+        private String grade;
+        private String className;
+        private String avatar;
+        private String status;
+        private LocalDateTime createTime;
+        private LocalDateTime lastLoginTime;
+        private LocalDateTime joinTime;
+        private Boolean isActive;
+        
+        // Getters and Setters
+        public Long getStudentId() { return studentId; }
+        public void setStudentId(Long studentId) { this.studentId = studentId; }
+        public String getStudentNumber() { return studentNumber; }
+        public void setStudentNumber(String studentNumber) { this.studentNumber = studentNumber; }
+        public String getRealName() { return realName; }
+        public void setRealName(String realName) { this.realName = realName; }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getPhone() { return phone; }
+        public void setPhone(String phone) { this.phone = phone; }
+        public String getGender() { return gender; }
+        public void setGender(String gender) { this.gender = gender; }
+        public String getMajor() { return major; }
+        public void setMajor(String major) { this.major = major; }
+        public String getGrade() { return grade; }
+        public void setGrade(String grade) { this.grade = grade; }
+        public String getClassName() { return className; }
+        public void setClassName(String className) { this.className = className; }
+        public String getAvatar() { return avatar; }
+        public void setAvatar(String avatar) { this.avatar = avatar; }
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
+        public LocalDateTime getCreateTime() { return createTime; }
+        public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
+        public LocalDateTime getLastLoginTime() { return lastLoginTime; }
+        public void setLastLoginTime(LocalDateTime lastLoginTime) { this.lastLoginTime = lastLoginTime; }
+        public LocalDateTime getJoinTime() { return joinTime; }
+        public void setJoinTime(LocalDateTime joinTime) { this.joinTime = joinTime; }
+        public Boolean getIsActive() { return isActive; }
+        public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+        /**
+         * 设置学生姓名（兼容方法）
+         */
+        public void setStudentName(String studentName) {
+            this.realName = studentName;
+        }
+
+        /**
+         * 获取学生姓名（兼容方法）
+         */
+        public String getStudentName() {
+            return this.realName;
+        }
+    }
+    
+    /**
+     * 邀请码响应DTO
+     */
+    public static class InviteCodeResponse {
+        private String inviteCode;
+        private Long classId;
+        private String className;
+        private LocalDateTime expireTime;
+        private LocalDateTime createTime;
+        private Boolean isActive;
+        
+        // Getters and Setters
+        public String getInviteCode() { return inviteCode; }
+        public void setInviteCode(String inviteCode) { this.inviteCode = inviteCode; }
+        public Long getClassId() { return classId; }
+        public void setClassId(Long classId) { this.classId = classId; }
+        public String getClassName() { return className; }
+        public void setClassName(String className) { this.className = className; }
+        public LocalDateTime getExpireTime() { return expireTime; }
+        public void setExpireTime(LocalDateTime expireTime) { this.expireTime = expireTime; }
+        public LocalDateTime getCreateTime() { return createTime; }
+        public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
+        public Boolean getIsActive() { return isActive; }
+        public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+        
+
     }
 }

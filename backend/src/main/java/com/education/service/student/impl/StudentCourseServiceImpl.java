@@ -38,18 +38,17 @@ public class StudentCourseServiceImpl implements StudentCourseService {
     private StudentMapper studentMapper;
     
     @Autowired
-    private ClassMapper classMapper;
+    private ChapterMapper chapterMapper;
     
-    // ChapterMapper暂时注释，因为该类不存在
-    // @Autowired
-    // private ChapterMapper chapterMapper;
+    @Autowired
+    private LearningProgressMapper learningProgressMapper;
     
     @Autowired
     private ResourceMapper resourceMapper;
 
     @Override
     public PageResponse<CourseDTO.CourseListResponse> getStudentCourses(Long studentId, PageRequest pageRequest) {
-        log.info("获取学生课程列表，学生ID: {}", studentId);
+        // 获取学生课程列表，学生ID: {}
         
         Student student = studentMapper.selectById(studentId);
         if (student == null) {
@@ -76,7 +75,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
 
     @Override
     public CourseDTO.CourseDetailResponse getCourseDetail(Long courseId, Long studentId) {
-        log.info("获取课程详情，课程ID: {}, 学生ID: {}", courseId, studentId);
+        // 获取课程详情，课程ID: {}
         
         // 验证权限
         if (!hasCourseAccess(courseId, studentId)) {
@@ -94,9 +93,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
         response.setDescription(course.getDescription());
         // TODO: 需要通过teacherId查询教师姓名
         // response.setTeacherName(course.getTeacherName());
-        // TODO: Course实体缺少createdTime和updatedTime字段
-        // response.setCreatedTime(course.getCreatedTime());
-        // response.setUpdatedTime(course.getUpdatedTime());
+        response.setCreateTime(course.getCreateTime());
         
         return response;
     }
@@ -105,34 +102,110 @@ public class StudentCourseServiceImpl implements StudentCourseService {
 
     @Override
     public List<CourseDTO.ChapterResponse> getCourseChapters(Long courseId, Long studentId) {
-        log.info("获取课程章节列表，课程ID: {}, 学生ID: {}", courseId, studentId);
+        // 获取课程章节列表，课程ID: {}
         
         // 验证权限
         if (!hasCourseAccess(courseId, studentId)) {
             throw new BusinessException(ResultCode.ACCESS_DENIED, "无权限访问该课程");
         }
         
-        // TODO: ChapterMapper不存在，暂时返回空列表
-        log.warn("ChapterMapper不存在，返回空章节列表");
-        return List.of();
+        // 查询课程章节
+        List<Chapter> chapters = chapterMapper.selectByCourseId(courseId);
+        
+        // 转换为响应对象并添加学习进度信息
+        return chapters.stream()
+                .map(chapter -> convertToChapterResponse(chapter, studentId))
+                .collect(Collectors.toList());
     }
 
     @Override
     public CourseDTO.ChapterDetailResponse getChapterDetail(Long chapterId, Long studentId) {
-        log.info("获取章节详情，章节ID: {}, 学生ID: {}", chapterId, studentId);
+        // 获取章节详情，章节ID: {}
         
-        // TODO: ChapterMapper不存在，暂时抛出异常
-        log.warn("ChapterMapper不存在，无法获取章节详情");
-        throw new BusinessException(ResultCode.DATA_NOT_FOUND, "章节功能暂未实现");
+        // 查询章节
+        Chapter chapter = chapterMapper.selectById(chapterId);
+        if (chapter == null) {
+            throw new BusinessException(ResultCode.DATA_NOT_FOUND, "章节不存在");
+        }
+        
+        // 验证权限
+        if (!hasCourseAccess(chapter.getCourseId(), studentId)) {
+            throw new BusinessException(ResultCode.ACCESS_DENIED, "无权限访问该章节");
+        }
+        
+        // 查询学习进度
+        LearningProgress progress = learningProgressMapper.selectByStudentCourseChapter(
+                studentId, chapter.getCourseId(), chapterId);
+        
+        // 转换为详情响应对象
+        CourseDTO.ChapterDetailResponse response = new CourseDTO.ChapterDetailResponse();
+        response.setChapterId(chapterId);
+        response.setTitle(chapter.getTitle());
+        response.setDescription(chapter.getDescription());
+        response.setContent(chapter.getContent());
+        response.setSortOrder(chapter.getSortOrder());
+        response.setDuration(chapter.getEstimatedDuration());
+        response.setCreateTime(chapter.getCreateTime());
+        
+        if (progress != null) {
+            response.setIsLearned("COMPLETED".equals(progress.getStatus()));
+            response.setStudyTime(progress.getStudyDuration());
+            response.setLastAccessTime(progress.getLastStudyTime());
+        } else {
+            response.setIsLearned(false);
+            response.setStudyTime(0);
+        }
+        
+        return response;
     }
 
     @Override
+    @Transactional
     public Boolean markChapterAsLearned(Long chapterId, Long studentId) {
         log.info("标记章节为已学习，章节ID: {}, 学生ID: {}", chapterId, studentId);
         
-        // TODO: ChapterMapper不存在，暂时返回false
-        log.warn("ChapterMapper不存在，无法标记章节为已学习");
-        return false;
+        // 查询章节
+        Chapter chapter = chapterMapper.selectById(chapterId);
+        if (chapter == null) {
+            throw new BusinessException(ResultCode.DATA_NOT_FOUND, "章节不存在");
+        }
+        
+        // 验证权限
+        if (!hasCourseAccess(chapter.getCourseId(), studentId)) {
+            throw new BusinessException(ResultCode.ACCESS_DENIED, "无权限访问该章节");
+        }
+        
+        // 查询或创建学习进度记录
+        LearningProgress progress = learningProgressMapper.selectByStudentCourseChapter(
+                studentId, chapter.getCourseId(), chapterId);
+        
+        if (progress == null) {
+            // 创建新的学习进度记录
+            progress = new LearningProgress();
+            progress.setStudentId(studentId);
+            progress.setCourseId(chapter.getCourseId());
+            progress.setChapterId(chapterId);
+            progress.setStatus("COMPLETED");
+            progress.setProgressPercentage(100.0);
+            progress.setLastStudyTime(LocalDateTime.now());
+            progress.setCompletedTime(LocalDateTime.now());
+            progress.setCreateTime(LocalDateTime.now());
+            progress.setUpdateTime(LocalDateTime.now());
+            
+            learningProgressMapper.insert(progress);
+        } else {
+            // 更新现有记录
+            progress.setStatus("COMPLETED");
+            progress.setProgressPercentage(100.0);
+            progress.setLastStudyTime(LocalDateTime.now());
+            progress.setCompletedTime(LocalDateTime.now());
+            progress.setUpdateTime(LocalDateTime.now());
+            
+            learningProgressMapper.updateById(progress);
+        }
+        
+        log.info("章节标记为已学习成功");
+        return true;
     }
 
     @Override
@@ -144,12 +217,25 @@ public class StudentCourseServiceImpl implements StudentCourseService {
             throw new BusinessException(ResultCode.ACCESS_DENIED, "无权限访问该课程");
         }
         
+        // 统计章节总数
+        Integer totalChapters = chapterMapper.countByCourseId(courseId);
+        
+        // 统计已完成章节数
+        Integer completedChapters = learningProgressMapper.countCompletedChapters(studentId, courseId);
+        
+        // 计算平均进度
+        Double averageProgress = learningProgressMapper.calculateAverageProgress(studentId, courseId);
+        
+        // 计算总学习时长
+        Integer totalStudyDuration = learningProgressMapper.calculateTotalStudyDuration(studentId, courseId);
+        
         CourseDTO.LearningProgressResponse response = new CourseDTO.LearningProgressResponse();
         response.setCourseId(courseId);
         response.setStudentId(studentId);
-        response.setProgress(0.0);
-        response.setCompletedChapters(0);
-        response.setTotalChapters(0);
+        response.setProgress(averageProgress != null ? averageProgress : 0.0);
+        response.setCompletedChapters(completedChapters != null ? completedChapters : 0);
+        response.setTotalChapters(totalChapters != null ? totalChapters : 0);
+        response.setTotalStudyDuration(totalStudyDuration != null ? totalStudyDuration : 0);
         
         return response;
     }
@@ -163,7 +249,62 @@ public class StudentCourseServiceImpl implements StudentCourseService {
             throw new BusinessException(ResultCode.USER_NOT_FOUND, "学生不存在");
         }
         
-        // 这里可以实现更新学习进度的逻辑
+        // 查询章节
+        Chapter chapter = chapterMapper.selectById(progressRequest.getChapterId());
+        if (chapter == null) {
+            throw new BusinessException(ResultCode.DATA_NOT_FOUND, "章节不存在");
+        }
+        
+        // 验证权限
+        if (!hasCourseAccess(chapter.getCourseId(), studentId)) {
+            throw new BusinessException(ResultCode.ACCESS_DENIED, "无权限访问该章节");
+        }
+        
+        // 查询现有学习进度
+        LearningProgress existingProgress = learningProgressMapper.selectByStudentCourseChapter(
+                studentId, chapter.getCourseId(), progressRequest.getChapterId());
+        
+        if (existingProgress != null) {
+            // 更新现有进度
+            existingProgress.setProgressPercentage(progressRequest.getProgressPercentage());
+            existingProgress.setStudyDuration(existingProgress.getStudyDuration() + progressRequest.getStudyDuration());
+            existingProgress.setLastStudyTime(LocalDateTime.now());
+            existingProgress.setUpdateTime(LocalDateTime.now());
+            
+            // 如果进度达到100%，标记为已完成
+            if (progressRequest.getProgressPercentage() >= 100.0) {
+                existingProgress.setStatus("COMPLETED");
+                existingProgress.setCompletedTime(LocalDateTime.now());
+            } else if (progressRequest.getProgressPercentage() > 0) {
+                existingProgress.setStatus("IN_PROGRESS");
+            }
+            
+            learningProgressMapper.updateById(existingProgress);
+        } else {
+            // 创建新的学习进度记录
+            LearningProgress newProgress = new LearningProgress();
+            newProgress.setStudentId(studentId);
+            newProgress.setCourseId(chapter.getCourseId());
+            newProgress.setChapterId(progressRequest.getChapterId());
+            newProgress.setProgressPercentage(progressRequest.getProgressPercentage());
+            newProgress.setStudyDuration(progressRequest.getStudyDuration());
+            newProgress.setLastStudyTime(LocalDateTime.now());
+            newProgress.setCreateTime(LocalDateTime.now());
+            newProgress.setUpdateTime(LocalDateTime.now());
+            
+            // 设置学习状态
+            if (progressRequest.getProgressPercentage() >= 100.0) {
+                newProgress.setStatus("COMPLETED");
+                newProgress.setCompletedTime(LocalDateTime.now());
+            } else if (progressRequest.getProgressPercentage() > 0) {
+                newProgress.setStatus("IN_PROGRESS");
+            } else {
+                newProgress.setStatus("NOT_STARTED");
+            }
+            
+            learningProgressMapper.insert(newProgress);
+        }
+        
         log.info("学习进度更新成功");
         return true;
     }
@@ -641,24 +782,37 @@ public class StudentCourseServiceImpl implements StudentCourseService {
         response.setDescription(course.getDescription());
         // TODO: 需要通过teacherId查询教师姓名
         // response.setTeacherName(course.getTeacherName());
-        // TODO: Course实体缺少createdTime字段
-        // response.setCreatedTime(course.getCreatedTime());
+        response.setCreatedTime(course.getCreateTime());
         return response;
     }
     
     /**
      * 转换为章节响应对象
      */
-    // TODO: Chapter类不存在，暂时注释该方法
-    // private CourseDTO.ChapterResponse convertToChapterResponse(Chapter chapter) {
-    //     CourseDTO.ChapterResponse response = new CourseDTO.ChapterResponse();
-    //     response.setChapterId(chapter.getId());
-    //     response.setCourseId(chapter.getCourseId());
-    //     response.setTitle(chapter.getTitle());
-    //     response.setSortOrder(chapter.getSortOrder());
-    //     response.setCreatedTime(chapter.getCreatedTime());
-    //     return response;
-    // }
+    private CourseDTO.ChapterResponse convertToChapterResponse(Chapter chapter, Long studentId) {
+        CourseDTO.ChapterResponse response = new CourseDTO.ChapterResponse();
+        response.setChapterId(chapter.getId());
+        response.setTitle(chapter.getTitle());
+        response.setDescription(chapter.getDescription());
+        response.setSortOrder(chapter.getSortOrder());
+        response.setDuration(chapter.getEstimatedDuration());
+        response.setCreateTime(chapter.getCreateTime());
+        
+        // 查询学习进度
+        LearningProgress progress = learningProgressMapper.selectByStudentCourseChapter(
+                studentId, chapter.getCourseId(), chapter.getId());
+        
+        if (progress != null) {
+            response.setIsLearned("COMPLETED".equals(progress.getStatus()));
+            response.setStudyTime(progress.getStudyDuration());
+            response.setLastAccessTime(progress.getLastStudyTime());
+        } else {
+            response.setIsLearned(false);
+            response.setStudyTime(0);
+        }
+        
+        return response;
+    }
     
     /**
      * 转换为资源响应对象
@@ -670,7 +824,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
         response.setFileName(resource.getResourceName());
         response.setFileType(resource.getFileType());
         response.setFileSize(resource.getFileSize());
-        response.setCreatedTime(resource.getCreateTime());
+        response.setCreateTime(resource.getCreateTime());
         return response;
     }
     

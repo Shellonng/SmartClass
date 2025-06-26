@@ -5,6 +5,8 @@ import lombok.Data;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * 分页请求基类
@@ -41,5 +43,54 @@ public class PageRequest {
      */
     public Integer getOffset() {
         return (pageNum - 1) * pageSize;
+    }
+    
+    /**
+     * 获取过滤条件
+     */
+    public Map<String, Object> getFilters() {
+        return new HashMap<>();
+    }
+
+    /**
+     * 无参构造函数
+     */
+    public PageRequest() {
+    }
+
+    /**
+     * 带参构造函数
+     */
+    public PageRequest(Integer page, Integer size) {
+        this.pageNum = page;
+        this.pageSize = size;
+    }
+
+    /**
+     * 设置页码
+     */
+    public void setPage(Integer page) {
+        this.pageNum = page;
+    }
+
+    /**
+     * 设置每页大小
+     */
+    public void setSize(Integer size) {
+        this.pageSize = size;
+    }
+
+    /**
+     * 获取页码（兼容方法）
+     */
+    public Integer getPage() {
+        return this.pageNum;
+    }
+
+    /**
+     * 获取每页大小（兼容方法）
+     */
+    public Integer getSize() {
+        return this.pageSize;
     }
 }

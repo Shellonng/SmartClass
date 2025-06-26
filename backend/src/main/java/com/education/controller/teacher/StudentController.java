@@ -1,8 +1,15 @@
 package com.education.controller.teacher;
 
 import com.education.dto.common.Result;
+import com.education.dto.common.PageRequest;
+import com.education.dto.StudentDTO;
+import com.education.dto.StudentDTOExtension;
+import com.education.service.teacher.StudentService;
+import com.education.utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,9 +24,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/teacher/students")
 public class StudentController {
 
-    // TODO: 注入StudentService
-    // @Autowired
-    // private StudentService studentService;
+    @Autowired
+    private StudentService studentService;
+    
+    @Autowired
+    private JwtUtils jwtUtils;
+    
+    @Autowired
+    private HttpServletRequest request;
 
     @Operation(summary = "获取学生列表", description = "获取教师所有班级的学生列表")
     @GetMapping
@@ -28,32 +40,38 @@ public class StudentController {
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long classId) {
-        // TODO: 实现获取学生列表逻辑
-        // 1. 获取当前教师ID
-        // 2. 查询教师管理的班级
-        // 3. 分页查询学生列表
-        // 4. 支持按班级筛选和关键词搜索
-        return Result.success(null);
+        try {
+            Long teacherId = getCurrentTeacherId();
+            PageRequest pageRequest = buildPageRequest(page, size, classId, keyword);
+            Object students = studentService.getStudentList(teacherId, pageRequest);
+            return Result.success(students);
+        } catch (Exception e) {
+            return Result.error("获取学生列表失败: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "获取学生详情", description = "获取指定学生的详细信息")
     @GetMapping("/{studentId}")
     public Result<Object> getStudentDetail(@PathVariable Long studentId) {
-        // TODO: 实现获取学生详情逻辑
-        // 1. 验证教师权限（学生是否在教师管理的班级中）
-        // 2. 查询学生详细信息
-        // 3. 包含学习进度、成绩等信息
-        return Result.success(null);
+        try {
+            Long teacherId = getCurrentTeacherId();
+            Object student = studentService.getStudentDetail(studentId, teacherId);
+            return Result.success(student);
+        } catch (Exception e) {
+            return Result.error("获取学生详情失败: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "获取学生学习进度", description = "获取学生在各课程中的学习进度")
     @GetMapping("/{studentId}/progress")
     public Result<Object> getStudentProgress(@PathVariable Long studentId) {
-        // TODO: 实现获取学生学习进度逻辑
-        // 1. 验证教师权限
-        // 2. 查询学生在各课程中的进度
-        // 3. 统计任务完成情况
-        return Result.success(null);
+        try {
+            Long teacherId = getCurrentTeacherId();
+            Object progress = studentService.getStudentProgress(studentId, teacherId, null);
+            return Result.success(progress);
+        } catch (Exception e) {
+            return Result.error("获取学生学习进度失败: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "获取学生成绩统计", description = "获取学生的成绩统计信息")
@@ -63,12 +81,13 @@ public class StudentController {
             @RequestParam(required = false) Long courseId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        // TODO: 实现获取学生成绩逻辑
-        // 1. 验证教师权限
-        // 2. 查询学生成绩记录
-        // 3. 支持按课程筛选
-        // 4. 计算平均分、排名等统计信息
-        return Result.success(null);
+        try {
+            Long teacherId = getCurrentTeacherId();
+            Object grades = studentService.getStudentGradeStatistics(studentId, teacherId);
+            return Result.success(grades);
+        } catch (Exception e) {
+            return Result.error("获取学生成绩失败: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "获取学生任务提交记录", description = "获取学生的任务提交历史")
@@ -78,11 +97,14 @@ public class StudentController {
             @RequestParam(required = false) Long taskId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        // TODO: 实现获取学生提交记录逻辑
-        // 1. 验证教师权限
-        // 2. 查询学生任务提交记录
-        // 3. 支持按任务筛选
-        return Result.success(null);
+        try {
+            Long teacherId = getCurrentTeacherId();
+            PageRequest pageRequest = buildSubmissionPageRequest(page, size, taskId);
+            Object submissions = studentService.getStudentSubmissions(studentId, teacherId, pageRequest);
+            return Result.success(submissions);
+        } catch (Exception e) {
+            return Result.error("获取学生提交记录失败: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "获取学生学习分析", description = "获取学生的学习行为分析数据")
@@ -90,24 +112,26 @@ public class StudentController {
     public Result<Object> getStudentAnalytics(
             @PathVariable Long studentId,
             @RequestParam(required = false) String timeRange) {
-        // TODO: 实现获取学生学习分析逻辑
-        // 1. 验证教师权限
-        // 2. 分析学生学习行为数据
-        // 3. 生成学习报告
-        // 4. 包含学习时长、活跃度、知识点掌握情况等
-        return Result.success(null);
+        try {
+            Long teacherId = getCurrentTeacherId();
+            Object analytics = studentService.getStudentAnalysis(studentId, teacherId, timeRange);
+            return Result.success(analytics);
+        } catch (Exception e) {
+            return Result.error("获取学生学习分析失败: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "批量导入学生", description = "通过Excel批量导入学生信息")
     @PostMapping("/import")
     public Result<Object> importStudents(@RequestParam Long classId, @RequestParam String fileUrl) {
-        // TODO: 实现批量导入学生逻辑
-        // 1. 验证教师权限
-        // 2. 解析Excel文件
-        // 3. 验证学生信息
-        // 4. 批量创建学生账号
-        // 5. 加入指定班级
-        return Result.success(null);
+        try {
+            Long teacherId = getCurrentTeacherId();
+            StudentDTO.StudentImportRequest importRequest = buildImportRequest(classId, fileUrl);
+            Object importResult = studentService.importStudents(importRequest, teacherId);
+            return Result.success(importResult);
+        } catch (Exception e) {
+            return Result.error("批量导入学生失败: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "导出学生信息", description = "导出学生信息到Excel")
@@ -115,23 +139,26 @@ public class StudentController {
     public Result<Object> exportStudents(
             @RequestParam(required = false) Long classId,
             @RequestParam(required = false) String keyword) {
-        // TODO: 实现导出学生信息逻辑
-        // 1. 验证教师权限
-        // 2. 查询学生信息
-        // 3. 生成Excel文件
-        // 4. 返回下载链接
-        return Result.success(null);
+        try {
+            Long teacherId = getCurrentTeacherId();
+            StudentDTOExtension.StudentExportRequest exportRequest = buildExportRequest(classId, keyword);
+            Object exportResult = studentService.exportStudents(exportRequest, teacherId);
+            return Result.success(exportResult);
+        } catch (Exception e) {
+            return Result.error("导出学生信息失败: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "重置学生密码", description = "重置指定学生的登录密码")
     @PostMapping("/{studentId}/reset-password")
     public Result<Object> resetStudentPassword(@PathVariable Long studentId) {
-        // TODO: 实现重置学生密码逻辑
-        // 1. 验证教师权限
-        // 2. 生成新密码
-        // 3. 更新学生密码
-        // 4. 发送通知邮件
-        return Result.success(null);
+        try {
+            Long teacherId = getCurrentTeacherId();
+            Object resetResult = studentService.resetStudentPassword(studentId, teacherId);
+            return Result.success(resetResult);
+        } catch (Exception e) {
+            return Result.error("重置学生密码失败: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "获取学生排行榜", description = "获取班级或课程的学生排行榜")
@@ -141,10 +168,53 @@ public class StudentController {
             @RequestParam(required = false) Long courseId,
             @RequestParam(defaultValue = "score") String rankBy,
             @RequestParam(defaultValue = "10") Integer limit) {
-        // TODO: 实现获取学生排行榜逻辑
-        // 1. 验证教师权限
-        // 2. 根据排序条件查询学生排名
-        // 3. 支持按成绩、活跃度等排序
-        return Result.success(null);
+        try {
+            Long teacherId = getCurrentTeacherId();
+            Object ranking = studentService.getStudentRanking(teacherId, rankBy, classId, limit);
+            return Result.success(ranking);
+        } catch (Exception e) {
+            return Result.error("获取学生排行榜失败: " + e.getMessage());
+        }
+    }
+
+    // 辅助方法
+    private Long getCurrentTeacherId() {
+        try {
+            String token = JwtUtils.getTokenFromRequest(request);
+            return jwtUtils.getUserIdFromToken(token);
+        } catch (Exception e) {
+            throw new RuntimeException("获取当前教师ID失败: " + e.getMessage());
+        }
+    }
+
+    private PageRequest buildPageRequest(Integer page, Integer size, Long classId, String keyword) {
+        PageRequest pageRequest = new PageRequest();
+        pageRequest.setPage(page);
+        pageRequest.setSize(size);
+        // 可以根据需要添加其他查询条件
+        return pageRequest;
+    }
+
+    private PageRequest buildSubmissionPageRequest(Integer page, Integer size, Long taskId) {
+        PageRequest pageRequest = new PageRequest();
+        pageRequest.setPage(page);
+        pageRequest.setSize(size);
+        // 可以根据需要添加taskId等查询条件
+        return pageRequest;
+    }
+
+    private StudentDTO.StudentImportRequest buildImportRequest(Long classId, String fileUrl) {
+        StudentDTO.StudentImportRequest importRequest = new StudentDTO.StudentImportRequest();
+        importRequest.setImportType("EXCEL");
+        importRequest.setFileUrl(fileUrl);
+        return importRequest;
+    }
+
+    private StudentDTOExtension.StudentExportRequest buildExportRequest(Long classId, String keyword) {
+        StudentDTOExtension.StudentExportRequest exportRequest = new StudentDTOExtension.StudentExportRequest();
+        exportRequest.setExportType("EXCEL");
+        exportRequest.setIncludeGrades(true);
+        exportRequest.setIncludeProgress(true);
+        return exportRequest;
     }
 }

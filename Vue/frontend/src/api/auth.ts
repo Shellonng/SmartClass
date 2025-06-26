@@ -35,40 +35,45 @@ export interface RegisterRequest {
 
 // 登录
 export const login = (data: LoginRequest) => {
-  return axios.post<LoginResponse>('/auth/login', data)
+  console.log('🚀 发送登录请求:')
+  console.log('URL:', axios.defaults.baseURL + '/api/auth/login')
+  console.log('数据:', data)
+  console.log('Headers:', axios.defaults.headers)
+  
+  return axios.post<LoginResponse>('/api/auth/login', data)
 }
 
 // 注册
 export const register = (data: RegisterRequest) => {
-  return axios.post('/auth/register', data)
+  return axios.post('/api/auth/register', data)
 }
 
 // 登出
 export const logout = () => {
-  return axios.post('/auth/logout')
+  return axios.post('/api/auth/logout')
 }
 
 // 获取用户信息
 export const getUserInfo = () => {
-  return axios.get('/auth/userinfo')
+  return axios.get('/api/auth/user-info')
 }
 
 // 刷新token
 export const refreshToken = () => {
-  return axios.post('/auth/refresh')
+  return axios.post('/api/auth/refresh')
 }
 
 // 获取验证码
 export const getCaptcha = () => {
-  return axios.get('/auth/captcha')
+  return axios.get('/api/auth/captcha')
 }
 
 // 修改密码
 export const changePassword = (data: { oldPassword: string; newPassword: string }) => {
-  return axios.post('/auth/change-password', data)
+  return axios.post('/api/auth/change-password', data)
 }
 
 // 重置密码
 export const resetPassword = (data: { email: string }) => {
-  return axios.post('/auth/reset-password', data)
+  return axios.post('/api/auth/reset-password', data)
 }

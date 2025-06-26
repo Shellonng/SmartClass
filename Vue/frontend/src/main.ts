@@ -11,12 +11,21 @@ import router from './router'
 import { useAuthStore } from './stores/auth'
 
 // 配置axios
-axios.defaults.baseURL = 'http://localhost:8080/api'
+axios.defaults.baseURL = 'http://localhost:8080'
 axios.defaults.timeout = 10000
 
 // 请求拦截器
 axios.interceptors.request.use(
   (config) => {
+    console.log('📤 发出请求:', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: (config.baseURL || '') + (config.url || ''),
+      headers: config.headers,
+      data: config.data
+    })
+    
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -24,6 +33,7 @@ axios.interceptors.request.use(
     return config
   },
   (error) => {
+    console.error('❌ 请求错误:', error)
     return Promise.reject(error)
   }
 )
@@ -31,9 +41,32 @@ axios.interceptors.request.use(
 // 响应拦截器
 axios.interceptors.response.use(
   (response) => {
+    console.log('📥 收到响应:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.config.url,
+      headers: response.headers,
+      data: response.data
+    })
     return response
   },
   (error) => {
+    console.error('❌ 响应错误:', {
+      message: error.message,
+      code: error.code,
+      response: error.response ? {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        headers: error.response.headers,
+        data: error.response.data
+      } : '无响应',
+      config: {
+        method: error.config?.method,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL
+      }
+    })
+    
     if (error.response?.status === 401) {
       const authStore = useAuthStore()
       authStore.clearToken()

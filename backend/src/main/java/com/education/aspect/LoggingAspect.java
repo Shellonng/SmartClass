@@ -1,6 +1,7 @@
 package com.education.aspect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
@@ -26,7 +27,12 @@ import java.util.Arrays;
 public class LoggingAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+    
+    public LoggingAspect() {
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
+    }
 
     /**
      * 定义切点：Controller层的所有方法

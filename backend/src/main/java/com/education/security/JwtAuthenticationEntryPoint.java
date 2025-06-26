@@ -3,6 +3,8 @@ package com.education.security;
 import com.education.dto.common.Result;
 import com.education.exception.ResultCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,6 +35,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         Result<Object> result = Result.error(ResultCode.UNAUTHORIZED);
         
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String jsonResult = objectMapper.writeValueAsString(result);
         
         response.getWriter().write(jsonResult);

@@ -1,8 +1,10 @@
 package com.education.controller.student;
 
 import com.education.dto.common.Result;
+import com.education.service.student.StudentResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,9 +19,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/student/resources")
 public class ResourceController {
 
-    // TODO: 注入StudentResourceService
-    // @Autowired
-    // private StudentResourceService studentResourceService;
+    @Autowired
+    private StudentResourceService studentResourceService;
 
     @Operation(summary = "获取课程资源列表", description = "获取指定课程的资源列表")
     @GetMapping("/course/{courseId}")

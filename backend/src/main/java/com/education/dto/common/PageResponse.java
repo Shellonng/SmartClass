@@ -92,6 +92,19 @@ public class PageResponse<T> implements Serializable {
         return new PageResponse<>(current, size, 0L, Collections.emptyList());
     }
 
+    // Compatibility setters for legacy code
+    public void setList(List<T> list) {
+        this.records = list;
+    }
+    
+    public void setPageNum(Integer pageNum) {
+        this.current = pageNum != null ? pageNum.longValue() : 1L;
+    }
+    
+    public void setPageSize(Integer pageSize) {
+        this.size = pageSize != null ? pageSize.longValue() : 20L;
+    }
+    
     /**
      * 创建单页响应
      * 

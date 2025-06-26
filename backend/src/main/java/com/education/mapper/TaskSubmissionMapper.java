@@ -49,6 +49,61 @@ public interface TaskSubmissionMapper extends BaseMapper<TaskSubmission> {
     List<TaskSubmission> selectByTaskAndStudent(@Param("taskId") Long taskId, @Param("studentId") Long studentId);
 
     /**
+     * 统计学生的提交总数
+     * 
+     * @param studentId 学生ID
+     * @return 提交总数
+     */
+    @Select("SELECT COUNT(*) FROM task_submission WHERE student_id = #{studentId} AND is_deleted = 0")
+    Integer countSubmissionsByStudent(@Param("studentId") Long studentId);
+
+    /**
+     * 统计学生已评分的提交数
+     * 
+     * @param studentId 学生ID
+     * @return 已评分提交数
+     */
+    @Select("SELECT COUNT(*) FROM task_submission WHERE student_id = #{studentId} AND is_deleted = 0 AND score IS NOT NULL")
+    Integer countGradedSubmissionsByStudent(@Param("studentId") Long studentId);
+
+    /**
+     * 计算学生的平均分
+     * 
+     * @param studentId 学生ID
+     * @return 平均分
+     */
+    @Select("SELECT AVG(score) FROM task_submission WHERE student_id = #{studentId} AND is_deleted = 0 AND score IS NOT NULL")
+    Double calculateAverageScoreByStudent(@Param("studentId") Long studentId);
+
+    /**
+     * 获取学生的最高分
+     * 
+     * @param studentId 学生ID
+     * @return 最高分
+     */
+    @Select("SELECT MAX(score) FROM task_submission WHERE student_id = #{studentId} AND is_deleted = 0 AND score IS NOT NULL")
+    Integer getHighestScoreByStudent(@Param("studentId") Long studentId);
+
+    /**
+     * 获取学生的最低分
+     * 
+     * @param studentId 学生ID
+     * @return 最低分
+     */
+    @Select("SELECT MIN(score) FROM task_submission WHERE student_id = #{studentId} AND is_deleted = 0 AND score IS NOT NULL")
+    Integer getLowestScoreByStudent(@Param("studentId") Long studentId);
+
+    /**
+     * 统计学生最近指定天数内的提交数
+     * 
+     * @param studentId 学生ID
+     * @param days 天数
+     * @return 最近提交数
+     */
+    @Select("SELECT COUNT(*) FROM task_submission WHERE student_id = #{studentId} AND is_deleted = 0 AND submit_time >= DATE_SUB(NOW(), INTERVAL #{days} DAY)")
+    Integer countRecentSubmissionsByStudent(@Param("studentId") Long studentId, @Param("days") Integer days);
+
+    /**
      * 根据任务ID和学生ID查询最新提交记录
      * 
      * @param taskId 任务ID
@@ -420,6 +475,61 @@ public interface TaskSubmissionMapper extends BaseMapper<TaskSubmission> {
      */
     @Select("SELECT COUNT(*) FROM task_submission WHERE task_id = #{taskId} AND student_id = #{studentId} AND is_deleted = 0")
     int countSubmissionsByTaskAndStudent(@Param("taskId") Long taskId, @Param("studentId") Long studentId);
+
+    /**
+     * 根据任务ID统计提交总数
+     * 
+     * @param taskId 任务ID
+     * @return 提交总数
+     */
+    @Select("SELECT COUNT(*) FROM task_submission WHERE task_id = #{taskId} AND is_deleted = 0")
+    Integer countByTaskId(@Param("taskId") Long taskId);
+
+    /**
+     * 根据任务ID统计已评分提交数
+     * 
+     * @param taskId 任务ID
+     * @return 已评分提交数
+     */
+    @Select("SELECT COUNT(*) FROM task_submission WHERE task_id = #{taskId} AND status = 'GRADED' AND is_deleted = 0")
+    Integer countGradedByTaskId(@Param("taskId") Long taskId);
+
+    /**
+     * 根据任务ID统计迟交提交数
+     * 
+     * @param taskId 任务ID
+     * @return 迟交提交数
+     */
+    @Select("SELECT COUNT(*) FROM task_submission WHERE task_id = #{taskId} AND is_late = 1 AND is_deleted = 0")
+    Integer countLateByTaskId(@Param("taskId") Long taskId);
+
+    /**
+     * 根据任务ID获取平均分
+     * 
+     * @param taskId 任务ID
+     * @return 平均分
+     */
+    @Select("SELECT AVG(score) FROM task_submission WHERE task_id = #{taskId} AND score IS NOT NULL AND is_deleted = 0")
+    Double getAverageScoreByTaskId(@Param("taskId") Long taskId);
+
+    /**
+     * 根据任务ID获取最高分
+     * 
+     * @param taskId 任务ID
+     * @return 最高分
+     */
+    @Select("SELECT MAX(score) FROM task_submission WHERE task_id = #{taskId} AND score IS NOT NULL AND is_deleted = 0")
+    Double getMaxScoreByTaskId(@Param("taskId") Long taskId);
+
+    /**
+     * 根据任务ID获取最低分
+     * 
+     * @param taskId 任务ID
+     * @return 最低分
+     */
+    @Select("SELECT MIN(score) FROM task_submission WHERE task_id = #{taskId} AND score IS NOT NULL AND is_deleted = 0")
+    Double getMinScoreByTaskId(@Param("taskId") Long taskId);
+
 
     /**
      * 检查是否可以重新提交

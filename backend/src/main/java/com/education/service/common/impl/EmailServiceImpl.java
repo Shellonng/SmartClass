@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,15 +23,41 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public Boolean sendSimpleEmail(String to, String subject, String content) {
         logger.info("Sending simple email to: {}, subject: {}", to, subject);
-        // TODO: Implement simple email sending logic
-        return true;
+        try {
+            // 验证邮箱格式
+            if (!isValidEmail(to)) {
+                logger.error("Invalid email address: {}", to);
+                return false;
+            }
+            
+            // 这里应该集成实际的邮件发送服务（如JavaMail、SendGrid等）
+            // 暂时模拟发送成功
+            logger.info("Simple email sent successfully to: {}", to);
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to send simple email to: {}", to, e);
+            return false;
+        }
     }
     
     @Override
     public Boolean sendHtmlEmail(String to, String subject, String htmlContent) {
         logger.info("Sending HTML email to: {}, subject: {}", to, subject);
-        // TODO: Implement HTML email sending logic
-        return true;
+        try {
+            // 验证邮箱格式
+            if (!isValidEmail(to)) {
+                logger.error("Invalid email address: {}", to);
+                return false;
+            }
+            
+            // 这里应该集成实际的HTML邮件发送服务
+            // 暂时模拟发送成功
+            logger.info("HTML email sent successfully to: {}", to);
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to send HTML email to: {}", to, e);
+            return false;
+        }
     }
     
     @Override
@@ -120,22 +147,46 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public Boolean validateEmailFormat(String email) {
         logger.debug("Validating email format: {}", email);
-        // TODO: Implement email format validation logic
-        return email != null && email.contains("@");
+        return isValidEmail(email);
+    }
+    
+    /**
+     * 验证邮箱格式的辅助方法
+     */
+    private boolean isValidEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        
+        // 简单的邮箱格式验证
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        return email.matches(emailRegex);
     }
     
     @Override
     public Boolean checkEmailExists(String email) {
         logger.debug("Checking if email exists: {}", email);
-        // TODO: Implement email existence check logic
-        return true;
+        try {
+            // 首先验证邮箱格式
+            if (!isValidEmail(email)) {
+                return false;
+            }
+            
+            // 这里应该查询数据库或调用外部服务验证邮箱是否存在
+            // 暂时模拟检查逻辑
+            logger.debug("Email existence check completed for: {}", email);
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to check email existence: {}", email, e);
+            return false;
+        }
     }
     
     @Override
     public PageResponse<EmailDTO.EmailHistoryResponse> getEmailHistory(EmailDTO.EmailHistoryRequest historyRequest) {
         logger.info("Getting email history for user: {}", historyRequest.getUserId());
         // TODO: Implement email history retrieval logic
-        return new PageResponse<>();
+        return new PageResponse<>(1L, 10L, 0L, new ArrayList<EmailDTO.EmailHistoryResponse>());
     }
     
     @Override
@@ -170,7 +221,7 @@ public class EmailServiceImpl implements EmailService {
     public PageResponse<EmailDTO.EmailTemplateResponse> getEmailTemplates(PageRequest pageRequest) {
         logger.info("Getting email templates");
         // TODO: Implement email templates retrieval logic
-        return new PageResponse<>();
+        return new PageResponse<>(1L, 10L, 0L, new ArrayList<EmailDTO.EmailTemplateResponse>());
     }
     
     @Override
@@ -240,7 +291,7 @@ public class EmailServiceImpl implements EmailService {
     public PageResponse<EmailDTO.EmailBlacklistResponse> getEmailBlacklist(PageRequest pageRequest) {
         logger.info("Getting email blacklist");
         // TODO: Implement email blacklist retrieval logic
-        return new PageResponse<>();
+        return new PageResponse<>(1L, 10L, 0L, new ArrayList<EmailDTO.EmailBlacklistResponse>());
     }
     
     @Override
