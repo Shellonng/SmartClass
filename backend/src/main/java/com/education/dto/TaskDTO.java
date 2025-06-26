@@ -36,6 +36,7 @@ public class TaskDTO {
         private Integer timeLimit; // 时间限制（分钟）
         private Integer maxAttempts; // 最大尝试次数
         private BigDecimal totalScore; // 总分
+        private BigDecimal weight; // 任务权重
         private LocalDateTime startTime;
         private LocalDateTime endTime;
         private Boolean isVisible;
@@ -61,6 +62,8 @@ public class TaskDTO {
         public void setMaxAttempts(Integer maxAttempts) { this.maxAttempts = maxAttempts; }
         public BigDecimal getTotalScore() { return totalScore; }
         public void setTotalScore(BigDecimal totalScore) { this.totalScore = totalScore; }
+        public BigDecimal getWeight() { return weight; }
+        public void setWeight(BigDecimal weight) { this.weight = weight; }
         public LocalDateTime getStartTime() { return startTime; }
         public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
         public LocalDateTime getEndTime() { return endTime; }
@@ -91,6 +94,7 @@ public class TaskDTO {
         private Integer timeLimit;
         private Integer maxAttempts;
         private BigDecimal totalScore;
+        private BigDecimal weight;
         private LocalDateTime startTime;
         private LocalDateTime endTime;
         private Boolean isVisible;
@@ -125,6 +129,8 @@ public class TaskDTO {
         public void setMaxAttempts(Integer maxAttempts) { this.maxAttempts = maxAttempts; }
         public BigDecimal getTotalScore() { return totalScore; }
         public void setTotalScore(BigDecimal totalScore) { this.totalScore = totalScore; }
+        public BigDecimal getWeight() { return weight; }
+        public void setWeight(BigDecimal weight) { this.weight = weight; }
         public LocalDateTime getStartTime() { return startTime; }
         public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
         public LocalDateTime getEndTime() { return endTime; }
@@ -160,6 +166,7 @@ public class TaskDTO {
         private String taskType;
         private String difficulty;
         private BigDecimal totalScore;
+        private BigDecimal weight;
         private LocalDateTime startTime;
         private LocalDateTime endTime;
         private String status;
@@ -179,6 +186,8 @@ public class TaskDTO {
         public void setDifficulty(String difficulty) { this.difficulty = difficulty; }
         public BigDecimal getTotalScore() { return totalScore; }
         public void setTotalScore(BigDecimal totalScore) { this.totalScore = totalScore; }
+        public BigDecimal getWeight() { return weight; }
+        public void setWeight(BigDecimal weight) { this.weight = weight; }
         public LocalDateTime getStartTime() { return startTime; }
         public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
         public LocalDateTime getEndTime() { return endTime; }
@@ -219,6 +228,7 @@ public class TaskDTO {
         private LocalDateTime submitTime;
         private String feedback;
         private Map<String, Object> settings;
+        private BigDecimal weight;
         
         // Getters and Setters
         public Long getTaskId() { return taskId; }
@@ -237,6 +247,8 @@ public class TaskDTO {
         public void setMaxAttempts(Integer maxAttempts) { this.maxAttempts = maxAttempts; }
         public BigDecimal getTotalScore() { return totalScore; }
         public void setTotalScore(BigDecimal totalScore) { this.totalScore = totalScore; }
+        public BigDecimal getWeight() { return weight; }
+        public void setWeight(BigDecimal weight) { this.weight = weight; }
         public LocalDateTime getStartTime() { return startTime; }
         public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
         public LocalDateTime getEndTime() { return endTime; }
@@ -326,6 +338,7 @@ public class TaskDTO {
         private Integer timeLimit;
         private Integer maxAttempts;
         private BigDecimal totalScore;
+        private BigDecimal weight;
         private LocalDateTime startTime;
         private LocalDateTime endTime;
         private Boolean isVisible;
@@ -347,6 +360,8 @@ public class TaskDTO {
         public void setMaxAttempts(Integer maxAttempts) { this.maxAttempts = maxAttempts; }
         public BigDecimal getTotalScore() { return totalScore; }
         public void setTotalScore(BigDecimal totalScore) { this.totalScore = totalScore; }
+        public BigDecimal getWeight() { return weight; }
+        public void setWeight(BigDecimal weight) { this.weight = weight; }
         public LocalDateTime getStartTime() { return startTime; }
         public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
         public LocalDateTime getEndTime() { return endTime; }
@@ -502,8 +517,8 @@ public class TaskDTO {
         public List<String> getSuggestions() { return suggestions; }
         public void setSuggestions(List<String> suggestions) { this.suggestions = suggestions; }
 
-        public void setGradeTime(LocalDateTime gradeTime) {
-            this.gradeTime = gradeTime;
+        public void setGradeTime(LocalDateTime graTime) {
+            this.gradeTime = graTime;
         }
     }
 
@@ -546,6 +561,10 @@ public class TaskDTO {
         private Integer overdueTasks;
         private Double averageScore;
         private Integer totalSubmissions;
+        private Integer gradedSubmissions;
+        private Integer lateSubmissions;
+        private Double maxScore;
+        private Double minScore;
         
         // Getters and Setters
         public Integer getTotalTasks() { return totalTasks; }
@@ -560,6 +579,18 @@ public class TaskDTO {
         public void setAverageScore(Double averageScore) { this.averageScore = averageScore; }
         public Integer getTotalSubmissions() { return totalSubmissions; }
         public void setTotalSubmissions(Integer totalSubmissions) { this.totalSubmissions = totalSubmissions; }
+        public Integer getGradedSubmissions() { return gradedSubmissions; }
+        public void setGradedSubmissions(Integer gradedSubmissions) { this.gradedSubmissions = gradedSubmissions; }
+        public void setGradedSubmissions(int gradedSubmissions) { this.gradedSubmissions = gradedSubmissions; }
+        public Integer getLateSubmissions() { return lateSubmissions; }
+        public void setLateSubmissions(Integer lateSubmissions) { this.lateSubmissions = lateSubmissions; }
+        public void setLateSubmissions(int lateSubmissions) { this.lateSubmissions = lateSubmissions; }
+        public Double getMaxScore() { return maxScore; }
+        public void setMaxScore(Double maxScore) { this.maxScore = maxScore; }
+        public void setMaxScore(double maxScore) { this.maxScore = maxScore; }
+        public Double getMinScore() { return minScore; }
+        public void setMinScore(Double minScore) { this.minScore = minScore; }
+        public void setMinScore(double minScore) { this.minScore = minScore; }
     }
 
     /**

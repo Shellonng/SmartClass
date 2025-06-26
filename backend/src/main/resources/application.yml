@@ -21,12 +21,22 @@ spring:
   profiles:
     active: dev
   
-  # 数据源配置 - 直接使用JDBC连接
+  # 数据源配置 - 使用HikariCP连接池（基础配置，具体参数在各环境中配置）
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/education_platform?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
-    username: root
-    password: 641641773
+    type: com.zaxxer.hikari.HikariDataSource
+    # HikariCP连接池基础配置
+    hikari:
+      # 连接池名称
+      pool-name: HikariPool-Education
+      # 连接测试查询
+      connection-test-query: SELECT 1
+      # 是否自动提交
+      auto-commit: true
+      # 连接初始化SQL
+      connection-init-sql: SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci
+      # 验证超时时间(毫秒)
+      validation-timeout: 5000
   
   # Redis配置
   data:
@@ -124,6 +134,14 @@ management:
     health:
       enabled: true
       show-details: when-authorized
+      show-components: always
+  health:
+    db:
+      enabled: true
+    mail:
+      enabled: false  # 禁用邮件健康检查
+    redis:
+      enabled: true
   metrics:
     enable:
       all: false
@@ -155,7 +173,7 @@ knife4j:
 education:
   # JWT配置
   jwt:
-    secret: education-platform-jwt-secret-key-2024
+    secret: education-platform-jwt-secret-key-2024-for-hs512-algorithm-minimum-512-bits-required-security-compliance
     expiration: 7200000  # 2小时
     refresh-expiration: 604800000  # 7天
     header: Authorization
@@ -218,7 +236,15 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/education_platform?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
     username: root
-    password: 123456
+    password: 641641773
+    hikari:
+      # 开发环境连接池配置
+      minimum-idle: 3
+      maximum-pool-size: 10
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 900000
+      leak-detection-threshold: 60000
   data:
     redis:
       host: localhost
@@ -229,6 +255,11 @@ logging:
   level:
     com.education: DEBUG
     root: INFO
+
+management:
+  health:
+    mail:
+      enabled: false  # 开发环境禁用邮件健康检查
 
 education:
   ai:
@@ -244,6 +275,13 @@ spring:
     url: jdbc:mysql://test-db:3306/education_platform_test?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8
     username: test_user
     password: test_password
+    hikari:
+      # 测试环境连接池配置
+      minimum-idle: 2
+      maximum-pool-size: 8
+      connection-timeout: 15000
+      idle-timeout: 300000
+      max-lifetime: 600000
   data:
     redis:
       host: test-redis
@@ -261,9 +299,19 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    url: jdbc:mysql://prod-db:3306/education_platform?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    url: jdbc:mysql://prod-db:3306/education_platform?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
     username: ${DB_USERNAME:prod_user}
     password: ${DB_PASSWORD:prod_password}
+    hikari:
+      # 生产环境连接池配置
+      minimum-idle: 10
+      maximum-pool-size: 50
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+      # 生产环境启用连接池监控
+      register-mbeans: true
   data:
     redis:
       host: ${REDIS_HOST:prod-redis}

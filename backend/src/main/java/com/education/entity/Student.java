@@ -118,12 +118,12 @@ public class Student implements Serializable {
     private String learningGoals;
 
     @Schema(description = "创建时间")
-    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    @TableField(value = "created_time", fill = FieldFill.INSERT)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     @Schema(description = "更新时间")
-    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "updated_time", fill = FieldFill.INSERT_UPDATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
@@ -330,6 +330,20 @@ public class Student implements Serializable {
         } catch (IllegalArgumentException e) {
             return this.enrollmentStatus;
         }
+    }
+
+    /**
+     * 获取状态（兼容方法）
+     */
+    public String getStatus() {
+        return this.enrollmentStatus;
+    }
+
+    /**
+     * 设置状态（兼容方法）
+     */
+    public void setStatus(String status) {
+        this.enrollmentStatus = status;
     }
 
     /**

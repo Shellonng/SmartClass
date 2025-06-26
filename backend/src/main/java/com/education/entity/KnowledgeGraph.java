@@ -96,4 +96,29 @@ public class KnowledgeGraph {
     @TableLogic
     @TableField("is_deleted")
     private Boolean isDeleted;
+
+    // 为了兼容Service层的调用，添加别名方法
+    public Long getGraphId() {
+        return this.id;
+    }
+    
+    public void setGraphId(Long graphId) {
+        this.id = graphId;
+    }
+    
+    public String getGraphName() {
+        return this.name;
+    }
+    
+    public void setGraphName(String graphName) {
+        this.name = graphName;
+    }
+    
+    public Long getCreatorId() {
+        return this.createdBy;
+    }
+
+    public void setCreatorId(Long creatorId) {
+        this.createdBy = creatorId;
+    }
 }

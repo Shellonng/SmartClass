@@ -1,8 +1,10 @@
 package com.education.controller.student;
 
 import com.education.dto.common.Result;
+import com.education.service.student.StudentTaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,9 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/student/tasks")
 public class TaskController {
 
-    // TODO: 注入StudentTaskService
-    // @Autowired
-    // private StudentTaskService studentTaskService;
+    @Autowired
+    private StudentTaskService studentTaskService;
 
     @Operation(summary = "获取我的任务列表", description = "获取学生的任务列表")
     @GetMapping

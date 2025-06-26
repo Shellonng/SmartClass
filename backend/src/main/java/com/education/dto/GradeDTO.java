@@ -37,6 +37,11 @@ public class GradeDTO {
         private String feedback;
         private String gradeType; // AUTO, MANUAL
         private String status; // PENDING, GRADED, REVIEWED
+        private Long courseId;
+        private BigDecimal maxScore;
+        private Double weight;
+        private String comments;
+        private Long graderId;
         
         // Getters and Setters
         public Long getStudentId() { return studentId; }
@@ -51,6 +56,16 @@ public class GradeDTO {
         public void setGradeType(String gradeType) { this.gradeType = gradeType; }
         public String getStatus() { return status; }
         public void setStatus(String status) { this.status = status; }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public BigDecimal getMaxScore() { return maxScore; }
+        public void setMaxScore(BigDecimal maxScore) { this.maxScore = maxScore; }
+        public Double getWeight() { return weight; }
+        public void setWeight(Double weight) { this.weight = weight; }
+        public String getComments() { return comments; }
+        public void setComments(String comments) { this.comments = comments; }
+        public Long getGraderId() { return graderId; }
+        public void setGraderId(Long graderId) { this.graderId = graderId; }
     }
 
     /**
@@ -59,11 +74,18 @@ public class GradeDTO {
     public static class GradeResponse {
         private Long gradeId;
         private Long studentId;
+        private Long courseId;
         private String studentName;
         private String studentNumber;
         private Long taskId;
         private String taskTitle;
         private BigDecimal score;
+        private BigDecimal maxScore;
+        private BigDecimal percentage;
+        private String letterGrade;
+        private BigDecimal gpaPoints;
+        private BigDecimal weight;
+        private BigDecimal weightedScore;
         private String feedback;
         private String gradeType;
         private String status;
@@ -98,6 +120,33 @@ public class GradeDTO {
         public void setGradeTime(LocalDateTime gradeTime) { this.gradeTime = gradeTime; }
         public String getGraderName() { return graderName; }
         public void setGraderName(String graderName) { this.graderName = graderName; }
+        
+        // Additional getters and setters
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public BigDecimal getPercentage() { return percentage; }
+        public void setPercentage(BigDecimal percentage) { this.percentage = percentage; }
+        public String getLetterGrade() { return letterGrade; }
+        public void setLetterGrade(String letterGrade) { this.letterGrade = letterGrade; }
+        public BigDecimal getGpaPoints() { return gpaPoints; }
+        public void setGpaPoints(BigDecimal gpaPoints) { this.gpaPoints = gpaPoints; }
+        public BigDecimal getWeight() { return weight; }
+        public void setWeight(BigDecimal weight) { this.weight = weight; }
+        public BigDecimal getWeightedScore() { return weightedScore; }
+        public void setWeightedScore(BigDecimal weightedScore) { this.weightedScore = weightedScore; }
+        public BigDecimal getMaxScore() { return maxScore; }
+        public void setMaxScore(BigDecimal maxScore) { this.maxScore = maxScore; }
+        
+        // Additional setter methods for compatibility
+        public void setId(Long id) { this.gradeId = id; }
+        public Long getId() { return this.gradeId; }
+        public void setIsPassed(Boolean isPassed) { /* Implementation needed */ }
+        public void setGraderId(Long graderId) { /* Implementation needed */ }
+        public void setComments(String comments) { this.feedback = comments; }
+        public void setIsPublished(Boolean isPublished) { /* Implementation needed */ }
+        public void setPublishTime(LocalDateTime publishTime) { /* Implementation needed */ }
+        public void setCreateTime(LocalDateTime createTime) { /* Implementation needed */ }
+        public void setUpdateTime(LocalDateTime updateTime) { /* Implementation needed */ }
     }
 
     /**
@@ -110,6 +159,11 @@ public class GradeDTO {
         
         private String feedback;
         private String status;
+        private Long courseId;
+        private BigDecimal maxScore;
+        private Double weight;
+        private String comments;
+        private Long graderId;
         
         // Getters and Setters
         public BigDecimal getScore() { return score; }
@@ -118,6 +172,16 @@ public class GradeDTO {
         public void setFeedback(String feedback) { this.feedback = feedback; }
         public String getStatus() { return status; }
         public void setStatus(String status) { this.status = status; }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public BigDecimal getMaxScore() { return maxScore; }
+        public void setMaxScore(BigDecimal maxScore) { this.maxScore = maxScore; }
+        public Double getWeight() { return weight; }
+        public void setWeight(Double weight) { this.weight = weight; }
+        public String getComments() { return comments; }
+        public void setComments(String comments) { this.comments = comments; }
+        public Long getGraderId() { return graderId; }
+        public void setGraderId(Long graderId) { this.graderId = graderId; }
     }
 
     /**
@@ -133,6 +197,9 @@ public class GradeDTO {
         private BigDecimal averageScore;
         private BigDecimal maxScore;
         private BigDecimal minScore;
+        private BigDecimal highestScore;
+        private BigDecimal lowestScore;
+        private BigDecimal passRate;
         private List<ScoreDistribution> scoreDistribution;
         
         // Getters and Setters
@@ -152,6 +219,12 @@ public class GradeDTO {
         public void setMaxScore(BigDecimal maxScore) { this.maxScore = maxScore; }
         public BigDecimal getMinScore() { return minScore; }
         public void setMinScore(BigDecimal minScore) { this.minScore = minScore; }
+        public BigDecimal getHighestScore() { return highestScore; }
+        public void setHighestScore(BigDecimal highestScore) { this.highestScore = highestScore; }
+        public BigDecimal getLowestScore() { return lowestScore; }
+        public void setLowestScore(BigDecimal lowestScore) { this.lowestScore = lowestScore; }
+        public BigDecimal getPassRate() { return passRate; }
+        public void setPassRate(BigDecimal passRate) { this.passRate = passRate; }
         public List<ScoreDistribution> getScoreDistribution() { return scoreDistribution; }
         public void setScoreDistribution(List<ScoreDistribution> scoreDistribution) {
         this.scoreDistribution = scoreDistribution;
@@ -182,6 +255,7 @@ public class GradeDTO {
         private String range; // 0-60, 60-70, 70-80, 80-90, 90-100
         private Integer count;
         private Double percentage;
+        private String grade; // 等级
         
         // Getters and Setters
         public String getRange() { return range; }
@@ -190,6 +264,8 @@ public class GradeDTO {
         public void setCount(Integer count) { this.count = count; }
         public Double getPercentage() { return percentage; }
         public void setPercentage(Double percentage) { this.percentage = percentage; }
+        public String getGrade() { return grade; }
+        public void setGrade(String grade) { this.grade = grade; }
     }
 
     /**
@@ -344,12 +420,18 @@ public class GradeDTO {
     public static class TaskGradeDetailResponse {
         private Long gradeId;
         private Long studentId;
+        private Long courseId;
         private Long taskId;
         private String taskTitle;
         private String taskDescription;
         private BigDecimal score;
         private BigDecimal originalScore;
         private BigDecimal maxScore;
+        private BigDecimal percentage;
+        private String letterGrade;
+        private BigDecimal gpaPoints;
+        private BigDecimal weight;
+        private BigDecimal weightedScore;
         private String grade;
         private String feedback;
         private List<GradeCriteria> gradeCriteria;
@@ -372,8 +454,7 @@ public class GradeDTO {
         public void setTaskDescription(String taskDescription) { this.taskDescription = taskDescription; }
         public BigDecimal getScore() { return score; }
         public void setScore(BigDecimal score) { this.score = score; }
-        public BigDecimal getMaxScore() { return maxScore; }
-        public void setMaxScore(BigDecimal maxScore) { this.maxScore = maxScore; }
+
         public String getGrade() { return grade; }
         public void setGrade(String grade) { this.grade = grade; }
         public String getFeedback() { return feedback; }
@@ -388,6 +469,33 @@ public class GradeDTO {
         public void setGradeTime(LocalDateTime gradeTime) { this.gradeTime = gradeTime; }
         public String getGraderName() { return graderName; }
         public void setGraderName(String graderName) { this.graderName = graderName; }
+        
+        // Additional getters and setters
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public BigDecimal getPercentage() { return percentage; }
+        public void setPercentage(BigDecimal percentage) { this.percentage = percentage; }
+        public String getLetterGrade() { return letterGrade; }
+        public void setLetterGrade(String letterGrade) { this.letterGrade = letterGrade; }
+        public BigDecimal getGpaPoints() { return gpaPoints; }
+        public void setGpaPoints(BigDecimal gpaPoints) { this.gpaPoints = gpaPoints; }
+        public BigDecimal getWeight() { return weight; }
+        public void setWeight(BigDecimal weight) { this.weight = weight; }
+        public BigDecimal getWeightedScore() { return weightedScore; }
+        public void setWeightedScore(BigDecimal weightedScore) { this.weightedScore = weightedScore; }
+        public BigDecimal getMaxScore() { return maxScore; }
+        public void setMaxScore(BigDecimal maxScore) { this.maxScore = maxScore; }
+        
+        // Additional setter methods for compatibility
+        public void setId(Long id) { this.gradeId = id; }
+        public Long getId() { return this.gradeId; }
+        public void setIsPassed(Boolean isPassed) { /* Implementation needed */ }
+        public void setGraderId(Long graderId) { /* Implementation needed */ }
+        public void setComments(String comments) { this.feedback = comments; }
+        public void setIsPublished(Boolean isPublished) { /* Implementation needed */ }
+        public void setPublishTime(LocalDateTime publishTime) { /* Implementation needed */ }
+        public void setCreateTime(LocalDateTime createTime) { /* Implementation needed */ }
+        public void setUpdateTime(LocalDateTime updateTime) { /* Implementation needed */ }
         public Boolean getCanAppeal() { return canAppeal; }
         public void setCanAppeal(Boolean canAppeal) { this.canAppeal = canAppeal; }
         public Long getStudentId() { return studentId; }
@@ -423,8 +531,11 @@ public class GradeDTO {
      * 成绩趋势响应DTO
      */
     public static class GradeTrendResponse {
+        private Long studentId;
+        private Long courseId;
         private String timeRange;
         private List<GradeTrendData> trendData;
+        private List<GradeResponse> grades;
         private BigDecimal averageScore;
         private String trend; // IMPROVING, DECLINING, STABLE
         private String analysis;
@@ -441,9 +552,14 @@ public class GradeDTO {
         public String getAnalysis() { return analysis; }
         public void setAnalysis(String analysis) { this.analysis = analysis; }
         
-        public void setStudentId(Long studentId) {
-            // 可以添加studentId字段或使用现有逻辑
-        }
+        public Long getStudentId() { return studentId; }
+        public void setStudentId(Long studentId) { this.studentId = studentId; }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public List<GradeResponse> getGrades() { return grades; }
+        public void setGrades(List<GradeResponse> grades) { this.grades = grades; }
+        
+        // Additional setter method for compatibility removed due to duplicate definition
         
         public static class GradeTrendData {
             private String period;
@@ -467,6 +583,7 @@ public class GradeDTO {
      * 成绩分布响应DTO
      */
     public static class GradeDistributionResponse {
+        private Long studentId;
         private Long courseId;
         private String courseName;
         private Long taskId;
@@ -475,10 +592,11 @@ public class GradeDTO {
         private BigDecimal averageScore;
         private List<ScoreRange> scoreRanges;
         private List<GradeLevel> gradeLevels;
+        private List<ScoreDistribution> scoreDistribution;
+        private List<GradeResponse> grades;
         
         // Getters and Setters
-        public Long getCourseId() { return courseId; }
-        public void setCourseId(Long courseId) { this.courseId = courseId; }
+    
         public String getCourseName() { return courseName; }
         public void setCourseName(String courseName) { this.courseName = courseName; }
         public Long getTaskId() { return taskId; }
@@ -493,10 +611,17 @@ public class GradeDTO {
         public void setScoreRanges(List<ScoreRange> scoreRanges) { this.scoreRanges = scoreRanges; }
         public List<GradeLevel> getGradeLevels() { return gradeLevels; }
         public void setGradeLevels(List<GradeLevel> gradeLevels) { this.gradeLevels = gradeLevels; }
+        public List<ScoreDistribution> getScoreDistribution() { return scoreDistribution; }
+        public void setScoreDistribution(List<ScoreDistribution> scoreDistribution) { this.scoreDistribution = scoreDistribution; }
         
-        public void setStudentId(Long studentId) {
-            // 可以添加studentId字段或使用现有逻辑
-        }
+        public Long getStudentId() { return studentId; }
+        public void setStudentId(Long studentId) { this.studentId = studentId; }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public List<GradeResponse> getGrades() { return grades; }
+        public void setGrades(List<GradeResponse> grades) { this.grades = grades; }
+        
+        // Additional setter method for compatibility removed due to duplicate definition
         
         public void setDistributionData(List<Object> distributionData) {
             // 可以将distributionData转换为scoreRanges或gradeLevels
@@ -535,6 +660,8 @@ public class GradeDTO {
      * 班级排名响应DTO
      */
     public static class ClassRankingResponse {
+        private Long studentId;
+        private Long courseId;
         private Long classId;
         private String className;
         private Integer totalStudents;
@@ -543,6 +670,7 @@ public class GradeDTO {
         private String currentGrade;
         private List<StudentRank> rankings;
         private RankingStatistics statistics;
+        private List<GradeResponse> grades;
         
         // Getters and Setters
         public Long getClassId() { return classId; }
@@ -562,9 +690,14 @@ public class GradeDTO {
         public RankingStatistics getStatistics() { return statistics; }
         public void setStatistics(RankingStatistics statistics) { this.statistics = statistics; }
         
-        public void setStudentId(Long studentId) {
-            // 可以添加studentId字段或使用现有逻辑
-        }
+        public Long getStudentId() { return studentId; }
+        public void setStudentId(Long studentId) { this.studentId = studentId; }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public List<GradeResponse> getGrades() { return grades; }
+        public void setGrades(List<GradeResponse> grades) { this.grades = grades; }
+        
+        // Additional setter method for compatibility removed due to duplicate definition
         
         public void setRanking(int ranking) {
             this.currentRank = ranking;
@@ -622,6 +755,7 @@ public class GradeDTO {
      * 课程排名响应DTO
      */
     public static class CourseRankingResponse {
+        private Long studentId;
         private Long courseId;
         private String courseName;
         private Integer totalStudents;
@@ -630,10 +764,10 @@ public class GradeDTO {
         private String currentGrade;
         private List<StudentRank> rankings;
         private RankingStatistics statistics;
+        private List<GradeResponse> grades;
         
         // Getters and Setters
-        public Long getCourseId() { return courseId; }
-        public void setCourseId(Long courseId) { this.courseId = courseId; }
+
         public String getCourseName() { return courseName; }
         public void setCourseName(String courseName) { this.courseName = courseName; }
         public Integer getTotalStudents() { return totalStudents; }
@@ -649,9 +783,14 @@ public class GradeDTO {
         public RankingStatistics getStatistics() { return statistics; }
         public void setStatistics(RankingStatistics statistics) { this.statistics = statistics; }
         
-        public void setStudentId(Long studentId) {
-            // 可以添加studentId字段或使用现有逻辑
-        }
+        public Long getStudentId() { return studentId; }
+        public void setStudentId(Long studentId) { this.studentId = studentId; }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public List<GradeResponse> getGrades() { return grades; }
+        public void setGrades(List<GradeResponse> grades) { this.grades = grades; }
+        
+        // Additional setter method for compatibility removed due to duplicate definition
         
         public void setRanking(int ranking) {
             this.currentRank = ranking;
@@ -709,10 +848,13 @@ public class GradeDTO {
      * 成绩对比分析响应DTO
      */
     public static class GradeComparisonResponse {
+        private Long studentId;
+        private Long courseId;
         private String comparisonType;
         private List<ComparisonData> comparisonData;
         private String analysis;
         private List<String> recommendations;
+        private List<GradeResponse> grades;
         
         // Getters and Setters
         public String getComparisonType() { return comparisonType; }
@@ -722,12 +864,17 @@ public class GradeDTO {
         public String getAnalysis() { return analysis; }
         public void setAnalysis(String analysis) { this.analysis = analysis; }
         
-        public void setStudentId(Long studentId) {
-            // 可以添加studentId字段或使用现有逻辑
-        }
+        public Long getStudentId() { return studentId; }
+        public void setStudentId(Long studentId) { this.studentId = studentId; }
+
+        public List<GradeResponse> getGrades() { return grades; }
+        public void setGrades(List<GradeResponse> grades) { this.grades = grades; }
+        
+        // Additional setter method for compatibility removed due to duplicate definition
         public List<String> getRecommendations() { return recommendations; }
         public void setRecommendations(List<String> recommendations) { this.recommendations = recommendations; }
-        public void setCourseId(Long courseId) { /* Implementation needed */ }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
         public void setAbilities(List<Object> abilities) { /* Implementation needed */ }
         
         public static class ComparisonData {
@@ -775,6 +922,8 @@ public class GradeDTO {
      * 学期成绩汇总响应DTO
      */
     public static class SemesterGradeSummaryResponse {
+        private Long studentId;
+        private Long courseId;
         private String semester;
         private Integer totalCourses;
         private Integer completedCourses;
@@ -783,6 +932,7 @@ public class GradeDTO {
         private List<CourseGradeSummary> courseGrades;
         private List<String> achievements;
         private List<String> warnings;
+        private List<GradeResponse> grades;
         
         // Getters and Setters
         public String getSemester() { return semester; }
@@ -802,9 +952,14 @@ public class GradeDTO {
         public List<String> getWarnings() { return warnings; }
         public void setWarnings(List<String> warnings) { this.warnings = warnings; }
         
-        public void setStudentId(Long studentId) {
-            // 可以添加studentId字段或使用现有逻辑
-        }
+        public Long getStudentId() { return studentId; }
+        public void setStudentId(Long studentId) { this.studentId = studentId; }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public List<GradeResponse> getGrades() { return grades; }
+        public void setGrades(List<GradeResponse> grades) { this.grades = grades; }
+        
+        // Additional setter method for compatibility removed due to duplicate definition
         
         public void setAverageGPA(double averageGPA) {
             // 可以将GPA转换为averageScore或添加新字段
@@ -1144,6 +1299,7 @@ public class GradeDTO {
      */
     public static class GradeCertificateResponse {
         private Long certificateId;
+        private Long courseId;
         private String certificateType;
         private String courseName;
         private String studentName;
@@ -1176,7 +1332,8 @@ public class GradeDTO {
         public Boolean getIsValid() { return isValid; }
         public void setIsValid(Boolean isValid) { this.isValid = isValid; }
         public void setStudentId(Long studentId) { /* Implementation needed */ }
-        public void setCourseId(Long courseId) { /* Implementation needed */ }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
     }
 
     /**
@@ -1462,10 +1619,13 @@ public class GradeDTO {
      * 能力雷达图响应DTO
      */
     public static class AbilityRadarResponse {
+        private Long studentId;
+        private Long courseId;
         private List<AbilityDimension> dimensions;
         private BigDecimal overallScore;
         private String analysis;
         private List<String> recommendations;
+        private List<GradeResponse> grades;
         
         // Getters and Setters
         public List<AbilityDimension> getDimensions() { return dimensions; }
@@ -1475,12 +1635,17 @@ public class GradeDTO {
         public String getAnalysis() { return analysis; }
         public void setAnalysis(String analysis) { this.analysis = analysis; }
         
-        public void setStudentId(Long studentId) {
-            // 可以添加studentId字段或使用现有逻辑
-        }
+        public Long getStudentId() { return studentId; }
+        public void setStudentId(Long studentId) { this.studentId = studentId; }
+
+        public List<GradeResponse> getGrades() { return grades; }
+        public void setGrades(List<GradeResponse> grades) { this.grades = grades; }
+        
+        // Additional setter method for compatibility removed due to duplicate definition
         public List<String> getRecommendations() { return recommendations; }
         public void setRecommendations(List<String> recommendations) { this.recommendations = recommendations; }
-        public void setCourseId(Long courseId) { /* Implementation needed */ }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
         public void setAbilities(List<Object> abilities) { /* Implementation needed */ }
         
         public static class AbilityDimension {
@@ -1573,6 +1738,7 @@ public class GradeDTO {
      * 知识点掌握度响应DTO
      */
     public static class KnowledgePointMasteryResponse {
+        private Long courseId;
         private List<KnowledgePointMastery> masteryList;
         private BigDecimal overallMastery;
         private Integer totalPoints;
@@ -1588,7 +1754,8 @@ public class GradeDTO {
         public Integer getMasteredPoints() { return masteredPoints; }
         public void setMasteredPoints(Integer masteredPoints) { this.masteredPoints = masteredPoints; }
         public void setStudentId(Long studentId) { /* Implementation needed */ }
-        public void setCourseId(Long courseId) { /* Implementation needed */ }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
         public void setKnowledgePoints(List<Object> knowledgePoints) { /* Implementation needed */ }
         
         public static class KnowledgePointMastery {
@@ -1984,6 +2151,20 @@ public class GradeDTO {
         private List<GradeResponse> successGrades;
         private List<GradeError> errors;
         
+        // Getters and Setters
+        public Integer getTotalCount() { return totalCount; }
+        public void setTotalCount(Integer totalCount) { this.totalCount = totalCount; }
+        public Integer getSuccessCount() { return successCount; }
+        public void setSuccessCount(Integer successCount) { this.successCount = successCount; }
+        public Integer getFailureCount() { return failureCount; }
+        public void setFailureCount(Integer failureCount) { this.failureCount = failureCount; }
+        public List<GradeResponse> getSuccessGrades() { return successGrades; }
+        public void setSuccessGrades(List<GradeResponse> successGrades) { this.successGrades = successGrades; }
+        public List<GradeResponse> getGrades() { return successGrades; }
+        public void setGrades(List<GradeResponse> grades) { this.successGrades = grades; }
+        public List<GradeError> getErrors() { return errors; }
+        public void setErrors(List<GradeError> errors) { this.errors = errors; }
+        
         @Data
         @NoArgsConstructor
         @AllArgsConstructor
@@ -2009,9 +2190,18 @@ public class GradeDTO {
         private BigDecimal totalScore;
         private String finalGrade;
         private List<TaskGradeDetail> taskGrades;
+        private List<GradeResponse> grades;
         private Double completionRate;
         private Integer rank;
         private LocalDateTime lastUpdateTime;
+        
+        public void setGrades(List<GradeResponse> grades) {
+            this.grades = grades;
+        }
+        
+        public List<GradeResponse> getGrades() {
+            return grades;
+        }
         
         @Data
         @NoArgsConstructor
@@ -2036,11 +2226,20 @@ public class GradeDTO {
     @AllArgsConstructor
     public static class GradeExportRequest {
         private Long courseId;
+        private Long taskId;
         private List<Long> taskIds;
         private List<Long> studentIds;
         private String exportFormat; // EXCEL, CSV, PDF
         private Boolean includeStatistics;
         private String dateRange;
+        
+        public Long getTaskId() {
+            return taskId;
+        }
+        
+        public void setTaskId(Long taskId) {
+            this.taskId = taskId;
+        }
     }
 
     /**
@@ -2095,6 +2294,17 @@ public class GradeDTO {
         private Integer totalStudents;
         private List<StudentRanking> rankings;
         private RankingStatistics statistics;
+        private Integer rank;
+        private Long studentId;
+        private BigDecimal score;
+        
+        // Additional methods for compatibility
+        public void setRank(int rank) { this.rank = rank; }
+        public Integer getRank() { return rank; }
+        public void setStudentId(Long studentId) { this.studentId = studentId; }
+        public Long getStudentId() { return studentId; }
+        public void setScore(BigDecimal score) { this.score = score; }
+        public BigDecimal getScore() { return score; }
         
         @Data
         @NoArgsConstructor
@@ -2106,6 +2316,10 @@ public class GradeDTO {
             private String studentNumber;
             private BigDecimal score;
             private String grade;
+            private GradeResponse gradeResponse;
+            
+            public void setRank(int rank) { this.rank = rank; }
+            public void setGrade(GradeResponse grade) { this.gradeResponse = grade; }
         }
         
         @Data

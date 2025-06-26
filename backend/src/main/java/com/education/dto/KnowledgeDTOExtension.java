@@ -25,18 +25,25 @@ public class KnowledgeDTOExtension {
         private Long courseId;
         private String graphType; // TREE, NETWORK, HIERARCHY
         private Map<String, Object> metadata;
+        private String status;
+        private Long creatorId;
         
         // Getters and Setters
         public String getGraphName() { return graphName; }
         public void setGraphName(String graphName) { this.graphName = graphName; }
         public String getDescription() { return description; }
         public void setDescription(String description) { this.description = description; }
-        public Long getCourseId() { return courseId; }
-        public void setCourseId(Long courseId) { this.courseId = courseId; }
+
         public String getGraphType() { return graphType; }
         public void setGraphType(String graphType) { this.graphType = graphType; }
         public Map<String, Object> getMetadata() { return metadata; }
         public void setMetadata(Map<String, Object> metadata) { this.metadata = metadata; }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
+        public Long getCreatorId() { return creatorId; }
+        public void setCreatorId(Long creatorId) { this.creatorId = creatorId; }
     }
 
     /**
@@ -47,6 +54,7 @@ public class KnowledgeDTOExtension {
         private String graphName;
         private String description;
         private Long courseId;
+        private Long creatorId;
         private String courseName;
         private String graphType;
         private Integer nodeCount;
@@ -63,8 +71,7 @@ public class KnowledgeDTOExtension {
         public void setGraphName(String graphName) { this.graphName = graphName; }
         public String getDescription() { return description; }
         public void setDescription(String description) { this.description = description; }
-        public Long getCourseId() { return courseId; }
-        public void setCourseId(Long courseId) { this.courseId = courseId; }
+
         public String getCourseName() { return courseName; }
         public void setCourseName(String courseName) { this.courseName = courseName; }
         public String getGraphType() { return graphType; }
@@ -73,14 +80,19 @@ public class KnowledgeDTOExtension {
         public void setNodeCount(Integer nodeCount) { this.nodeCount = nodeCount; }
         public Integer getRelationCount() { return relationCount; }
         public void setRelationCount(Integer relationCount) { this.relationCount = relationCount; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
+
         public LocalDateTime getCreateTime() { return createTime; }
         public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
         public LocalDateTime getUpdateTime() { return updateTime; }
         public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
         public Map<String, Object> getMetadata() { return metadata; }
         public void setMetadata(Map<String, Object> metadata) { this.metadata = metadata; }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
+        public Long getCreatorId() { return creatorId; }
+        public void setCreatorId(Long creatorId) { this.creatorId = creatorId; }
     }
 
     /**
@@ -91,6 +103,7 @@ public class KnowledgeDTOExtension {
         private String graphName;
         private String description;
         private Long courseId;
+        private Long creatorId;
         private String courseName;
         private String graphType;
         private List<KnowledgeNodeResponse> nodes;
@@ -107,8 +120,7 @@ public class KnowledgeDTOExtension {
         public void setGraphName(String graphName) { this.graphName = graphName; }
         public String getDescription() { return description; }
         public void setDescription(String description) { this.description = description; }
-        public Long getCourseId() { return courseId; }
-        public void setCourseId(Long courseId) { this.courseId = courseId; }
+
         public String getCourseName() { return courseName; }
         public void setCourseName(String courseName) { this.courseName = courseName; }
         public String getGraphType() { return graphType; }
@@ -117,14 +129,19 @@ public class KnowledgeDTOExtension {
         public void setNodes(List<KnowledgeNodeResponse> nodes) { this.nodes = nodes; }
         public List<KnowledgeRelationResponse> getRelations() { return relations; }
         public void setRelations(List<KnowledgeRelationResponse> relations) { this.relations = relations; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
+
         public LocalDateTime getCreateTime() { return createTime; }
         public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
         public LocalDateTime getUpdateTime() { return updateTime; }
         public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
         public Map<String, Object> getMetadata() { return metadata; }
         public void setMetadata(Map<String, Object> metadata) { this.metadata = metadata; }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
+        public Long getCreatorId() { return creatorId; }
+        public void setCreatorId(Long creatorId) { this.creatorId = creatorId; }
     }
 
     /**
@@ -134,7 +151,10 @@ public class KnowledgeDTOExtension {
         private String graphName;
         private String description;
         private String graphType;
+        private Long courseId;
+        private String status;
         private Map<String, Object> metadata;
+        private Long creatorId;
         
         // Getters and Setters
         public String getGraphName() { return graphName; }
@@ -145,6 +165,12 @@ public class KnowledgeDTOExtension {
         public void setGraphType(String graphType) { this.graphType = graphType; }
         public Map<String, Object> getMetadata() { return metadata; }
         public void setMetadata(Map<String, Object> metadata) { this.metadata = metadata; }
+        public Long getCourseId() { return courseId; }
+        public void setCourseId(Long courseId) { this.courseId = courseId; }
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
+        public Long getCreatorId() { return creatorId; }
+        public void setCreatorId(Long creatorId) { this.creatorId = creatorId; }
     }
 
     /**
@@ -160,6 +186,8 @@ public class KnowledgeDTOExtension {
         private Double positionX;
         private Double positionY;
         private Map<String, Object> properties;
+        private Integer difficultyLevel;
+        private Integer importanceLevel;
         
         // Getters and Setters
         public String getNodeName() { return nodeName; }
@@ -178,6 +206,10 @@ public class KnowledgeDTOExtension {
         public void setPositionY(Double positionY) { this.positionY = positionY; }
         public Map<String, Object> getProperties() { return properties; }
         public void setProperties(Map<String, Object> properties) { this.properties = properties; }
+        public Integer getDifficultyLevel() { return difficultyLevel; }
+        public void setDifficultyLevel(Integer difficultyLevel) { this.difficultyLevel = difficultyLevel; }
+        public Integer getImportanceLevel() { return importanceLevel; }
+        public void setImportanceLevel(Integer importanceLevel) { this.importanceLevel = importanceLevel; }
     }
 
     /**
@@ -190,6 +222,8 @@ public class KnowledgeDTOExtension {
         private String content;
         private String nodeType;
         private String difficulty;
+        private Integer difficultyLevel;
+        private Integer importanceLevel;
         private Double positionX;
         private Double positionY;
         private Long graphId;
@@ -225,6 +259,10 @@ public class KnowledgeDTOExtension {
         public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
         public Map<String, Object> getProperties() { return properties; }
         public void setProperties(Map<String, Object> properties) { this.properties = properties; }
+        public Integer getDifficultyLevel() { return difficultyLevel; }
+        public void setDifficultyLevel(Integer difficultyLevel) { this.difficultyLevel = difficultyLevel; }
+        public Integer getImportanceLevel() { return importanceLevel; }
+        public void setImportanceLevel(Integer importanceLevel) { this.importanceLevel = importanceLevel; }
     }
 
     /**
@@ -239,6 +277,8 @@ public class KnowledgeDTOExtension {
         private Double positionX;
         private Double positionY;
         private Map<String, Object> properties;
+        private Integer difficultyLevel;
+        private Integer importanceLevel;
         
         // Getters and Setters
         public String getNodeName() { return nodeName; }
@@ -257,6 +297,10 @@ public class KnowledgeDTOExtension {
         public void setPositionY(Double positionY) { this.positionY = positionY; }
         public Map<String, Object> getProperties() { return properties; }
         public void setProperties(Map<String, Object> properties) { this.properties = properties; }
+        public Integer getDifficultyLevel() { return difficultyLevel; }
+        public void setDifficultyLevel(Integer difficultyLevel) { this.difficultyLevel = difficultyLevel; }
+        public Integer getImportanceLevel() { return importanceLevel; }
+        public void setImportanceLevel(Integer importanceLevel) { this.importanceLevel = importanceLevel; }
     }
 
     /**
@@ -272,6 +316,8 @@ public class KnowledgeDTOExtension {
         private String description;
         private Double weight;
         private Map<String, Object> properties;
+        private Integer difficultyLevel;
+        private Integer importanceLevel;
         
         // Getters and Setters
         public Long getSourceNodeId() { return sourceNodeId; }
@@ -286,6 +332,10 @@ public class KnowledgeDTOExtension {
         public void setWeight(Double weight) { this.weight = weight; }
         public Map<String, Object> getProperties() { return properties; }
         public void setProperties(Map<String, Object> properties) { this.properties = properties; }
+        public Integer getDifficultyLevel() { return difficultyLevel; }
+        public void setDifficultyLevel(Integer difficultyLevel) { this.difficultyLevel = difficultyLevel; }
+        public Integer getImportanceLevel() { return importanceLevel; }
+        public void setImportanceLevel(Integer importanceLevel) { this.importanceLevel = importanceLevel; }
     }
 
     /**
@@ -305,6 +355,8 @@ public class KnowledgeDTOExtension {
         private LocalDateTime createTime;
         private LocalDateTime updateTime;
         private Map<String, Object> properties;
+        private Integer difficultyLevel;
+        private Integer importanceLevel;
         
         // Getters and Setters
         public Long getRelationId() { return relationId; }
@@ -333,6 +385,10 @@ public class KnowledgeDTOExtension {
         public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
         public Map<String, Object> getProperties() { return properties; }
         public void setProperties(Map<String, Object> properties) { this.properties = properties; }
+        public Integer getDifficultyLevel() { return difficultyLevel; }
+        public void setDifficultyLevel(Integer difficultyLevel) { this.difficultyLevel = difficultyLevel; }
+        public Integer getImportanceLevel() { return importanceLevel; }
+        public void setImportanceLevel(Integer importanceLevel) { this.importanceLevel = importanceLevel; }
     }
 
     /**
@@ -343,6 +399,8 @@ public class KnowledgeDTOExtension {
         private String description;
         private Double weight;
         private Map<String, Object> properties;
+        private Integer difficultyLevel;
+        private Integer importanceLevel;
         
         // Getters and Setters
         public String getRelationType() { return relationType; }
@@ -353,5 +411,9 @@ public class KnowledgeDTOExtension {
         public void setWeight(Double weight) { this.weight = weight; }
         public Map<String, Object> getProperties() { return properties; }
         public void setProperties(Map<String, Object> properties) { this.properties = properties; }
+        public Integer getDifficultyLevel() { return difficultyLevel; }
+        public void setDifficultyLevel(Integer difficultyLevel) { this.difficultyLevel = difficultyLevel; }
+        public Integer getImportanceLevel() { return importanceLevel; }
+        public void setImportanceLevel(Integer importanceLevel) { this.importanceLevel = importanceLevel; }
     }
 }

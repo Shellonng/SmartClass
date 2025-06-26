@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>后端调试测试</title>
+</head>
+<body>
+    <h1>后端调试测试</h1>
+    <button onclick="testDebugInfo()">测试调试信息接口</button>
+    <button onclick="testCorsDebug()">测试CORS调试接口</button>
+    <div id="result"></div>
+
+    <script>
+        async function testDebugInfo() {
+            try {
+                const response = await fetch('http://localhost:8080/api/debug/info');
+                const data = await response.text();
+                document.getElementById('result').innerHTML = `
+                    <h3>调试信息接口测试结果:</h3>
+                    <p>状态: ${response.status}</p>
+                    <pre>${data}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <h3>调试信息接口测试失败:</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+
+        async function testCorsDebug() {
+            try {
+                const response = await fetch('http://localhost:8080/api/debug/cors-test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'http://localhost:5173'
+                    },
+                    body: JSON.stringify({test: 'data'})
+                });
+                const data = await response.text();
+                document.getElementById('result').innerHTML = `
+                    <h3>CORS调试接口测试结果:</h3>
+                    <p>状态: ${response.status}</p>
+                    <pre>${data}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <h3>CORS调试接口测试失败:</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 

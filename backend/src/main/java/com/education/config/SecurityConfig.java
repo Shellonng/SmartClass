@@ -1,5 +1,7 @@
 package com.education.config;
 
+import com.education.security.JwtAuthenticationFilter;
+import com.education.security.JwtAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,12 +28,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    // TODO: 注入JWT过滤器和认证入口点
-    // @Autowired
-    // private JwtAuthenticationFilter jwtAuthenticationFilter;
-    //
-    // @Autowired
-    // private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     /**
      * 安全过滤器链配置
@@ -42,17 +43,19 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // 公开接口
-                .requestMatchers("/api/auth/**").permitAll()
+                // 允许CORS预检请求
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                // 公开接口 - 注意去掉/api前缀，因为context-path已经包含了
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/debug/**").permitAll()
                 .requestMatchers("/doc.html", "/swagger-resources/**", "/webjars/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/druid/**", "/actuator/**").permitAll()
                 // 其他接口需要认证
                 .anyRequest().authenticated()
             );
             
-        // TODO: 添加JWT过滤器和认证入口点
-        // http.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
-        // http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
     }
@@ -72,4 +75,6 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
+
+
 }

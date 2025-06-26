@@ -21,6 +21,8 @@ public class CorsConfig {
      */
     @Bean
     public CorsFilter corsFilter() {
+        System.out.println("🔧 初始化 CORS 过滤器");
+        
         CorsConfiguration config = new CorsConfiguration();
         
         // 允许所有域名进行跨域调用
@@ -34,9 +36,14 @@ public class CorsConfig {
         // 预检请求的有效期，单位为秒
         config.setMaxAge(3600L);
         
+        System.out.println("✅ CORS 配置: 允许所有域名、方法和头部");
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         
-        return new CorsFilter(source);
+        CorsFilter filter = new CorsFilter(source);
+        System.out.println("✅ CORS 过滤器创建完成");
+        
+        return filter;
     }
 }

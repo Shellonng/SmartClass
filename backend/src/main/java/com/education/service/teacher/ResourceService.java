@@ -1,6 +1,7 @@
 package com.education.service.teacher;
 
 import com.education.dto.ResourceDTO;
+import com.education.dto.*;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
 
@@ -22,7 +23,7 @@ public interface ResourceService {
      * @param teacherId 教师ID
      * @return 资源信息
      */
-    ResourceDTO.ResourceResponse uploadResource(ResourceDTO.ResourceUploadRequest uploadRequest, Long teacherId);
+    ResourceResponse uploadResource(ResourceUploadRequest uploadRequest, Long teacherId);
 
     /**
      * 获取资源列表
@@ -31,7 +32,7 @@ public interface ResourceService {
      * @param pageRequest 分页请求
      * @return 资源列表
      */
-    PageResponse<ResourceDTO.ResourceResponse> getResourceList(Long teacherId, PageRequest pageRequest);
+    PageResponse<ResourceResponse> getResourceList(Long teacherId, PageRequest pageRequest);
 
     /**
      * 获取资源详情
@@ -40,7 +41,7 @@ public interface ResourceService {
      * @param teacherId 教师ID
      * @return 资源详情
      */
-    ResourceDTO.ResourceDetailResponse getResourceDetail(Long resourceId, Long teacherId);
+    ResourceDetailResponse getResourceDetail(Long resourceId, Long teacherId);
 
     /**
      * 更新资源信息
@@ -50,7 +51,7 @@ public interface ResourceService {
      * @param teacherId 教师ID
      * @return 更新后的资源信息
      */
-    ResourceDTO.ResourceResponse updateResource(Long resourceId, ResourceDTO.ResourceUpdateRequest updateRequest, Long teacherId);
+    ResourceResponse updateResource(Long resourceId, ResourceUpdateRequest updateRequest, Long teacherId);
 
     /**
      * 删除资源
@@ -78,7 +79,7 @@ public interface ResourceService {
      * @param teacherId 教师ID
      * @return 分享信息
      */
-    ResourceDTO.ResourceShareResponse shareResource(Long resourceId, ResourceDTO.ResourceShareRequest shareRequest, Long teacherId);
+    ResourceDTO.ResourceShareResponse shareResource(Long resourceId, ResourceShareRequest shareRequest, Long teacherId);
 
     /**
      * 取消分享资源
@@ -97,7 +98,7 @@ public interface ResourceService {
      * @param pageRequest 分页请求
      * @return 分享记录
      */
-    PageResponse<ResourceDTO.ResourceShareRecordResponse> getResourceShareRecords(Long resourceId, Long teacherId, PageRequest pageRequest);
+    PageResponse<ResourceShareRecordResponse> getResourceShareRecords(Long resourceId, Long teacherId, PageRequest pageRequest);
 
     /**
      * 下载资源
@@ -114,7 +115,7 @@ public interface ResourceService {
      * @param teacherId 教师ID
      * @return 资源统计
      */
-    ResourceDTO.ResourceStatisticsResponse getResourceStatistics(Long teacherId);
+    ResourceStatisticsResponse getResourceStatistics(Long teacherId);
 
     /**
      * 批量上传资源
@@ -123,7 +124,7 @@ public interface ResourceService {
      * @param teacherId 教师ID
      * @return 上传结果
      */
-    ResourceDTO.BatchUploadResponse batchUploadResources(List<ResourceDTO.ResourceUploadRequest> uploadRequests, Long teacherId);
+    BatchUploadResponse batchUploadResources(List<ResourceUploadRequest> uploadRequests, Long teacherId);
 
     /**
      * 创建文件夹
@@ -132,7 +133,7 @@ public interface ResourceService {
      * @param teacherId 教师ID
      * @return 文件夹信息
      */
-    ResourceDTO.FolderResponse createFolder(ResourceDTO.FolderCreateRequest folderRequest, Long teacherId);
+    FolderResponse createFolder(FolderCreateRequest folderRequest, Long teacherId);
 
     /**
      * 移动资源
@@ -152,7 +153,7 @@ public interface ResourceService {
      * @param teacherId 教师ID
      * @return 新资源信息
      */
-    ResourceDTO.ResourceResponse copyResource(Long resourceId, Long targetFolderId, Long teacherId);
+    ResourceResponse copyResource(Long resourceId, Long targetFolderId, Long teacherId);
 
     /**
      * 搜索资源
@@ -162,7 +163,7 @@ public interface ResourceService {
      * @param pageRequest 分页请求
      * @return 搜索结果
      */
-    PageResponse<ResourceDTO.ResourceResponse> searchResources(String keyword, Long teacherId, PageRequest pageRequest);
+    PageResponse<ResourceResponse> searchResources(String keyword, Long teacherId, PageRequest pageRequest);
 
     /**
      * 获取资源访问记录

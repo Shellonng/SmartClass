@@ -1291,4 +1291,16 @@ public class ResourceDTO {
         public LocalDateTime getLastUpdated() { return lastUpdated; }
         public void setLastUpdated(LocalDateTime lastUpdated) { this.lastUpdated = lastUpdated; }
     }
+
+    /**
+     * 资源移动请求DTO
+     */
+    public static class ResourceMoveRequest {
+        @NotNull(message = "目标文件夹ID不能为空")
+        private Long targetFolderId;
+        
+        // Getters and Setters
+        public Long getTargetFolderId() { return targetFolderId; }
+        public void setTargetFolderId(Long targetFolderId) { this.targetFolderId = targetFolderId; }
+    }
   }

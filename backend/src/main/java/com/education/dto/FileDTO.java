@@ -1024,6 +1024,30 @@ public class FileDTO {
         public void setUsagePercentage(Double usagePercentage) { this.usagePercentage = usagePercentage; }
         public Integer getFileCount() { return fileCount; }
         public void setFileCount(Integer fileCount) { this.fileCount = fileCount; }
+        public void setTotalQuota(long totalQuota2) {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'setTotalQuota'");
+        }
+        public void setUsedSpace(long totalSize) {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'setUsedSpace'");
+        }
+        public void setAvailableSpace(long availableSpace2) {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'setAvailableSpace'");
+        }
+        public void setTotalFiles(int totalFiles2) {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'setTotalFiles'");
+        }
+        public void setRecycleBinSize(long recycleBinSize2) {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'setRecycleBinSize'");
+        }
+        public void setRecycleBinFiles(long size) {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'setRecycleBinFiles'");
+        }
     }
 
     /**
@@ -1285,6 +1309,10 @@ public class FileDTO {
         public void setUserId(Long userId) { this.userId = userId; }
         public String getSyncStatus() { return syncStatus; }
         public void setSyncStatus(String syncStatus) { this.syncStatus = syncStatus; }
+        public void setMessage(String string) {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'setMessage'");
+        }
     }
 
     /**

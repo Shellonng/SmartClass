@@ -286,4 +286,6 @@ public interface StudentService {
      * @return 操作结果
      */
     Boolean updateStudentAbilityAssessment(Long studentId, Object assessment, Long teacherId);
+
+    Object getStudentRanking(Long teacherId, Object rankingParams);
 }
