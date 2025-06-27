@@ -47,3 +47,141 @@
 2025-06-27 00:49:12.812 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path '/api'
 2025-06-27 00:49:12.823 [scheduling-1] WARN  com.education.monitor.DataSourceMonitor - 连接池监控跳过: HikariCP连接池尚未完全初始化
 2025-06-27 00:49:12.824 [main] INFO  com.education.EducationApplication - Started EducationApplication in 4.428 seconds (process running for 4.652)
+2025-06-27 11:32:18.726 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.6 with PID 980 (D:\my_git_code\SmartClass\backend\target\classes started by 28255 in D:\my_git_code\SmartClass\backend)
+2025-06-27 11:32:18.726 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
+2025-06-27 11:32:18.730 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
+2025-06-27 11:32:19.148 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanDefinitionStoreException: Failed to parse configuration class [com.education.EducationApplication]
+2025-06-27 11:32:19.196 [main] ERROR org.springframework.boot.SpringApplication - Application run failed
+org.springframework.beans.factory.BeanDefinitionStoreException: Failed to parse configuration class [com.education.EducationApplication]
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:178)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.processConfigBeanDefinitions(ConfigurationClassPostProcessor.java:415)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry(ConfigurationClassPostProcessor.java:287)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanDefinitionRegistryPostProcessors(PostProcessorRegistrationDelegate.java:344)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:115)
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:778)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:597)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:324)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1317)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
+	at com.education.EducationApplication.main(EducationApplication.java:27)
+Caused by: org.springframework.context.annotation.ConflictingBeanDefinitionException: Annotation-specified bean name 'dashboardController' for bean class [com.education.controller.teacher.DashboardController] conflicts with existing, non-compatible bean definition of same name and class [com.education.controller.student.DashboardController]
+	at org.springframework.context.annotation.ClassPathBeanDefinitionScanner.checkCandidate(ClassPathBeanDefinitionScanner.java:349)
+	at org.springframework.context.annotation.ClassPathBeanDefinitionScanner.doScan(ClassPathBeanDefinitionScanner.java:287)
+	at org.springframework.context.annotation.ComponentScanAnnotationParser.parse(ComponentScanAnnotationParser.java:128)
+	at org.springframework.context.annotation.ConfigurationClassParser.doProcessConfigurationClass(ConfigurationClassParser.java:289)
+	at org.springframework.context.annotation.ConfigurationClassParser.processConfigurationClass(ConfigurationClassParser.java:243)
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:196)
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:164)
+	... 13 common frames omitted
+2025-06-27 12:02:16.691 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.6 with PID 1676 (D:\my_git_code\SmartClass\backend\target\classes started by 28255 in D:\my_git_code\SmartClass\backend)
+2025-06-27 12:02:16.694 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
+2025-06-27 12:02:16.695 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
+2025-06-27 12:02:17.277 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanDefinitionStoreException: Failed to parse configuration class [com.education.EducationApplication]
+2025-06-27 12:02:17.323 [main] ERROR org.springframework.boot.SpringApplication - Application run failed
+org.springframework.beans.factory.BeanDefinitionStoreException: Failed to parse configuration class [com.education.EducationApplication]
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:178)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.processConfigBeanDefinitions(ConfigurationClassPostProcessor.java:415)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry(ConfigurationClassPostProcessor.java:287)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanDefinitionRegistryPostProcessors(PostProcessorRegistrationDelegate.java:344)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:115)
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:778)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:597)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:324)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1317)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
+	at com.education.EducationApplication.main(EducationApplication.java:27)
+Caused by: org.springframework.context.annotation.ConflictingBeanDefinitionException: Annotation-specified bean name 'dashboardController' for bean class [com.education.controller.teacher.DashboardController] conflicts with existing, non-compatible bean definition of same name and class [com.education.controller.student.DashboardController]
+	at org.springframework.context.annotation.ClassPathBeanDefinitionScanner.checkCandidate(ClassPathBeanDefinitionScanner.java:349)
+	at org.springframework.context.annotation.ClassPathBeanDefinitionScanner.doScan(ClassPathBeanDefinitionScanner.java:287)
+	at org.springframework.context.annotation.ComponentScanAnnotationParser.parse(ComponentScanAnnotationParser.java:128)
+	at org.springframework.context.annotation.ConfigurationClassParser.doProcessConfigurationClass(ConfigurationClassParser.java:289)
+	at org.springframework.context.annotation.ConfigurationClassParser.processConfigurationClass(ConfigurationClassParser.java:243)
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:196)
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:164)
+	... 13 common frames omitted
+2025-06-27 12:03:05.062 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.6 with PID 32604 (D:\my_git_code\SmartClass\backend\target\classes started by 28255 in D:\my_git_code\SmartClass\backend)
+2025-06-27 12:03:05.063 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
+2025-06-27 12:03:05.066 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
+2025-06-27 12:03:05.633 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanDefinitionStoreException: Failed to parse configuration class [com.education.EducationApplication]
+2025-06-27 12:03:05.674 [main] ERROR org.springframework.boot.SpringApplication - Application run failed
+org.springframework.beans.factory.BeanDefinitionStoreException: Failed to parse configuration class [com.education.EducationApplication]
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:178)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.processConfigBeanDefinitions(ConfigurationClassPostProcessor.java:415)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry(ConfigurationClassPostProcessor.java:287)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanDefinitionRegistryPostProcessors(PostProcessorRegistrationDelegate.java:344)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:115)
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:778)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:597)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:324)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1317)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
+	at com.education.EducationApplication.main(EducationApplication.java:27)
+Caused by: org.springframework.context.annotation.ConflictingBeanDefinitionException: Annotation-specified bean name 'dashboardServiceImpl' for bean class [com.education.service.teacher.impl.DashboardServiceImpl] conflicts with existing, non-compatible bean definition of same name and class [com.education.service.student.impl.DashboardServiceImpl]
+	at org.springframework.context.annotation.ClassPathBeanDefinitionScanner.checkCandidate(ClassPathBeanDefinitionScanner.java:349)
+	at org.springframework.context.annotation.ClassPathBeanDefinitionScanner.doScan(ClassPathBeanDefinitionScanner.java:287)
+	at org.springframework.context.annotation.ComponentScanAnnotationParser.parse(ComponentScanAnnotationParser.java:128)
+	at org.springframework.context.annotation.ConfigurationClassParser.doProcessConfigurationClass(ConfigurationClassParser.java:289)
+	at org.springframework.context.annotation.ConfigurationClassParser.processConfigurationClass(ConfigurationClassParser.java:243)
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:196)
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:164)
+	... 13 common frames omitted
+2025-06-27 12:05:02.236 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.6 with PID 8844 (D:\my_git_code\SmartClass\backend\target\classes started by 28255 in D:\my_git_code\SmartClass\backend)
+2025-06-27 12:05:02.236 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
+2025-06-27 12:05:02.236 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
+2025-06-27 12:05:04.112 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-06-27 12:05:04.122 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-06-27 12:05:04.200 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 41 ms. Found 0 Redis repository interfaces.
+2025-06-27 12:05:04.394 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\AIFeatureMapper.class]
+2025-06-27 12:05:04.394 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\ChapterMapper.class]
+2025-06-27 12:05:04.394 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\ClassMapper.class]
+2025-06-27 12:05:04.394 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\CourseMapper.class]
+2025-06-27 12:05:04.394 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\GradeMapper.class]
+2025-06-27 12:05:04.394 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\KnowledgeGraphMapper.class]
+2025-06-27 12:05:04.394 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\KnowledgeNodeMapper.class]
+2025-06-27 12:05:04.398 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\KnowledgeRelationMapper.class]
+2025-06-27 12:05:04.398 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\LearningProgressMapper.class]
+2025-06-27 12:05:04.398 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\QuestionBankMapper.class]
+2025-06-27 12:05:04.398 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\ResourceMapper.class]
+2025-06-27 12:05:04.398 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\StudentMapper.class]
+2025-06-27 12:05:04.398 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\TaskMapper.class]
+2025-06-27 12:05:04.402 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\TaskSubmissionMapper.class]
+2025-06-27 12:05:04.402 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\TeacherMapper.class]
+2025-06-27 12:05:04.403 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\my_git_code\SmartClass\backend\target\classes\com\education\mapper\UserMapper.class]
+2025-06-27 12:05:04.405 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'AIFeatureMapper' and 'com.education.mapper.AIFeatureMapper' mapperInterface
+2025-06-27 12:05:04.410 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'chapterMapper' and 'com.education.mapper.ChapterMapper' mapperInterface
+2025-06-27 12:05:04.411 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'classMapper' and 'com.education.mapper.ClassMapper' mapperInterface
+2025-06-27 12:05:04.411 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'courseMapper' and 'com.education.mapper.CourseMapper' mapperInterface
+2025-06-27 12:05:04.415 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'gradeMapper' and 'com.education.mapper.GradeMapper' mapperInterface
+2025-06-27 12:05:04.415 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeGraphMapper' and 'com.education.mapper.KnowledgeGraphMapper' mapperInterface
+2025-06-27 12:05:04.415 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeNodeMapper' and 'com.education.mapper.KnowledgeNodeMapper' mapperInterface
+2025-06-27 12:05:04.418 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'knowledgeRelationMapper' and 'com.education.mapper.KnowledgeRelationMapper' mapperInterface
+2025-06-27 12:05:04.420 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'learningProgressMapper' and 'com.education.mapper.LearningProgressMapper' mapperInterface
+2025-06-27 12:05:04.420 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'questionBankMapper' and 'com.education.mapper.QuestionBankMapper' mapperInterface
+2025-06-27 12:05:04.424 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'resourceMapper' and 'com.education.mapper.ResourceMapper' mapperInterface
+2025-06-27 12:05:04.424 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'studentMapper' and 'com.education.mapper.StudentMapper' mapperInterface
+2025-06-27 12:05:04.426 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskMapper' and 'com.education.mapper.TaskMapper' mapperInterface
+2025-06-27 12:05:04.427 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'taskSubmissionMapper' and 'com.education.mapper.TaskSubmissionMapper' mapperInterface
+2025-06-27 12:05:04.427 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'teacherMapper' and 'com.education.mapper.TeacherMapper' mapperInterface
+2025-06-27 12:05:04.427 [main] DEBUG org.mybatis.spring.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'userMapper' and 'com.education.mapper.UserMapper' mapperInterface
+2025-06-27 12:05:05.971 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+2025-06-27 12:05:05.990 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-06-27 12:05:05.993 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2025-06-27 12:05:06.148 [main] INFO  o.a.c.c.ContainerBase.[Tomcat].[localhost].[/api] - Initializing Spring embedded WebApplicationContext
+2025-06-27 12:05:06.148 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3823 ms
+2025-06-27 12:05:07.155 [main] DEBUG com.education.security.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2025-06-27 12:05:13.628 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
+2025-06-27 12:05:13.889 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@258ac1e6, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@491f3fb0, org.springframework.security.web.context.SecurityContextHolderFilter@df5f657, org.springframework.security.web.header.HeaderWriterFilter@4e7b89b6, org.springframework.security.web.authentication.logout.LogoutFilter@5de14222, com.education.security.JwtAuthenticationFilter@8b1202a, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1aba8978, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@487ee2a, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@3d0ce151, org.springframework.security.web.session.SessionManagementFilter@5ee76cf2, org.springframework.security.web.access.ExceptionTranslationFilter@5d3a238, org.springframework.security.web.access.intercept.AuthorizationFilter@756030e2]
+2025-06-27 12:05:15.660 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path '/api'
+2025-06-27 12:05:15.696 [scheduling-1] WARN  com.education.monitor.DataSourceMonitor - 连接池监控跳过: HikariCP连接池尚未完全初始化
+2025-06-27 12:05:15.699 [main] INFO  com.education.EducationApplication - Started EducationApplication in 14.184 seconds (process running for 14.741)
+2025-06-27 12:10:15.705 [scheduling-1] WARN  com.education.monitor.DataSourceMonitor - 连接池监控跳过: HikariCP连接池尚未完全初始化
+2025-06-27 12:15:15.697 [scheduling-1] WARN  com.education.monitor.DataSourceMonitor - 连接池监控跳过: HikariCP连接池尚未完全初始化
