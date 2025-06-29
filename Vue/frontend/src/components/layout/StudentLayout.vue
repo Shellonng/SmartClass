@@ -1,6 +1,6 @@
 <template>
   <a-layout class="student-layout">
-    <!-- 侧边�?-->
+    <!-- 侧边栏 -->
     <a-layout-sider
       v-model:collapsed="collapsed"
       :trigger="null"
@@ -34,8 +34,8 @@
             <FileTextOutlined />
           </template>
           <template #title>作业中心</template>
-          <a-menu-item key="assignments-todo">待完�?/a-menu-item>
-          <a-menu-item key="assignments-completed">已完�?/a-menu-item>
+          <a-menu-item key="assignments-todo">待完成</a-menu-item>
+          <a-menu-item key="assignments-completed">已完成</a-menu-item>
           <a-menu-item key="assignments-all">全部作业</a-menu-item>
         </a-sub-menu>
         
@@ -60,7 +60,7 @@
             <BookOutlined />
           </template>
           <template #title>学习资源</template>
-          <a-menu-item key="resources-library">资源�?/a-menu-item>
+          <a-menu-item key="resources-library">资源库</a-menu-item>
           <a-menu-item key="resources-favorites">我的收藏</a-menu-item>
         </a-sub-menu>
         
@@ -144,7 +144,8 @@
                 <a-menu-divider />
                 <a-menu-item key="logout">
                   <LogoutOutlined />
-                  退出登�?                </a-menu-item>
+                  退出登录
+                </a-menu-item>
               </a-menu>
             </template>
           </a-dropdown>
@@ -218,12 +219,12 @@
           <ClockCircleOutlined style="font-size: 48px; color: #1890ff;" />
         </div>
         <div class="reminder-content">
-          <h3>该休息一下了�?/h3>
-          <p>您已经连续学习了 {{ studyDuration }} 分钟，建议休�?10-15 分钟后继续学习�?/p>
+          <h3>该休息一下了！</h3>
+          <p>您已经连续学习了 {{ studyDuration }} 分钟，建议休息 10-15 分钟后继续学习。</p>
         </div>
         <div class="reminder-actions">
           <a-button @click="studyReminderVisible = false">继续学习</a-button>
-          <a-button type="primary" @click="takeBreak">休息一�?/a-button>
+          <a-button type="primary" @click="takeBreak">休息一下</a-button>
         </div>
       </div>
     </a-modal>
@@ -233,7 +234,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore, type User } from '@/stores/auth'
+import { useAuthStore } from '@/stores/auth'
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -257,17 +258,19 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
-// 侧边栏状�?const collapsed = ref(false)
+// 侧边栏状态
+const collapsed = ref(false)
 const selectedKeys = ref<string[]>(['dashboard'])
 const openKeys = ref<string[]>([])
 
 // 用户信息
-const userInfo = computed(() => authStore.user as User | null)
+const userInfo = computed(() => authStore.user)
 
 // 学习进度
 const todayProgress = ref(65)
 
-// 面包屑导�?const breadcrumbItems = computed(() => {
+// 面包屑导航
+const breadcrumbItems = computed(() => {
   const items = [{ title: '学习中心', path: '/student' }]
   
   if (route.meta?.breadcrumb) {
@@ -285,16 +288,16 @@ const notifications = ref([
   {
     id: 1,
     title: '新作业通知',
-    description: '数学老师布置了新的作�?,
-    time: '5分钟�?,
+    description: '数学老师布置了新的作业,',
+    time: '5分钟,',
     icon: 'FileTextOutlined',
     color: '#1890ff'
   },
   {
     id: 2,
     title: '成绩发布',
-    description: '英语测试成绩已发�?,
-    time: '1小时�?,
+    description: '英语测试成绩已发布,',
+    time: '1小时,',
     icon: 'TrophyOutlined',
     color: '#52c41a'
   },
@@ -302,7 +305,7 @@ const notifications = ref([
     id: 3,
     title: '学习提醒',
     description: '今日学习计划还有2项未完成',
-    time: '2小时�?,
+    time: '2小时,',
     icon: 'CalendarOutlined',
     color: '#faad14'
   }
@@ -333,7 +336,8 @@ function updateSelectedKeys(path: string) {
     const key = pathSegments.slice(1).join('-')
     selectedKeys.value = [key || 'dashboard']
     
-    // 自动展开父菜�?    if (key.includes('-')) {
+    // 自动展开父菜单
+    if (key.includes('-')) {
       const parentKey = key.split('-')[0]
       if (!openKeys.value.includes(parentKey)) {
         openKeys.value.push(parentKey)
@@ -379,9 +383,10 @@ function handleUserMenuClick({ key }: { key: string }) {
   }
 }
 
-// 退出登�?function handleLogout() {
-  authStore.logoutUser()
-  message.success('已退出登�?)
+// 退出登录
+function handleLogout() {
+  authStore.clearAuth()
+  message.success('已退出登录')
   router.push('/login')
 }
 
@@ -399,17 +404,21 @@ function toggleAITutor() {
 // 休息提醒
 function takeBreak() {
   studyReminderVisible.value = false
-  message.success('记得适当休息，保护视力哦�?)
-  // 可以添加休息计时�?}
+  message.success('记得适当休息，保护视力哦')
+  // 可以添加休息计时
+}
 
-// 开始学习计�?function startStudyTimer() {
+// 开始学习计时
+function startStudyTimer() {
   studyTimer = setInterval(() => {
     studyDuration.value += 1
     
-    // �?5分钟提醒一�?    if (studyDuration.value % 45 === 0) {
+    // 5分钟提醒一次
+    if (studyDuration.value % 45 === 0) {
       studyReminderVisible.value = true
     }
-  }, 60000) // 每分钟更新一�?}
+  }, 60000) // 每分钟更新一次
+}
 
 // 显示AI助手提示
 function showAITooltipTemporarily() {
@@ -420,9 +429,11 @@ function showAITooltipTemporarily() {
 }
 
 onMounted(() => {
-  // 初始化时设置正确的菜单选中状�?  updateSelectedKeys(route.path)
+  // 初始化时设置正确的菜单选中状态
+  updateSelectedKeys(route.path)
   
-  // 开始学习计�?  startStudyTimer()
+  // 开始学习计时
+  startStudyTimer()
   
   // 5秒后显示AI助手提示
   setTimeout(() => {
@@ -675,7 +686,7 @@ onUnmounted(() => {
   justify-content: center;
 }
 
-/* 响应式设�?*/
+/* 响应式设置 */
 @media (min-width: 1400px) {
   .main-layout {
     max-width: none;
@@ -696,6 +707,5 @@ onUnmounted(() => {
     margin: 16px;
   }
 }
-
 
 </style>
