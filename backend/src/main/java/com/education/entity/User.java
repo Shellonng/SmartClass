@@ -31,7 +31,7 @@ public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Schema(description = "用户ID")
-    @TableId(value = "id", type = IdType.ASSIGN_ID)
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     @Schema(description = "用户名", example = "admin")
@@ -55,7 +55,7 @@ public class User implements Serializable {
     private String email;
 
     @Schema(description = "手机号", example = "13800138000")
-    @TableField("phone")
+    @TableField(exist = false)
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
     private String phone;
 
@@ -78,42 +78,15 @@ public class User implements Serializable {
     @TableField("status")
     private String status;
 
-    @Schema(description = "最后登录时间")
-    @TableField("last_login_time")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime lastLoginTime;
-
-    @Schema(description = "最后登录IP")
-    @TableField("last_login_ip")
-    private String lastLoginIp;
-
     @Schema(description = "创建时间")
-    @TableField(value = "created_time", fill = FieldFill.INSERT)
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     @Schema(description = "更新时间")
-    @TableField(value = "updated_time", fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
-
-    @Schema(description = "是否删除")
-    @TableField("deleted")
-    @TableLogic
-    @JsonIgnore
-    private Boolean isDeleted;
-
-    @Schema(description = "扩展字段1")
-    @TableField("ext_field1")
-    private String extField1;
-
-    @Schema(description = "扩展字段2")
-    @TableField("ext_field2")
-    private String extField2;
-
-    @Schema(description = "扩展字段3")
-    @TableField("ext_field3")
-    private String extField3;
 
     /**
      * 用户角色枚举
@@ -315,17 +288,6 @@ public class User implements Serializable {
     }
 
     /**
-     * 更新最后登录信息
-     * 
-     * @param loginTime 登录时间
-     * @param loginIp 登录IP
-     */
-    public void updateLastLogin(LocalDateTime loginTime, String loginIp) {
-        this.lastLoginTime = loginTime;
-        this.lastLoginIp = loginIp;
-    }
-
-    /**
      * 重置密码前的验证
      * 
      * @return 是否可以重置密码
@@ -340,6 +302,6 @@ public class User implements Serializable {
      * @return 账户是否可用
      */
     public boolean isAccountAvailable() {
-        return isActive() && !isDeleted;
+        return isActive();
     }
 }

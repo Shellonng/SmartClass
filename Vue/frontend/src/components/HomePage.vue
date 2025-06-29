@@ -52,7 +52,7 @@ const featuredCourses = ref([
     id: 4,
     title: '线性代数',
     instructor: '赵教授',
-    university: '中科大',
+    university: '中科院',
     students: 9800,
     image: '',
     category: '数学'
@@ -70,9 +70,9 @@ const categories = ref([
 
 const stats = ref([
   { label: '优质课程', value: '5000+', icon: '📚' },
-  { label: '注册学员', value: '300万+', icon: '👥' },
+  { label: '注册学员', value: '300万', icon: '👥' },
   { label: '合作高校', value: '200+', icon: '🏫' },
-  { label: '认证证书', value: '50万+', icon: '🏆' }
+  { label: '认证证书', value: '50万', icon: '🏆' }
 ])
 
 const goToCourses = () => {
@@ -88,11 +88,18 @@ const goToRegister = () => {
 }
 
 const goToDashboard = () => {
-  if (authStore.user?.role === 'teacher') {
+  if (authStore.user?.role === 'TEACHER') {
     router.push('/teacher/dashboard')
+  } else if (authStore.user?.role === 'STUDENT') {
+    router.push('/student/dashboard') 
   } else {
-    router.push('/student/dashboard')
+    router.push('/')
   }
+}
+
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push('/')
 }
 
 const currentDate = computed(() => {
@@ -135,7 +142,7 @@ const currentDate = computed(() => {
                 <a-menu>
                   <a-menu-item @click="goToDashboard">个人中心</a-menu-item>
                   <a-menu-divider />
-                  <a-menu-item @click="authStore.logout">退出登录</a-menu-item>
+                  <a-menu-item @click="handleLogout">退出登录</a-menu-item>
                 </a-menu>
               </template>
             </a-dropdown>
@@ -173,7 +180,7 @@ const currentDate = computed(() => {
             </div>
             <div class="banner-stats">
               <div class="stat-item">
-                <span class="stat-number">300万+</span>
+                <span class="stat-number">300万</span>
                 <span class="stat-label">学习者</span>
               </div>
               <div class="stat-item">
@@ -189,11 +196,11 @@ const currentDate = computed(() => {
           <div class="banner-visual">
             <div class="visual-container">
               <div class="hero-image placeholder-image">
-              <div class="placeholder-content">
-                <BookOutlined style="font-size: 64px; color: #1890ff;" />
-                <p>在线学习平台</p>
+                <div class="placeholder-content">
+                  <BookOutlined style="font-size: 64px; color: #1890ff;" />
+                  <p>在线学习平台</p>
+                </div>
               </div>
-            </div>
               <div class="floating-cards">
                 <div class="floating-card card-1">
                   <BookOutlined />
@@ -384,31 +391,19 @@ const currentDate = computed(() => {
 }
 
 .logo-img {
-  width: 32px;
   height: 32px;
+  width: auto;
 }
 
 .logo-text {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: bold;
   color: #1890ff;
 }
 
-.nav-menu {
-  border-bottom: none;
+.main-nav .nav-menu {
+  border: none;
   background: transparent;
-}
-
-.nav-menu .ant-menu-item {
-  font-weight: 500;
-  color: #666;
-  border-bottom: 2px solid transparent;
-}
-
-.nav-menu .ant-menu-item:hover,
-.nav-menu .ant-menu-item-selected {
-  color: #1890ff;
-  border-bottom-color: #1890ff;
 }
 
 .header-right {
@@ -421,7 +416,6 @@ const currentDate = computed(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 500;
 }
 
 .auth-buttons {
@@ -433,188 +427,112 @@ const currentDate = computed(() => {
 .hero-banner {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 80px 0 120px;
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-banner::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
-  pointer-events: none;
+  padding: 80px 20px;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
 }
 
 .banner-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
-  position: relative;
-  z-index: 1;
+  width: 100%;
 }
 
 .banner-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 80px;
+  gap: 60px;
   align-items: center;
-}
-
-.banner-text {
-  animation: slideInLeft 0.8s ease-out;
 }
 
 .banner-title {
   font-size: 3.5rem;
-  font-weight: 700;
-  line-height: 1.2;
+  font-weight: bold;
   margin-bottom: 24px;
+  line-height: 1.2;
 }
 
 .title-highlight {
-  background: linear-gradient(45deg, #ffffff, #e3f2fd);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffd700;
 }
 
 .banner-subtitle {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
+  margin-bottom: 32px;
   line-height: 1.6;
-  margin-bottom: 40px;
   opacity: 0.9;
 }
 
 .banner-actions {
   display: flex;
   gap: 16px;
-  margin-bottom: 48px;
+  margin-bottom: 40px;
 }
 
-.cta-button {
+.cta-button, .secondary-button {
   height: 48px;
-  padding: 0 32px;
-  font-size: 16px;
-  border-radius: 24px;
-  background: linear-gradient(45deg, #1890ff, #722ed1);
-  border: none;
-  box-shadow: 0 4px 15px rgba(24, 144, 255, 0.4);
-  transition: all 0.3s ease;
-}
-
-.cta-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.6);
-}
-
-/* 占位符图片样式 */
-.placeholder-image {
-  width: 100%;
-  height: 400px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border: 2px dashed #1890ff;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.placeholder-content {
-  text-align: center;
-  color: #1890ff;
-}
-
-.placeholder-content p {
-  margin-top: 16px;
-  font-size: 18px;
-  font-weight: 500;
-}
-
-.placeholder-course-image {
-  height: 200px;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.placeholder-course-image .placeholder-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.placeholder-course-image .placeholder-content span {
-  font-size: 14px;
-  font-weight: 500;
-  color: #64748b;
+  padding: 0 24px;
+  font-size: 1.1rem;
+  border-radius: 6px;
 }
 
 .secondary-button {
-  height: 48px;
-  padding: 0 32px;
-  font-size: 16px;
-  border-radius: 24px;
   background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.secondary-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
 }
 
 .banner-stats {
   display: flex;
-  gap: 32px;
+  gap: 40px;
 }
 
-.banner-stats .stat-item {
+.stat-item {
   text-align: center;
 }
 
 .stat-number {
   display: block;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 4px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #ffd700;
+  margin-bottom: 8px;
 }
 
 .stat-label {
-  font-size: 0.875rem;
+  font-size: 1rem;
   opacity: 0.8;
 }
 
 .banner-visual {
   position: relative;
-  animation: slideInRight 0.8s ease-out;
 }
 
 .visual-container {
   position: relative;
+  height: 400px;
 }
 
 .hero-image {
   width: 100%;
-  height: auto;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
 }
 
-.hero-image:hover {
-  transform: scale(1.02);
+.placeholder-content {
+  text-align: center;
+  color: white;
+}
+
+.placeholder-content p {
+  margin-top: 16px;
+  font-size: 1.1rem;
 }
 
 .floating-cards {
@@ -628,47 +546,46 @@ const currentDate = computed(() => {
 
 .floating-card {
   position: absolute;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
   padding: 12px 16px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 0.9rem;
   color: #333;
-  font-weight: 500;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  animation: float 3s ease-in-out infinite;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .card-1 {
-  top: 20%;
-  right: -10%;
-  animation-delay: 0s;
+  top: 20px;
+  right: 20px;
 }
 
 .card-2 {
-  bottom: 30%;
-  left: -10%;
-  animation-delay: 1s;
+  bottom: 80px;
+  left: 20px;
 }
 
 .card-3 {
-  top: 60%;
-  right: 10%;
-  animation-delay: 2s;
+  top: 50%;
+  right: -20px;
 }
 
 /* 课程分类导航 */
 .category-nav {
-  background: #ffffff;
-  padding: 24px 0;
-  border-bottom: 1px solid #f0f0f0;
+  background: #f8f9fa;
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .category-tabs {
   display: flex;
-  gap: 32px;
+  gap: 20px;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -677,357 +594,33 @@ const currentDate = computed(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 16px 24px;
+  padding: 20px;
+  background: white;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 100px;
+  min-width: 120px;
 }
 
 .tab-item:hover,
 .tab-item.active {
-  background: #f0f7ff;
-  color: #1890ff;
+  background: #1890ff;
+  color: white;
+  transform: translateY(-2px);
 }
 
 .tab-icon {
-  font-size: 24px;
+  font-size: 2rem;
+  margin-bottom: 8px;
 }
 
 .tab-text {
-  font-size: 14px;
+  font-size: 0.9rem;
   font-weight: 500;
 }
 
 /* 精品课程推荐 */
 .featured-courses {
-  padding: 80px 0;
-  background: #fafafa;
-}
-
-.courses-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-  margin-bottom: 48px;
-}
-
-.course-card {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.course-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.course-cover {
-  position: relative;
-  height: 200px;
-  overflow: hidden;
-}
-
-.course-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.course-card:hover .course-image {
-  transform: scale(1.05);
-}
-
-.course-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.course-card:hover .course-overlay {
-  opacity: 1;
-}
-
-.preview-btn {
-  border-radius: 20px;
-  border: none;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-}
-
-.course-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: #1890ff;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.course-info {
-  padding: 20px;
-}
-
-.course-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #333;
-  line-height: 1.4;
-}
-
-.course-meta {
-  margin-bottom: 16px;
-}
-
-.instructor-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.instructor-name {
-  font-weight: 500;
-  color: #333;
-}
-
-.university {
-  color: #666;
-  font-size: 14px;
-}
-
-.course-stats {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  color: #666;
-  font-size: 14px;
-}
-
-.course-stats .stat-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}.course-actions .ant-btn {
-   height: 40px;
-   border-radius: 8px;
-   font-weight: 500;
- }
-
-/* 通用样式 */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 48px;
-}
-
-.section-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 16px;
-}
-
-.section-subtitle {
-  font-size: 1.125rem;
-  color: #666;
-  line-height: 1.6;
-}
-
-.section-footer {
-  text-align: center;
-  margin-top: 48px;
-}
-
-/* 动画效果 */
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 响应式设计 */
-@media (max-width: 1024px) {
-  .banner-content {
-    grid-template-columns: 1fr;
-    gap: 40px;
-    text-align: center;
-  }
-  
-  .banner-title {
-    font-size: 2.5rem;
-  }
-  
-  .courses-container {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .header-container {
-    padding: 0 16px;
-  }
-  
-  .header-left {
-    gap: 20px;
-  }
-  
-  .main-nav {
-    display: none;
-  }
-  
-  .banner-title {
-    font-size: 2rem;
-  }
-  
-  .banner-actions {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .banner-stats {
-    justify-content: center;
-    gap: 20px;
-  }
-  
-  .category-tabs {
-    gap: 16px;
-  }
-  
-  .tab-item {
-    padding: 12px 16px;
-    min-width: 80px;
-  }
-  
-  .courses-container {
-    grid-template-columns: 1fr;
-  }
-  
-  .floating-cards {
-    display: none;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 0 16px;
-  }
-  
-  .banner-title {
-    font-size: 1.75rem;
-  }
-  
-  .section-title {
-    font-size: 2rem;
-  }
-  
-  .course-info {
-    padding: 16px;
-  }
-}
-
-/* Stats Section */
-.stats-section {
-  padding: 60px 20px;
-  background: #f8f9fa;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 40px;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 30px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.stat-icon {
-  font-size: 3rem;
-  margin-bottom: 15px;
-}
-
-.stat-value {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #1890ff;
-  margin-bottom: 10px;
-}
-
-.stat-label {
-  font-size: 1.1rem;
-  color: #666;
-}
-
-/* Courses Section */
-.courses-section {
   padding: 80px 20px;
 }
 
@@ -1036,18 +629,18 @@ const currentDate = computed(() => {
   margin-bottom: 60px;
 }
 
-.section-header h2 {
+.section-title {
   font-size: 2.5rem;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
   color: #333;
 }
 
-.section-header p {
+.section-subtitle {
   font-size: 1.1rem;
   color: #666;
 }
 
-.courses-grid {
+.courses-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 30px;
@@ -1068,19 +661,47 @@ const currentDate = computed(() => {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.course-image {
+.course-cover {
   position: relative;
   height: 200px;
   overflow: hidden;
 }
 
-.course-image img {
+.course-image,
+.placeholder-course-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.course-category {
+.placeholder-course-image {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.course-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.course-card:hover .course-overlay {
+  opacity: 1;
+}
+
+.course-badge {
   position: absolute;
   top: 15px;
   left: 15px;
@@ -1091,27 +712,54 @@ const currentDate = computed(() => {
   font-size: 0.9rem;
 }
 
-.course-content {
+.course-info {
   padding: 20px;
 }
 
 .course-title {
   font-size: 1.3rem;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   color: #333;
 }
 
-.course-instructor {
+.course-meta {
+  margin-bottom: 16px;
+}
+
+.instructor-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.instructor-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.university {
   color: #666;
-  margin-bottom: 15px;
+  font-size: 0.9rem;
 }
 
 .course-stats {
   display: flex;
   align-items: center;
+  gap: 20px;
+  margin-bottom: 16px;
   color: #999;
   font-size: 0.9rem;
+}
+
+.course-stats .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.course-actions {
+  margin-top: 16px;
 }
 
 .section-footer {
@@ -1192,23 +840,52 @@ const currentDate = computed(() => {
   line-height: 1.6;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .hero-content {
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .banner-content {
     grid-template-columns: 1fr;
     text-align: center;
+    gap: 40px;
   }
   
-  .hero-title {
+  .banner-title {
     font-size: 2.5rem;
   }
-  
-  .hero-buttons {
-    justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .header-left {
+    gap: 20px;
   }
   
-  .stats-grid,
-  .courses-grid,
+  .main-nav {
+    display: none;
+  }
+  
+  .banner-title {
+    font-size: 2rem;
+  }
+  
+  .banner-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .banner-stats {
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .category-tabs {
+    gap: 10px;
+  }
+  
+  .tab-item {
+    min-width: 100px;
+    padding: 15px;
+  }
+  
+  .courses-container,
   .categories-grid,
   .features-grid {
     grid-template-columns: 1fr;

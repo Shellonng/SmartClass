@@ -366,4 +366,13 @@ public interface StudentMapper extends BaseMapper<Student> {
                        @Param("extField1") String extField1, 
                        @Param("extField2") String extField2, 
                        @Param("extField3") String extField3);
+
+    /**
+     * 获取指定年份的最大学号
+     * 
+     * @param year 年份
+     * @return 最大学号
+     */
+    @Select("SELECT MAX(student_id) FROM student WHERE student_id LIKE CONCAT(#{year}, '%')")
+    String getMaxStudentIdByYear(@Param("year") String year);
 }

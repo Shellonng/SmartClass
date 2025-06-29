@@ -2,11 +2,21 @@
 server:
   port: 8080
   servlet:
-    context-path: /api
+    context-path: /
     encoding:
       charset: UTF-8
       enabled: true
       force: true
+    session:
+      cookie:
+        http-only: true
+        secure: false  # 开发环境设为false，生产环境设为true
+        same-site: lax
+        name: JSESSIONID
+        path: /
+      timeout: 86400s  # 会话超时时间，设为24小时
+      tracking-modes: cookie
+      persistent: true
   tomcat:
     uri-encoding: UTF-8
     max-connections: 1000
@@ -14,81 +24,86 @@ server:
       max: 200
       min-spare: 10
 
+# 视频上传配置
+video:
+  upload:
+    path: D:/my_git_code/SmartClass/resource/video
+
 spring:
   application:
     name: education_platform
   
   profiles:
     active: dev
-  
-  # 数据源配置 - 使用HikariCP连接池（基础配置，具体参数在各环境中配置）
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.zaxxer.hikari.HikariDataSource
-    # HikariCP连接池基础配置
-    hikari:
-      # 连接池名称
-      pool-name: HikariPool-Education
-      # 连接测试查询
-      connection-test-query: SELECT 1
-      # 是否自动提交
-      auto-commit: true
-      # 连接初始化SQL
-      connection-init-sql: SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci
-      # 验证超时时间(毫秒)
-      validation-timeout: 5000
-  
-  # Redis配置
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: 
-      database: 0
-      timeout: 10000ms
-      lettuce:
-        pool:
-          max-active: 8
-          max-wait: -1ms
-          max-idle: 8
-          min-idle: 0
-  
-  # 文件上传配置
-  servlet:
-    multipart:
-      max-file-size: 100MB
-      max-request-size: 100MB
-      enabled: true
-  
-  # 邮件配置
-  mail:
-    host: smtp.qq.com
-    port: 587
-    username: your-email@qq.com
-    password: your-email-password
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-  
-  # Jackson配置
-  jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: GMT+8
-    serialization:
-      write-dates-as-timestamps: false
-    deserialization:
-      fail-on-unknown-properties: false
-  
-  # 缓存配置
-  cache:
-    type: redis
-    redis:
-      time-to-live: 1800000  # 30分钟
-      cache-null-values: false
+
+# 数据源配置 - 使用HikariCP连接池（基础配置，具体参数在各环境中配置）
+datasource:
+  driver-class-name: com.mysql.cj.jdbc.Driver
+  type: com.zaxxer.hikari.HikariDataSource
+  # HikariCP连接池基础配置
+  hikari:
+    # 连接池名称
+    pool-name: HikariPool-Education
+    # 连接测试查询
+    connection-test-query: SELECT 1
+    # 是否自动提交
+    auto-commit: true
+    # 连接初始化SQL
+    connection-init-sql: SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci
+    # 验证超时时间(毫秒)
+    validation-timeout: 5000
+
+# Redis配置
+data:
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 10000
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+
+# 文件上传配置
+servlet:
+  multipart:
+    max-file-size: 500MB
+    max-request-size: 500MB
+    enabled: true
+
+# 邮件配置
+mail:
+  host: smtp.qq.com
+  port: 587
+  username: your-email@qq.com
+  password: your-email-password
+  properties:
+    mail:
+      smtp:
+        auth: true
+        starttls:
+          enable: true
+          required: true
+
+# Jackson配置
+jackson:
+  date-format: yyyy-MM-dd HH:mm:ss
+  time-zone: GMT+8
+  serialization:
+    write-dates-as-timestamps: false
+  deserialization:
+    fail-on-unknown-properties: false
+
+# 缓存配置
+cache:
+  type: redis
+  redis:
+    time-to-live: 1800000  # 30分钟
+    cache-null-values: false
 
 # MyBatis-Plus配置
 mybatis-plus:
@@ -100,10 +115,7 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
-      id-type: ASSIGN_ID
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
+      id-type: auto
       table-underline: true
   mapper-locations: classpath*:/mapper/**/*.xml
   type-aliases-package: com.education.entity
@@ -111,10 +123,8 @@ mybatis-plus:
 # 日志配置
 logging:
   level:
-    com.education: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.web: INFO
-    org.mybatis: DEBUG
+    root: info
+    com.education: debug
   pattern:
     console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
     file: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
@@ -171,19 +181,16 @@ knife4j:
 
 # 自定义配置
 education:
-  # JWT配置
-  jwt:
-    secret: education-platform-jwt-secret-key-2024-for-hs512-algorithm-minimum-512-bits-required-security-compliance
-    expiration: 7200000  # 2小时
-    refresh-expiration: 604800000  # 7天
-    header: Authorization
-    prefix: Bearer 
-  
   # 文件存储配置
   file:
-    upload-path: /data/education/uploads/
+    upload-path: ./uploads/  # 使用相对路径，更容易在不同环境中工作
     max-size: 104857600  # 100MB
     allowed-types: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar
+    upload:
+      path: ./uploads  # 文件上传根目录
+    access:
+      url:
+        prefix: /files  # 文件访问URL前缀
   
   # MinIO配置
   minio:
