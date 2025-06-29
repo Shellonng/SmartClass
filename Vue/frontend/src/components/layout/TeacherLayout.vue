@@ -6,15 +6,103 @@
       :trigger="null"
       collapsible
       class="sidebar"
-      :width="240"
+      :width="200"
       :collapsed-width="80"
     >
       <div class="logo">
-        <img src="/logo.svg" alt="Logo" v-if="!collapsed" />
+        <span v-if="!collapsed" class="logo-text">SmartClass</span>
+        <div class="logo-spacer"></div>
+        <a-button 
+          v-if="!collapsed"
+          type="text"
+          @click="collapsed = !collapsed"
+          class="sidebar-collapse-btn"
+        >
+          <MenuFoldOutlined />
+        </a-button>
         <img src="/logo-mini.svg" alt="Logo" v-else />
       </div>
       
+      <!-- 侧边栏折叠按钮，仅在收起状态显示 -->
       <a-menu
+        v-if="collapsed"
+        theme="dark"
+        mode="inline"
+        class="sidebar-menu"
+      >
+        <a-menu-item key="collapse" @click="collapsed = !collapsed">
+          <template #icon>
+            <MenuUnfoldOutlined />
+          </template>
+        </a-menu-item>
+      </a-menu>
+      
+      <!-- 课程详情页侧边栏 -->
+      <template v-if="isCourseDetailPage">
+        <div class="course-sidebar-header">
+          <BookOutlined />
+          <span v-if="!collapsed" class="course-title">{{ currentCourse?.title || currentCourse?.courseName || '课程详情' }}</span>
+        </div>
+        <div v-if="!collapsed" class="course-sidebar-info">
+          <div class="course-semester">{{ currentCourse?.semester || currentCourse?.term || '未设置学期' }}</div>
+          <span>已完成进度: {{ calculateProgress(currentCourse?.startTime, currentCourse?.endTime) }}%</span>
+        </div>
+        <a-menu
+          v-model:selectedKeys="courseSelectedKeys"
+          mode="inline"
+          theme="dark"
+          class="sidebar-menu"
+        >
+          <a-sub-menu key="tasks">
+            <template #icon>
+              <FileTextOutlined />
+            </template>
+            <template #title>任务</template>
+            <a-menu-item key="exams">考试</a-menu-item>
+            <a-menu-item key="assignments">作业</a-menu-item>
+          </a-sub-menu>
+          <a-menu-item key="chapters">
+            <template #icon>
+              <OrderedListOutlined />
+            </template>
+            <span>章节</span>
+          </a-menu-item>
+          <a-menu-item key="discussions">
+            <template #icon>
+              <CommentOutlined />
+            </template>
+            <span>讨论</span>
+          </a-menu-item>
+          <a-menu-item key="resources">
+            <template #icon>
+              <FolderOutlined />
+            </template>
+            <span>资料</span>
+          </a-menu-item>
+          <a-menu-item key="wrongbook">
+            <template #icon>
+              <EditOutlined />
+            </template>
+            <span>错题集</span>
+          </a-menu-item>
+          <a-menu-item key="records">
+            <template #icon>
+              <HistoryOutlined />
+            </template>
+            <span>学习记录</span>
+          </a-menu-item>
+          <a-menu-item key="knowledge-map">
+            <template #icon>
+              <NodeIndexOutlined />
+            </template>
+            <span>知识图谱</span>
+          </a-menu-item>
+        </a-menu>
+      </template>
+      
+      <!-- 普通侧边栏 -->
+      <a-menu
+        v-else
         v-model:selectedKeys="selectedKeys"
         v-model:openKeys="openKeys"
         mode="inline"
@@ -36,6 +124,16 @@
           <template #title>班级管理</template>
           <a-menu-item key="classes-list">班级列表</a-menu-item>
           <a-menu-item key="classes-create">创建班级</a-menu-item>
+        </a-sub-menu>
+        
+        <a-sub-menu key="courses">
+          <template #icon>
+            <BookOutlined />
+          </template>
+          <template #title>课程管理</template>
+          <a-menu-item key="courses-list">课程列表</a-menu-item>
+          <a-menu-item key="courses-create">创建课程</a-menu-item>
+          <a-menu-item key="courses-chapters">章节管理</a-menu-item>
         </a-sub-menu>
         
         <a-sub-menu key="assignments">
@@ -87,21 +185,14 @@
       <!-- 顶部导航 -->
       <a-layout-header class="header">
         <div class="header-left">
-          <a-button
-            type="text"
-            @click="collapsed = !collapsed"
-            class="trigger"
-          >
-            <MenuUnfoldOutlined v-if="collapsed" />
-            <MenuFoldOutlined v-else />
-          </a-button>
-          
-          <a-breadcrumb class="breadcrumb">
-            <a-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path">
-              <router-link v-if="item.path" :to="item.path">{{ item.title }}</router-link>
-              <span v-else>{{ item.title }}</span>
-            </a-breadcrumb-item>
-          </a-breadcrumb>
+          <div class="page-title">
+            <a-breadcrumb class="breadcrumb">
+              <a-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path">
+                <router-link v-if="item.path" :to="item.path">{{ item.title }}</router-link>
+                <span v-else>{{ item.title }}</span>
+              </a-breadcrumb-item>
+            </a-breadcrumb>
+          </div>
         </div>
         
         <div class="header-right">
@@ -200,9 +291,12 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore, type User } from '@/stores/auth'
+import axios from 'axios'
+import dayjs from 'dayjs'
 import {
   DashboardOutlined,
   TeamOutlined,
+  BookOutlined,
   FileTextOutlined,
   UserOutlined,
   FolderOutlined,
@@ -213,7 +307,12 @@ import {
   BellOutlined,
   DownOutlined,
   SettingOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  OrderedListOutlined,
+  CommentOutlined,
+  EditOutlined,
+  HistoryOutlined,
+  NodeIndexOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 
@@ -225,9 +324,85 @@ const authStore = useAuthStore()
 const collapsed = ref(false)
 const selectedKeys = ref<string[]>(['dashboard'])
 const openKeys = ref<string[]>([])
+const courseSelectedKeys = ref<string[]>(['chapters'])
 
 // 用户信息
 const userInfo = computed(() => authStore.user as User | null)
+
+// 判断是否是课程详情页
+const isCourseDetailPage = computed(() => {
+  return /^\/teacher\/courses\/\d+$/.test(route.path);
+})
+
+// 当前课程信息
+const currentCourse = ref<any>(null)
+
+// 计算课程进度
+const calculateProgress = (startTime?: string, endTime?: string): number => {
+  if (!startTime || !endTime) return 0;
+  
+  const start = dayjs(startTime);
+  const end = dayjs(endTime);
+  const now = dayjs();
+  
+  // 如果当前时间在开始时间之前，进度为0
+  if (now.isBefore(start)) return 0;
+  // 如果当前时间在结束时间之后，进度为100
+  if (now.isAfter(end)) return 100;
+  
+  // 计算总时长和已过时长
+  const totalDuration = end.diff(start);
+  const passedDuration = now.diff(start);
+  
+  // 计算百分比
+  const progress = Math.round((passedDuration / totalDuration) * 100);
+  return Math.min(Math.max(progress, 0), 100); // 确保进度在0-100之间
+}
+
+// 获取课程信息
+const fetchCourseInfo = async (courseId: number) => {
+  try {
+    // 获取token和用户ID
+    const token = localStorage.getItem('user-token') || localStorage.getItem('token');
+    const userInfo = localStorage.getItem('user-info');
+    let userId = '';
+    
+    if (userInfo) {
+      try {
+        const userObj = JSON.parse(userInfo);
+        userId = userObj.id || '';
+      } catch (e) {
+        console.error('解析用户信息失败:', e);
+      }
+    }
+    
+    // 使用简化的token格式
+    const authToken = userId ? `Bearer token-${userId}` : (token ? `Bearer ${token}` : '');
+    
+    const response = await axios.get(`/api/teacher/courses/${courseId}`, {
+      headers: {
+        'Authorization': authToken
+      }
+    });
+    
+    if (response.data && response.data.code === 200) {
+      currentCourse.value = response.data.data;
+      console.log('获取到的课程信息:', currentCourse.value);
+    } else {
+      message.error(response.data?.message || '获取课程信息失败');
+    }
+  } catch (error) {
+    console.error('获取课程信息失败:', error);
+    message.error('获取课程信息失败，请检查网络连接');
+  }
+}
+
+// 监听路由变化，获取课程信息
+watch(() => route.params.id, (newId) => {
+  if (isCourseDetailPage.value && newId) {
+    fetchCourseInfo(Number(newId));
+  }
+}, { immediate: true });
 
 // 面包屑导航
 const breadcrumbItems = computed(() => {
@@ -298,6 +473,9 @@ function handleMenuClick({ key }: { key: string }) {
     'dashboard': '/teacher',
     'classes-list': '/teacher/classes',
     'classes-create': '/teacher/classes/create',
+    'courses-list': '/teacher/courses',
+    'courses-create': '/teacher/courses/create',
+    'courses-chapters': '/teacher/courses/chapters',
     'assignments-list': '/teacher/assignments',
     'assignments-create': '/teacher/assignments/create',
     'assignments-review': '/teacher/assignments/review',
@@ -332,7 +510,7 @@ function handleUserMenuClick({ key }: { key: string }) {
 
 // 退出登录
 function handleLogout() {
-  authStore.logout()
+  authStore.logoutUser()
   message.success('已退出登录')
   router.push('/login')
 }
@@ -366,20 +544,46 @@ onMounted(() => {
   bottom: 0;
   z-index: 100;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  width: 200px !important;
 }
 
 .logo {
   height: 64px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 16px;
-  border-radius: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-bottom: 16px;
 }
 
 .logo img {
   height: 32px;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 1px;
+}
+
+.logo-spacer {
+  flex: 1;
+}
+
+.sidebar-collapse-btn {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 16px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+}
+
+.sidebar-collapse-btn:hover {
+  color: #fff;
 }
 
 .sidebar-menu {
@@ -387,11 +591,11 @@ onMounted(() => {
 }
 
 .main-layout {
-  margin-left: 240px;
+  margin-left: 200px;
   transition: margin-left 0.2s;
-  min-width: 1000px;
+  min-width: 800px;
   max-width: 1800px;
-  width: calc(100vw - 240px);
+  width: calc(100vw - 200px);
 }
 
 .teacher-layout :deep(.ant-layout-sider-collapsed) + .main-layout {
@@ -417,19 +621,29 @@ onMounted(() => {
   gap: 16px;
 }
 
-.trigger {
+.header-trigger {
   font-size: 18px;
-  line-height: 64px;
   cursor: pointer;
   transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
 }
 
-.trigger:hover {
+.header-trigger:hover {
   color: #1890ff;
 }
 
-.breadcrumb {
+.page-title {
   margin-left: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb {
+  font-size: 14px;
+  color: #333;
 }
 
 .header-right {
@@ -518,5 +732,42 @@ onMounted(() => {
   }
 }
 
+.course-sidebar-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  color: white;
+}
 
+.course-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin-left: 8px;
+  color: white;
+}
+
+.course-sidebar-info {
+  padding: 0 16px 16px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.course-semester {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.course-progress {
+  margin-bottom: 16px;
+}
+
+.course-progress :deep(.ant-progress-bg) {
+  background-color: #1890ff;
+}
+
+.course-progress span {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+}
 </style>

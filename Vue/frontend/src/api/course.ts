@@ -97,8 +97,8 @@ export const getCourseList = (params: CourseListParams): Promise<ApiResponse<Cou
 }
 
 // 获取课程详情
-export const getCourseDetail = (courseId: number): Promise<ApiResponse<Course>> => {
-  return axios.get(`/api/courses/${courseId}`)
+export const getCourseDetail = (courseId: number) => {
+  return axios.get(`/teacher/courses/${courseId}`)
 }
 
 // 搜索课程
