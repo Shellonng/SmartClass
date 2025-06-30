@@ -353,4 +353,30 @@ public class PageResponse<T> implements Serializable {
             this.previousPage = current > 1 ? current - 1 : null;
         }
     }
+
+    /**
+     * 从MyBatis-Plus的IPage对象创建PageResponse对象
+     * 
+     * @param <T> 数据类型
+     * @param page MyBatis-Plus的IPage对象
+     * @return 分页响应数据
+     */
+    public static <T> PageResponse<T> fromIPage(IPage<T> page) {
+        PageResponse<T> response = new PageResponse<>();
+        response.setCurrent(page.getCurrent());
+        response.setSize(page.getSize());
+        response.setTotal(page.getTotal());
+        response.setPages(page.getPages());
+        response.setRecords(page.getRecords());
+        
+        // 设置分页导航信息
+        PageNavigation navigation = new PageNavigation();
+        navigation.setHasNext(page.getCurrent() < page.getPages());
+        navigation.setHasPrevious(page.getCurrent() > 1);
+        navigation.setFirstPage(1);
+        navigation.setLastPage((int) page.getPages());
+        response.setNavigation(navigation);
+        
+        return response;
+    }
 }

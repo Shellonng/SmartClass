@@ -217,6 +217,18 @@ export function getSectionComments(sectionId: number, page = 1, size = 10) {
   })
 }
 
+export function getSectionCommentReplies(sectionId: number, commentId: number, page = 1, size = 50) {
+  return axios.get(`/api/sections/${sectionId}/comments/${commentId}/replies`, {
+    params: { page, size }
+  })
+}
+
+export function getCourseComments(courseId: number, page = 1, size = 10) {
+  return axios.get(`/api/courses/${courseId}/comments`, {
+    params: { page, size }
+  })
+}
+
 export function createSectionComment(sectionId: number, data: {
   content: string
   parentId?: number
@@ -232,4 +244,66 @@ export function updateSectionComment(sectionId: number, commentId: number, data:
 
 export function deleteSectionComment(sectionId: number, commentId: number) {
   return axios.delete(`/api/sections/${sectionId}/comments/${commentId}`)
+}
+
+// 课程资源相关接口
+export interface CourseResource {
+  id: number
+  courseId: number
+  name: string
+  fileType: string
+  fileSize: number
+  formattedSize: string
+  fileUrl: string
+  description?: string
+  downloadCount: number
+  uploadUserId: number
+  uploadUserName: string
+  createTime: string
+}
+
+// 获取课程资源列表
+export function getTeacherCourseResources(courseId: number) {
+  return axios.get(`/api/teacher/courses/${courseId}/resources`)
+}
+
+// 分页获取课程资源
+export function getTeacherCourseResourcesPage(courseId: number, page = 1, size = 10) {
+  return axios.get(`/api/teacher/courses/${courseId}/resources/page`, {
+    params: { page, size }
+  })
+}
+
+// 上传课程资源
+export function uploadCourseResource(courseId: number, file: File, name?: string, description?: string) {
+  const formData = new FormData()
+  formData.append('file', file)
+  if (name) formData.append('name', name)
+  if (description) formData.append('description', description)
+  
+  return axios.post(`/api/teacher/courses/${courseId}/resources/upload`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+// 删除课程资源
+export function deleteCourseResource(resourceId: number) {
+  return axios.delete(`/api/teacher/courses/resources/${resourceId}`)
+}
+
+// 获取资源详情
+export function getResourceDetail(resourceId: number) {
+  return axios.get(`/api/teacher/courses/resources/${resourceId}`)
+}
+
+// 获取资源下载链接
+export function getResourceDownloadUrl(resourceId: number) {
+  return `/api/teacher/courses/resources/${resourceId}/download`
+}
+
+// 获取资源预览链接
+export function getResourcePreviewUrl(resourceId: number) {
+  return `/api/teacher/courses/resources/${resourceId}/preview`
 }

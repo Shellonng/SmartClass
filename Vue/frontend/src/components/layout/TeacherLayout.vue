@@ -397,10 +397,25 @@ const fetchCourseInfo = async (courseId: number) => {
   }
 }
 
-// 监听路由变化，获取课程信息
+// 监听路由变化，获取课程信息和设置正确的菜单选中状态
 watch(() => route.params.id, (newId) => {
   if (isCourseDetailPage.value && newId) {
     fetchCourseInfo(Number(newId));
+    
+    // 根据URL中的view参数设置正确的菜单选中状态
+    const viewParam = route.query.view as string;
+    if (viewParam) {
+      courseSelectedKeys.value = [viewParam];
+    } else {
+      courseSelectedKeys.value = ['chapters'];
+    }
+  }
+}, { immediate: true });
+
+// 监听路由query参数变化，更新菜单选中状态
+watch(() => route.query.view, (newView) => {
+  if (isCourseDetailPage.value && newView) {
+    courseSelectedKeys.value = [newView as string];
   }
 }, { immediate: true });
 
@@ -441,18 +456,28 @@ const notifications = ref([
 // AI助手
 const showAIAssistant = ref(true)
 
-// 监听路由变化更新选中菜单
+// 监听路由变化
 watch(
-  () => route.path,
-  (newPath) => {
-    updateSelectedKeys(newPath)
+  () => route.fullPath,
+  () => {
+    updateSelectedKeys()
+    
+    // 处理课程详情页的视图切换
+    if (isCourseDetailPage.value) {
+      const view = route.query.view as string
+      if (view) {
+        courseSelectedKeys.value = [view]
+      } else {
+        courseSelectedKeys.value = ['chapters']
+      }
+    }
   },
   { immediate: true }
 )
 
 // 更新选中的菜单项
-function updateSelectedKeys(path: string) {
-  const pathSegments = path.split('/').filter(Boolean)
+function updateSelectedKeys() {
+  const pathSegments = route.path.split('/').filter(Boolean)
   if (pathSegments.length >= 2) {
     const key = pathSegments.slice(1).join('-')
     selectedKeys.value = [key || 'dashboard']
@@ -531,20 +556,21 @@ function toggleAIAssistant() {
   message.info('AI助手功能开发中...')
 }
 
-// 处理课程详情页面侧边栏菜单点击
-const handleCourseMenuClick = ({ key }: { key: string }) => {
-  if (isCourseDetailPage.value) {
-    const courseId = route.params.id
-    router.push({
-      path: `/teacher/courses/${courseId}`,
-      query: { view: key }
-    })
-  }
+// 课程详情页菜单点击处理
+function handleCourseMenuClick({ key }: { key: string }) {
+  const courseId = route.params.id
+  if (!courseId) return
+  
+  // 更新路由查询参数，保持在同一页面但切换视图
+  router.push({
+    path: `/teacher/courses/${courseId}`,
+    query: { view: key }
+  })
 }
 
 onMounted(() => {
   // 初始化时设置正确的菜单选中状态
-  updateSelectedKeys(route.path)
+  updateSelectedKeys()
 })
 </script>
 
