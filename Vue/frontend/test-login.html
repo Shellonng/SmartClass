@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录角色验证测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        input, select { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 3px; }
+        .result { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>登录角色验证测试</h1>
+    
+    <div class="test-section">
+        <h3>登录测试</h3>
+        <div>
+            <label>用户名: </label>
+            <input type="text" id="username" value="teacher1" placeholder="用户名">
+        </div>
+        <div>
+            <label>密码: </label>
+            <input type="password" id="password" value="teacher123" placeholder="密码">
+        </div>
+        <div>
+            <label>角色: </label>
+            <select id="role">
+                <option value="TEACHER">教师</option>
+                <option value="STUDENT">学生</option>
+            </select>
+        </div>
+        <button onclick="testLogin()">测试登录</button>
+        <button onclick="clearResult()">清除结果</button>
+    </div>
+
+    <div class="test-section">
+        <h3>预设测试案例</h3>
+        <button onclick="testCase1()">案例1: teacher1 + TEACHER (应该成功)</button>
+        <button onclick="testCase2()">案例2: teacher1 + STUDENT (应该失败)</button>
+        <button onclick="testCase3()">案例3: student1 + STUDENT (应该成功)</button>
+        <button onclick="testCase4()">案例4: student1 + TEACHER (应该失败)</button>
+    </div>
+
+    <div id="result" class="result" style="display: none;"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+
+        function showResult(message, isError = false) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result ' + (isError ? 'error' : 'success');
+            resultDiv.innerHTML = message;
+        }
+
+        function clearResult() {
+            document.getElementById('result').style.display = 'none';
+        }
+
+        async function testLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        role: role
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.code === 200) {
+                    showResult(`✅ 登录成功!<br>
+                        用户: ${data.data.userInfo.realName} (${data.data.userInfo.username})<br>
+                        角色: ${data.data.userInfo.role}<br>
+                        Token: ${data.data.token.substring(0, 50)}...`, false);
+                } else {
+                    showResult(`❌ 登录失败: ${data.message || '未知错误'}`, true);
+                }
+            } catch (error) {
+                showResult(`❌ 网络错误: ${error.message}`, true);
+            }
+        }
+
+        function testCase1() {
+            document.getElementById('username').value = 'teacher1';
+            document.getElementById('password').value = 'teacher123';
+            document.getElementById('role').value = 'TEACHER';
+            testLogin();
+        }
+
+        function testCase2() {
+            document.getElementById('username').value = 'teacher1';
+            document.getElementById('password').value = 'teacher123';
+            document.getElementById('role').value = 'STUDENT';
+            testLogin();
+        }
+
+        function testCase3() {
+            document.getElementById('username').value = 'student1';
+            document.getElementById('password').value = 'student123';
+            document.getElementById('role').value = 'STUDENT';
+            testLogin();
+        }
+
+        function testCase4() {
+            document.getElementById('username').value = 'student1';
+            document.getElementById('password').value = 'student123';
+            document.getElementById('role').value = 'TEACHER';
+            testLogin();
+        }
+    </script>
+</body>
+</html> 

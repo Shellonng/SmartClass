@@ -97,8 +97,8 @@ export const getCourseList = (params: CourseListParams): Promise<ApiResponse<Cou
 }
 
 // 获取课程详情
-export const getCourseDetail = (courseId: number): Promise<ApiResponse<Course>> => {
-  return axios.get(`/api/courses/${courseId}`)
+export const getCourseDetail = (courseId: number) => {
+  return axios.get(`/teacher/courses/${courseId}`)
 }
 
 // 搜索课程
@@ -208,4 +208,28 @@ export const getCourseReviews = (courseId: number, params?: { page?: number; siz
 // 报告课程问题
 export const reportCourse = (courseId: number, data: { reason: string; description?: string }): Promise<ApiResponse<void>> => {
   return axios.post(`/api/courses/${courseId}/report`, data)
+}
+
+// 评论相关接口
+export function getSectionComments(sectionId: number, page = 1, size = 10) {
+  return axios.get(`/api/sections/${sectionId}/comments`, {
+    params: { page, size }
+  })
+}
+
+export function createSectionComment(sectionId: number, data: {
+  content: string
+  parentId?: number
+}) {
+  return axios.post(`/api/sections/${sectionId}/comments`, data)
+}
+
+export function updateSectionComment(sectionId: number, commentId: number, data: {
+  content: string
+}) {
+  return axios.put(`/api/sections/${sectionId}/comments/${commentId}`, data)
+}
+
+export function deleteSectionComment(sectionId: number, commentId: number) {
+  return axios.delete(`/api/sections/${sectionId}/comments/${commentId}`)
 }

@@ -45,7 +45,6 @@ CREATE TABLE `user` (
 CREATE TABLE `teacher` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '教师ID',
   `user_id` bigint NOT NULL COMMENT '用户ID',
-  `teacher_no` varchar(20) NOT NULL COMMENT '教师工号',
   `department` varchar(100) DEFAULT NULL COMMENT '所属院系',
   `title` varchar(50) DEFAULT NULL COMMENT '职称',
   `education` varchar(50) DEFAULT NULL COMMENT '学历',
@@ -61,7 +60,6 @@ CREATE TABLE `teacher` (
   `ext_field3` text COMMENT '扩展字段3(JSON格式)',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_id` (`user_id`),
-  UNIQUE KEY `uk_teacher_no` (`teacher_no`),
   KEY `idx_department` (`department`),
   CONSTRAINT `fk_teacher_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='教师表';
@@ -72,7 +70,6 @@ CREATE TABLE `teacher` (
 CREATE TABLE `student` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '学生ID',
   `user_id` bigint NOT NULL COMMENT '用户ID',
-  `student_no` varchar(20) NOT NULL COMMENT '学号',
   `class_id` bigint DEFAULT NULL COMMENT '班级ID',
   `major` varchar(100) DEFAULT NULL COMMENT '专业',
   `grade` varchar(10) DEFAULT NULL COMMENT '年级',
@@ -88,7 +85,6 @@ CREATE TABLE `student` (
   `ext_field3` text COMMENT '扩展字段3(JSON格式)',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_id` (`user_id`),
-  UNIQUE KEY `uk_student_no` (`student_no`),
   KEY `idx_class_id` (`class_id`),
   KEY `idx_major` (`major`),
   KEY `idx_grade` (`grade`),
@@ -133,22 +129,30 @@ ALTER TABLE `student` ADD CONSTRAINT `fk_student_class` FOREIGN KEY (`class_id`)
 CREATE TABLE `course` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '课程ID',
   `course_name` varchar(100) NOT NULL COMMENT '课程名称',
-  `course_code` varchar(20) NOT NULL COMMENT '课程代码',
+  `course_code` varchar(20) DEFAULT NULL COMMENT '课程代码',
   `teacher_id` bigint NOT NULL COMMENT '授课教师ID',
   `class_id` bigint DEFAULT NULL COMMENT '班级ID',
   `credits` decimal(3,1) DEFAULT NULL COMMENT '学分',
   `course_type` enum('REQUIRED','ELECTIVE','PUBLIC') DEFAULT 'REQUIRED' COMMENT '课程类型',
+  `category` varchar(50) DEFAULT NULL COMMENT '课程分类',
+  `difficulty` varchar(20) DEFAULT NULL COMMENT '难度等级',
+  `cover_image` varchar(500) DEFAULT NULL COMMENT '课程封面图片',
   `semester` varchar(20) DEFAULT NULL COMMENT '学期',
   `start_date` date DEFAULT NULL COMMENT '开始日期',
   `end_date` date DEFAULT NULL COMMENT '结束日期',
+  `start_time` datetime DEFAULT NULL COMMENT '开始时间',
+  `end_time` datetime DEFAULT NULL COMMENT '结束时间',
   `schedule` text COMMENT '课程安排(JSON格式)',
   `description` text COMMENT '课程描述',
   `objectives` text COMMENT '课程目标',
   `requirements` text COMMENT '课程要求',
-  `status` tinyint DEFAULT '1' COMMENT '状态(0:禁用,1:启用)',
-  `created_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `deleted` tinyint DEFAULT '0' COMMENT '是否删除(0:否,1:是)',
+  `status` enum('DRAFT','PUBLISHED','ARCHIVED') DEFAULT 'DRAFT' COMMENT '课程状态',
+  `is_public` tinyint DEFAULT '1' COMMENT '是否公开',
+  `current_enrollment` int DEFAULT '0' COMMENT '当前选课人数',
+  `max_enrollment` int DEFAULT '100' COMMENT '最大选课人数',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `is_deleted` tinyint DEFAULT '0' COMMENT '是否删除(0:否,1:是)',
   `ext_field1` varchar(255) DEFAULT NULL COMMENT '扩展字段1',
   `ext_field2` varchar(255) DEFAULT NULL COMMENT '扩展字段2',
   `ext_field3` text COMMENT '扩展字段3(JSON格式)',
@@ -158,6 +162,7 @@ CREATE TABLE `course` (
   KEY `idx_class_id` (`class_id`),
   KEY `idx_semester` (`semester`),
   KEY `idx_course_type` (`course_type`),
+  KEY `idx_status` (`status`),
   CONSTRAINT `fk_course_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`id`),
   CONSTRAINT `fk_course_class` FOREIGN KEY (`class_id`) REFERENCES `class` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课程表';
@@ -450,7 +455,7 @@ CREATE TABLE `notification` (
   `extra_data` text COMMENT '额外数据(JSON格式)',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint DEFAULT '0' COMMENT '是否删除(0:否,1:是)',
+  `deleted` tinyint DEFAULT '0' COMMENT '是否删除(0:否,1:是)', 
   `ext_field1` varchar(255) DEFAULT NULL COMMENT '扩展字段1',
   `ext_field2` varchar(255) DEFAULT NULL COMMENT '扩展字段2',
   `ext_field3` text COMMENT '扩展字段3(JSON格式)',
@@ -521,154 +526,179 @@ ALTER TABLE question_bank ADD FULLTEXT INDEX ft_question_content (question_text,
 
 -- 插入root管理员用户 (密码: root123)
 INSERT INTO user (username, password, email, real_name, role, status) VALUES 
-('root', 'root123', 'root@education.com', 'Root管理员', 'ADMIN', 1);
+('root', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'root@education.com', 'Root管理员', 'ADMIN', 1);
 
--- 插入更多测试用户 (所有密码均为明文)
+-- 插入更多测试用户 (所有密码均为对应的明文加密后的结果)
 INSERT INTO user (username, password, email, real_name, role, status) VALUES
-('admin', 'admin123', 'admin@education.com', '系统管理员', 'ADMIN', 1),
-('teacher1', 'teacher123', 'teacher1@education.com', '张教授', 'TEACHER', 1),
-('teacher2', 'teacher123', 'teacher2@education.com', '李教授', 'TEACHER', 1),
-('teacher3', 'teacher123', 'teacher3@education.com', '王老师', 'TEACHER', 1),
-('teacher4', 'teacher123', 'teacher4@education.com', '陈教授', 'TEACHER', 1),
-('teacher5', 'teacher123', 'teacher5@education.com', '刘老师', 'TEACHER', 1),
-('student1', 'student123', 'student1@education.com', '张三', 'STUDENT', 1),
-('student2', 'student123', 'student2@education.com', '李四', 'STUDENT', 1),
-('student3', 'student123', 'student3@education.com', '王五', 'STUDENT', 1),
-('student4', 'student123', 'student4@education.com', '赵六', 'STUDENT', 1),
-('student5', 'student123', 'student5@education.com', '陈七', 'STUDENT', 1),
-('student6', 'student123', 'student6@education.com', '刘八', 'STUDENT', 1),
-('student7', 'student123', 'student7@education.com', '周九', 'STUDENT', 1),
-('student8', 'student123', 'student8@education.com', '吴十', 'STUDENT', 1),
-('student9', 'student123', 'student9@education.com', '郑十一', 'STUDENT', 1),
-('student10', 'student123', 'student10@education.com', '孙十二', 'STUDENT', 1),
-('student11', 'student123', 'student11@education.com', '钱十三', 'STUDENT', 1),
-('student12', 'student123', 'student12@education.com', '孙十四', 'STUDENT', 1),
-('student13', 'student123', 'student13@education.com', '李十五', 'STUDENT', 1),
-('student14', 'student123', 'student14@education.com', '周十六', 'STUDENT', 1),
-('student15', 'student123', 'student15@education.com', '吴十七', 'STUDENT', 1),
-('student16', 'student123', 'student16@education.com', '郑十八', 'STUDENT', 1),
-('student17', 'student123', 'student17@education.com', '王十九', 'STUDENT', 1),
-('student18', 'student123', 'student18@education.com', '冯二十', 'STUDENT', 1),
-('student19', 'student123', 'student19@education.com', '陈二一', 'STUDENT', 1),
-('student20', 'student123', 'student20@education.com', '褚二二', 'STUDENT', 1);
+('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'admin@education.com', '系统管理员', 'ADMIN', 1),
+('teacher1', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'teacher1@education.com', '张教授', 'TEACHER', 1),
+('teacher2', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'teacher2@education.com', '李教授', 'TEACHER', 1),
+('teacher3', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'teacher3@education.com', '王老师', 'TEACHER', 1),
+('teacher4', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'teacher4@education.com', '陈教授', 'TEACHER', 1),
+('teacher5', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'teacher5@education.com', '刘老师', 'TEACHER', 1),
+('student1', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student1@education.com', '张三', 'STUDENT', 1),
+('student2', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student2@education.com', '李四', 'STUDENT', 1),
+('student3', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student3@education.com', '王五', 'STUDENT', 1),
+('student4', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student4@education.com', '赵六', 'STUDENT', 1),
+('student5', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student5@education.com', '陈七', 'STUDENT', 1),
+('student6', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student6@education.com', '刘八', 'STUDENT', 1),
+('student7', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student7@education.com', '周九', 'STUDENT', 1),
+('student8', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student8@education.com', '吴十', 'STUDENT', 1),
+('student9', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student9@education.com', '郑十一', 'STUDENT', 1),
+('student10', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student10@education.com', '孙十二', 'STUDENT', 1),
+('student11', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student11@education.com', '钱十三', 'STUDENT', 1),
+('student12', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student12@education.com', '孙十四', 'STUDENT', 1),
+('student13', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student13@education.com', '李十五', 'STUDENT', 1),
+('student14', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student14@education.com', '周十六', 'STUDENT', 1),
+('student15', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student15@education.com', '吴十七', 'STUDENT', 1),
+('student16', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student16@education.com', '郑十八', 'STUDENT', 1),
+('student17', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student17@education.com', '王十九', 'STUDENT', 1),
+('student18', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student18@education.com', '冯二十', 'STUDENT', 1),
+('student19', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student19@education.com', '陈二一', 'STUDENT', 1),
+('student20', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9P1.jO8m3.TjZ.y', 'student20@education.com', '褚二二', 'STUDENT', 1);
 
 -- 插入教师信息
-INSERT INTO teacher (user_id, teacher_no, department, title, education, specialty, introduction, office_location, office_hours) VALUES
-((SELECT id FROM user WHERE username = 'teacher1'), 'T001', '计算机科学系', '副教授', '博士', 'Java开发,数据库设计', '专注于软件工程和数据库设计', 'A101', '周一至周五 9:00-17:00'),
-((SELECT id FROM user WHERE username = 'teacher2'), 'T002', '数学系', '教授', '博士', '算法分析,数学建模', '数学建模和算法分析专家', 'B201', '周一至周五 8:00-16:00'),
-((SELECT id FROM user WHERE username = 'teacher3'), 'T003', '英语系', '讲师', '硕士', '英语教学,口语训练', '英语教学和跨文化交流', 'C301', '周一至周五 10:00-18:00'),
-((SELECT id FROM user WHERE username = 'teacher4'), 'T004', '物理系', '教授', '博士', '理论物理,量子力学', '理论物理和量子力学研究专家', 'D401', '周一至周五 8:30-16:30'),
-((SELECT id FROM user WHERE username = 'teacher5'), 'T005', '化学系', '副教授', '博士', '有机化学,材料科学', '有机化学合成和新材料开发', 'E501', '周一至周五 9:30-17:30');
+INSERT INTO teacher (user_id, department, title, education, specialty, introduction, office_location, office_hours) VALUES
+((SELECT id FROM user WHERE username = 'teacher1'), '计算机科学系', '副教授', '博士', 'Java开发,数据库设计', '专注于软件工程和数据库设计', 'A101', '周一至周五 9:00-17:00'),
+((SELECT id FROM user WHERE username = 'teacher2'), '数学系', '教授', '博士', '算法分析,数学建模', '数学建模和算法分析专家', 'B201', '周一至周五 8:00-16:00'),
+((SELECT id FROM user WHERE username = 'teacher3'), '英语系', '讲师', '硕士', '英语教学,口语训练', '英语教学和跨文化交流', 'C301', '周一至周五 10:00-18:00'),
+((SELECT id FROM user WHERE username = 'teacher4'), '物理系', '教授', '博士', '理论物理,量子力学', '理论物理和量子力学研究专家', 'D401', '周一至周五 8:30-16:30'),
+((SELECT id FROM user WHERE username = 'teacher5'), '化学系', '副教授', '博士', '有机化学,材料科学', '有机化学合成和新材料开发', 'E501', '周一至周五 9:30-17:30');
 
 -- 插入学生信息
-INSERT INTO student (user_id, student_no, major, grade, enrollment_year, graduation_year, status) VALUES
-((SELECT id FROM user WHERE username = 'student1'), 'S2023001', '计算机科学与技术', '大二', 2023, 2027, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student2'), 'S2023002', '计算机科学与技术', '大二', 2023, 2027, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student3'), 'S2023003', '软件工程', '大二', 2023, 2027, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student4'), 'S2023004', '软件工程', '大二', 2023, 2027, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student5'), 'S2023005', '数据科学与大数据技术', '大一', 2024, 2028, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student6'), 'S2023006', '数据科学与大数据技术', '大一', 2024, 2028, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student7'), 'S2023007', '信息安全', '大三', 2022, 2026, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student8'), 'S2023008', '信息安全', '大三', 2022, 2026, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student9'), 'S2023009', '人工智能', '大二', 2023, 2027, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student10'), 'S2023010', '人工智能', '大二', 2023, 2027, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student11'), 'S2023011', '计算机科学与技术', '大二', 2023, 2027, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student12'), 'S2023012', '计算机科学与技术', '大二', 2023, 2027, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student13'), 'S2023013', '软件工程', '大二', 2023, 2027, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student14'), 'S2023014', '软件工程', '大二', 2023, 2027, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student15'), 'S2024015', '数据科学与大数据技术', '大一', 2024, 2028, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student16'), 'S2024016', '数据科学与大数据技术', '大一', 2024, 2028, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student17'), 'S2022017', '信息安全', '大三', 2022, 2026, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student18'), 'S2022018', '信息安全', '大三', 2022, 2026, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student19'), 'S2023019', '人工智能', '大二', 2023, 2027, 'ACTIVE'),
-((SELECT id FROM user WHERE username = 'student20'), 'S2023020', '人工智能', '大二', 2023, 2027, 'ACTIVE');
+INSERT INTO student (user_id, major, grade, enrollment_year, graduation_year, status) VALUES
+((SELECT id FROM user WHERE username = 'student1'), '计算机科学与技术', '大二', 2023, 2027, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student2'), '计算机科学与技术', '大二', 2023, 2027, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student3'), '软件工程', '大二', 2023, 2027, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student4'), '软件工程', '大二', 2023, 2027, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student5'), '数据科学与大数据技术', '大一', 2024, 2028, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student6'), '数据科学与大数据技术', '大一', 2024, 2028, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student7'), '信息安全', '大三', 2022, 2026, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student8'), '信息安全', '大三', 2022, 2026, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student9'), '人工智能', '大二', 2023, 2027, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student10'), '人工智能', '大二', 2023, 2027, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student11'), '计算机科学与技术', '大二', 2023, 2027, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student12'), '计算机科学与技术', '大二', 2023, 2027, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student13'), '软件工程', '大二', 2023, 2027, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student14'), '软件工程', '大二', 2023, 2027, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student15'), '数据科学与大数据技术', '大一', 2024, 2028, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student16'), '数据科学与大数据技术', '大一', 2024, 2028, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student17'), '信息安全', '大三', 2022, 2026, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student18'), '信息安全', '大三', 2022, 2026, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student19'), '人工智能', '大二', 2023, 2027, 'ACTIVE'),
+((SELECT id FROM user WHERE username = 'student20'), '人工智能', '大二', 2023, 2027, 'ACTIVE');
 
 -- 插入班级信息
 INSERT INTO class (class_name, class_code, teacher_id, major, grade, semester, description) VALUES
-('计科2班', 'CS2024-02', (SELECT id FROM teacher WHERE teacher_no = 'T001'), '计算机科学与技术', '大二', '2024-2025上', '计算机科学与技术专业二年级班级'),
-('软工1班', 'SE2024-01', (SELECT id FROM teacher WHERE teacher_no = 'T001'), '软件工程', '大二', '2024-2025上', '软件工程专业二年级班级'),
-('数据1班', 'DS2024-01', (SELECT id FROM teacher WHERE teacher_no = 'T002'), '数据科学与大数据技术', '大一', '2024-2025上', '数据科学与大数据技术专业一年级班级'),
-('信安1班', 'IS2024-01', (SELECT id FROM teacher WHERE teacher_no = 'T001'), '信息安全', '大三', '2024-2025上', '信息安全专业三年级班级'),
-('AI1班', 'AI2024-01', (SELECT id FROM teacher WHERE teacher_no = 'T002'), '人工智能', '大二', '2024-2025上', '人工智能专业二年级班级');
+('计科2班', 'CS2024-02', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), '计算机科学与技术', '大二', '2024-2025上', '计算机科学与技术专业二年级班级'),
+('软工1班', 'SE2024-01', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), '软件工程', '大二', '2024-2025上', '软件工程专业二年级班级'),
+('数据1班', 'DS2024-01', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher2'), '数据科学与大数据技术', '大一', '2024-2025上', '数据科学与大数据技术专业一年级班级'),
+('信安1班', 'IS2024-01', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), '信息安全', '大三', '2024-2025上', '信息安全专业三年级班级'),
+('AI1班', 'AI2024-01', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher2'), '人工智能', '大二', '2024-2025上', '人工智能专业二年级班级');
 
 -- 更新学生班级信息
-UPDATE student SET class_id = (SELECT id FROM class WHERE class_code = 'CS2024-02') WHERE student_no IN ('S2023001', 'S2023002', 'S2023011', 'S2023012');
-UPDATE student SET class_id = (SELECT id FROM class WHERE class_code = 'SE2024-01') WHERE student_no IN ('S2023003', 'S2023004', 'S2023013', 'S2023014');
-UPDATE student SET class_id = (SELECT id FROM class WHERE class_code = 'DS2024-01') WHERE student_no IN ('S2023005', 'S2023006', 'S2024015', 'S2024016');
-UPDATE student SET class_id = (SELECT id FROM class WHERE class_code = 'IS2024-01') WHERE student_no IN ('S2023007', 'S2023008', 'S2022017', 'S2022018');
-UPDATE student SET class_id = (SELECT id FROM class WHERE class_code = 'AI2024-01') WHERE student_no IN ('S2023009', 'S2023010', 'S2023019', 'S2023020');
+UPDATE student SET class_id = (SELECT id FROM class WHERE class_code = 'CS2024-02') WHERE user_id IN (
+    (SELECT id FROM user WHERE username = 'student1'),
+    (SELECT id FROM user WHERE username = 'student2'),
+    (SELECT id FROM user WHERE username = 'student11'),
+    (SELECT id FROM user WHERE username = 'student12')
+);
+UPDATE student SET class_id = (SELECT id FROM class WHERE class_code = 'SE2024-01') WHERE user_id IN (
+    (SELECT id FROM user WHERE username = 'student3'),
+    (SELECT id FROM user WHERE username = 'student4'),
+    (SELECT id FROM user WHERE username = 'student13'),
+    (SELECT id FROM user WHERE username = 'student14')
+);
+UPDATE student SET class_id = (SELECT id FROM class WHERE class_code = 'DS2024-01') WHERE user_id IN (
+    (SELECT id FROM user WHERE username = 'student5'),
+    (SELECT id FROM user WHERE username = 'student6'),
+    (SELECT id FROM user WHERE username = 'student15'),
+    (SELECT id FROM user WHERE username = 'student16')
+);
+UPDATE student SET class_id = (SELECT id FROM class WHERE class_code = 'IS2024-01') WHERE user_id IN (
+    (SELECT id FROM user WHERE username = 'student7'),
+    (SELECT id FROM user WHERE username = 'student8'),
+    (SELECT id FROM user WHERE username = 'student17'),
+    (SELECT id FROM user WHERE username = 'student18')
+);
+UPDATE student SET class_id = (SELECT id FROM class WHERE class_code = 'AI2024-01') WHERE user_id IN (
+    (SELECT id FROM user WHERE username = 'student9'),
+    (SELECT id FROM user WHERE username = 'student10'),
+    (SELECT id FROM user WHERE username = 'student19'),
+    (SELECT id FROM user WHERE username = 'student20')
+);
 
 -- 插入课程信息
-INSERT INTO course (course_name, course_code, teacher_id, class_id, credits, course_type, semester, start_date, end_date, description, objectives, requirements) VALUES
-('Java程序设计', 'CS101', (SELECT id FROM teacher WHERE teacher_no = 'T001'), (SELECT id FROM class WHERE class_code = 'CS2024-02'), 4.0, 'REQUIRED', '2024-2025上', '2024-09-01', '2025-01-15', 'Java编程语言基础与面向对象编程', '掌握Java基础语法和面向对象编程思想', '需要有一定的编程基础'),
-('数据结构与算法', 'CS102', (SELECT id FROM teacher WHERE teacher_no = 'T001'), (SELECT id FROM class WHERE class_code = 'CS2024-02'), 4.0, 'REQUIRED', '2024-2025上', '2024-09-01', '2025-01-15', '数据结构基础和常用算法分析', '掌握基本数据结构和算法设计', '需要掌握至少一门编程语言'),
-('数据库系统原理', 'CS201', (SELECT id FROM teacher WHERE teacher_no = 'T001'), (SELECT id FROM class WHERE class_code = 'IS2024-01'), 3.0, 'REQUIRED', '2024-2025上', '2024-09-01', '2025-01-15', '关系数据库理论与SQL实践', '掌握数据库设计和SQL编程', '需要有编程基础'),
-('高等数学', 'MATH101', (SELECT id FROM teacher WHERE teacher_no = 'T002'), (SELECT id FROM class WHERE class_code = 'DS2024-01'), 5.0, 'REQUIRED', '2024-2025上', '2024-09-01', '2025-01-15', '微积分和线性代数基础', '掌握高等数学基本概念和计算方法', '高中数学基础'),
-('概率论与数理统计', 'MATH201', (SELECT id FROM teacher WHERE teacher_no = 'T002'), (SELECT id FROM class WHERE class_code = 'AI2024-01'), 3.0, 'REQUIRED', '2024-2025上', '2024-09-01', '2025-01-15', '概率论基础和统计学应用', '掌握概率论和统计学基本理论', '需要高等数学基础'),
-('软件工程', 'SE301', (SELECT id FROM teacher WHERE teacher_no = 'T001'), (SELECT id FROM class WHERE class_code = 'SE2024-01'), 3.0, 'REQUIRED', '2024-2025上', '2024-09-01', '2025-01-15', '软件开发生命周期和项目管理', '掌握软件工程基本理论和实践方法', '需要编程基础和项目经验'),
-('机器学习基础', 'AI201', (SELECT id FROM teacher WHERE teacher_no = 'T002'), (SELECT id FROM class WHERE class_code = 'AI2024-01'), 4.0, 'ELECTIVE', '2024-2025上', '2024-09-01', '2025-01-15', '机器学习算法和应用实践', '掌握常用机器学习算法', '需要数学基础和编程能力');
+INSERT INTO course (course_name, course_code, teacher_id, class_id, credits, course_type, category, difficulty, cover_image, semester, start_date, end_date, start_time, end_time, description, objectives, requirements, status, is_public, current_enrollment, max_enrollment) VALUES
+('Java程序设计', 'CS101', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), (SELECT id FROM class WHERE class_code = 'CS2024-02'), 4.0, 'REQUIRED', '编程语言', 'EASY', 'java_cover.jpg', '2024-2025上', '2024-09-01', '2025-01-15', '2024-09-01 09:00:00', '2025-01-15 11:00:00', 'Java编程语言基础与面向对象编程', '掌握Java基础语法和面向对象编程思想', '需要有一定的编程基础', 'PUBLISHED', 1, 30, 100),
+('数据结构与算法', 'CS102', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), (SELECT id FROM class WHERE class_code = 'CS2024-02'), 4.0, 'REQUIRED', '编程语言', 'MEDIUM', 'data_structure_cover.jpg', '2024-2025上', '2024-09-01', '2025-01-15', '2024-09-01 11:00:00', '2025-01-15 13:00:00', '数据结构基础和常用算法分析', '掌握基本数据结构和算法设计', '需要掌握至少一门编程语言', 'PUBLISHED', 1, 25, 100),
+('数据库系统原理', 'CS201', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), (SELECT id FROM class WHERE class_code = 'IS2024-01'), 3.0, 'REQUIRED', '数据库', 'HARD', 'database_cover.jpg', '2024-2025上', '2024-09-01', '2025-01-15', '2024-09-01 13:00:00', '2025-01-15 15:00:00', '关系数据库理论与SQL实践', '掌握数据库设计和SQL编程', '需要有编程基础', 'PUBLISHED', 1, 28, 100),
+('高等数学', 'MATH101', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher2'), (SELECT id FROM class WHERE class_code = 'DS2024-01'), 5.0, 'REQUIRED', '数学', 'EASY', 'math_cover.jpg', '2024-2025上', '2024-09-01', '2025-01-15', '2024-09-01 09:00:00', '2025-01-15 11:00:00', '微积分和线性代数基础', '掌握高等数学基本概念和计算方法', '高中数学基础', 'PUBLISHED', 1, 35, 100),
+('概率论与数理统计', 'MATH201', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher2'), (SELECT id FROM class WHERE class_code = 'AI2024-01'), 3.0, 'REQUIRED', '数学', 'MEDIUM', 'probability_cover.jpg', '2024-2025上', '2024-09-01', '2025-01-15', '2024-09-01 11:00:00', '2025-01-15 13:00:00', '概率论基础和统计学应用', '掌握概率论和统计学基本理论', '需要高等数学基础', 'PUBLISHED', 1, 22, 100),
+('软件工程', 'SE301', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), (SELECT id FROM class WHERE class_code = 'SE2024-01'), 3.0, 'REQUIRED', '软件工程', 'MEDIUM', 'software_engineering_cover.jpg', '2024-2025上', '2024-09-01', '2025-01-15', '2024-09-01 13:00:00', '2025-01-15 15:00:00', '软件开发生命周期和项目管理', '掌握软件工程基本理论和实践方法', '需要编程基础和项目经验', 'PUBLISHED', 1, 18, 100),
+('机器学习基础', 'AI201', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher2'), (SELECT id FROM class WHERE class_code = 'AI2024-01'), 4.0, 'ELECTIVE', '人工智能', 'HARD', 'machine_learning_cover.jpg', '2024-2025上', '2024-09-01', '2025-01-15', '2024-09-01 15:00:00', '2025-01-15 17:00:00', '机器学习算法和应用实践', '掌握常用机器学习算法', '需要数学基础和编程能力', 'PUBLISHED', 1, 15, 100);
 
 -- 插入学生选课记录
 INSERT INTO student_course (student_id, course_id, enrollment_time, status) VALUES
 -- 计科2班学生选课
-((SELECT id FROM student WHERE student_no = 'S2023001'), (SELECT id FROM course WHERE course_code = 'CS101'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023001'), (SELECT id FROM course WHERE course_code = 'CS102'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023001'), (SELECT id FROM course WHERE course_code = 'MATH101'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023002'), (SELECT id FROM course WHERE course_code = 'CS101'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023002'), (SELECT id FROM course WHERE course_code = 'CS102'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023002'), (SELECT id FROM course WHERE course_code = 'MATH101'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student1'), (SELECT id FROM course WHERE course_code = 'CS101'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student1'), (SELECT id FROM course WHERE course_code = 'CS102'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student1'), (SELECT id FROM course WHERE course_code = 'MATH101'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student2'), (SELECT id FROM course WHERE course_code = 'CS101'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student2'), (SELECT id FROM course WHERE course_code = 'CS102'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student2'), (SELECT id FROM course WHERE course_code = 'MATH101'), NOW(), 'ENROLLED'),
 -- 软工1班学生选课
-((SELECT id FROM student WHERE student_no = 'S2023003'), (SELECT id FROM course WHERE course_code = 'CS101'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023003'), (SELECT id FROM course WHERE course_code = 'SE301'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023004'), (SELECT id FROM course WHERE course_code = 'CS101'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023004'), (SELECT id FROM course WHERE course_code = 'SE301'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student3'), (SELECT id FROM course WHERE course_code = 'CS101'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student3'), (SELECT id FROM course WHERE course_code = 'SE301'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student4'), (SELECT id FROM course WHERE course_code = 'CS101'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student4'), (SELECT id FROM course WHERE course_code = 'SE301'), NOW(), 'ENROLLED'),
 -- 数据1班学生选课
-((SELECT id FROM student WHERE student_no = 'S2023005'), (SELECT id FROM course WHERE course_code = 'MATH101'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023006'), (SELECT id FROM course WHERE course_code = 'MATH101'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student5'), (SELECT id FROM course WHERE course_code = 'MATH101'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student6'), (SELECT id FROM course WHERE course_code = 'MATH101'), NOW(), 'ENROLLED'),
 -- 信安1班学生选课
-((SELECT id FROM student WHERE student_no = 'S2023007'), (SELECT id FROM course WHERE course_code = 'CS201'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023007'), (SELECT id FROM course WHERE course_code = 'CS102'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023008'), (SELECT id FROM course WHERE course_code = 'CS201'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023008'), (SELECT id FROM course WHERE course_code = 'CS102'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student7'), (SELECT id FROM course WHERE course_code = 'CS201'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student7'), (SELECT id FROM course WHERE course_code = 'CS102'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student8'), (SELECT id FROM course WHERE course_code = 'CS201'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student8'), (SELECT id FROM course WHERE course_code = 'CS102'), NOW(), 'ENROLLED'),
 -- AI1班学生选课
-((SELECT id FROM student WHERE student_no = 'S2023009'), (SELECT id FROM course WHERE course_code = 'AI201'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023009'), (SELECT id FROM course WHERE course_code = 'MATH201'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023010'), (SELECT id FROM course WHERE course_code = 'AI201'), NOW(), 'ENROLLED'),
-((SELECT id FROM student WHERE student_no = 'S2023010'), (SELECT id FROM course WHERE course_code = 'MATH201'), NOW(), 'ENROLLED');
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student9'), (SELECT id FROM course WHERE course_code = 'AI201'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student9'), (SELECT id FROM course WHERE course_code = 'MATH201'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student10'), (SELECT id FROM course WHERE course_code = 'AI201'), NOW(), 'ENROLLED'),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student10'), (SELECT id FROM course WHERE course_code = 'MATH201'), NOW(), 'ENROLLED');
 
 -- 插入任务信息
 INSERT INTO task (task_title, task_type, course_id, teacher_id, description, requirements, total_score, start_time, end_time, status) VALUES
-('Java基础练习1', 'HOMEWORK', (SELECT id FROM course WHERE course_code = 'CS101'), (SELECT id FROM teacher WHERE teacher_no = 'T001'), '完成Java基本语法练习，包括变量、循环、条件语句', '提交完整的Java代码文件', 100.00, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY), 'PUBLISHED'),
-('Java面向对象编程', 'PROJECT', (SELECT id FROM course WHERE course_code = 'CS101'), (SELECT id FROM teacher WHERE teacher_no = 'T001'), '设计一个简单的学生管理系统，体现面向对象思想', '包含类设计、继承、多态等概念', 150.00, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY), 'PUBLISHED'),
-('数据结构实现', 'HOMEWORK', (SELECT id FROM course WHERE course_code = 'CS102'), (SELECT id FROM teacher WHERE teacher_no = 'T001'), '用Java实现栈、队列、链表等基本数据结构', '代码规范，注释清晰', 120.00, NOW(), DATE_ADD(NOW(), INTERVAL 10 DAY), 'PUBLISHED'),
-('SQL查询练习', 'HOMEWORK', (SELECT id FROM course WHERE course_code = 'CS201'), (SELECT id FROM teacher WHERE teacher_no = 'T001'), '完成复杂SQL查询语句编写，包括多表连接和子查询', '提交SQL文件和执行结果', 80.00, NOW(), DATE_ADD(NOW(), INTERVAL 5 DAY), 'PUBLISHED'),
-('微积分应用题', 'HOMEWORK', (SELECT id FROM course WHERE course_code = 'MATH101'), (SELECT id FROM teacher WHERE teacher_no = 'T002'), '解决实际问题中的微积分应用', '详细的解题过程和答案', 100.00, NOW(), DATE_ADD(NOW(), INTERVAL 3 DAY), 'PUBLISHED'),
-('软件需求分析', 'PROJECT', (SELECT id FROM course WHERE course_code = 'SE301'), (SELECT id FROM teacher WHERE teacher_no = 'T001'), '为给定项目编写详细的需求分析文档', '包含功能需求和非功能需求', 200.00, NOW(), DATE_ADD(NOW(), INTERVAL 21 DAY), 'PUBLISHED'),
-('机器学习算法实现', 'PROJECT', (SELECT id FROM course WHERE course_code = 'AI201'), (SELECT id FROM teacher WHERE teacher_no = 'T002'), '实现并比较不同的机器学习算法', '代码实现和实验报告', 180.00, NOW(), DATE_ADD(NOW(), INTERVAL 28 DAY), 'PUBLISHED');
+('Java基础练习1', 'HOMEWORK', (SELECT id FROM course WHERE course_code = 'CS101'), (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), '完成Java基本语法练习，包括变量、循环、条件语句', '提交完整的Java代码文件', 100.00, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY), 'PUBLISHED'),
+('Java面向对象编程', 'PROJECT', (SELECT id FROM course WHERE course_code = 'CS101'), (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), '设计一个简单的学生管理系统，体现面向对象思想', '包含类设计、继承、多态等概念', 150.00, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY), 'PUBLISHED'),
+('数据结构实现', 'HOMEWORK', (SELECT id FROM course WHERE course_code = 'CS102'), (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), '用Java实现栈、队列、链表等基本数据结构', '代码规范，注释清晰', 120.00, NOW(), DATE_ADD(NOW(), INTERVAL 10 DAY), 'PUBLISHED'),
+('SQL查询练习', 'HOMEWORK', (SELECT id FROM course WHERE course_code = 'CS201'), (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), '完成复杂SQL查询语句编写，包括多表连接和子查询', '提交SQL文件和执行结果', 80.00, NOW(), DATE_ADD(NOW(), INTERVAL 5 DAY), 'PUBLISHED'),
+('微积分应用题', 'HOMEWORK', (SELECT id FROM course WHERE course_code = 'MATH101'), (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher2'), '解决实际问题中的微积分应用', '详细的解题过程和答案', 100.00, NOW(), DATE_ADD(NOW(), INTERVAL 3 DAY), 'PUBLISHED'),
+('软件需求分析', 'PROJECT', (SELECT id FROM course WHERE course_code = 'SE301'), (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), '为给定项目编写详细的需求分析文档', '包含功能需求和非功能需求', 200.00, NOW(), DATE_ADD(NOW(), INTERVAL 21 DAY), 'PUBLISHED'),
+('机器学习算法实现', 'PROJECT', (SELECT id FROM course WHERE course_code = 'AI201'), (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher2'), '实现并比较不同的机器学习算法', '代码实现和实验报告', 180.00, NOW(), DATE_ADD(NOW(), INTERVAL 28 DAY), 'PUBLISHED');
 
 -- 插入任务提交记录
 INSERT INTO task_submission (task_id, student_id, content, files, submit_time, status, score, feedback, grader_id, grade_time) VALUES
 -- Java基础练习1的提交
-((SELECT id FROM task WHERE task_title = 'Java基础练习1'), (SELECT id FROM student WHERE student_no = 'S2023001'), '已完成所有Java基础语法练习', '[{"name":"java_basic.zip","path":"/uploads/submissions/s2023001_java_basic.zip","size":1024000}]', NOW(), 'GRADED', 95.00, '代码规范良好，逻辑清晰', (SELECT id FROM teacher WHERE teacher_no = 'T001'), NOW()),
-((SELECT id FROM task WHERE task_title = 'Java基础练习1'), (SELECT id FROM student WHERE student_no = 'S2023002'), '完成了大部分练习题', '[{"name":"java_basic.zip","path":"/uploads/submissions/s2023002_java_basic.zip","size":896000}]', NOW(), 'GRADED', 88.00, '有几个小错误，整体不错', (SELECT id FROM teacher WHERE teacher_no = 'T001'), NOW()),
+((SELECT id FROM task WHERE task_title = 'Java基础练习1'), (SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student1'), '已完成所有Java基础语法练习', '[{"name":"java_basic.zip","path":"/uploads/submissions/s2023001_java_basic.zip","size":1024000}]', NOW(), 'GRADED', 95.00, '代码规范良好，逻辑清晰', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), NOW()),
+((SELECT id FROM task WHERE task_title = 'Java基础练习1'), (SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student2'), '完成了大部分练习题', '[{"name":"java_basic.zip","path":"/uploads/submissions/s2023002_java_basic.zip","size":896000}]', NOW(), 'GRADED', 88.00, '有几个小错误，整体不错', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), NOW()),
 -- 数据结构实现的提交
-((SELECT id FROM task WHERE task_title = '数据结构实现'), (SELECT id FROM student WHERE student_no = 'S2023001'), '实现了栈、队列、链表的基本操作', '[{"name":"data_structure.zip","path":"/uploads/submissions/s2023001_data_structure.zip","size":1536000}]', NOW(), 'GRADED', 110.00, '实现完整，代码质量高', (SELECT id FROM teacher WHERE teacher_no = 'T001'), NOW()),
-((SELECT id FROM task WHERE task_title = '数据结构实现'), (SELECT id FROM student WHERE student_no = 'S2023002'), '实现了栈和队列，链表部分有问题', '[{"name":"data_structure.zip","path":"/uploads/submissions/s2023002_data_structure.zip","size":1280000}]', NOW(), 'GRADED', 85.00, '链表实现需要改进', (SELECT id FROM teacher WHERE teacher_no = 'T001'), NOW()),
+((SELECT id FROM task WHERE task_title = '数据结构实现'), (SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student1'), '实现了栈、队列、链表的基本操作', '[{"name":"data_structure.zip","path":"/uploads/submissions/s2023001_data_structure.zip","size":1536000}]', NOW(), 'GRADED', 110.00, '实现完整，代码质量高', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), NOW()),
+((SELECT id FROM task WHERE task_title = '数据结构实现'), (SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student2'), '实现了栈和队列，链表部分有问题', '[{"name":"data_structure.zip","path":"/uploads/submissions/s2023002_data_structure.zip","size":1280000}]', NOW(), 'GRADED', 85.00, '链表实现需要改进', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), NOW()),
 -- SQL查询练习的提交
-((SELECT id FROM task WHERE task_title = 'SQL查询练习'), (SELECT id FROM student WHERE student_no = 'S2023007'), '完成了所有SQL查询题目', '[{"name":"sql_practice.sql","path":"/uploads/submissions/s2023007_sql_practice.sql","size":51200}]', NOW(), 'GRADED', 75.00, 'SQL语法正确，但查询效率可以优化', (SELECT id FROM teacher WHERE teacher_no = 'T001'), NOW()),
-((SELECT id FROM task WHERE task_title = 'SQL查询练习'), (SELECT id FROM student WHERE student_no = 'S2023008'), '完成了大部分查询，有两题未完成', '[{"name":"sql_practice.sql","path":"/uploads/submissions/s2023008_sql_practice.sql","size":40960}]', NOW(), 'GRADED', 65.00, '需要加强复杂查询的练习', (SELECT id FROM teacher WHERE teacher_no = 'T001'), NOW());
+((SELECT id FROM task WHERE task_title = 'SQL查询练习'), (SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student7'), '完成了所有SQL查询题目', '[{"name":"sql_practice.sql","path":"/uploads/submissions/s2023007_sql_practice.sql","size":51200}]', NOW(), 'GRADED', 75.00, 'SQL语法正确，但查询效率可以优化', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), NOW()),
+((SELECT id FROM task WHERE task_title = 'SQL查询练习'), (SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student8'), '完成了大部分查询，有两题未完成', '[{"name":"sql_practice.sql","path":"/uploads/submissions/s2023008_sql_practice.sql","size":40960}]', NOW(), 'GRADED', 65.00, '需要加强复杂查询的练习', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), NOW());
 
 -- 插入成绩记录
 INSERT INTO grade (student_id, course_id, task_id, grade_type, score, total_score, grade_level, graded_by, grade_time) VALUES
 -- CS101课程成绩
-((SELECT id FROM student WHERE student_no = 'S2023001'), (SELECT id FROM course WHERE course_code = 'CS101'), (SELECT id FROM task WHERE task_title = 'Java基础练习1'), 'TASK', 95.00, 100.00, 'A', (SELECT id FROM teacher WHERE teacher_no = 'T001'), NOW()),
-((SELECT id FROM student WHERE student_no = 'S2023002'), (SELECT id FROM course WHERE course_code = 'CS101'), (SELECT id FROM task WHERE task_title = 'Java基础练习1'), 'TASK', 88.00, 100.00, 'B+', (SELECT id FROM teacher WHERE teacher_no = 'T001'), NOW()),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student1'), (SELECT id FROM course WHERE course_code = 'CS101'), (SELECT id FROM task WHERE task_title = 'Java基础练习1'), 'TASK', 95.00, 100.00, 'A', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), NOW()),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student2'), (SELECT id FROM course WHERE course_code = 'CS101'), (SELECT id FROM task WHERE task_title = 'Java基础练习1'), 'TASK', 88.00, 100.00, 'B+', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), NOW()),
 -- CS102课程成绩
-((SELECT id FROM student WHERE student_no = 'S2023001'), (SELECT id FROM course WHERE course_code = 'CS102'), (SELECT id FROM task WHERE task_title = '数据结构实现'), 'TASK', 110.00, 120.00, 'A+', (SELECT id FROM teacher WHERE teacher_no = 'T001'), NOW()),
-((SELECT id FROM student WHERE student_no = 'S2023002'), (SELECT id FROM course WHERE course_code = 'CS102'), (SELECT id FROM task WHERE task_title = '数据结构实现'), 'TASK', 85.00, 120.00, 'B', (SELECT id FROM teacher WHERE teacher_no = 'T001'), NOW()),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student1'), (SELECT id FROM course WHERE course_code = 'CS102'), (SELECT id FROM task WHERE task_title = '数据结构实现'), 'TASK', 110.00, 120.00, 'A+', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), NOW()),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student2'), (SELECT id FROM course WHERE course_code = 'CS102'), (SELECT id FROM task WHERE task_title = '数据结构实现'), 'TASK', 85.00, 120.00, 'B', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), NOW()),
 -- CS201课程成绩
-((SELECT id FROM student WHERE student_no = 'S2023007'), (SELECT id FROM course WHERE course_code = 'CS201'), (SELECT id FROM task WHERE task_title = 'SQL查询练习'), 'TASK', 75.00, 80.00, 'A-', (SELECT id FROM teacher WHERE teacher_no = 'T001'), NOW()),
-((SELECT id FROM student WHERE student_no = 'S2023008'), (SELECT id FROM course WHERE course_code = 'CS201'), (SELECT id FROM task WHERE task_title = 'SQL查询练习'), 'TASK', 65.00, 80.00, 'B-', (SELECT id FROM teacher WHERE teacher_no = 'T001'), NOW());
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student7'), (SELECT id FROM course WHERE course_code = 'CS201'), (SELECT id FROM task WHERE task_title = 'SQL查询练习'), 'TASK', 75.00, 80.00, 'A-', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), NOW()),
+((SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student8'), (SELECT id FROM course WHERE course_code = 'CS201'), (SELECT id FROM task WHERE task_title = 'SQL查询练习'), 'TASK', 65.00, 80.00, 'B-', (SELECT t.id FROM teacher t JOIN user u ON t.user_id = u.id WHERE u.username = 'teacher1'), NOW());
 
 -- 插入通知信息
 INSERT INTO notification (title, content, type, priority, sender_id, recipient_id, recipient_type, related_entity_type, related_entity_id) VALUES
@@ -714,9 +744,9 @@ INSERT INTO question_bank (question_text, question_type, course_id, difficulty, 
 INSERT INTO ai_feature (feature_name, feature_type, description, target_entity_type, target_entity_id, input_data, output_data, confidence_score, processing_status, created_by) VALUES
 ('作业自动批改', 'AUTO_GRADING', '对Java编程作业进行自动批改', 'task', (SELECT id FROM task WHERE task_title = 'Java基础练习1'), '{"submission_id": 1, "code_content": "public class Hello {...}"}', '{"score": 95, "feedback": "代码规范良好", "errors": []}', 0.92, 'COMPLETED', (SELECT id FROM user WHERE username = 'teacher1')),
 ('知识点提取', 'KNOWLEDGE_EXTRACTION', '从课程内容中提取关键知识点', 'course', (SELECT id FROM course WHERE course_code = 'CS101'), '{"course_content": "Java编程基础课程"}', '{"knowledge_points": ["Java语法", "面向对象", "异常处理"]}', 0.88, 'COMPLETED', (SELECT id FROM user WHERE username = 'teacher1')),
-('学习能力分析', 'ABILITY_ANALYSIS', '分析学生的学习能力和进度', 'student', (SELECT id FROM student WHERE student_no = 'S2023001'), '{"grades": [95, 88, 110], "submissions": 3}', '{"ability_level": "优秀", "weak_points": [], "suggestions": ["可以尝试更有挑战性的项目"]}', 0.85, 'COMPLETED', (SELECT id FROM user WHERE username = 'teacher1')),
-('内容推荐', 'CONTENT_RECOMMENDATION', '为学生推荐合适的学习资源', 'student', (SELECT id FROM student WHERE student_no = 'S2023002'), '{"current_progress": "Java基础", "learning_style": "视觉型"}', '{"recommendations": [{"type": "video", "title": "Java面向对象编程视频教程"}]}', 0.78, 'COMPLETED', (SELECT id FROM user WHERE username = 'teacher1')),
-('查重检测', 'PLAGIARISM_CHECK', '检测作业提交的原创性', 'submission', 1, '{"submission_content": "学生提交的代码内容"}', '{"similarity": 15, "sources": [], "is_original": true}', 0.95, 'COMPLETED', (SELECT id FROM user WHERE username = 'teacher1'));
+('学习能力分析', 'ABILITY_ANALYSIS', '分析学生的学习能力和进度', 'student', (SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student1'), '{"grades": [95, 88, 110], "submissions": 3}', '{"ability_level": "优秀", "weak_points": [], "suggestions": ["可以尝试更有挑战性的项目"]}', 0.85, 'COMPLETED', (SELECT id FROM user WHERE username = 'teacher1')),
+('内容推荐', 'CONTENT_RECOMMENDATION', '为学生推荐合适的学习资源', 'student', (SELECT s.id FROM student s JOIN user u ON s.user_id = u.id WHERE u.username = 'student2'), '{"current_progress": "Java基础", "learning_style": "视觉型"}', '{"recommendations": [{"type": "video", "title": "Java面向对象编程视频教程"}]}', 0.78, 'COMPLETED', (SELECT id FROM user WHERE username = 'teacher1')),
+('查重检测', 'PLAGIARISM_CHECK', '检测作业提交的原创性', 'submission', 1, '{"submission_content": "学生提交的代码内容"}', '{"submission_content": "学生提交的代码内容"}', 0.95, 'COMPLETED', (SELECT id FROM user WHERE username = 'teacher1'));
 
 -- =============================================
 -- 数据库初始化完成

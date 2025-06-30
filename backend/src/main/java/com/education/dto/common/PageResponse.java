@@ -182,6 +182,40 @@ public class PageResponse<T> implements Serializable {
     }
 
     /**
+     * PageResponse构建器
+     */
+    public static class PageResponseBuilder<T> {
+        private List<T> records;
+        private Long total;
+        private Integer current;
+        private Integer pageSize;
+
+        public PageResponseBuilder<T> records(List<T> records) {
+            this.records = records;
+            return this;
+        }
+
+        public PageResponseBuilder<T> total(Long total) {
+            this.total = total;
+            return this;
+        }
+
+        public PageResponseBuilder<T> current(Integer current) {
+            this.current = current;
+            return this;
+        }
+
+        public PageResponseBuilder<T> pageSize(Integer pageSize) {
+            this.pageSize = pageSize;
+            return this;
+        }
+
+        public PageResponse<T> build() {
+            return new PageResponse<>(current, pageSize, total, records);
+        }
+    }
+
+    /**
      * 创建单页响应
      * 
      * @param records 数据列表

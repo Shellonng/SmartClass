@@ -11,8 +11,9 @@ import router from './router'
 import { useAuthStore } from './stores/auth'
 
 // 配置axios
-axios.defaults.baseURL = 'http://localhost:8080/api'
+axios.defaults.baseURL = 'http://localhost:8080'
 axios.defaults.timeout = 10000
+axios.defaults.withCredentials = true // 允许跨域请求携带凭证（cookies）
 
 // 请求拦截器
 axios.interceptors.request.use(
@@ -26,10 +27,9 @@ axios.interceptors.request.use(
       data: config.data
     })
     
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
+    // 确保请求包含cookie（用于Session认证）
+    config.withCredentials = true
+    
     return config
   },
   (error) => {
@@ -48,6 +48,13 @@ axios.interceptors.response.use(
       headers: response.headers,
       data: response.data
     })
+    
+    // 检查并保存会话ID（如果存在）
+    const setCookieHeader = response.headers['set-cookie']
+    if (setCookieHeader) {
+      console.log('服务器设置了Cookie:', setCookieHeader)
+    }
+    
     return response
   },
   (error) => {
@@ -67,10 +74,16 @@ axios.interceptors.response.use(
       }
     })
     
-    if (error.response?.status === 401) {
-      const authStore = useAuthStore()
-      authStore.clearToken()
-      router.push('/login')
+    // 处理401未授权错误
+    if (error.response && error.response.status === 401) {
+      // 清除本地存储的认证信息
+      localStorage.removeItem('token');
+      localStorage.removeItem('user-token');
+      localStorage.removeItem('userInfo');
+      localStorage.removeItem('sessionId');
+      
+      // 重定向到登录页
+      window.location.href = '/login';
     }
     return Promise.reject(error)
   }
@@ -85,6 +98,8 @@ app.use(Antd)
 
 // 初始化认证状态
 const authStore = useAuthStore()
-authStore.initAuth()
+authStore.init().catch((error) => {
+  console.error('认证初始化失败:', error)
+})
 
 app.mount('#app')

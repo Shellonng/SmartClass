@@ -25,7 +25,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
         <!-- druid.version已移除 -->
-        <jwt.version>0.11.5</jwt.version>
+
         <fastjson.version>2.0.1</fastjson.version>
         <hutool.version>5.8.22</hutool.version>
         <knife4j.version>4.3.0</knife4j.version>
@@ -101,24 +101,7 @@
             <version>${mybatis-plus.version}</version>
         </dependency>
 
-        <!-- JWT -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <version>${jwt.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>${jwt.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>${jwt.version}</version>
-            <scope>runtime</scope>
-        </dependency>
+
 
         <!-- JSON -->
         <dependency>
