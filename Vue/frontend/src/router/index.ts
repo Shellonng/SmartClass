@@ -135,6 +135,39 @@ const router = createRouter({
         }
       ]
     },
+    
+    // 课程题库页面 - 使用独立布局
+    {
+      path: '/teacher/courses/:courseId/question-bank',
+      name: 'TeacherCourseQuestionBank',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'TEACHER' },
+      children: [
+        {
+          path: '',
+          component: TeacherQuestionBank,
+          props: route => ({ courseId: Number(route.params.courseId) })
+        }
+      ]
+    },
+    
+    // 课程题目详情页面
+    {
+      path: '/teacher/courses/:courseId/question-bank/:id',
+      name: 'TeacherCourseQuestionDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'TEACHER' },
+      children: [
+        {
+          path: '',
+          component: TeacherQuestionDetail,
+          props: route => ({ 
+            id: Number(route.params.id),
+            courseId: Number(route.params.courseId)
+          })
+        }
+      ]
+    },
 
     // 教师端路由
     {

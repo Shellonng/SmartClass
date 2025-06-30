@@ -39,6 +39,9 @@ public enum ResultCode {
     BUSINESS_ERROR(501, "业务错误"),
     VALIDATION_ERROR(4002, "数据验证失败"),
     
+    // 课程相关错误码
+    COURSE_NOT_FOUND(4101, "课程不存在"),
+    
     // 文件相关 (5000-5999)
     FILE_UPLOAD_ERROR(10001, "文件上传失败"),
     FILE_UPLOAD_FAILED(5002, "文件上传失败"),

@@ -80,6 +80,12 @@
             </template>
             <span>资料</span>
           </a-menu-item>
+          <a-menu-item key="question-bank">
+            <template #icon>
+              <FileOutlined />
+            </template>
+            <span>题库</span>
+          </a-menu-item>
           <a-menu-item key="wrongbook">
             <template #icon>
               <EditOutlined />
@@ -163,6 +169,7 @@
           <template #title>教学资源</template>
           <a-menu-item key="resources-list">资源库</a-menu-item>
           <a-menu-item key="resources-upload">上传资源</a-menu-item>
+          <a-menu-item key="question-bank">题库管理</a-menu-item>
         </a-sub-menu>
         
         <a-menu-item key="analytics">
@@ -313,7 +320,8 @@ import {
   CommentOutlined,
   EditOutlined,
   HistoryOutlined,
-  NodeIndexOutlined
+  NodeIndexOutlined,
+  FileOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 
@@ -508,6 +516,7 @@ function handleMenuClick({ key }: { key: string }) {
     'students-grades': '/teacher/students/grades',
     'resources-list': '/teacher/resources',
     'resources-upload': '/teacher/resources/upload',
+    'question-bank': '/teacher/question-bank',
     'analytics': '/teacher/analytics',
     'ai-assistant': '/teacher/ai-assistant'
   }
@@ -718,19 +727,18 @@ onMounted(() => {
 }
 
 .content {
-  margin: 24px;
+  margin: 0;
   padding: 0;
-  min-height: calc(100vh - 112px);
-  max-width: 1600px;
-  margin: 24px auto;
+  min-height: calc(100vh - 64px);
+  width: 100%;
 }
 
 .content-wrapper {
   background: #fff;
-  border-radius: 12px;
   min-height: 100%;
   overflow: hidden;
   padding: 24px;
+  border-radius: 0;
 }
 
 .ai-assistant-float {

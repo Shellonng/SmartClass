@@ -269,6 +269,14 @@ export function getTeacherCourseResources(courseId: number) {
 
 // 分页获取课程资源
 export function getTeacherCourseResourcesPage(courseId: number, page = 1, size = 10) {
+  console.log('调用getTeacherCourseResourcesPage，参数:', { courseId, page, size })
+  
+  // 确保courseId是有效数字
+  if (isNaN(courseId) || courseId <= 0) {
+    console.error('无效的courseId:', courseId)
+    return Promise.reject(new Error('Invalid courseId'))
+  }
+  
   return axios.get(`/api/teacher/courses/${courseId}/resources/page`, {
     params: { page, size }
   })
@@ -280,6 +288,12 @@ export function uploadCourseResource(courseId: number, file: File, name?: string
   formData.append('file', file)
   if (name) formData.append('name', name)
   if (description) formData.append('description', description)
+  
+  // 确保courseId是有效数字
+  if (isNaN(courseId) || courseId <= 0) {
+    console.error('Invalid courseId:', courseId)
+    return Promise.reject(new Error('Invalid courseId'))
+  }
   
   return axios.post(`/api/teacher/courses/${courseId}/resources/upload`, formData, {
     headers: {
@@ -306,4 +320,18 @@ export function getResourceDownloadUrl(resourceId: number) {
 // 获取资源预览链接
 export function getResourcePreviewUrl(resourceId: number) {
   return `/api/teacher/courses/resources/${resourceId}/preview`
+}
+
+// 直接下载资源（返回blob）
+export function downloadResourceDirectly(resourceId: number) {
+  return axios.get(`/api/teacher/courses/resources/${resourceId}/download`, {
+    responseType: 'blob'
+  })
+}
+
+// 直接预览资源（返回blob）
+export function previewResourceDirectly(resourceId: number) {
+  return axios.get(`/api/teacher/courses/resources/${resourceId}/preview`, {
+    responseType: 'blob'
+  })
 }

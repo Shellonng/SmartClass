@@ -69,7 +69,7 @@ spring:
           min-idle: 0
   
   # 文件上传配置
-    servlet:
+  servlet:
     multipart:
       max-file-size: 500MB
       max-request-size: 500MB
