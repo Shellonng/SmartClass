@@ -12,6 +12,6 @@
 .course-layout {
   width: 100%;
   min-height: 100vh;
-  background-color: #fff;
+  background-color: #f5f5f5;
 }
 </style> 

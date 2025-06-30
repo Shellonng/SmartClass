@@ -17,7 +17,7 @@
           :dataSource="resources"
           :columns="columns"
           :pagination="pagination"
-          :rowKey="record => record.id"
+          :rowKey="(record: CourseResource) => record.id"
           @change="handleTableChange"
         >
           <!-- 资源名称 -->
@@ -143,67 +143,11 @@
         </a-form-item>
       </a-form>
     </a-modal>
-
-    <!-- 资源预览弹窗 -->
-    <a-modal
-      v-model:open="previewModalVisible"
-      :title="previewResourceData?.name"
-      width="800px"
-      :footer="null"
-      :destroyOnClose="true"
-    >
-      <div class="preview-container">
-        <div v-if="previewLoading" class="preview-loading">
-          <a-spin tip="资源加载中..."></a-spin>
-        </div>
-        <div v-else>
-          <!-- PDF预览 -->
-          <iframe
-            v-if="previewResourceData?.fileType === 'pdf'"
-            :src="previewUrl"
-            class="pdf-preview"
-          ></iframe>
-          
-          <!-- 图片预览 -->
-          <img
-            v-else-if="previewResourceData && ['jpg', 'jpeg', 'png', 'gif'].includes(previewResourceData.fileType)"
-            :src="previewUrl"
-            class="image-preview"
-          />
-          
-          <!-- 视频预览 -->
-          <video
-            v-else-if="previewResourceData?.fileType === 'mp4'"
-            :src="previewUrl"
-            controls
-            class="video-preview"
-          ></video>
-          
-          <!-- 音频预览 -->
-          <audio
-            v-else-if="previewResourceData?.fileType === 'mp3'"
-            :src="previewUrl"
-            controls
-            class="audio-preview"
-          ></audio>
-          
-          <!-- 不支持预览 -->
-          <div v-else class="unsupported-preview">
-            <FileOutlined class="unsupported-icon" />
-            <p>该文件类型不支持在线预览，请下载后查看</p>
-            <a-button type="primary" @click="downloadResource(previewResourceData)">
-              <DownloadOutlined />
-              下载文件
-            </a-button>
-          </div>
-        </div>
-      </div>
-    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, defineProps } from 'vue'
 import { useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
@@ -227,11 +171,38 @@ import {
   uploadCourseResource,
   deleteCourseResource,
   getResourceDownloadUrl,
-  getResourcePreviewUrl
+  getResourcePreviewUrl,
+  downloadResourceDirectly
 } from '@/api/course'
 
+const props = defineProps<{
+  courseId?: number
+}>()
+
 const route = useRoute()
-const courseId = computed(() => Number(route.params.courseId))
+const courseId = computed(() => {
+  // 优先使用传入的courseId，如果没有则尝试从路由获取
+  if (props.courseId !== undefined) {
+    console.log('CourseResources - 使用props传入的courseId:', props.courseId)
+    return props.courseId
+  }
+  
+  // 从路由参数获取courseId
+  const idParam = route.params.courseId
+  const idStr = typeof idParam === 'string' ? idParam : Array.isArray(idParam) ? idParam[0] : ''
+  const id = parseInt(idStr)
+  
+  console.log('CourseResources - 从路由获取courseId:', {
+    routeParams: route.params,
+    idParam,
+    idStr,
+    id,
+    isNaN: isNaN(id),
+    final: isNaN(id) ? -1 : id
+  })
+  
+  return isNaN(id) ? -1 : id
+})
 
 // 资源列表状态
 const resources = ref<CourseResource[]>([])
@@ -297,12 +268,6 @@ const uploadForm = ref({
   description: ''
 })
 
-// 预览相关状态
-const previewModalVisible = ref(false)
-const previewResourceData = ref<CourseResource | null>(null)
-const previewUrl = ref('')
-const previewLoading = ref(false)
-
 // 生命周期钩子
 onMounted(() => {
   fetchResources()
@@ -320,6 +285,14 @@ watch(
 
 // 获取资源列表
 const fetchResources = async () => {
+  // 检查课程ID是否有效
+  if (courseId.value <= 0) {
+    message.error('无效的课程ID')
+    console.error('无效的课程ID:', courseId.value)
+    return
+  }
+
+  console.log('开始获取课程资源，课程ID:', courseId.value)
   loading.value = true
   try {
     const { data } = await getTeacherCourseResourcesPage(
@@ -328,11 +301,15 @@ const fetchResources = async () => {
       pagination.value.pageSize
     )
     
+    console.log('获取课程资源响应:', data)
+    
     if (data.code === 200) {
       resources.value = data.data.records
       pagination.value.total = data.data.total
+      console.log('成功获取课程资源:', resources.value)
     } else {
       message.error(data.message || '获取资源列表失败')
+      console.error('获取资源列表失败:', data)
     }
   } catch (error) {
     console.error('获取资源列表失败:', error)
@@ -383,6 +360,12 @@ const handleUpload = async () => {
     return
   }
   
+  // 检查课程ID是否有效
+  if (courseId.value <= 0) {
+    message.error('无效的课程ID')
+    return
+  }
+  
   uploading.value = true
   
   try {
@@ -427,30 +410,61 @@ const deleteResource = async (resource: CourseResource) => {
 }
 
 // 下载资源
-const downloadResource = (resource: CourseResource | null) => {
+const downloadResource = async (resource: CourseResource | null) => {
   if (!resource) return
   
-  const downloadUrl = getResourceDownloadUrl(resource.id)
-  const link = document.createElement('a')
-  link.href = downloadUrl
-  link.download = `${resource.name}.${resource.fileType}`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+  console.log('下载资源:', {
+    resourceId: resource.id,
+    resourceName: resource.name
+  })
+  
+  try {
+    // 显示加载状态
+    message.loading({ content: '正在下载文件...', key: 'download' })
+    
+    // 使用直接下载API
+    const response = await downloadResourceDirectly(resource.id)
+    
+    // 创建Blob对象
+    const blob = new Blob([response.data], { 
+      type: response.headers['content-type'] || 'application/octet-stream' 
+    })
+    
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${resource.name}.${resource.fileType}`
+    document.body.appendChild(link)
+    link.click()
+    
+    // 清理
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(link)
+    
+    // 显示成功消息
+    message.success({ content: '下载成功', key: 'download' })
+  } catch (error) {
+    console.error('下载资源失败:', error)
+    message.error({ content: '下载失败，请重试', key: 'download' })
+  }
 }
 
 // 预览资源
 const showResourcePreview = async (resource: CourseResource) => {
-  previewResourceData.value = resource
-  previewLoading.value = true
-  previewModalVisible.value = true
+  // 构建完整的预览URL
+  const baseUrl = 'http://localhost:8080'
+  const previewUrl = `${baseUrl}${getResourcePreviewUrl(resource.id)}`
   
-  previewUrl.value = getResourcePreviewUrl(resource.id)
+  console.log('预览资源:', {
+    resourceId: resource.id,
+    resourceName: resource.name,
+    resourceType: resource.fileType,
+    previewUrl: previewUrl
+  })
   
-  // 模拟加载过程
-  setTimeout(() => {
-    previewLoading.value = false
-  }, 1000)
+  // 直接在新窗口打开预览
+  window.open(previewUrl, '_blank');
 }
 
 // 检查是否可以预览
@@ -573,51 +587,5 @@ const handleTableChange = (pag: any) => {
 .file-size {
   font-size: 12px;
   color: #999;
-}
-
-.preview-container {
-  min-height: 400px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.preview-loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 400px;
-}
-
-.pdf-preview {
-  width: 100%;
-  height: 600px;
-  border: none;
-}
-
-.image-preview {
-  max-width: 100%;
-  max-height: 600px;
-  object-fit: contain;
-}
-
-.video-preview,
-.audio-preview {
-  width: 100%;
-}
-
-.unsupported-preview {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  text-align: center;
-}
-
-.unsupported-icon {
-  font-size: 64px;
-  color: #d9d9d9;
-  margin-bottom: 16px;
 }
 </style> 

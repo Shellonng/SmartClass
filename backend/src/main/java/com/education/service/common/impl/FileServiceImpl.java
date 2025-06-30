@@ -33,7 +33,7 @@ public class FileServiceImpl implements FileService {
     
     private static final List<String> ALLOWED_IMAGE_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png", "gif");
     
-    @Value("${file.upload.path:/uploads}")
+    @Value("${file.upload.path:D:/my_git_code/SmartClass/resource/file}")
     private String uploadBasePath;
     
     @Value("${file.access.url.prefix:/files}")
@@ -65,9 +65,17 @@ public class FileServiceImpl implements FileService {
         Path uploadPath = Paths.get(uploadBasePath, relativePath);
         try {
             logger.info("创建上传目录: {}", uploadPath);
+            // 确保基础目录存在
+            Path baseDir = Paths.get(uploadBasePath);
+            if (!Files.exists(baseDir)) {
+                Files.createDirectories(baseDir);
+                logger.info("基础目录创建成功: {}", baseDir);
+            }
+            
+            // 确保子目录存在
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
-                logger.info("目录创建成功");
+                logger.info("子目录创建成功: {}", uploadPath);
             } else {
                 logger.info("目录已存在");
             }

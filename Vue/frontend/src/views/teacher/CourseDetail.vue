@@ -10,6 +10,8 @@
               返回课程列表
             </a-button>
           </div>
+          
+          <!-- 删除导航菜单 -->
         </div>
 
         <!-- 章节管理内容 -->
@@ -207,7 +209,12 @@
 
         <!-- 资料管理内容 -->
         <div v-if="currentView === 'resources'" class="management-content">
-          <CourseResources />
+          <CourseResources :courseId="courseId" />
+        </div>
+
+        <!-- 题库管理内容 -->
+        <div v-if="currentView === 'question-bank'" class="management-content">
+          <QuestionBank :courseId="courseId" />
         </div>
 
         <!-- 错题集管理内容 -->
@@ -331,6 +338,7 @@ import { getCourseComments, deleteSectionComment, getSectionCommentReplies } fro
 import CourseResources from './CourseResources.vue'
 import axios from 'axios'
 import dayjs from 'dayjs'
+import QuestionBank from './QuestionBank.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -376,7 +384,23 @@ const expandedComments = ref(new Set<number>())
 
 // 计算属性
 const courseId = computed(() => {
-  return parseInt(route.params.id as string)
+  // 先尝试从路由参数中获取id
+  const idParam = route.params.id;
+  // 确保idParam是字符串
+  const idStr = typeof idParam === 'string' ? idParam : Array.isArray(idParam) ? idParam[0] : '';
+  // 转换为数字
+  const id = parseInt(idStr);
+  
+  console.log('CourseDetail - 计算courseId:', { 
+    routeParams: route.params,
+    idParam,
+    idStr,
+    id,
+    isNaN: isNaN(id),
+    final: isNaN(id) ? -1 : id
+  });
+  
+  return isNaN(id) ? -1 : id;
 })
 
 // 监听路由变化，更新当前视图
@@ -870,24 +894,18 @@ const loadReplies = async (comment: any) => {
 
 .page-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+
+.header-left {
+  display: flex;
   align-items: center;
-  margin-bottom: 32px;
-  padding: 20px 28px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
 }
 
 .back-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #666;
-}
-
-.back-btn:hover {
-  color: #1890ff;
+  padding-left: 0;
 }
 
 .course-info-card {

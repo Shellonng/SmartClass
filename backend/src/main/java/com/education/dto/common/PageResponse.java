@@ -334,6 +334,8 @@ public class PageResponse<T> implements Serializable {
         private Integer lastPage;
         private Integer nextPage;
         private Integer previousPage;
+        private Boolean hasNext;
+        private Boolean hasPrevious;
 
         public PageNavigation(Integer current, Integer total, int displayPages) {
             if (total <= displayPages) {
@@ -351,6 +353,8 @@ public class PageResponse<T> implements Serializable {
             
             this.nextPage = current < total ? current + 1 : null;
             this.previousPage = current > 1 ? current - 1 : null;
+            this.hasNext = current < total;
+            this.hasPrevious = current > 1;
         }
     }
 
@@ -363,8 +367,8 @@ public class PageResponse<T> implements Serializable {
      */
     public static <T> PageResponse<T> fromIPage(IPage<T> page) {
         PageResponse<T> response = new PageResponse<>();
-        response.setCurrent(page.getCurrent());
-        response.setSize(page.getSize());
+        response.setCurrent((int)page.getCurrent());
+        response.setPageSize((int)page.getSize());
         response.setTotal(page.getTotal());
         response.setPages(page.getPages());
         response.setRecords(page.getRecords());
