@@ -143,14 +143,13 @@
           <a-menu-item key="courses-chapters">章节管理</a-menu-item>
         </a-sub-menu>
         
-        <a-sub-menu key="assignments">
+        <a-sub-menu key="tasks">
           <template #icon>
             <FileTextOutlined />
           </template>
-          <template #title>作业管理</template>
-          <a-menu-item key="assignments-list">作业列表</a-menu-item>
-          <a-menu-item key="assignments-create">布置作业</a-menu-item>
-          <a-menu-item key="assignments-review">批改作业</a-menu-item>
+          <template #title>任务管理</template>
+          <a-menu-item key="exams">考试管理</a-menu-item>
+          <a-menu-item key="assignments">作业管理</a-menu-item>
         </a-sub-menu>
         
         <a-sub-menu key="students">
@@ -512,6 +511,7 @@ function handleMenuClick({ key }: { key: string }) {
     'assignments-list': '/teacher/assignments',
     'assignments-create': '/teacher/assignments/create',
     'assignments-review': '/teacher/assignments/review',
+    'exams': '/teacher/exams',
     'students-list': '/teacher/students',
     'students-grades': '/teacher/students/grades',
     'resources-list': '/teacher/resources',
@@ -524,6 +524,17 @@ function handleMenuClick({ key }: { key: string }) {
   const targetRoute = routeMap[key]
   if (targetRoute && targetRoute !== route.path) {
     router.push(targetRoute)
+  }
+
+  // 任务管理
+  if (key === 'exams') {
+    router.push('/teacher/exams')
+    return
+  }
+  
+  if (key === 'assignments') {
+    router.push('/teacher/assignments')
+    return
   }
 }
 

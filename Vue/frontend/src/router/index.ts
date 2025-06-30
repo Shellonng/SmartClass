@@ -33,6 +33,12 @@ const TeacherSectionDetail = () => import('@/views/teacher/SectionDetail.vue')
 const TeacherTasks = () => import('@/views/teacher/Tasks.vue')
 const TeacherTaskDetail = () => import('@/views/teacher/TaskDetail.vue')
 
+// 教师端 - 考试管理
+const TeacherExams = () => import('@/views/teacher/Exams.vue')
+
+// 教师端 - 作业管理
+const TeacherAssignments = () => import('@/views/teacher/Assignments.vue')
+
 // 教师端 - 成绩管理
 const TeacherGrades = () => import('@/views/teacher/Grades.vue')
 
@@ -247,6 +253,20 @@ const router = createRouter({
           name: 'TeacherTaskDetail',
           component: TeacherTaskDetail,
           props: true
+        },
+        
+        // 考试管理
+        {
+          path: 'exams',
+          name: 'TeacherExams',
+          component: TeacherExams
+        },
+        
+        // 作业管理
+        {
+          path: 'assignments',
+          name: 'TeacherAssignments',
+          component: TeacherAssignments
         },
         
         // 成绩管理
