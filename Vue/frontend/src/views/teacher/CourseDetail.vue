@@ -217,6 +217,16 @@
           <QuestionBank :courseId="courseId" />
         </div>
 
+        <!-- 考试管理内容 -->
+        <div v-if="currentView === 'exams'" class="management-content">
+          <CourseExams :courseId="courseId" />
+        </div>
+
+        <!-- 作业管理内容 -->
+        <div v-if="currentView === 'assignments'" class="management-content">
+          <CourseAssignments :courseId="courseId" />
+        </div>
+
         <!-- 错题集管理内容 -->
         <div v-if="currentView === 'wrongbook'" class="management-content">
           <div class="content-header">
@@ -339,6 +349,8 @@ import CourseResources from './CourseResources.vue'
 import axios from 'axios'
 import dayjs from 'dayjs'
 import QuestionBank from './QuestionBank.vue'
+import CourseExams from './CourseExams.vue'
+import CourseAssignments from './CourseAssignments.vue'
 
 const route = useRoute()
 const router = useRouter()

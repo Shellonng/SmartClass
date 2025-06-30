@@ -4,6 +4,8 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/reset.css'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 import axios from 'axios'
 
 import App from './App.vue'
@@ -95,6 +97,7 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 app.use(Antd)
+app.use(ElementPlus)
 
 // 初始化认证状态
 const authStore = useAuthStore()

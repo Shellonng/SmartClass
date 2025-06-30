@@ -103,7 +103,7 @@ export function addQuestion(question: Question) {
   return axios.post<{code: number, data: Question, message: string}>('/api/teacher/questions', question)
     .then(response => {
       // 直接返回响应，无论是否成功，让调用方决定如何处理
-      return response;
+        return response;
     })
     .catch(error => {
       console.error("添加题目请求失败:", error);

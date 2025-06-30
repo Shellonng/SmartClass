@@ -23,7 +23,7 @@ public class QuestionDTO {
 
     @Schema(description = "题目类型")
     private String questionType;  // single, multiple, true_false, blank, short, code
-    
+
     @Schema(description = "题目类型描述")
     private String questionTypeDesc;
 

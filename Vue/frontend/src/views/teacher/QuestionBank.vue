@@ -39,8 +39,8 @@
           <div class="filter-item">
             <span class="filter-label">知识点：</span>
             <a-auto-complete
-              v-model:value="filters.knowledgePoint"
-              style="width: 180px"
+              v-model:value="filters.knowledgePoint" 
+              style="width: 180px" 
               placeholder="输入知识点"
               :options="filteredKnowledgePoints.map(point => ({ value: point }))"
               @search="handleKnowledgePointSearch"
@@ -65,12 +65,12 @@
               @select="handleTitleSelect"
             >
               <template #default>
-                <a-input-search
-                  v-model:value="filters.keyword"
-                  placeholder="搜索题目内容"
-                  @search="handleSearch"
-                  enter-button
-                />
+            <a-input-search
+              v-model:value="filters.keyword"
+              placeholder="搜索题目内容"
+              @search="handleSearch"
+              enter-button
+            />
               </template>
               <template #option="{ value: title }">
                 <div class="auto-complete-option">
@@ -261,7 +261,7 @@
       :footer="null"
       width="700px"
     >
-            <div v-if="currentQuestion" class="question-detail">
+      <div v-if="currentQuestion" class="question-detail">
         <!-- 题目类型和难度水平排列 -->
         <div class="question-detail-header">
           <a-tag :color="getQuestionTypeColor(currentQuestion.questionType)" class="question-type-tag">
@@ -281,9 +281,9 @@
           <div class="question-detail-value">
             <div v-for="option in currentQuestion.options" :key="option.id || option.optionLabel" class="question-option">
               {{ option.optionLabel }}. {{ option.optionText }}
-            </div>
           </div>
         </div>
+          </div>
         
         <div class="question-detail-item" v-if="currentQuestion.knowledgePoint">
           <div class="question-detail-label">知识点：</div>
@@ -731,11 +731,11 @@ const editQuestion = async (question: Question) => {
       const detailData = res.data.data
       console.log('获取到题目详情用于编辑:', detailData)
       
-      questionForm.value = {
-        ...detailData,
+    questionForm.value = {
+      ...detailData,
         options: detailData.options || [],
         images: detailData.images || []
-      }
+    }
       
       // 处理多选题答案
       if (detailData.questionType === QuestionType.MULTIPLE && detailData.correctAnswer) {
@@ -846,8 +846,8 @@ const handleSaveQuestion = async () => {
       message.error('请选择正确选项')
       return
     } else if (!questionForm.value.correctAnswer) {
-      message.error('请输入标准答案')
-      return
+    message.error('请输入标准答案')
+    return
     }
   }
   
@@ -880,7 +880,7 @@ const handleSaveQuestion = async () => {
       // 编辑现有题目
       const res = await updateQuestion(formData)
       if (res.data && res.data.code === 200) {
-        message.success('题目更新成功')
+      message.success('题目更新成功')
         // 更新本地列表中的题目
         const updatedIndex = questions.value.findIndex(q => q.id === formData.id)
         if (updatedIndex !== -1) {
@@ -934,7 +934,7 @@ const handleTableChange = (pag: any) => {
     questions.value = allFilteredQuestions.value.slice(start, end)
   } else {
     // 否则调用后端分页
-    fetchQuestions()
+  fetchQuestions()
   }
 }
 
