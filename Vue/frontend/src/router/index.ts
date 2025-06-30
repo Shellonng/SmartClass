@@ -120,15 +120,6 @@ const router = createRouter({
       meta: { requiresAuth: false, mode: 'register' }
     },
 
-    // 教师端 - 小节详情页面（独立页面，不使用布局）
-    {
-      path: '/teacher/courses/:courseId/sections/:sectionId',
-      name: 'TeacherSectionDetail',
-      component: TeacherSectionDetail,
-      props: true,
-      meta: { requiresAuth: true, role: 'TEACHER' }
-    },
-
     // 教师端路由
     {
       path: '/teacher',
@@ -189,7 +180,30 @@ const router = createRouter({
           component: TeacherCourseDetail,
           props: true
         },
-
+        {
+          path: 'courses/:id/discussions',
+          name: 'TeacherCourseDiscussions',
+          component: TeacherCourseDetail,
+          props: true
+        },
+        {
+          path: 'courses/:id/tasks',
+          name: 'TeacherCourseTasks',
+          component: TeacherCourseDetail,
+          props: true
+        },
+        {
+          path: 'courses/:id/resources',
+          name: 'TeacherCourseResources',
+          component: TeacherCourseDetail,
+          props: true
+        },
+        {
+          path: 'courses/:courseId/sections/:sectionId',
+          name: 'TeacherSectionDetail',
+          component: TeacherSectionDetail,
+          props: true
+        },
         {
           path: 'courses/chapters',
           name: 'TeacherCourseChapters',

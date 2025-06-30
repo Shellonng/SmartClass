@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.education.mapper.SectionCommentMapper">
+    <select id="selectByCourseId" resultType="java.util.Map">
+        SELECT id, section_id as sectionId, user_id as userId, content, create_time as createdAt, parent_id as parentId
+        FROM section_comment
+        WHERE section_id IN (
+            SELECT id FROM section WHERE chapter_id IN (
+                SELECT id FROM chapter WHERE course_id = #{courseId}
+            )
+        )
+        ORDER BY create_time DESC
+    </select>
+</mapper>
