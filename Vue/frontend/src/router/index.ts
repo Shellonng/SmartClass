@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 const AuthLayout = () => import('@/components/layout/AuthLayout.vue')
 const TeacherLayout = () => import('@/components/layout/TeacherLayout.vue')
 const StudentLayout = () => import('@/components/layout/StudentLayout.vue')
+const CourseLayout = () => import('@/components/layout/CourseLayout.vue')
 
 // 认证相关页面
 const Login = () => import('@/views/auth/Login.vue')
@@ -120,6 +121,21 @@ const router = createRouter({
       meta: { requiresAuth: false, mode: 'register' }
     },
 
+    // 课程章节页面 - 使用独立布局
+    {
+      path: '/teacher/courses/:courseId/sections/:sectionId',
+      name: 'TeacherSectionDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'TEACHER' },
+      children: [
+        {
+          path: '',
+          component: TeacherSectionDetail,
+          props: true
+        }
+      ]
+    },
+
     // 教师端路由
     {
       path: '/teacher',
@@ -178,30 +194,6 @@ const router = createRouter({
           path: 'courses/:id',
           name: 'TeacherCourseDetail',
           component: TeacherCourseDetail,
-          props: true
-        },
-        {
-          path: 'courses/:id/discussions',
-          name: 'TeacherCourseDiscussions',
-          component: TeacherCourseDetail,
-          props: true
-        },
-        {
-          path: 'courses/:id/tasks',
-          name: 'TeacherCourseTasks',
-          component: TeacherCourseDetail,
-          props: true
-        },
-        {
-          path: 'courses/:id/resources',
-          name: 'TeacherCourseResources',
-          component: TeacherCourseDetail,
-          props: true
-        },
-        {
-          path: 'courses/:courseId/sections/:sectionId',
-          name: 'TeacherSectionDetail',
-          component: TeacherSectionDetail,
           props: true
         },
         {

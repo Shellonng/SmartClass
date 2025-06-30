@@ -52,20 +52,23 @@
           mode="inline"
           theme="dark"
           class="sidebar-menu"
+          @click="handleCourseMenuClick"
         >
-          <a-menu-item key="tasks">
+          <a-sub-menu key="tasks">
             <template #icon>
               <FileTextOutlined />
             </template>
-            <span>任务</span>
-          </a-menu-item>
+            <template #title>任务</template>
+            <a-menu-item key="exams">考试</a-menu-item>
+            <a-menu-item key="assignments">作业</a-menu-item>
+          </a-sub-menu>
           <a-menu-item key="chapters">
             <template #icon>
               <OrderedListOutlined />
             </template>
             <span>章节</span>
           </a-menu-item>
-          <a-menu-item key="discussion">
+          <a-menu-item key="discussions">
             <template #icon>
               <CommentOutlined />
             </template>
@@ -76,6 +79,24 @@
               <FolderOutlined />
             </template>
             <span>资料</span>
+          </a-menu-item>
+          <a-menu-item key="wrongbook">
+            <template #icon>
+              <EditOutlined />
+            </template>
+            <span>错题集</span>
+          </a-menu-item>
+          <a-menu-item key="records">
+            <template #icon>
+              <HistoryOutlined />
+            </template>
+            <span>学习记录</span>
+          </a-menu-item>
+          <a-menu-item key="knowledge-map">
+            <template #icon>
+              <NodeIndexOutlined />
+            </template>
+            <span>知识图谱</span>
           </a-menu-item>
         </a-menu>
       </template>
@@ -270,7 +291,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore, type User } from '@/stores/auth'
+import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
 import dayjs from 'dayjs'
 import {
@@ -307,7 +328,7 @@ const openKeys = ref<string[]>([])
 const courseSelectedKeys = ref<string[]>(['chapters'])
 
 // 用户信息
-const userInfo = computed(() => authStore.user as User | null)
+const userInfo = computed(() => authStore.user)
 
 // 判断是否是课程详情页
 const isCourseDetailPage = computed(() => {
@@ -318,25 +339,24 @@ const isCourseDetailPage = computed(() => {
 const currentCourse = ref<any>(null)
 
 // 计算课程进度
-const calculateProgress = (startTime?: string, endTime?: string): number => {
-  if (!startTime || !endTime) return 0;
-  
-  const start = dayjs(startTime);
-  const end = dayjs(endTime);
-  const now = dayjs();
-  
-  // 如果当前时间在开始时间之前，进度为0
-  if (now.isBefore(start)) return 0;
-  // 如果当前时间在结束时间之后，进度为100
-  if (now.isAfter(end)) return 100;
-  
-  // 计算总时长和已过时长
-  const totalDuration = end.diff(start);
-  const passedDuration = now.diff(start);
-  
-  // 计算百分比
-  const progress = Math.round((passedDuration / totalDuration) * 100);
-  return Math.min(Math.max(progress, 0), 100); // 确保进度在0-100之间
+const calculateProgress = (startTime: string | undefined, endTime: string | undefined): number => {
+  if (!startTime || !endTime) return 0
+
+  try {
+    const start = new Date(startTime).getTime()
+    const end = new Date(endTime).getTime()
+    const now = Date.now()
+
+    if (now <= start) return 0
+    if (now >= end) return 100
+
+    const total = end - start
+    const current = now - start
+    return Math.round((current / total) * 100)
+  } catch (e) {
+    console.error('计算进度错误:', e)
+    return 0
+  }
 }
 
 // 获取课程信息
@@ -383,15 +403,6 @@ watch(() => route.params.id, (newId) => {
     fetchCourseInfo(Number(newId));
   }
 }, { immediate: true });
-
-// 监听课程详情页的菜单点击
-watch(() => courseSelectedKeys.value, (newKeys) => {
-  if (isCourseDetailPage.value && newKeys.length > 0) {
-    const key = newKeys[0];
-    const courseId = route.params.id;
-    router.push(`/teacher/courses/${courseId}#${key}`);
-  }
-});
 
 // 面包屑导航
 const breadcrumbItems = computed(() => {
@@ -498,10 +509,15 @@ function handleUserMenuClick({ key }: { key: string }) {
 }
 
 // 退出登录
-function handleLogout() {
-  authStore.logoutUser()
-  message.success('已退出登录')
-  router.push('/login')
+const handleLogout = async () => {
+  try {
+    await authStore.logout()
+    message.success('退出登录成功')
+    router.push('/login')
+  } catch (error) {
+    console.error('退出登录失败:', error)
+    message.error('退出登录失败')
+  }
 }
 
 // 显示通知
@@ -513,6 +529,17 @@ function showNotifications() {
 function toggleAIAssistant() {
   // TODO: 实现AI助手功能
   message.info('AI助手功能开发中...')
+}
+
+// 处理课程详情页面侧边栏菜单点击
+const handleCourseMenuClick = ({ key }: { key: string }) => {
+  if (isCourseDetailPage.value) {
+    const courseId = route.params.id
+    router.push({
+      path: `/teacher/courses/${courseId}`,
+      query: { view: key }
+    })
+  }
 }
 
 onMounted(() => {

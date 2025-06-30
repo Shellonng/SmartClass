@@ -67,6 +67,7 @@ public class SectionCommentServiceImpl implements SectionCommentService {
                     if (user != null) {
                         dto.setUserName(user.getRealName());
                         dto.setUserAvatar(user.getAvatar());
+                        dto.setUserRole(user.getRole());
                     }
                     
                     // 获取回复数
@@ -111,6 +112,7 @@ public class SectionCommentServiceImpl implements SectionCommentService {
         BeanUtils.copyProperties(comment, dto);
         dto.setUserName(user.getRealName());
         dto.setUserAvatar(user.getAvatar());
+        dto.setUserRole(user.getRole());
         return dto;
     }
     

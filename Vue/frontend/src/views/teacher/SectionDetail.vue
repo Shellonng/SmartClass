@@ -81,11 +81,11 @@
           <div class="content-header">
             <h1>{{ section?.title || '加载中...' }}</h1>
             <a-button type="primary" @click="editSection">
-              <EditOutlined />
-              编辑
-            </a-button>
-          </div>
-
+                <EditOutlined />
+                编辑
+              </a-button>
+            </div>
+            
           <div class="content-body">
             <!-- 视频区域 -->
             <div class="video-section">
@@ -115,12 +115,12 @@
                 </a-upload>
               </div>
             </div>
-
+            
             <!-- 小节简介 -->
             <div class="section-info">
               <h2>小节简介</h2>
               <p>{{ section?.description || '暂无简介' }}</p>
-            </div>
+              </div>
 
             <!-- 评论区 -->
             <div class="section-comments">
@@ -136,12 +136,17 @@
                       <!-- 主评论 -->
                       <div class="comment-main">
                         <div class="comment-avatar">
-                          <img :src="comment.userAvatar || '/default-avatar.png'" :alt="comment.userName" />
+                          <template v-if="comment.userAvatar">
+                            <img :src="comment.userAvatar" :alt="comment.userName" />
+                          </template>
+                          <div v-else class="avatar-placeholder">
+                            {{ getFirstChar(comment.userName) }}
+                          </div>
                         </div>
                         <div class="comment-content">
                           <div class="comment-header">
                             <span class="username">{{ comment.userName }}</span>
-                            <span class="user-title">{{ comment.userTitle || '学员' }}</span>
+                            <span class="user-title">{{ getUserTitle(comment.userRole) }}</span>
                           </div>
                           <div class="comment-text">{{ comment.content }}</div>
                           <div class="comment-footer">
@@ -165,22 +170,33 @@
                             <div class="additional-header">{{ comment.additionalDays || 14 }}天后追评：</div>
                             <div class="additional-content">{{ comment.additionalComment }}</div>
                           </div>
-
+                          
                           <!-- 回复列表 -->
                           <div v-if="comment.replies && comment.replies.length > 0" class="replies-container">
                             <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
-                              <span class="reply-username">{{ reply.userName }}</span>
-                              <span class="reply-text">：{{ reply.content }}</span>
-                              <div class="reply-footer">
-                                <span class="reply-time">{{ formatDate(reply.createTime) }}</span>
-                                <div class="reply-actions" v-if="isCurrentUser(reply.userId)">
-                                  <span class="action-item" @click="showEditInput(reply)">编辑</span>
-                                  <a-popconfirm
-                                    title="确定要删除这条回复吗？"
-                                    @confirm="deleteComment(reply)"
-                                  >
-                                    <span class="action-item delete">删除</span>
-                                  </a-popconfirm>
+                              <div class="reply-avatar">
+                                <template v-if="reply.userAvatar">
+                                  <img :src="reply.userAvatar" :alt="reply.userName" />
+                                </template>
+                                <div v-else class="avatar-placeholder small">
+                                  {{ getFirstChar(reply.userName) }}
+                                </div>
+                              </div>
+                              <div class="reply-content">
+                                <span class="reply-username">{{ reply.userName }}</span>
+                                <span class="reply-role">({{ getUserTitle(reply.userRole) }})</span>
+                                <span class="reply-text">：{{ reply.content }}</span>
+                                <div class="reply-footer">
+                                  <span class="reply-time">{{ formatDate(reply.createTime) }}</span>
+                                  <div class="reply-actions" v-if="isCurrentUser(reply.userId)">
+                                    <span class="action-item" @click="showEditInput(reply)">编辑</span>
+                                    <a-popconfirm
+                                      title="确定要删除这条回复吗？"
+                                      @confirm="deleteComment(reply)"
+                                    >
+                                      <span class="action-item delete">删除</span>
+                                    </a-popconfirm>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -244,7 +260,7 @@
         </a-spin>
       </div>
     </div>
-
+    
     <!-- 编辑弹窗 -->
     <a-modal
       v-model:open="editModalVisible"
@@ -434,7 +450,7 @@ const initializeData = async () => {
     }
 
     // 处理小节数据
-    if (sectionRes.data.code === 200) {
+    if (sectionRes.data.code === 200 && sectionRes.data.data) {
       section.value = sectionRes.data.data
       
       // 更新表单数据
@@ -446,13 +462,20 @@ const initializeData = async () => {
           videoUrl: section.value.videoUrl || ''
         }
       }
+      
+      // 加载评论数据
+      await fetchComments()
+    } else {
+      // 如果找不到小节数据，可能是已被删除
+      message.warning('找不到小节数据，可能已被删除')
+      // 跳转回课程页面
+      router.push(`/teacher/courses/${courseId}`)
     }
-
-    // 加载评论数据
-    await fetchComments()
   } catch (error) {
     console.error('加载数据失败:', error)
     message.error('加载数据失败')
+    // 发生错误时也跳转回课程页面
+    router.push(`/teacher/courses/${courseId}`)
   } finally {
     loading.value = false
   }
@@ -460,18 +483,19 @@ const initializeData = async () => {
 
 // 监听路由参数变化
 watch(
-  () => route.params.sectionId,
-  (newSectionId, oldSectionId) => {
-    if (newSectionId && newSectionId !== oldSectionId) {
-      currentSectionId.value = Number(newSectionId)
+  () => route.params,
+  (newParams) => {
+    if (newParams.sectionId) {
+      currentSectionId.value = Number(newParams.sectionId)
       initializeData()
     }
-  }
+  },
+  { deep: true, immediate: true }
 )
 
 // 组件挂载时初始化数据
 onMounted(() => {
-  initializeData()
+  // 初始化数据已经在watch中通过immediate: true触发
 })
 
 // 组件卸载时清理
@@ -490,7 +514,7 @@ const goBack = () => {
 // 跳转到指定小节
 const navigateToSection = (sectionId: number) => {
   if (sectionId === currentSectionId.value) return
-  router.push(`/teacher/courses/${courseId.value}/sections/${sectionId}`)
+    router.push(`/teacher/courses/${courseId.value}/sections/${sectionId}`)
 }
 
 // 编辑小节
@@ -542,7 +566,7 @@ const handleSaveSection = async () => {
       message.success('保存成功')
       editModalVisible.value = false
       initializeData() // 重新加载数据
-    } else {
+      } else {
       message.error(response.data.message || '保存失败')
     }
   } catch (error) {
@@ -594,13 +618,13 @@ const handleBeforeUpload = async (file: File) => {
     
     try {
       const response = await uploadSectionVideo(Number(currentSectionId.value), file);
-      if (response.data.code === 200) {
+    if (response.data.code === 200) {
         message.success('视频上传成功');
         // 重新加载小节数据
         initializeData();
-      } else {
+    } else {
         message.error(response.data.message || '视频上传失败');
-      }
+    }
     } finally {
       hide();
     }
@@ -647,11 +671,7 @@ const handleSectionClick = (section: any) => {
   
   // 使用路由跳转到新的小节
   router.push({
-    name: 'TeacherSectionDetail',
-    params: {
-      courseId: route.params.courseId,
-      sectionId: section.id
-    }
+    path: `/teacher/courses/${courseId.value}/sections/${section.id}`
   }).catch((err) => {
     console.error('路由跳转失败:', err)
     message.error('页面跳转失败')
@@ -671,24 +691,36 @@ const handleDelete = async (section: Section) => {
     okType: 'danger',
     async onOk() {
       try {
-        await axios.delete(`/teacher/sections/${section.id}`);
-        message.success('删除成功');
-        // 重新加载章节数据
-        await initializeData();
-        
-        // 获取当前章节的所有小节
-        const currentChapter = chapters.value?.find(c => c.sections?.some(s => s.id === section.id));
-        if (currentChapter?.sections) {
-          // 如果还有其他小节，跳转到第一个小节
-          if (currentChapter.sections.length > 1) {
-            const firstSection = currentChapter.sections.find(s => s.id !== section.id);
-            if (firstSection?.id) {
-              router.push(`/teacher/courses/${courseId}/sections/${firstSection.id}`);
+        const response = await deleteSection(section.id!);
+        if (response.data.code === 200) {
+          message.success('删除成功');
+          
+          // 获取当前章节的所有小节（在删除前）
+          const currentChapter = chapters.value?.find(c => c.sections?.some(s => s.id === section.id));
+          
+          // 如果是当前正在查看的小节被删除，需要跳转
+          if (section.id === currentSectionId.value) {
+            if (currentChapter?.sections) {
+              // 查找除了当前小节外的其他小节
+              const otherSections = currentChapter.sections.filter(s => s.id !== section.id);
+              
+              if (otherSections.length > 0) {
+                // 如果还有其他小节，跳转到第一个小节
+                router.push(`/teacher/courses/${courseId.value}/sections/${otherSections[0].id}`);
+              } else {
+                // 如果没有其他小节了，返回到课程页面
+                router.push(`/teacher/courses/${courseId.value}`);
+              }
+            } else {
+              // 如果找不到章节信息，直接返回课程页面
+              router.push(`/teacher/courses/${courseId.value}`);
             }
           } else {
-            // 如果没有小节了，返回到课程页面
-            router.push(`/teacher/courses/${courseId}`);
+            // 如果删除的不是当前查看的小节，只需重新加载数据
+            await initializeData();
           }
+        } else {
+          message.error(response.data.message || '删除失败');
         }
       } catch (error) {
         message.error('删除失败');
@@ -733,6 +765,16 @@ const fetchComments = async () => {
       // 先将所有评论放入 Map 中
       res.data.data.records.forEach((comment: any) => {
         comment.replies = []
+        // 确保userRole字段存在
+        if (!comment.userRole && comment.userId) {
+          // 如果后端没有提供userRole，根据用户ID判断是否为当前用户，并使用当前用户的角色
+          if (comment.userId === authStore.user?.id) {
+            comment.userRole = authStore.user?.role?.toLowerCase();
+          } else {
+            // 默认设置为student，后续可以根据实际情况调整
+            comment.userRole = 'student';
+          }
+        }
         commentMap.set(comment.id, comment)
       })
       
@@ -741,6 +783,14 @@ const fetchComments = async () => {
         if (comment.parentId) {
           const parentComment = commentMap.get(comment.parentId)
           if (parentComment) {
+            // 确保子评论也有userRole
+            if (!comment.userRole && comment.userId) {
+              if (comment.userId === authStore.user?.id) {
+                comment.userRole = authStore.user?.role?.toLowerCase();
+              } else {
+                comment.userRole = 'student';
+              }
+            }
             parentComment.replies.push(comment)
           }
         } else {
@@ -798,22 +848,39 @@ const submitReply = async (parentComment: any) => {
     })
     
     if (res.data && res.data.code === 200) {
-      // 构造新回复对象
-      const newReply = {
-        id: res.data.data.id,
-        content: replyContent.value.trim(),
-        userId: authStore.user?.id,
-        userName: authStore.user?.username || authStore.user?.realName,
-        userAvatar: authStore.user?.avatar,
-        createTime: new Date().toISOString(),
-        parentId: parentComment.id
+      // 如果后端返回了完整的评论对象，包括用户角色
+      if (res.data.data && res.data.data.id) {
+        const newReply = res.data.data;
+        
+        // 确保有用户角色
+        if (!newReply.userRole && authStore.user?.role) {
+          newReply.userRole = authStore.user.role.toLowerCase();
+        }
+        
+        // 立即更新界面显示
+        if (!parentComment.replies) {
+          parentComment.replies = [];
+        }
+        parentComment.replies.push(newReply);
+      } else {
+        // 后端没有返回完整对象，手动构造
+        const newReply = {
+          id: res.data.data.id,
+          content: replyContent.value.trim(),
+          userId: authStore.user?.id,
+          userName: authStore.user?.realName || authStore.user?.username || '用户',
+          userAvatar: authStore.user?.avatar,
+          userRole: authStore.user?.role?.toLowerCase(), // 添加用户角色
+          createTime: new Date().toISOString(),
+          parentId: parentComment.id
+        };
+        
+        // 立即更新界面显示
+        if (!parentComment.replies) {
+          parentComment.replies = [];
+        }
+        parentComment.replies.push(newReply);
       }
-      
-      // 立即更新界面显示
-      if (!parentComment.replies) {
-        parentComment.replies = []
-      }
-      parentComment.replies.push(newReply)
       
       message.success('回复成功')
       replyContent.value = ''
@@ -828,6 +895,12 @@ const submitReply = async (parentComment: any) => {
   } finally {
     submitting.value = false
   }
+}
+
+// 获取用户名的第一个字符
+const getFirstChar = (name: string | undefined | null): string => {
+  if (!name) return '用';
+  return name.charAt(0);
 }
 
 // 检查是否是当前用户的评论
@@ -883,6 +956,19 @@ const deleteComment = async (comment: any) => {
     console.log('删除评论响应:', res)
     if (res.data && res.data.code === 200) {
       message.success('删除成功')
+      
+      // 如果是父评论，直接从列表中移除
+      if (!comment.parentId) {
+        comments.value = comments.value.filter(c => c.id !== comment.id)
+      } else {
+        // 如果是回复，从父评论的回复列表中移除
+        const parentComment = comments.value.find(c => c.id === comment.parentId)
+        if (parentComment && parentComment.replies) {
+          parentComment.replies = parentComment.replies.filter((r: any) => r.id !== comment.id)
+        }
+      }
+      
+      // 删除后重新获取评论列表，确保前后端数据一致
       await fetchComments()
     } else {
       console.warn('删除评论响应异常:', res.data)
@@ -893,49 +979,46 @@ const deleteComment = async (comment: any) => {
     message.error('删除失败')
   }
 }
+
+// 获取用户标题
+const getUserTitle = (userRole: string | undefined): string => {
+  if (!userRole) return '用户';
+  
+  // 统一转为小写处理
+  const role = userRole.toLowerCase();
+  
+  switch (role) {
+    case 'teacher':
+      return '教师';
+    case 'student':
+      return '学员';
+    case 'admin':
+      return '管理员';
+    default:
+      return '用户';
+  }
+}
 </script>
 
 <style scoped>
 .section-detail-container {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  width: 100%;
-  background-color: #f5f5f5;
+  background-color: #fff;
 }
 
 .top-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  height: 60px;
   padding: 0 24px;
-  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background-color: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
   z-index: 100;
-}
-
-.main-container {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-.sidebar {
-  width: 280px;
-  background-color: #fff;
-  border-right: 1px solid #f0f0f0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.content {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-  height: calc(100vh - 64px); /* 减去顶部导航的高度 */
-  background-color: #fff;
 }
 
 .nav-left {
@@ -952,7 +1035,6 @@ const deleteComment = async (comment: any) => {
 
 .logo img {
   height: 32px;
-  width: 32px;
 }
 
 .logo span {
@@ -964,7 +1046,27 @@ const deleteComment = async (comment: any) => {
 .back-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+}
+
+.main-container {
+  flex: 1;
+  display: flex;
+  height: calc(100vh - 60px);
+}
+
+.sidebar {
+  width: 280px;
+  border-right: 1px solid #f0f0f0;
+  overflow-y: auto;
+  background-color: #fff;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background-color: #f5f5f5;
 }
 
 .content-header {
@@ -1349,6 +1451,25 @@ const deleteComment = async (comment: any) => {
   object-fit: cover;
 }
 
+.avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #1890ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.avatar-placeholder.small {
+  width: 30px;
+  height: 30px;
+  font-size: 14px;
+}
+
 .comment-content {
   flex: 1;
 }
@@ -1432,17 +1553,42 @@ const deleteComment = async (comment: any) => {
 }
 
 .reply-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
   padding: 8px 0;
-  font-size: 14px;
-}
-
-.reply-item:not(:last-child) {
   border-bottom: 1px solid #f0f0f0;
 }
 
+.reply-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.reply-avatar {
+  flex-shrink: 0;
+}
+
+.reply-avatar img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.reply-content {
+  flex: 1;
+}
+
 .reply-username {
-  color: #1890ff;
   font-weight: 500;
+  color: #333;
+}
+
+.reply-role {
+  font-size: 12px;
+  color: #999;
+  margin-left: 4px;
 }
 
 .reply-text {

@@ -17,6 +17,7 @@ public class SectionCommentDTO {
     // 额外的展示字段
     private String userName;
     private String userAvatar;
+    private String userRole;
     private Integer replyCount;
     
     @Data

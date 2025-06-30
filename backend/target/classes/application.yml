@@ -35,75 +35,75 @@ spring:
   
   profiles:
     active: dev
-
-# 数据源配置 - 使用HikariCP连接池（基础配置，具体参数在各环境中配置）
-datasource:
-  driver-class-name: com.mysql.cj.jdbc.Driver
-  type: com.zaxxer.hikari.HikariDataSource
-  # HikariCP连接池基础配置
-  hikari:
-    # 连接池名称
-    pool-name: HikariPool-Education
-    # 连接测试查询
-    connection-test-query: SELECT 1
-    # 是否自动提交
-    auto-commit: true
-    # 连接初始化SQL
-    connection-init-sql: SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci
-    # 验证超时时间(毫秒)
-    validation-timeout: 5000
-
-# Redis配置
-data:
-  redis:
-    host: localhost
-    port: 6379
-    password: 
-    database: 0
-    timeout: 10000
-    lettuce:
-      pool:
-        max-active: 8
-        max-wait: -1
-        max-idle: 8
-        min-idle: 0
-
-# 文件上传配置
-servlet:
-  multipart:
-    max-file-size: 500MB
-    max-request-size: 500MB
-    enabled: true
-
-# 邮件配置
-mail:
-  host: smtp.qq.com
-  port: 587
-  username: your-email@qq.com
-  password: your-email-password
-  properties:
-    mail:
-      smtp:
-        auth: true
-        starttls:
-          enable: true
-          required: true
-
-# Jackson配置
-jackson:
-  date-format: yyyy-MM-dd HH:mm:ss
-  time-zone: GMT+8
-  serialization:
-    write-dates-as-timestamps: false
-  deserialization:
-    fail-on-unknown-properties: false
-
-# 缓存配置
-cache:
-  type: redis
-  redis:
-    time-to-live: 1800000  # 30分钟
-    cache-null-values: false
+  
+  # 数据源配置 - 使用HikariCP连接池（基础配置，具体参数在各环境中配置）
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    # HikariCP连接池基础配置
+    hikari:
+      # 连接池名称
+      pool-name: HikariPool-Education
+      # 连接测试查询
+      connection-test-query: SELECT 1
+      # 是否自动提交
+      auto-commit: true
+      # 连接初始化SQL
+      connection-init-sql: SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci
+      # 验证超时时间(毫秒)
+      validation-timeout: 5000
+  
+  # Redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 
+      database: 0
+      timeout: 10000
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1
+          max-idle: 8
+          min-idle: 0
+  
+  # 文件上传配置
+    servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+      enabled: true
+  
+  # 邮件配置
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: your-email@qq.com
+    password: your-email-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  
+  # Jackson配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+  
+  # 缓存配置
+  cache:
+    type: redis
+    redis:
+      time-to-live: 1800000  # 30分钟
+      cache-null-values: false
 
 # MyBatis-Plus配置
 mybatis-plus:
