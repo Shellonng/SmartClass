@@ -6,17 +6,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
 import java.util.concurrent.TimeUnit;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.web.servlet.resource.PathResourceResolver;
-import org.springframework.web.servlet.resource.ResourceTransformer;
-import org.springframework.web.servlet.resource.ResourceTransformerChain;
-import jakarta.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 /**
  * Web MVC 配置
@@ -38,17 +29,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private String videoUploadPath;
 
     /**
-     * 配置内容协商
-     */
-    @Override
-    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-        configurer
-            .mediaType("mp4", MediaType.valueOf("video/mp4"))
-            .mediaType("webm", MediaType.valueOf("video/webm"))
-            .mediaType("ogg", MediaType.valueOf("video/ogg"));
-    }
-
-    /**
      * 添加资源处理器
      */
     @Override
@@ -65,18 +45,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/resource/video/**")
                 .addResourceLocations("file:" + videoUploadPath + "/")
                 .setCacheControl(CacheControl.maxAge(1, TimeUnit.HOURS))
-                .resourceChain(true)
-                .addResolver(new PathResourceResolver())
-                .addTransformer(new ResourceTransformer() {
-                    @Override
-                    public Resource transform(
-                            HttpServletRequest request,
-                            Resource resource,
-                            ResourceTransformerChain transformerChain
-                    ) throws IOException {
-                        return transformerChain.transform(request, resource);
-                    }
-                });
+                .resourceChain(true); // 启用资源链，提供更好的资源处理
         
         // 配置Swagger UI资源
         registry.addResourceHandler("/swagger-ui/**")

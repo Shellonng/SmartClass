@@ -12,20 +12,14 @@
           </div>
         </div>
 
-        <!-- 右侧内容区域 -->
-        <div style="padding: 24px; min-height: 280px">
-          <!-- 章节管理内容 -->
-          <div v-if="currentTab === 'chapters'" class="chapter-management">
-          <div class="page-header">
-            <div class="header-left">
-              <h2 class="section-title">章节管理</h2>
-            </div>
-            <div class="header-right">
-              <a-button type="primary" @click="showAddChapterModal">
-                <PlusOutlined />
-                添加章节
-              </a-button>
-            </div>
+        <!-- 章节管理内容 -->
+        <div v-if="currentView === 'chapters'" class="chapter-management">
+          <div class="chapter-header">
+            <h2 class="section-title">章节管理</h2>
+            <a-button type="primary" @click="showAddChapterModal">
+              <PlusOutlined />
+              添加章节
+            </a-button>
           </div>
           
           <div class="chapter-list">
@@ -93,98 +87,70 @@
           </div>
         </div>
 
-                    <!-- 任务管理内容 -->
-            <div v-else-if="currentTab === 'tasks'" class="tasks-container">
-              <div class="page-header">
-                <div class="header-left">
-                  <h2 class="section-title">任务管理</h2>
-                </div>
-              </div>
-              <div class="development-notice">
-                <a-empty>
-                  <template #description>
-                    <span>任务功能开发中...</span>
-                  </template>
-                </a-empty>
-              </div>
-            </div>
+        <!-- 讨论区管理内容 -->
+        <div v-if="currentView === 'discussions'" class="management-content">
+          <div class="content-header">
+            <h2 class="section-title">讨论区管理</h2>
+            <a-button type="primary">
+              <PlusOutlined />
+              发起讨论
+            </a-button>
+          </div>
+          <div class="content-body">
+            <a-empty description="暂无讨论内容" />
+          </div>
+        </div>
 
-            <!-- 讨论区内容 -->
-            <div v-else-if="currentTab === 'discussion'" class="discussion-container">
-              <div class="page-header">
-                <div class="header-left">
-                  <h2 class="section-title">讨论区</h2>
-                </div>
-              </div>
-              
-              <!-- 讨论列表 -->
-              <div class="discussion-list">
-                <a-collapse v-model:activeKey="activeChapters">
-                  <a-collapse-panel 
-                    v-for="chapter in chapterComments" 
-                    :key="chapter.chapterId" 
-                    :header="chapter.chapterTitle"
-                  >
-                    <a-list
-                      :data-source="chapter.comments"
-                      :loading="commentsLoading"
-                      item-layout="vertical"
-                    >
-                      <template #renderItem="{ item }">
-                        <a-list-item>
-                          <template #extra>
-                            <div class="comment-actions">
-                              <a-button type="link" @click="viewComment(item)">
-                                <EyeOutlined />
-                                查看
-                              </a-button>
-                              <a-button type="link" danger @click="deleteComment(item)">
-                                <DeleteOutlined />
-                                删除
-                              </a-button>
-                            </div>
-                          </template>
-                          <a-list-item-meta>
-                            <template #title>
-                              <div class="comment-header">
-                                <span class="section-title">{{ item.sectionTitle }}</span>
-                              </div>
-                            </template>
-                            <template #description>
-                              <div class="comment-info">
-                                <span class="comment-author">{{ item.authorName }}</span>
-                                <a-divider type="vertical" />
-                                <span class="comment-time">{{ formatTime(item.createTime) }}</span>
-                              </div>
-                            </template>
-                          </a-list-item-meta>
-                          <div class="comment-content">{{ item.content }}</div>
-                        </a-list-item>
-                      </template>
-                      <template #emptyText>
-                        <a-empty description="暂无评论" />
-                      </template>
-                    </a-list>
-                  </a-collapse-panel>
-                </a-collapse>
-              </div>
-            </div>
+        <!-- 资料管理内容 -->
+        <div v-if="currentView === 'resources'" class="management-content">
+          <div class="content-header">
+            <h2 class="section-title">资料管理</h2>
+            <a-button type="primary">
+              <PlusOutlined />
+              上传资料
+            </a-button>
+          </div>
+          <div class="content-body">
+            <a-empty description="暂无资料内容" />
+          </div>
+        </div>
 
-            <!-- 资料管理内容 -->
-            <div v-else-if="currentTab === 'resources'" class="resources-container">
-              <div class="page-header">
-                <div class="header-left">
-                  <h2 class="section-title">资料管理</h2>
-                </div>
-              </div>
-              <div class="development-notice">
-                <a-empty>
-                  <template #description>
-                    <span>资料功能开发中...</span>
-                  </template>
-                </a-empty>
-              </div>
-            </div>
+        <!-- 错题集管理内容 -->
+        <div v-if="currentView === 'wrongbook'" class="management-content">
+          <div class="content-header">
+            <h2 class="section-title">错题集管理</h2>
+            <a-button type="primary">
+              <PlusOutlined />
+              添加错题
+            </a-button>
+          </div>
+          <div class="content-body">
+            <a-empty description="暂无错题内容" />
+          </div>
+        </div>
+
+        <!-- 学习记录管理内容 -->
+        <div v-if="currentView === 'records'" class="management-content">
+          <div class="content-header">
+            <h2 class="section-title">学习记录管理</h2>
+          </div>
+          <div class="content-body">
+            <a-empty description="暂无学习记录" />
+          </div>
+        </div>
+
+        <!-- 知识图谱管理内容 -->
+        <div v-if="currentView === 'knowledge-map'" class="management-content">
+          <div class="content-header">
+            <h2 class="section-title">知识图谱管理</h2>
+            <a-button type="primary">
+              <PlusOutlined />
+              添加知识点
+            </a-button>
+          </div>
+          <div class="content-body">
+            <a-empty description="暂无知识图谱内容" />
+          </div>
         </div>
         
         <!-- 添加章节弹窗 -->
@@ -232,12 +198,8 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message, Empty } from 'ant-design-vue'
-import dayjs from 'dayjs'
 import {
   BookOutlined,
-  CheckSquareOutlined,
-  CommentOutlined,
-  FolderOutlined,
   UserOutlined,
   CalendarOutlined,
   ClockCircleOutlined,
@@ -254,8 +216,7 @@ import {
   PlusOutlined,
   VideoCameraOutlined,
   FormOutlined,
-  FileOutlined,
-  EyeOutlined
+  FileOutlined
 } from '@ant-design/icons-vue'
 import { 
   getChaptersByCourseId, 
@@ -274,85 +235,12 @@ import axios from 'axios'
 const route = useRoute()
 const router = useRouter()
 
+// 当前视图状态
+const currentView = ref('chapters')
+
 // 状态变量
 const loading = ref(false)
 const chapters = ref<Chapter[]>([])
-const currentTab = ref('chapters')
-const selectedKeys = ref(['chapters'])
-
-// 评论相关
-const chapterComments = ref<any[]>([])
-const commentsLoading = ref(false)
-const activeChapters = ref<string[]>([])
-
-// 格式化时间
-const formatTime = (time: string) => {
-  return dayjs(time).format('YYYY-MM-DD HH:mm')
-}
-
-// 查看评论
-const viewComment = (comment: any) => {
-  // 跳转到对应的小节
-  router.push(`/teacher/courses/${courseId.value}/chapters/${comment.chapterId}/sections/${comment.sectionId}`)
-}
-
-// 删除评论
-const deleteComment = async (comment: any) => {
-  try {
-    await axios.delete(`/api/teacher/courses/comments/${comment.id}`)
-    message.success('删除成功')
-    // 重新加载评论列表
-    await loadComments()
-  } catch (error) {
-    message.error('删除失败')
-  }
-}
-
-// 加载评论列表
-const loadComments = async () => {
-  commentsLoading.value = true
-  try {
-    const response = await axios.get(`/api/teacher/courses/${courseId.value}/comments`)
-    if (response.data.code === 200) {
-      chapterComments.value = response.data.data.chapters
-      // 默认展开第一个章节
-      if (chapterComments.value.length > 0) {
-        activeChapters.value = [chapterComments.value[0].chapterId.toString()]
-      }
-    } else {
-      message.error(response.data.message || '获取评论失败')
-    }
-  } catch (error) {
-    console.error('获取评论失败:', error)
-    message.error('获取评论失败')
-  } finally {
-    commentsLoading.value = false
-  }
-}
-
-// 监听路由变化更新当前标签
-watch(() => route.hash, (newHash) => {
-  const hash = newHash.slice(1) // 去掉 # 号
-  if (['chapters', 'tasks', 'discussion', 'resources'].includes(hash)) {
-    currentTab.value = hash
-    selectedKeys.value = [hash]
-    // 如果切换到讨论区，加载评论列表
-    if (hash === 'discussion') {
-      loadComments()
-    }
-  } else {
-    currentTab.value = 'chapters'
-    selectedKeys.value = ['chapters']
-  }
-}, { immediate: true })
-
-// 监听菜单选择变化
-watch(() => selectedKeys.value, (newKeys) => {
-  if (newKeys.length > 0) {
-    const key = newKeys[0]
-    router.push(`/teacher/courses/${courseId.value}#${key}`)
-  }
-})
 
 // 章节表单相关
 const addChapterModalVisible = ref(false)
@@ -378,6 +266,15 @@ const sectionForm = ref({
 const courseId = computed(() => {
   return parseInt(route.params.id as string)
 })
+
+// 监听路由变化，更新当前视图
+watch(() => route.query.view, (newView) => {
+  if (newView) {
+    currentView.value = newView as string
+  } else {
+    currentView.value = 'chapters'
+  }
+}, { immediate: true })
 
 // 加载章节列表
 const loadChapters = async () => {
@@ -712,17 +609,9 @@ const deleteSectionItem = async (chapter: Chapter, section: Section) => {
   }
 }
 
-// 页面加载时直接获取章节列表
-onMounted(async () => {
-  console.log('页面加载，课程ID:', courseId.value);
-  loading.value = true;
-  try {
-    await loadChapters();
-  } catch (error) {
-    console.error('页面初始化失败:', error);
-  } finally {
-    loading.value = false;
-  }
+// 组件挂载时初始化数据
+onMounted(() => {
+  loadChapters()
 })
 </script>
 
@@ -982,104 +871,25 @@ onMounted(async () => {
   border-radius: 8px;
 }
 
-/* 新增功能页面样式 */
-.tasks-container,
-.resources-container {
-  background: #fff;
-  border-radius: 8px;
+.management-content {
+  background: white;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.content-body {
   min-height: 400px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-
-.discussion-container {
-  background: #fff;
-  border-radius: 8px;
-  min-height: 400px;
-  padding: 24px;
-
-  .discussion-list {
-    margin-top: 24px;
-
-    :deep(.ant-collapse) {
-      background: transparent;
-      border: none;
-
-      .ant-collapse-item {
-        margin-bottom: 16px;
-        border: 1px solid #e8e8e8;
-        border-radius: 8px;
-        overflow: hidden;
-
-        .ant-collapse-header {
-          padding: 16px 24px;
-          background: #fafafa;
-          font-size: 16px;
-          font-weight: 500;
-          color: #1890ff;
-
-          &:hover {
-            background: #f0f5ff;
-          }
-        }
-
-        .ant-collapse-content {
-          border-top: 1px solid #e8e8e8;
-          
-          .ant-collapse-content-box {
-            padding: 0;
-          }
-        }
-      }
-    }
-  }
-
-  .comment-header {
-    .section-title {
-      color: #333;
-      font-weight: 500;
-    }
-  }
-
-  .comment-info {
-    .comment-author {
-      color: #666;
-    }
-    .comment-time {
-      color: #999;
-    }
-  }
-
-  .comment-content {
-    margin: 16px 0;
-    color: #333;
-    line-height: 1.6;
-  }
-
-  .comment-actions {
-    display: flex;
-    gap: 8px;
-  }
-
-  :deep(.ant-list-item) {
-    padding: 24px;
-    background: #fff;
-    border-bottom: 1px solid #f0f0f0;
-    transition: all 0.3s;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &:hover {
-      background: #fafafa;
-    }
-  }
-}
-
-.development-notice {
-  padding: 40px;
-  text-align: center;
 }
 </style>

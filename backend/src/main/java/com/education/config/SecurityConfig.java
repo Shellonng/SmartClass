@@ -66,7 +66,6 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**", "/api/auth/**").permitAll()
                 .requestMatchers("/api/common/files/**").permitAll()
                 .requestMatchers("/files/**").permitAll()
-                .requestMatchers("/resource/video/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/debug/**").permitAll()
                 .anyRequest().authenticated()
@@ -151,8 +150,7 @@ public class SecurityConfig {
         private static final List<String> AUTH_WHITELIST = Arrays.asList(
             "/auth/login", "/auth/register", "/auth/logout",
             "/api/auth/login", "/api/auth/register", "/api/auth/logout",
-            "/swagger-ui", "/v3/api-docs", "/debug", "/files", "/api/common/files",
-            "/resource/video"
+            "/swagger-ui", "/v3/api-docs", "/debug", "/files", "/api/common/files"
         );
 
         @Override
