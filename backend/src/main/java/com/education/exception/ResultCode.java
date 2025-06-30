@@ -66,7 +66,12 @@ public enum ResultCode {
     TASK_OVERDUE(7005, "任务已过期"),
     
     // 资源相关 (8000-8999)
-    RESOURCE_NOT_FOUND(8001, "资源不存在");
+    RESOURCE_NOT_FOUND(8001, "资源不存在"),
+    RESOURCE_UPLOAD_ERROR(8002, "资源上传失败"),
+    RESOURCE_DOWNLOAD_ERROR(8003, "资源下载失败"),
+    RESOURCE_DELETE_ERROR(8004, "资源删除失败"),
+    RESOURCE_ACCESS_DENIED(8005, "无权访问该资源"),
+    PERMISSION_DENIED(8006, "权限不足");
     
     private final int code;
     private final String message;

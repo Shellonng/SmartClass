@@ -7,11 +7,11 @@
           <img src="/logo-mini.svg" alt="SmartClass" />
           <span>SmartClass</span>
         </div>
-        <a-button type="text" @click="goBack" class="back-btn">
-          <ArrowLeftOutlined />
-          返回课程
-        </a-button>
-      </div>
+          <a-button type="text" @click="goBack" class="back-btn">
+            <ArrowLeftOutlined />
+            返回课程
+          </a-button>
+        </div>
       <div class="nav-right">
         <a-dropdown>
           <a-button type="text">
@@ -162,17 +162,27 @@
                                   <span class="action-item delete">删除</span>
                                 </a-popconfirm>
                               </template>
-                            </div>
-                          </div>
-
+            </div>
+          </div>
+          
                           <!-- 追评 -->
                           <div v-if="comment.additionalComment" class="additional-comment">
                             <div class="additional-header">{{ comment.additionalDays || 14 }}天后追评：</div>
                             <div class="additional-content">{{ comment.additionalComment }}</div>
+            </div>
+            
+                          <!-- 显示回复数量，点击展开/收起回复 -->
+                          <div v-if="comment.replyCount > 0" class="reply-toggle" @click="toggleReplies(comment)">
+                            <span v-if="!expandedComments.has(comment.id)">
+                              <DownOutlined /> 查看{{ comment.replyCount }}条回复
+                            </span>
+                            <span v-else>
+                              <UpOutlined /> 收起回复
+                            </span>
                           </div>
                           
                           <!-- 回复列表 -->
-                          <div v-if="comment.replies && comment.replies.length > 0" class="replies-container">
+                          <div v-if="expandedComments.has(comment.id) && comment.replies && comment.replies.length > 0" class="replies-container">
                             <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
                               <div class="reply-avatar">
                                 <template v-if="reply.userAvatar">
@@ -196,7 +206,7 @@
                                     >
                                       <span class="action-item delete">删除</span>
                                     </a-popconfirm>
-                                  </div>
+                    </div>
                                 </div>
                               </div>
                             </div>
@@ -209,71 +219,81 @@
                                 v-model:value="replyContent"
                                 placeholder="回复评论..."
                                 :rows="2"
-                                :maxLength="500"
-                                @keyup.enter.ctrl="submitReply(comment)"
+                                :maxlength="500"
                               />
-                              <span class="comment-tip">还可以输入 {{ 500 - (replyContent?.length || 0) }} 字</span>
+                              <div class="comment-tip">
+                                还可以输入{{ 500 - replyContent.length }}字
+                              </div>
                             </div>
                             <div class="reply-actions">
                               <a-button @click="cancelReply">取消</a-button>
-                              <a-button type="primary" @click="submitReply(comment)" :loading="submitting">
-                                发表回复
-                              </a-button>
+                              <a-button type="primary" :loading="submitting" @click="submitReply(comment)">
+                                提交回复
+                      </a-button>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-
-                    <!-- 分页 -->
-                    <div class="pagination-container">
-                      <a-pagination
-                        v-model:current="pagination.current"
-                        :total="pagination.total"
-                        :pageSize="pagination.pageSize"
-                        @change="pagination.onChange"
-                      />
-                    </div>
                   </div>
                 </a-spin>
               </div>
 
-              <!-- 评论输入框 -->
-              <div class="comment-input">
-                <div class="input-wrapper">
-                  <a-textarea
-                    v-model:value="newComment"
-                    placeholder="发表你的看法..."
-                    :rows="3"
-                    :maxLength="500"
-                  />
-                  <span class="comment-tip">还可以输入 {{ 500 - (newComment?.length || 0) }} 字</span>
-                </div>
-                <div class="comment-actions">
-                  <a-button type="primary" @click="submitComment" :loading="submitting">
-                    发表评论
-                  </a-button>
-                </div>
+              <!-- 分页器 - 调整位置，确保有足够的空间 -->
+              <div class="pagination-container">
+                <a-pagination
+                  v-model:current="pagination.current"
+                  :total="pagination.total"
+                  :pageSize="pagination.pageSize"
+                  @change="pagination.onChange"
+                  show-size-changer
+                  :pageSizeOptions="['10', '20', '50']"
+                  @showSizeChange="handleSizeChange"
+                />
               </div>
             </div>
+
+            <!-- 评论输入框 -->
+            <div class="comment-input">
+              <div class="comment-input-container">
+                <div class="input-area">
+                  <div class="input-wrapper">
+                    <a-textarea
+                      v-model:value="newComment"
+                      placeholder="发表你的看法..."
+                      :rows="4"
+                      :maxlength="500"
+                    />
+                    <div class="comment-tip">
+                      还可以输入{{ 500 - newComment.length }}字
+                    </div>
+                  </div>
+                </div>
+                <div class="button-area">
+                  <a-button type="primary" :loading="submitting" @click="submitComment" class="submit-btn">
+                    发表评论
+                      </a-button>
+                    </div>
+                  </div>
+                </div>
           </div>
         </a-spin>
-      </div>
-    </div>
-    
+          </div>
+        </div>
+        
     <!-- 编辑弹窗 -->
-    <a-modal
-      v-model:open="editModalVisible"
-      :title="isCreating ? '添加小节' : '编辑小节'"
-      @ok="handleSaveSection"
-      @cancel="cancelEditSection"
+        <a-modal
+          v-model:open="editModalVisible"
+          :title="isCreating ? '添加小节' : '编辑小节'"
+          @ok="handleSaveSection"
+          @cancel="cancelEditSection"
       width="600px"
-    >
-      <a-form :model="sectionForm" layout="vertical">
-        <a-form-item label="小节标题" required>
-          <a-input v-model:value="sectionForm.title" placeholder="请输入小节标题" />
-        </a-form-item>
-        <a-form-item label="预计时长">
+        >
+          <a-form :model="sectionForm" layout="vertical">
+            <a-form-item label="小节标题" required>
+              <a-input v-model:value="sectionForm.title" placeholder="请输入小节标题" />
+            </a-form-item>
+            <a-form-item label="预计时长">
           <a-input-number 
             v-model:value="sectionForm.duration" 
             :min="1" 
@@ -281,15 +301,15 @@
             addonAfter="分钟"
             style="width: 100%"
           />
-        </a-form-item>
-        <a-form-item label="内容描述">
+            </a-form-item>
+            <a-form-item label="内容描述">
           <a-textarea 
             v-model:value="sectionForm.description" 
             placeholder="请输入内容描述"
             :rows="4"
           />
-        </a-form-item>
-        <a-form-item label="视频链接">
+            </a-form-item>
+            <a-form-item label="视频链接">
           <div class="video-url-input">
             <a-input 
               v-model:value="sectionForm.videoUrl" 
@@ -307,9 +327,9 @@
               移除视频
             </a-button>
           </div>
-        </a-form-item>
-      </a-form>
-    </a-modal>
+            </a-form-item>
+          </a-form>
+        </a-modal>
   </div>
 </template>
 
@@ -327,7 +347,8 @@ import {
   CheckCircleOutlined,
   UserOutlined,
   DownOutlined,
-  UploadOutlined
+  UploadOutlined,
+  UpOutlined
 } from '@ant-design/icons-vue'
 import {
   getChaptersByCourseId,
@@ -342,7 +363,8 @@ import {
   getSectionComments,
   createSectionComment,
   updateSectionComment,
-  deleteSectionComment
+  deleteSectionComment,
+  getSectionCommentReplies
 } from '@/api/course'
 import videojs from 'video.js'
 import 'video.js/dist/video-js.css'
@@ -465,7 +487,7 @@ const initializeData = async () => {
       
       // 加载评论数据
       await fetchComments()
-    } else {
+      } else {
       // 如果找不到小节数据，可能是已被删除
       message.warning('找不到小节数据，可能已被删除')
       // 跳转回课程页面
@@ -496,6 +518,7 @@ watch(
 // 组件挂载时初始化数据
 onMounted(() => {
   // 初始化数据已经在watch中通过immediate: true触发
+  console.log('组件挂载，初始化数据');
 })
 
 // 组件卸载时清理
@@ -504,6 +527,8 @@ onBeforeUnmount(() => {
     player.dispose()
     player = null
   }
+  // 清理展开状态，避免内存泄漏
+  expandedComments.value.clear()
 })
 
 // 返回课程详情页
@@ -758,6 +783,9 @@ const fetchComments = async () => {
     )
     console.log('获取评论响应:', res)
     if (res.data && res.data.code === 200) {
+      // 清空已展开评论的集合
+      expandedComments.value.clear()
+      
       // 处理评论数据，构建父子关系
       const commentMap = new Map()
       const rootComments: any[] = []
@@ -792,6 +820,9 @@ const fetchComments = async () => {
               }
             }
             parentComment.replies.push(comment)
+            
+            // 更新父评论的回复计数
+            parentComment.replyCount = (parentComment.replyCount || 0) + 1
           }
         } else {
           rootComments.push(comment)
@@ -801,6 +832,13 @@ const fetchComments = async () => {
       comments.value = rootComments
       pagination.value.total = res.data.data.total || 0
       console.log('处理后的评论列表:', comments.value)
+      
+      // 自动展开有回复的评论
+      comments.value.forEach(comment => {
+        if (comment.replies && comment.replies.length > 0) {
+          expandedComments.value.add(comment.id)
+        }
+      })
     } else {
       console.warn('获取评论响应异常:', res.data)
       comments.value = []
@@ -862,10 +900,16 @@ const submitReply = async (parentComment: any) => {
           parentComment.replies = [];
         }
         parentComment.replies.push(newReply);
+        
+        // 更新回复计数
+        parentComment.replyCount = (parentComment.replyCount || 0) + 1;
+        
+        // 自动展开回复
+        expandedComments.value.add(parentComment.id);
       } else {
         // 后端没有返回完整对象，手动构造
         const newReply = {
-          id: res.data.data.id,
+          id: res.data.data || Date.now(), // 如果没有返回id，使用时间戳作为临时id
           content: replyContent.value.trim(),
           userId: authStore.user?.id,
           userName: authStore.user?.realName || authStore.user?.username || '用户',
@@ -880,6 +924,12 @@ const submitReply = async (parentComment: any) => {
           parentComment.replies = [];
         }
         parentComment.replies.push(newReply);
+        
+        // 更新回复计数
+        parentComment.replyCount = (parentComment.replyCount || 0) + 1;
+        
+        // 自动展开回复
+        expandedComments.value.add(parentComment.id);
       }
       
       message.success('回复成功')
@@ -957,17 +1007,6 @@ const deleteComment = async (comment: any) => {
     if (res.data && res.data.code === 200) {
       message.success('删除成功')
       
-      // 如果是父评论，直接从列表中移除
-      if (!comment.parentId) {
-        comments.value = comments.value.filter(c => c.id !== comment.id)
-      } else {
-        // 如果是回复，从父评论的回复列表中移除
-        const parentComment = comments.value.find(c => c.id === comment.parentId)
-        if (parentComment && parentComment.replies) {
-          parentComment.replies = parentComment.replies.filter((r: any) => r.id !== comment.id)
-        }
-      }
-      
       // 删除后重新获取评论列表，确保前后端数据一致
       await fetchComments()
     } else {
@@ -997,6 +1036,45 @@ const getUserTitle = (userRole: string | undefined): string => {
     default:
       return '用户';
   }
+}
+
+// 回复相关的状态
+const expandedComments = ref<Set<number>>(new Set())
+
+const toggleReplies = async (comment: any) => {
+  if (expandedComments.value.has(comment.id)) {
+    // 收起回复
+    expandedComments.value.delete(comment.id)
+  } else {
+    // 展开回复
+    expandedComments.value.add(comment.id)
+    
+    // 如果回复数大于0但回复数组为空或不存在，则加载回复
+    if ((comment.replyCount > 0) && (!comment.replies || comment.replies.length === 0)) {
+      try {
+        const sectionId = Number(route.params.sectionId)
+        console.log('加载评论回复，小节ID:', sectionId, '评论ID:', comment.id)
+        const res = await getSectionCommentReplies(sectionId, comment.id)
+        
+        if (res.data && res.data.code === 200) {
+          // 更新回复数据
+          comment.replies = res.data.data.records || []
+          console.log('成功加载回复:', comment.replies)
+        } else {
+          console.warn('加载回复响应异常:', res.data)
+          message.error(res.data?.message || '加载回复失败')
+        }
+      } catch (error) {
+        console.error('加载回复失败:', error)
+        message.error('加载回复失败')
+      }
+    }
+  }
+}
+
+const handleSizeChange = (pageSize: number) => {
+  pagination.value.pageSize = pageSize
+  fetchComments()
 }
 </script>
 
@@ -1059,7 +1137,422 @@ const getUserTitle = (userRole: string | undefined): string => {
   width: 280px;
   border-right: 1px solid #f0f0f0;
   overflow-y: auto;
+  background-color: #f9f9f9;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
   background-color: #fff;
+}
+
+.sidebar-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.course-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.chapter-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.section-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px 12px 32px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  background: #fff;
+  font-size: 14px;
+  border-bottom: 1px solid #f5f5f5;
+  margin-bottom: 2px;
+}
+
+.section-item:hover {
+  background: #f6f6f6;
+}
+
+.section-item.active {
+  background: #e6f7ff;
+  border-left: 3px solid #1890ff;
+}
+
+.section-item.active .section-title {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.section-title {
+  flex: 1;
+  color: #555;
+  margin-right: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.section-duration {
+  font-size: 12px;
+  color: #999;
+  margin-right: 8px;
+  flex-shrink: 0;
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.section-actions .anticon {
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+}
+
+.section-actions .anticon:hover {
+  color: #1890ff;
+}
+
+.section-actions .delete:hover {
+  color: #ff4d4f;
+}
+
+.video-url-input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+:deep(.ant-collapse) {
+  border: none;
+  background: transparent;
+}
+
+:deep(.ant-collapse-item) {
+  border: none;
+}
+
+:deep(.ant-collapse-header) {
+  padding: 12px 16px !important;
+  font-size: 15px !important;
+  color: #333 !important;
+  font-weight: 500 !important;
+}
+
+:deep(.ant-collapse-content-box) {
+  padding: 0 !important;
+}
+
+:deep(.ant-collapse-arrow) {
+  font-size: 12px !important;
+  color: #999 !important;
+}
+
+.section-title-area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.section-title-area h1 {
+  font-size: 24px;
+  margin: 0;
+  color: #333;
+}
+
+.section-description {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.section-comments {
+  margin-top: 24px;
+}
+
+.comment-list {
+  margin-bottom: 24px;
+}
+
+.comments-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.comment-thread {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 24px;
+}
+
+.comment-thread:last-child {
+  border-bottom: none;
+}
+
+.comment-main {
+  display: flex;
+  gap: 16px;
+}
+
+.comment-avatar {
+  flex-shrink: 0;
+}
+
+.comment-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #1890ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.avatar-placeholder.small {
+  width: 30px;
+  height: 30px;
+  font-size: 14px;
+}
+
+.comment-content {
+  flex: 1;
+}
+
+.comment-header {
+  margin-bottom: 8px;
+}
+
+.username {
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.user-title {
+  font-size: 12px;
+  color: #999;
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.comment-text {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.comment-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #999;
+}
+
+.comment-time {
+  margin-right: 16px;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.action-item {
+  cursor: pointer;
+  color: #1890ff;
+}
+
+.action-item:hover {
+  color: #40a9ff;
+}
+
+.action-item.delete {
+  color: #ff4d4f;
+}
+
+.action-item.delete:hover {
+  color: #ff7875;
+}
+
+.reply-toggle {
+  margin-top: 12px;
+  color: #1890ff;
+  cursor: pointer;
+  font-size: 13px;
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #f0f8ff;
+  border-radius: 4px;
+}
+
+.reply-toggle:hover {
+  background-color: #e6f7ff;
+}
+
+.replies-container {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.reply-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.reply-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.reply-avatar {
+  flex-shrink: 0;
+}
+
+.reply-avatar img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.reply-content {
+  flex: 1;
+}
+
+.reply-username {
+  font-weight: 500;
+  color: #333;
+}
+
+.reply-role {
+  font-size: 12px;
+  color: #999;
+  margin-left: 4px;
+}
+
+.reply-text {
+  margin-left: 4px;
+}
+
+.reply-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.reply-input {
+  margin: 16px 0 8px 0;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.input-wrapper {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.input-wrapper :deep(.ant-input) {
+  resize: none;
+  padding-bottom: 24px;
+}
+
+.comment-tip {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  font-size: 12px;
+  color: #999;
+}
+
+.reply-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.comment-input {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  padding: 16px;
+  margin-top: 24px;
+}
+
+.comment-input-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.input-area {
+  flex: 1;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper :deep(.ant-input) {
+  resize: none;
+  padding-bottom: 24px;
+}
+
+.comment-tip {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  font-size: 12px;
+  color: #999;
+}
+
+.button-area {
+  padding-top: 8px;
+}
+
+.submit-btn {
+  min-width: 100px;
+  height: 40px;
+}
+
+.pagination-container {
+  margin: 32px 0;
+  display: flex;
+  justify-content: center;
 }
 
 .content {
@@ -1144,503 +1637,5 @@ const getUserTitle = (userRole: string | undefined): string => {
 .section-info p {
   color: #666;
   line-height: 1.6;
-}
-
-.chapter-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0;
-}
-
-.section-item {
-  display: flex;
-  align-items: center;
-  padding: 8px 16px 8px 32px;  /* 增加左侧内边距，形成层级感 */
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-  background: #fff;
-  font-size: 13px;  /* 小节字体更小 */
-}
-
-.section-item:hover {
-  background: #f6f6f6;
-}
-
-.section-item.active {
-  background: #f0f7ff;
-}
-
-.section-title {
-  flex: 1;
-  color: #666;  /* 小节字体颜色更浅 */
-  margin-right: 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.section-duration {
-  font-size: 12px;
-  color: #999;
-  margin-right: 8px;
-  flex-shrink: 0;
-}
-
-.section-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.section-actions .anticon {
-  font-size: 14px;
-  color: #666;
-  cursor: pointer;
-}
-
-.section-actions .anticon:hover {
-  color: #1890ff;
-}
-
-.section-actions .delete:hover {
-  color: #ff4d4f;
-}
-
-.video-url-input {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-:deep(.ant-collapse) {
-  border: none;
-  background: transparent;
-}
-
-:deep(.ant-collapse-item) {
-  border: none;
-}
-
-:deep(.ant-collapse-header) {
-  padding: 12px 16px !important;
-  font-size: 15px !important;
-  color: #333 !important;
-  font-weight: 500 !important;
-}
-
-:deep(.ant-collapse-content-box) {
-  padding: 0 !important;
-}
-
-:deep(.ant-collapse-arrow) {
-  font-size: 12px !important;
-  color: #999 !important;
-}
-
-.section-title-area {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-.section-title-area h1 {
-  font-size: 24px;
-  margin: 0;
-  color: #333;
-}
-
-.section-description {
-  color: #666;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.section-comments {
-  margin-top: 24px;
-}
-
-.comment-list {
-  margin-bottom: 24px;
-}
-
-.comment-input {
-  background: #fff;
-  border: 1px solid #e8e8e8;
-  border-radius: 4px;
-  padding: 16px;
-}
-
-.input-wrapper {
-  position: relative;
-  margin-bottom: 16px;
-}
-
-.input-wrapper :deep(.ant-input) {
-  resize: none;
-  padding-bottom: 24px; /* 为字数提示留出空间 */
-}
-
-.comment-tip {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  font-size: 12px;
-  color: #999;
-}
-
-.comment-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.delete-action {
-  color: #ff4d4f;
-  cursor: pointer;
-}
-
-.delete-action:hover {
-  color: #ff7875;
-}
-
-.comment-item {
-  margin-bottom: 16px;
-}
-
-.reply-input {
-  margin: 8px 0 8px 44px; /* 缩进以对齐评论内容 */
-  background: #fafafa;
-  border-radius: 4px;
-  padding: 12px;
-}
-
-.reply-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.reply-list {
-  margin-left: 44px; /* 缩进以对齐评论内容 */
-  background: #fafafa;
-  border-radius: 4px;
-  padding: 8px;
-  margin-top: 8px;
-}
-
-:deep(.ant-comment-content) {
-  background: transparent;
-}
-
-:deep(.ant-comment-actions) {
-  margin-top: 8px;
-}
-
-:deep(.ant-comment-content-author) {
-  margin-bottom: 4px;
-}
-
-.comments-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.comment-thread {
-  border-bottom: 1px solid #f0f0f0;
-  padding-bottom: 16px;
-}
-
-.comment-thread:last-child {
-  border-bottom: none;
-}
-
-.replies-container {
-  margin-left: 44px;
-  margin-top: 16px;
-  padding: 8px 16px;
-  background: #fafafa;
-  border-radius: 4px;
-}
-
-.replies-container :deep(.ant-comment) {
-  margin-bottom: 8px;
-}
-
-.replies-container :deep(.ant-comment):last-child {
-  margin-bottom: 0;
-}
-
-.pagination-container {
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
-}
-
-.reply-input {
-  margin: 8px 0 8px 44px;
-  padding: 16px;
-  background: #fafafa;
-  border-radius: 4px;
-}
-
-.reply-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.input-wrapper {
-  position: relative;
-}
-
-.input-wrapper :deep(.ant-input) {
-  resize: none;
-  padding-bottom: 24px;
-}
-
-.comment-tip {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  font-size: 12px;
-  color: #999;
-}
-
-.delete-action {
-  color: #ff4d4f;
-  cursor: pointer;
-}
-
-.delete-action:hover {
-  color: #ff7875;
-}
-
-.comments-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.comment-thread {
-  border-bottom: 1px solid #f0f0f0;
-  padding-bottom: 24px;
-}
-
-.comment-thread:last-child {
-  border-bottom: none;
-}
-
-.comment-main {
-  display: flex;
-  gap: 16px;
-}
-
-.comment-avatar {
-  flex-shrink: 0;
-}
-
-.comment-avatar img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.avatar-placeholder {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #1890ff;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.avatar-placeholder.small {
-  width: 30px;
-  height: 30px;
-  font-size: 14px;
-}
-
-.comment-content {
-  flex: 1;
-}
-
-.comment-header {
-  margin-bottom: 8px;
-}
-
-.username {
-  font-weight: 500;
-  color: #333;
-  margin-right: 8px;
-}
-
-.user-title {
-  color: #999;
-  font-size: 12px;
-}
-
-.comment-text {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.comment-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 8px;
-}
-
-.comment-time {
-  color: #999;
-  font-size: 12px;
-}
-
-.comment-actions {
-  display: flex;
-  gap: 16px;
-}
-
-.action-item {
-  color: #666;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.action-item:hover {
-  color: #1890ff;
-}
-
-.action-item.delete:hover {
-  color: #ff4d4f;
-}
-
-.additional-comment {
-  margin-top: 12px;
-  background: #fafafa;
-  padding: 12px;
-  border-radius: 4px;
-}
-
-.additional-header {
-  color: #ff6000;
-  font-size: 12px;
-  margin-bottom: 4px;
-}
-
-.additional-content {
-  color: #333;
-  font-size: 14px;
-}
-
-.replies-container {
-  margin-top: 12px;
-  padding: 8px 12px;
-  background: #fafafa;
-  border-radius: 4px;
-}
-
-.reply-item {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.reply-item:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-}
-
-.reply-avatar {
-  flex-shrink: 0;
-}
-
-.reply-avatar img {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.reply-content {
-  flex: 1;
-}
-
-.reply-username {
-  font-weight: 500;
-  color: #333;
-}
-
-.reply-role {
-  font-size: 12px;
-  color: #999;
-  margin-left: 4px;
-}
-
-.reply-text {
-  color: #333;
-}
-
-.reply-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 4px;
-}
-
-.reply-time {
-  color: #999;
-  font-size: 12px;
-}
-
-.reply-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.reply-input {
-  margin-top: 12px;
-  background: #fafafa;
-  padding: 12px;
-  border-radius: 4px;
-}
-
-.input-wrapper {
-  position: relative;
-  margin-bottom: 8px;
-}
-
-.input-wrapper :deep(.ant-input) {
-  resize: none;
-  padding-bottom: 24px;
-  background: #fff;
-}
-
-.comment-tip {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  font-size: 12px;
-  color: #999;
-}
-
-.pagination-container {
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
 }
 </style> 

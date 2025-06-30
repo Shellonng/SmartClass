@@ -91,28 +91,123 @@
         <div v-if="currentView === 'discussions'" class="management-content">
           <div class="content-header">
             <h2 class="section-title">讨论区管理</h2>
-            <a-button type="primary">
-              <PlusOutlined />
-              发起讨论
-            </a-button>
           </div>
           <div class="content-body">
-            <a-empty description="暂无讨论内容" />
+            <a-spin :spinning="commentsLoading">
+              <div v-if="courseComments.length === 0" class="empty-comments">
+                <a-empty description="暂无讨论内容" />
+              </div>
+              <div v-else class="comments-list">
+                <a-list
+                  :data-source="courseComments"
+                  item-layout="horizontal"
+                >
+                  <template #renderItem="{ item }">
+                    <a-list-item>
+                      <a-list-item-meta>
+                        <template #avatar>
+                          <template v-if="item.userAvatar">
+                            <a-avatar :src="item.userAvatar" />
+                          </template>
+                          <template v-else>
+                            <a-avatar>{{ item.userName?.charAt(0) }}</a-avatar>
+                          </template>
+                        </template>
+                        <template #title>
+                          <div class="comment-header">
+                            <span class="comment-user">{{ item.userName }}</span>
+                            <span class="comment-role">{{ getUserRole(item.userRole) }}</span>
+                            <span class="comment-section" @click="navigateToSection(item.sectionId)">
+                              <a-tag color="blue">{{ item.sectionTitle || '未知小节' }}</a-tag>
+                            </span>
+                          </div>
+                        </template>
+                        <template #description>
+                          <div class="comment-content">{{ item.content }}</div>
+                          <div class="comment-footer">
+                            <span class="comment-time">{{ formatDate(item.createTime) }}</span>
+                            <span 
+                              v-if="item.replyCount > 0" 
+                              class="comment-replies-link" 
+                              @click.stop="fetchAndShowReplies(item)"
+                            >
+                              <span v-if="!expandedComments.has(item.id)">
+                                <DownOutlined /> 查看{{ item.replyCount }}条回复
+                              </span>
+                              <span v-else>
+                                <UpOutlined /> 收起回复
+                              </span>
+                            </span>
+                          </div>
+                          
+                          <!-- 显示回复列表 -->
+                          <div v-if="expandedComments.has(item.id) && item.replies && item.replies.length > 0" class="replies-list">
+                            <div v-for="reply in item.replies" :key="reply.id" class="reply-item">
+                              <div class="reply-avatar">
+                                <template v-if="reply.userAvatar">
+                                  <a-avatar :src="reply.userAvatar" size="small" />
+                                </template>
+                                <template v-else>
+                                  <a-avatar size="small">{{ reply.userName?.charAt(0) }}</a-avatar>
+                                </template>
+                              </div>
+                              <div class="reply-content">
+                                <div>
+                                  <span class="reply-username">{{ reply.userName }}</span>
+                                  <span class="reply-role">({{ getUserRole(reply.userRole) }})</span>
+                                  <span class="reply-text">：{{ reply.content }}</span>
+                                </div>
+                                <div class="reply-footer">
+                                  <span class="reply-time">{{ formatDate(reply.createTime) }}</span>
+                                  <a-popconfirm
+                                    title="确定要删除这条回复吗？"
+                                    @confirm="deleteComment(reply)"
+                                    ok-text="确定"
+                                    cancel-text="取消"
+                                  >
+                                    <a class="delete-link">删除</a>
+                                  </a-popconfirm>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </template>
+                      </a-list-item-meta>
+                      <template #actions>
+                        <a-button type="link" @click="navigateToSection(item.sectionId)">查看</a-button>
+                        <a-popconfirm
+                          title="确定要删除这条评论吗？"
+                          @confirm="deleteComment(item)"
+                          ok-text="确定"
+                          cancel-text="取消"
+                        >
+                          <a-button type="link" danger>删除</a-button>
+                        </a-popconfirm>
+                      </template>
+                    </a-list-item>
+                  </template>
+                </a-list>
+                
+                <div class="pagination">
+                  <a-pagination
+                    v-model:current="commentPagination.current"
+                    :total="commentPagination.total"
+                    :page-size="commentPagination.pageSize"
+                    @change="handleCommentPageChange"
+                    show-quick-jumper
+                    show-size-changer
+                    :page-size-options="['10', '20', '50', '100']"
+                    @showSizeChange="handleCommentSizeChange"
+                  />
+                </div>
+              </div>
+            </a-spin>
           </div>
         </div>
 
         <!-- 资料管理内容 -->
         <div v-if="currentView === 'resources'" class="management-content">
-          <div class="content-header">
-            <h2 class="section-title">资料管理</h2>
-            <a-button type="primary">
-              <PlusOutlined />
-              上传资料
-            </a-button>
-          </div>
-          <div class="content-body">
-            <a-empty description="暂无资料内容" />
-          </div>
+          <CourseResources />
         </div>
 
         <!-- 错题集管理内容 -->
@@ -216,21 +311,26 @@ import {
   PlusOutlined,
   VideoCameraOutlined,
   FormOutlined,
-  FileOutlined
+  FileOutlined,
+  DownOutlined,
+  UpOutlined
 } from '@ant-design/icons-vue'
 import { 
   getChaptersByCourseId, 
   createChapter, 
   updateChapter, 
-  deleteChapter, 
-  createSection, 
-  updateSection, 
+  deleteChapter,
+  createSection,
+  updateSection,
   deleteSection,
   type Course,
   type Chapter,
   type Section
 } from '@/api/teacher'
+import { getCourseComments, deleteSectionComment, getSectionCommentReplies } from '@/api/course'
+import CourseResources from './CourseResources.vue'
 import axios from 'axios'
+import dayjs from 'dayjs'
 
 const route = useRoute()
 const router = useRouter()
@@ -261,6 +361,18 @@ const sectionForm = ref({
   duration: 30,
   description: ''
 })
+
+// 评论相关数据
+const commentsLoading = ref(false)
+const courseComments = ref<any[]>([])
+const commentPagination = ref({
+  current: 1,
+  pageSize: 10,
+  total: 0
+})
+
+// 展开评论相关
+const expandedComments = ref(new Set<number>())
 
 // 计算属性
 const courseId = computed(() => {
@@ -609,10 +721,128 @@ const deleteSectionItem = async (chapter: Chapter, section: Section) => {
   }
 }
 
+// 加载课程评论
+const loadCourseComments = async () => {
+  commentsLoading.value = true
+  try {
+    const response = await getCourseComments(
+      courseId.value,
+      commentPagination.value.current,
+      commentPagination.value.pageSize
+    )
+    
+    if (response.data.code === 200) {
+      courseComments.value = response.data.data.records || []
+      commentPagination.value.total = response.data.data.total || 0
+    } else {
+      message.error(response.data.message || '获取评论失败')
+      courseComments.value = []
+    }
+  } catch (error) {
+    console.error('获取课程评论失败:', error)
+    message.error('获取评论失败')
+    courseComments.value = []
+  } finally {
+    commentsLoading.value = false
+  }
+}
+
+// 处理评论分页变化
+const handleCommentPageChange = (page: number) => {
+  commentPagination.value.current = page
+  loadCourseComments()
+}
+
+// 处理评论每页条数变化
+const handleCommentSizeChange = (current: number, size: number) => {
+  commentPagination.value.current = 1
+  commentPagination.value.pageSize = size
+  loadCourseComments()
+}
+
+// 删除评论
+const deleteComment = async (comment: any) => {
+  try {
+    const response = await deleteSectionComment(comment.sectionId, comment.id)
+    
+    if (response.data.code === 200) {
+      message.success('删除评论成功')
+      // 重新加载评论列表，确保前后端数据一致
+      await loadCourseComments()
+    } else {
+      message.error(response.data.message || '删除评论失败')
+    }
+  } catch (error) {
+    console.error('删除评论失败:', error)
+    message.error('删除评论失败')
+  }
+}
+
+// 跳转到小节详情页
+const navigateToSection = (sectionId: number) => {
+  router.push(`/teacher/courses/${courseId.value}/sections/${sectionId}`)
+}
+
+// 格式化日期
+const formatDate = (dateStr: string) => {
+  return dayjs(dateStr).format('YYYY-MM-DD HH:mm')
+}
+
+// 获取用户角色显示文本
+const getUserRole = (role: string) => {
+  if (!role) return '用户'
+  
+  const roleMap: Record<string, string> = {
+    'TEACHER': '教师',
+    'STUDENT': '学员',
+    'ADMIN': '管理员'
+  }
+  
+  return roleMap[role.toUpperCase()] || '用户'
+}
+
+// 监听视图变化，加载相应数据
+watch(() => currentView.value, (newView) => {
+  if (newView === 'discussions') {
+    loadCourseComments()
+  }
+})
+
 // 组件挂载时初始化数据
 onMounted(() => {
   loadChapters()
+  if (currentView.value === 'discussions') {
+    loadCourseComments()
+  }
 })
+
+// 展开评论
+const fetchAndShowReplies = async (comment: any) => {
+  if (expandedComments.value.has(comment.id)) {
+    expandedComments.value.delete(comment.id)
+  } else {
+    expandedComments.value.add(comment.id)
+    await loadReplies(comment)
+  }
+}
+
+// 加载回复
+const loadReplies = async (comment: any) => {
+  try {
+    const response = await getSectionCommentReplies(comment.sectionId, comment.id)
+    
+    if (response.data.code === 200) {
+      comment.replies = response.data.data.records || []
+    } else {
+      message.error(response.data.message || '获取回复失败')
+      comment.replies = []
+    }
+  } catch (error) {
+    console.error('获取回复失败:', error)
+    message.error('获取回复失败')
+    comment.replies = []
+  }
+}
 </script>
 
 <style scoped>
@@ -889,7 +1119,106 @@ onMounted(() => {
   min-height: 400px;
   display: flex;
   flex-direction: column;
+}
+
+.comments-list {
+  background: #fff;
+  border-radius: 8px;
+}
+
+.comment-header {
+  display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.comment-user {
+  font-weight: 500;
+  color: #333;
+}
+
+.comment-role {
+  font-size: 12px;
+  color: #666;
+  background-color: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.comment-section {
+  cursor: pointer;
+}
+
+.comment-content {
+  margin: 8px 0;
+  color: #333;
+}
+
+.comment-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  color: #999;
+}
+
+.pagination {
+  margin-top: 24px;
+  display: flex;
   justify-content: center;
+}
+
+.comment-replies-link {
+  cursor: pointer;
+  color: #1890ff;
+}
+
+.replies-list {
+  margin-top: 12px;
+  padding-left: 20px;
+}
+
+.reply-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.reply-avatar {
+  margin-right: 8px;
+}
+
+.reply-content {
+  flex: 1;
+}
+
+.reply-username {
+  font-weight: 500;
+  color: #333;
+}
+
+.reply-role {
+  font-size: 12px;
+  color: #666;
+  background-color: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.reply-text {
+  color: #333;
+}
+
+.reply-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  color: #999;
+}
+
+.delete-link {
+  cursor: pointer;
+  color: #1890ff;
 }
 </style>
