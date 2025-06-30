@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API调试工具</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; }
+        .result { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>API调试工具</h1>
+    
+    <div class="section">
+        <h3>当前Token状态</h3>
+        <textarea id="currentToken" readonly></textarea>
+        <button onclick="loadCurrentToken()">刷新Token</button>
+        <button onclick="clearToken()">清除Token</button>
+    </div>
+    
+    <div class="section">
+        <h3>API测试</h3>
+        <button onclick="testLogin()">测试登录</button>
+        <button onclick="testCourses()">测试课程列表</button>
+        <button onclick="testUserInfo()">测试用户信息</button>
+        <div id="apiResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+        
+        function loadCurrentToken() {
+            const token = localStorage.getItem('token');
+            document.getElementById('currentToken').value = token || '无Token';
+        }
+        
+        function clearToken() {
+            localStorage.removeItem('token');
+            loadCurrentToken();
+            showResult('Token已清除', 'success');
+        }
+        
+        function showResult(message, type = 'result') {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = message;
+        }
+        
+        async function testLogin() {
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'teacher1',
+                        password: 'teacher123'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.code === 200) {
+                    const token = result.data.token;
+                    localStorage.setItem('token', token);
+                    loadCurrentToken();
+                    showResult(`登录成功！<br/>Token: ${token.substring(0, 50)}...`, 'success');
+                } else {
+                    showResult(`登录失败: ${result.message || '未知错误'}`, 'error');
+                }
+            } catch (error) {
+                showResult(`登录请求失败: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testCourses() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showResult('请先登录获取Token', 'error');
+                    return;
+                }
+                
+                const response = await fetch(`${API_BASE}/api/teacher/courses`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                showResult(`课程列表API测试: ${response.status}<br/><pre>${JSON.stringify(result, null, 2)}</pre>`, 
+                          response.ok ? 'success' : 'error');
+            } catch (error) {
+                showResult(`课程列表请求失败: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testUserInfo() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showResult('请先登录获取Token', 'error');
+                    return;
+                }
+                
+                const response = await fetch(`${API_BASE}/api/auth/user-info`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                showResult(`用户信息API测试: ${response.status}<br/><pre>${JSON.stringify(result, null, 2)}</pre>`, 
+                          response.ok ? 'success' : 'error');
+            } catch (error) {
+                showResult(`用户信息请求失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 页面加载时自动加载当前token
+        window.onload = function() {
+            loadCurrentToken();
+        };
+    </script>
+</body>
+</html> 

@@ -53,21 +53,19 @@
           theme="dark"
           class="sidebar-menu"
         >
-          <a-sub-menu key="tasks">
+          <a-menu-item key="tasks">
             <template #icon>
               <FileTextOutlined />
             </template>
-            <template #title>任务</template>
-            <a-menu-item key="exams">考试</a-menu-item>
-            <a-menu-item key="assignments">作业</a-menu-item>
-          </a-sub-menu>
+            <span>任务</span>
+          </a-menu-item>
           <a-menu-item key="chapters">
             <template #icon>
               <OrderedListOutlined />
             </template>
             <span>章节</span>
           </a-menu-item>
-          <a-menu-item key="discussions">
+          <a-menu-item key="discussion">
             <template #icon>
               <CommentOutlined />
             </template>
@@ -78,24 +76,6 @@
               <FolderOutlined />
             </template>
             <span>资料</span>
-          </a-menu-item>
-          <a-menu-item key="wrongbook">
-            <template #icon>
-              <EditOutlined />
-            </template>
-            <span>错题集</span>
-          </a-menu-item>
-          <a-menu-item key="records">
-            <template #icon>
-              <HistoryOutlined />
-            </template>
-            <span>学习记录</span>
-          </a-menu-item>
-          <a-menu-item key="knowledge-map">
-            <template #icon>
-              <NodeIndexOutlined />
-            </template>
-            <span>知识图谱</span>
           </a-menu-item>
         </a-menu>
       </template>
@@ -403,6 +383,15 @@ watch(() => route.params.id, (newId) => {
     fetchCourseInfo(Number(newId));
   }
 }, { immediate: true });
+
+// 监听课程详情页的菜单点击
+watch(() => courseSelectedKeys.value, (newKeys) => {
+  if (isCourseDetailPage.value && newKeys.length > 0) {
+    const key = newKeys[0];
+    const courseId = route.params.id;
+    router.push(`/teacher/courses/${courseId}#${key}`);
+  }
+});
 
 // 面包屑导航
 const breadcrumbItems = computed(() => {
