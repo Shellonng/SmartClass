@@ -395,25 +395,6 @@ const fetchAssignments = async () => {
   console.log('开始获取课程作业列表，课程ID:', props.courseId)
   
   try {
-    // 获取用户Token
-    const token = localStorage.getItem('user-token') || localStorage.getItem('token')
-    const userInfo = localStorage.getItem('user-info')
-    let userId = ''
-    
-    if (userInfo) {
-      try {
-        const userObj = JSON.parse(userInfo)
-        userId = userObj.id || ''
-        console.log('当前用户ID:', userId)
-      } catch (e) {
-        console.error('解析用户信息失败:', e)
-      }
-    }
-    
-    // 构建认证头
-    const authToken = userId ? `Bearer token-${userId}` : (token ? `Bearer ${token}` : '')
-    console.log('使用认证Token:', authToken)
-    
     // 构建API请求参数
     const params = {
       pageNum: pagination.value.current,
@@ -426,10 +407,7 @@ const fetchAssignments = async () => {
     // 发送API请求
     console.log(`请求URL: /api/teacher/assignments，参数包括courseId=${props.courseId}`)
     const response = await axios.get('/api/teacher/assignments', {
-      params,
-      headers: {
-        'Authorization': authToken
-      }
+      params
     })
     
     console.log('API响应:', response.data)
@@ -551,26 +529,6 @@ const handleTimeRangeChange = (dates: [Dayjs, Dayjs] | null) => {
 const showAddAssignmentModal = () => {
   isEditing.value = false
   
-  // 获取当前用户ID
-  const userInfo = localStorage.getItem('user-info')
-  let userId = undefined as number | undefined
-  
-  if (userInfo) {
-    try {
-      const userObj = JSON.parse(userInfo)
-      userId = userObj.id
-      console.log('当前用户ID:', userId)
-    } catch (e) {
-      console.error('解析用户信息失败:', e)
-    }
-  }
-  
-  // 如果无法获取用户ID，使用默认值
-  if (!userId) {
-    userId = 6 // 使用测试教师ID作为默认值
-    console.log('使用默认用户ID:', userId)
-  }
-  
   assignmentForm.value = {
     id: undefined,
     title: '',
@@ -579,7 +537,7 @@ const showAddAssignmentModal = () => {
     endTime: '',
     description: '',
     status: assignmentStatus.NOT_STARTED,
-    userId: userId,
+    userId: undefined,
     mode: assignmentMode.FILE // 默认为上传文件型
   }
   assignmentTimeRange.value = null

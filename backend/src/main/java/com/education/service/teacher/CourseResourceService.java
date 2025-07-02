@@ -3,6 +3,7 @@ package com.education.service.teacher;
 import com.education.dto.CourseResourceDTO;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
+import com.education.dto.common.Result;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -66,4 +67,11 @@ public interface CourseResourceService {
      * @return 是否更新成功
      */
     boolean incrementDownloadCount(Long resourceId);
+
+    /**
+     * 获取所有资源列表
+     * @param pageRequest 分页请求
+     * @return 资源列表
+     */
+    Result getAllResources(PageRequest pageRequest);
 } 

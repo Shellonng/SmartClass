@@ -75,6 +75,10 @@ public class CourseResource implements Serializable {
     @TableField(exist = false)
     private String uploadUserName;
 
+    @Schema(description = "所属课程名称")
+    @TableField(exist = false)
+    private String courseName;
+
     @Schema(description = "格式化的文件大小")
     @TableField(exist = false)
     private String formattedSize;

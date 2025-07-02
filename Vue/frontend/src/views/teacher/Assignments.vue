@@ -25,6 +25,20 @@
               <a-select-option value="ended">已结束</a-select-option>
             </a-select>
           </div>
+          <div class="filter-item">
+            <span class="filter-label">所属课程：</span>
+            <a-select 
+              v-model:value="filters.courseId" 
+              style="width: 180px" 
+              placeholder="全部课程"
+              allowClear
+              @change="handleFilterChange"
+            >
+              <a-select-option v-for="course in courses" :key="course.id" :value="course.id">
+                {{ course.title }}
+              </a-select-option>
+            </a-select>
+          </div>
         </div>
         <div class="filter-right">
           <div class="filter-item search-box">
@@ -125,15 +139,71 @@
         </a-table>
       </a-spin>
     </div>
+    
+    <!-- 添加作业对话框 -->
+    <a-modal
+      v-model:visible="addModalVisible"
+      title="添加作业"
+      :confirmLoading="addModalLoading"
+      @ok="handleAddAssignment"
+      width="700px"
+    >
+      <a-form :model="assignmentForm" layout="vertical">
+        <a-form-item label="作业标题" required>
+          <a-input v-model:value="assignmentForm.title" placeholder="请输入作业标题" />
+        </a-form-item>
+        
+        <a-form-item label="所属课程" required>
+          <a-select 
+            v-model:value="assignmentForm.courseId" 
+            placeholder="请选择课程"
+            style="width: 100%"
+          >
+            <a-select-option v-for="course in courses" :key="course.id" :value="course.id">
+              {{ course.title }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        
+        <a-form-item label="作业时间" required>
+          <a-range-picker 
+            v-model:value="timeRange"
+            :show-time="{ format: 'HH:mm' }"
+            format="YYYY-MM-DD HH:mm"
+            @change="handleTimeRangeChange"
+            style="width: 100%"
+          />
+        </a-form-item>
+        
+        <a-form-item label="总分">
+          <a-input-number 
+            v-model:value="assignmentForm.totalScore" 
+            :min="0" 
+            :max="100" 
+            style="width: 100%"
+          />
+        </a-form-item>
+        
+        <a-form-item label="作业描述">
+          <a-textarea 
+            v-model:value="assignmentForm.description" 
+            placeholder="请输入作业描述" 
+            :rows="4"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
-import { message, notification } from 'ant-design-vue'
+import { message, notification, Modal } from 'ant-design-vue'
 import dayjs from 'dayjs'
+import type { Dayjs } from 'dayjs'
 import assignment from '@/api/assignment'
+import { getTeacherCourses } from '@/api/course'
 
 // 定义组件名称，便于调试
 defineComponent({
@@ -149,6 +219,13 @@ import {
   CloseCircleOutlined
 } from '@ant-design/icons-vue'
 
+// 定义课程类型
+interface Course {
+  id: number
+  title: string
+  [key: string]: any
+}
+
 const router = useRouter()
 
 // 表格列定义
@@ -157,13 +234,19 @@ const columns = [
     title: '作业名称',
     dataIndex: 'title',
     key: 'title',
-    width: '25%'
+    width: '20%'
+  },
+  {
+    title: '所属课程',
+    dataIndex: 'courseName',
+    key: 'courseName',
+    width: '15%'
   },
   {
     title: '状态',
     dataIndex: 'assignmentState',
     key: 'assignmentState',
-    width: '15%'
+    width: '10%'
   },
   {
     title: '作业时间',
@@ -175,7 +258,7 @@ const columns = [
     title: '发布状态',
     dataIndex: 'publishStatus',
     key: 'publishStatus',
-    width: '15%'
+    width: '10%'
   },
   {
     title: '操作',
@@ -188,6 +271,7 @@ const columns = [
 // 状态
 const loading = ref(false)
 const assignments = ref([])
+const courses = ref<Course[]>([])
 const pagination = reactive({
   current: 1,
   pageSize: 10,
@@ -200,8 +284,22 @@ const pagination = reactive({
 // 筛选条件
 const filters = reactive({
   status: undefined,
-  keyword: ''
+  keyword: '',
+  courseId: undefined
 })
+
+// 添加作业相关状态
+const addModalVisible = ref(false)
+const addModalLoading = ref(false)
+const assignmentForm = reactive({
+  title: '',
+  courseId: undefined as number | undefined,
+  description: '',
+  startTime: '',
+  endTime: '',
+  totalScore: 100
+})
+const timeRange = ref<[Dayjs, Dayjs] | null>(null)
 
 // 加载作业列表
 const loadAssignments = async () => {
@@ -211,6 +309,7 @@ const loadAssignments = async () => {
       current: pagination.current,
       pageSize: pagination.pageSize,
       keyword: filters.keyword,
+      courseId: filters.courseId,
       // 根据筛选条件的状态值转换为对应的数字状态码
       status: filters.status ? undefined : undefined
     }
@@ -220,7 +319,13 @@ const loadAssignments = async () => {
     if (response.code === 200) {
       const { records, total, current, size } = response.data
       
-      // 处理每个作业记录，添加状态字段
+      // 获取课程映射表
+      const courseMap = courses.value.reduce((map, course) => {
+        map[course.id] = course.title
+        return map
+      }, {} as Record<number, string>)
+      
+      // 处理每个作业记录，添加状态字段和课程名称
       assignments.value = records.map((item: any) => {
         const now = dayjs()
         const startTime = dayjs(item.startTime)
@@ -235,7 +340,8 @@ const loadAssignments = async () => {
         
         return {
           ...item,
-          assignmentState
+          assignmentState,
+          courseName: item.courseId ? courseMap[item.courseId] || '未知课程' : '未知课程'
         }
       })
       
@@ -250,6 +356,20 @@ const loadAssignments = async () => {
     message.error('获取作业列表失败，请检查网络连接')
   } finally {
     loading.value = false
+  }
+}
+
+// 加载课程列表
+const loadCourses = async () => {
+  try {
+    const response = await assignment.getTeacherCourses()
+    if (response.code === 200) {
+      courses.value = response.data
+    } else {
+      console.error('获取课程列表失败:', response)
+    }
+  } catch (error) {
+    console.error('获取课程列表出错:', error)
   }
 }
 
@@ -302,6 +422,7 @@ const handleSearch = () => {
 const resetFilters = () => {
   filters.status = undefined
   filters.keyword = ''
+  filters.courseId = undefined
   pagination.current = 1
   loadAssignments()
 }
@@ -364,14 +485,82 @@ const editAssignment = (record: any) => {
   router.push(`/teacher/assignments/${record.id}/edit`)
 }
 
-// 添加作业
+// 显示添加作业对话框
 const showAddAssignmentModal = () => {
-  router.push('/teacher/assignments/create')
+  // 重置表单
+  assignmentForm.title = ''
+  assignmentForm.courseId = undefined
+  assignmentForm.description = ''
+  assignmentForm.startTime = ''
+  assignmentForm.endTime = ''
+  assignmentForm.totalScore = 100
+  timeRange.value = null
+  
+  // 显示对话框
+  addModalVisible.value = true
+}
+
+// 处理时间范围变化
+const handleTimeRangeChange = (dates: [Dayjs, Dayjs] | null) => {
+  if (dates) {
+    assignmentForm.startTime = dates[0].format('YYYY-MM-DD HH:mm:ss')
+    assignmentForm.endTime = dates[1].format('YYYY-MM-DD HH:mm:ss')
+  } else {
+    assignmentForm.startTime = ''
+    assignmentForm.endTime = ''
+  }
+}
+
+// 提交添加作业表单
+const handleAddAssignment = async () => {
+  // 表单验证
+  if (!assignmentForm.title) {
+    message.error('请输入作业标题')
+    return
+  }
+  
+  if (!assignmentForm.courseId) {
+    message.error('请选择所属课程')
+    return
+  }
+  
+  if (!assignmentForm.startTime || !assignmentForm.endTime) {
+    message.error('请选择作业时间范围')
+    return
+  }
+  
+  addModalLoading.value = true
+  
+  try {
+    const response = await assignment.createAssignment({
+      title: assignmentForm.title,
+      courseId: assignmentForm.courseId,
+      description: assignmentForm.description,
+      startTime: assignmentForm.startTime,
+      endTime: assignmentForm.endTime,
+      totalScore: assignmentForm.totalScore,
+      type: 'homework'
+    })
+    
+    if (response.code === 200) {
+      message.success('添加作业成功')
+      addModalVisible.value = false
+      loadAssignments()
+    } else {
+      message.error(response.message || '添加作业失败')
+    }
+  } catch (error) {
+    console.error('添加作业出错:', error)
+    message.error('添加作业失败，请检查网络连接')
+  } finally {
+    addModalLoading.value = false
+  }
 }
 
 // 初始化
 onMounted(() => {
   loadAssignments()
+  loadCourses()
 })
 </script>
 
