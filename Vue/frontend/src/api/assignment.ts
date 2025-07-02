@@ -6,6 +6,17 @@ import type { ApiResponse } from '@/utils/request'
  */
 export default {
   /**
+   * 获取教师课程列表
+   * @returns 课程列表
+   */
+  getTeacherCourses(): Promise<ApiResponse> {
+    return request({
+      url: `/api/teacher/assignments/courses`,
+      method: 'get'
+    })
+  },
+
+  /**
    * 获取作业列表
    * @param params 查询参数
    * @returns 作业列表
@@ -199,11 +210,11 @@ export default {
    * @param assignmentId 作业ID
    * @returns 作业题目列表
    */
-  getAssignmentQuestions(assignmentId: number): Promise<ApiResponse> {
+  getAssignmentQuestions(assignmentId: number): Promise<any[]> {
     return request({
       url: `/api/student/assignments/${assignmentId}/questions`,
       method: 'get'
-    })
+    }).then(response => response.data || [])
   },
 
   /**
@@ -259,6 +270,154 @@ export default {
     return request({
       url: `/api/teacher/submissions/${submissionId}`,
       method: 'delete'
+    })
+  },
+
+  /**
+   * 获取作业详情（学生端）
+   * @param id 作业ID
+   * @returns 作业详情
+   */
+  getStudentAssignmentDetail(id: number): Promise<ApiResponse> {
+    return request({
+      url: `/api/student/assignments/${id}`,
+      method: 'get'
+    })
+  },
+
+  /**
+   * 提交作业答案（学生端）
+   * @param assignmentId 作业ID
+   * @param answers 答案数据
+   * @returns 提交结果
+   */
+  submitAssignmentAnswers(assignmentId: number, answers: any): Promise<ApiResponse> {
+    return request({
+      url: `/api/student/assignments/${assignmentId}/submit`,
+      method: 'post',
+      data: answers
+    })
+  },
+
+  /**
+   * 提交考试答案（学生端）
+   * @param examId 考试ID
+   * @param answers 答案数据
+   * @returns 提交结果
+   */
+  submitExamAnswers(examId: number, answers: any): Promise<ApiResponse> {
+    return request({
+      url: `/api/student/exams/${examId}/submit`,
+      method: 'post',
+      data: answers
+    })
+  },
+
+  /**
+   * 提交文件作业（学生端）
+   * @param assignmentId 作业ID
+   * @param formData 包含文件的FormData
+   * @returns 提交结果
+   */
+  submitAssignmentFile(assignmentId: number, formData: FormData): Promise<ApiResponse> {
+    return request({
+      url: `/api/student/assignments/${assignmentId}/submit-file`,
+      method: 'post',
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  /**
+   * 获取学生提交记录（学生端）
+   * @param assignmentId 作业ID
+   * @returns 提交记录
+   */
+  getStudentSubmission(assignmentId: number): Promise<any> {
+    return request({
+      url: `/api/student/assignments/${assignmentId}/submission`,
+      method: 'get'
+    }).then(response => response.data)
+  },
+
+  /**
+   * 获取作业列表
+   * @param params 查询参数
+   * @returns 作业列表
+   */
+  getAssignmentListStudent(params: any): Promise<ApiResponse> {
+    return request({
+      url: '/api/student/assignments',
+      method: 'get',
+      params
+    })
+  },
+
+  /**
+   * 获取作业详情
+   * @param id 作业ID
+   * @returns 作业详情
+   */
+  getAssignmentDetailStudent(id: number): Promise<ApiResponse> {
+    return request({
+      url: `/api/student/assignments/${id}`,
+      method: 'get'
+    })
+  },
+
+  /**
+   * 获取作业题目
+   * @param id 作业ID
+   * @returns 作业题目
+   */
+  getAssignmentQuestionsStudent(id: number): Promise<ApiResponse> {
+    return request({
+      url: `/api/student/assignments/${id}/questions`,
+      method: 'get'
+    })
+  },
+
+  /**
+   * 提交作业/考试答案
+   * @param id 作业ID
+   * @param data 答案数据
+   * @returns 提交结果
+   */
+  submitAssignment(id: number, data: any): Promise<ApiResponse> {
+    return request({
+      url: `/api/student/assignments/${id}/submit`,
+      method: 'post',
+      data
+    })
+  },
+
+  /**
+   * 获取已提交的作业列表
+   * @param params 查询参数
+   * @returns 已提交的作业列表
+   */
+  getSubmittedAssignments(params: any): Promise<ApiResponse> {
+    return request({
+      url: '/api/student/submitted-assignments',
+      method: 'get',
+      params
+    })
+  },
+
+  /**
+   * 保存单题答案
+   * @param id 作业ID
+   * @param questionId 题目ID
+   * @param data 答案数据
+   * @returns 保存结果
+   */
+  saveQuestionAnswer(id: number, questionId: number, data: any): Promise<ApiResponse> {
+    return request({
+      url: `/api/student/assignments/${id}/questions/${questionId}/save`,
+      method: 'post',
+      data
     })
   }
 } 

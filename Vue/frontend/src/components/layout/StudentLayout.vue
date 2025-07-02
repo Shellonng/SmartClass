@@ -372,7 +372,7 @@ function updateSelectedKeys(path: string) {
 function handleMenuClick({ key }: { key: string }) {
   const routeMap: Record<string, string> = {
     'dashboard': '/student',
-  'courses': '/student/courses',
+    'courses': '/student/courses',
     'assignments-todo': '/student/assignments/todo',
     'assignments-completed': '/student/assignments/completed',
     'assignments-all': '/student/assignments',

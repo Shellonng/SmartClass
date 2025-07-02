@@ -1,157 +1,115 @@
 <template>
   <div class="exam-detail-page">
-    <!-- 考试头部信息 -->
-    <div class="exam-header">
-      <h1 class="exam-title">{{ exam.title }}</h1>
-      <div class="exam-info">
-        <div class="info-item">
-          <span class="info-label">题量：</span>
-          <span class="info-value">{{ exam.questionCount || '0' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">满分：</span>
-          <span class="info-value">{{ exam.totalScore || '100' }}分</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">考试时间：</span>
-          <span class="info-value">
-            {{ formatDate(exam.startTime) }} ~ {{ formatDate(exam.endTime) }}
-          </span>
-        </div>
+    <a-spin :spinning="loading">
+      <div class="page-header">
+        <a-button class="back-btn" type="link" @click="goBack">
+          <arrow-left-outlined /> 返回
+        </a-button>
       </div>
-      <div v-if="exam.description" class="exam-description">
-        <div class="description-label">考试说明：</div>
-        <div class="description-content">{{ exam.description }}</div>
-      </div>
-    </div>
 
-    <!-- 题目区域 -->
-    <div class="exam-content">
-      <a-spin :spinning="loading">
-        <div v-if="!questions || questions.length === 0" class="empty-content">
-          <a-empty description="暂无题目" />
-        </div>
-        <div v-else class="question-list">
-          <!-- 按题型分组显示题目 -->
-          <div v-for="(group, groupIndex) in questionGroups" :key="group.type" class="question-group">
-            <div class="group-header">
-              <h2 class="group-title">{{ getRomanNumber(groupIndex + 1) }}、{{ getQuestionTypeText(group.type) }} （共{{ group.questions.length }}题，{{ group.totalScore }}分）</h2>
-            </div>
-            
-            <div class="questions">
-              <div v-for="(question, questionIndex) in group.questions" :key="question.id" class="question-item">
-                <div class="question-header">
-                  <div class="question-index">{{ questionIndex + 1 }}.（{{ getQuestionTypeText(question.questionType) }}，{{ question.score }}分）</div>
-                </div>
-                
-                <div class="question-content">{{ question.title }}</div>
-                
-                <!-- 选择题选项 -->
-                <div v-if="['single', 'multiple'].includes(question.questionType)" class="question-options">
-                  <div v-for="option in question.options" :key="option.id" class="option-item">
-                    <a-radio-group v-if="question.questionType === 'single'" v-model:value="answers[question.id]">
-                      <a-radio :value="option.optionKey">{{ option.optionKey }}. {{ option.content }}</a-radio>
-                    </a-radio-group>
-                    
-                    <a-checkbox-group v-else-if="question.questionType === 'multiple'" v-model:value="answers[question.id]">
-                      <a-checkbox :value="option.optionKey">{{ option.optionKey }}. {{ option.content }}</a-checkbox>
-                    </a-checkbox-group>
-                  </div>
-                </div>
-                
-                <!-- 判断题选项 -->
-                <div v-else-if="question.questionType === 'true_false'" class="question-options">
-                  <a-radio-group v-model:value="answers[question.id]">
-                    <a-radio value="true">正确</a-radio>
-                    <a-radio value="false">错误</a-radio>
-                  </a-radio-group>
-                </div>
-                
-                <!-- 填空题 -->
-                <div v-else-if="question.questionType === 'blank'" class="question-blank">
-                  <a-input v-model:value="answers[question.id]" placeholder="输入你的答案" />
-                </div>
-                
-                <!-- 简答题 -->
-                <div v-else-if="question.questionType === 'short'" class="question-short">
-                  <a-textarea v-model:value="answers[question.id]" placeholder="输入你的答案" :rows="4" />
-                </div>
-                
-                <!-- 其他题型 -->
-                <div v-else class="question-other">
-                  <a-textarea v-model:value="answers[question.id]" placeholder="输入你的答案" :rows="6" />
-                </div>
-                
-                <!-- 保存按钮 -->
-                <div class="question-actions">
-                  <a-button type="primary" size="small" @click="saveAnswer(question.id)">保存</a-button>
-                </div>
-              </div>
-            </div>
+      <div v-if="exam" class="exam-detail-container">
+        <div class="exam-header">
+          <h1 class="exam-title">{{ exam.title }}</h1>
+          <div class="exam-meta">
+            <a-tag color="orange">考试</a-tag>
+            <a-tag :color="getStatusColor(exam.status)">{{ getStatusText(exam.status) }}</a-tag>
           </div>
         </div>
-      </a-spin>
-    </div>
+
+        <div class="exam-info">
+          <div class="info-item">
+            <clock-circle-outlined /> 开始时间：{{ formatDateTime(exam.startTime) }}
+          </div>
+          <div class="info-item">
+            <calendar-outlined /> 截止时间：{{ formatDateTime(exam.endTime) }}
+          </div>
+          <div class="info-item" v-if="exam.timeLimit">
+            <hourglass-outlined /> 时间限制：{{ exam.timeLimit }} 分钟
+          </div>
+          <div class="info-item" v-if="exam.totalScore">
+            <trophy-outlined /> 总分值：{{ exam.totalScore }} 分
+          </div>
+        </div>
+
+        <div class="exam-description">
+          <div class="section-title">考试说明</div>
+          <div class="description-content">{{ exam.description || '暂无说明' }}</div>
+        </div>
+
+        <div class="exam-rules">
+          <div class="section-title">考试须知</div>
+          <div class="rules-content">
+            <ol>
+              <li>考试时间严格按照规定的开始和结束时间，超时系统将自动提交。</li>
+              <li>考试过程中请勿刷新页面或关闭浏览器，否则可能导致作答数据丢失。</li>
+              <li>考试开始后计时器将自动启动，请合理安排答题时间。</li>
+              <li>提交后将无法重新进入考试，请确认所有题目都已作答后再提交。</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="action-area">
+          <a-button 
+            type="primary" 
+            size="large" 
+            :disabled="!canStart" 
+            @click="startExam"
+            danger
+          >
+            开始考试
+          </a-button>
+          <div v-if="!canStart" class="cannot-start-tip">
+            {{ startDisabledReason }}
+          </div>
+        </div>
+      </div>
+      
+      <a-empty v-else description="未找到考试信息" />
+    </a-spin>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { formatDate } from '@/utils/date'
-import examAPI from '@/api/exam'
+import { 
+  ArrowLeftOutlined, 
+  ClockCircleOutlined, 
+  CalendarOutlined, 
+  HourglassOutlined,
+  TrophyOutlined
+} from '@ant-design/icons-vue'
+import assignmentApi from '@/api/assignment'
+import dayjs from 'dayjs'
 
-// 路由参数
 const route = useRoute()
-const examId = computed(() => Number(route.params.id))
-
-// 状态定义
+const router = useRouter()
 const loading = ref(true)
-const exam = ref<any>({})
-const questions = ref<any[]>([])
-const answers = ref<Record<number, any>>({})
+const exam = ref<any>(null)
+const examId = ref<number>(Number(route.params.id) || 0)
 
-// 计算按题型分组的题目
-const questionGroups = computed(() => {
-  if (!questions.value || questions.value.length === 0) return []
-  
-  const groups: Record<string, any> = {}
-  
-  // 按题型分组
-  questions.value.forEach(q => {
-    const type = q.questionType || 'other'
-    if (!groups[type]) {
-      groups[type] = {
-        type,
-        questions: [],
-        totalScore: 0
-      }
-    }
-    groups[type].questions.push(q)
-    groups[type].totalScore += (q.score || 0)
-  })
-  
-  // 转换为数组并排序
-  const order = ['single', 'multiple', 'true_false', 'blank', 'short', 'code', 'other']
-  return Object.values(groups).sort((a, b) => {
-    return order.indexOf(a.type) - order.indexOf(b.type)
-  })
-})
-
-// 获取考试详情
-const fetchExamDetail = async () => {
-  loading.value = true
+// 加载考试详情
+const loadExamDetail = async () => {
   try {
-    // 调用API获取考试详情
-    const response = await examAPI.getExamDetail(examId.value)
+    loading.value = true
+    // 使用相同的API，因为考试也是Assignment表中的数据
+    const response = await assignmentApi.getStudentAssignmentDetail(examId.value)
     
-    if (response && response.code === 200) {
-      exam.value = response.data
-      // 初始化问题
-      fetchExamQuestions()
+    if (response.code === 200 && response.data) {
+      exam.value = response.data.assignment || {}
+      
+      // 根据当前时间和截止时间判断状态
+      const now = new Date()
+      if (exam.value.endTime && now > new Date(exam.value.endTime)) {
+        exam.value.status = 'completed' // 已截止
+      } else if (exam.value.startTime && now < new Date(exam.value.startTime)) {
+        exam.value.status = 'pending' // 未开始
+      } else {
+        exam.value.status = 'in_progress' // 进行中
+      }
     } else {
-      message.error(response?.message || '获取考试信息失败')
+      message.error(response.message || '获取考试详情失败')
     }
   } catch (error) {
     console.error('获取考试详情失败:', error)
@@ -161,202 +119,205 @@ const fetchExamDetail = async () => {
   }
 }
 
-// 获取考试题目
-const fetchExamQuestions = async () => {
-  loading.value = true
-  try {
-    // 调用API获取考试题目
-    // 注：这里需要后端提供获取考试题目的API
-    const response = await examAPI.getExamQuestions(examId.value)
-    
-    if (response && response.code === 200) {
-      questions.value = response.data || []
-      
-      // 初始化答案对象
-      questions.value.forEach(q => {
-        // 根据题型初始化不同类型的默认值
-        if (q.questionType === 'multiple') {
-          answers.value[q.id] = []  // 多选题初始化为空数组
-        } else {
-          answers.value[q.id] = ''  // 其他题型初始化为空字符串
-        }
-      })
-    } else {
-      message.error(response?.message || '获取考试题目失败')
-    }
-  } catch (error) {
-    console.error('获取考试题目失败:', error)
-    message.error('获取考试题目失败')
-  } finally {
-    loading.value = false
+// 判断是否可以开始考试
+const canStart = computed(() => {
+  if (!exam.value) return false
+  
+  const now = new Date()
+  const startTime = exam.value.startTime ? new Date(exam.value.startTime) : null
+  const endTime = exam.value.endTime ? new Date(exam.value.endTime) : null
+  
+  // 考试必须在开始时间之后才能进入
+  if (startTime && now < startTime) {
+    return false
   }
-}
-
-// 保存答案
-const saveAnswer = async (questionId: number) => {
-  try {
-    const answer = answers.value[questionId]
-    
-    // 检查答案是否为空
-    if (answer === undefined || answer === null || 
-        (Array.isArray(answer) && answer.length === 0) || 
-        (typeof answer === 'string' && answer.trim() === '')) {
-      message.warning('请先填写答案')
-      return
-    }
-    
-    // 调用API保存答案
-    const response = await examAPI.saveExamAnswer(examId.value, questionId, answer)
-    
-    if (response && response.code === 200) {
-      message.success('答案保存成功')
-    } else {
-      message.error(response?.message || '答案保存失败')
-    }
-  } catch (error) {
-    console.error('保存答案失败:', error)
-    message.error('保存答案失败')
+  
+  // 如果已经截止，不能开始
+  if (endTime && now > endTime) {
+    return false
   }
-}
+  
+  return true
+})
 
-// 获取罗马数字
-const getRomanNumber = (num: number): string => {
-  const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
-  return roman[num - 1] || num.toString()
-}
-
-// 获取题目类型文本
-const getQuestionTypeText = (type: string): string => {
-  const typeMap: Record<string, string> = {
-    'single': '单选题',
-    'multiple': '多选题',
-    'true_false': '判断题',
-    'blank': '填空题',
-    'short': '简答题',
-    'code': '编程题',
-    'other': '其他题型'
+// 不能开始的原因
+const startDisabledReason = computed(() => {
+  if (!exam.value) return ''
+  
+  const now = new Date()
+  const startTime = exam.value.startTime ? new Date(exam.value.startTime) : null
+  const endTime = exam.value.endTime ? new Date(exam.value.endTime) : null
+  
+  if (startTime && now < startTime) {
+    return `考试将于 ${formatDateTime(exam.value.startTime)} 开始，请届时参加`
   }
-  return typeMap[type] || ''
+  
+  if (endTime && now > endTime) {
+    return '该考试已截止，无法参加'
+  }
+  
+  return ''
+})
+
+// 开始考试
+const startExam = () => {
+  if (!canStart.value) {
+    message.warning(startDisabledReason.value)
+    return
+  }
+  
+  // 跳转到考试页面
+  router.push(`/student/exams/${examId.value}/do`)
 }
 
-// 生命周期钩子
+// 返回上一页
+const goBack = () => {
+  router.back()
+}
+
+// 格式化日期时间
+const formatDateTime = (date: string | Date) => {
+  if (!date) return '未设置'
+  return dayjs(date).format('YYYY-MM-DD HH:mm')
+}
+
+// 获取模式文本
+const getModeText = (mode: string) => {
+  const modeMap: Record<string, string> = {
+    'question': '答题模式',
+    'file': '文件提交'
+  }
+  return modeMap[mode] || ''
+}
+
+// 获取模式颜色
+const getModeColor = (mode: string) => {
+  const colorMap: Record<string, string> = {
+    'question': 'purple',
+    'file': 'cyan'
+  }
+  return colorMap[mode] || 'default'
+}
+
+// 获取状态文本
+const getStatusText = (status: string) => {
+  const statusMap: Record<string, string> = {
+    'pending': '未开始',
+    'in_progress': '进行中',
+    'completed': '已截止'
+  }
+  return statusMap[status] || '未知状态'
+}
+
+// 获取状态颜色
+const getStatusColor = (status: string) => {
+  const colorMap: Record<string, string> = {
+    'pending': 'gold',
+    'in_progress': 'green',
+    'completed': 'red'
+  }
+  return colorMap[status] || 'default'
+}
+
 onMounted(() => {
-  fetchExamDetail()
+  loadExamDetail()
 })
 </script>
 
 <style scoped>
 .exam-detail-page {
   padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.back-btn {
+  font-size: 16px;
+  padding: 0;
+}
+
+.exam-detail-container {
   background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 24px;
 }
 
 .exam-header {
   margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 16px;
 }
 
 .exam-title {
   font-size: 24px;
-  font-weight: 600;
+  font-weight: 500;
   margin-bottom: 16px;
+}
+
+.exam-meta {
+  display: flex;
+  gap: 8px;
 }
 
 .exam-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .info-item {
-  display: flex;
-  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #666;
 }
 
-.info-label {
-  font-weight: 600;
-  margin-right: 8px;
+.section-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 16px;
 }
 
 .exam-description {
-  background-color: #f5f7fa;
-  padding: 12px 16px;
-  border-radius: 4px;
-  margin-top: 16px;
-}
-
-.description-label {
-  font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 24px;
 }
 
 .description-content {
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 4px;
   white-space: pre-line;
 }
 
-.exam-content {
-  margin-top: 24px;
-}
-
-.question-group {
+.exam-rules {
   margin-bottom: 32px;
-}
-
-.group-header {
-  margin-bottom: 16px;
-}
-
-.group-title {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.questions {
-  margin-left: 12px;
-}
-
-.question-item {
-  margin-bottom: 24px;
+  border: 1px solid #ffe58f;
+  background-color: #fffbe6;
   padding: 16px;
-  border: 1px solid #e8e8e8;
-  border-radius: 8px;
-  background-color: #fff;
+  border-radius: 4px;
 }
 
-.question-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
+.rules-content ol {
+  margin-left: 20px;
+  padding-left: 0;
 }
 
-.question-index {
-  font-weight: 600;
-}
-
-.question-content {
-  margin-bottom: 16px;
-  line-height: 1.6;
-}
-
-.question-options {
-  margin-left: 8px;
-}
-
-.option-item {
+.rules-content li {
   margin-bottom: 8px;
 }
 
-.question-blank,
-.question-short,
-.question-other {
-  margin-top: 16px;
+.action-area {
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
 }
 
-.question-actions {
-  display: flex;
-  justify-content: flex-end;
+.cannot-start-tip {
   margin-top: 16px;
+  color: #ff4d4f;
+  font-size: 14px;
 }
 </style> 

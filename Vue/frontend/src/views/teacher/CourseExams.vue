@@ -1116,18 +1116,8 @@ const fetchExams = async () => {
   console.log('开始获取考试列表...')
   loading.value = true
   try {
-    // 确保已获取用户ID
-    const userId = currentUserId.value || await fetchCurrentUserInfo()
-    console.log('获取到用户ID:', userId)
-    
-    if (!userId) {
-      message.error('获取用户信息失败，无法加载考试列表')
-      return
-    }
-    
     const params = {
       courseId: props.courseId,
-      userId: userId, // 添加用户ID参数
       status: filters.value.status,
       keyword: filters.value.keyword,
       current: pagination.value.current,
@@ -1263,12 +1253,66 @@ const viewExamDetail = (exam: ExamRecord) => {
 }
 
 // 编辑考试
-const editExam = (exam: ExamRecord) => {
+const editExam = async (exam: ExamRecord) => {
   isEditing.value = true
-  examForm.value = { ...exam }
-  // 这里应该从API获取完整的考试详情
-  examTimeRange.value = null // 应该根据startTime和endTime设置
+  
+  try {
+    // 获取考试详情
+    const response = await examAPI.getExamDetail(exam.id)
+    if (response && response.code === 200) {
+      // 确保类型转换正确
+      const examData = response.data
+      
+      // 处理可能的类型不匹配问题
+      examForm.value = {
+        id: examData.id,
+        title: examData.title || '',
+        courseId: examData.courseId || props.courseId,
+        userId: examData.userId || 0,
+        description: examData.description || '',
+        startTime: examData.startTime || '',
+        endTime: examData.endTime || '',
+        duration: examData.duration || 60,
+        totalScore: examData.totalScore || 100,
+        status: examData.status || 0,
+        type: examData.type || 'exam',
+        paperConfig: examData.paperConfig || {
+          singleCount: 10,
+          singleScore: 3,
+          multipleCount: 5,
+          multipleScore: 4,
+          trueFalseCount: 10,
+          trueFalseScore: 2,
+          blankCount: 5,
+          blankScore: 2,
+          shortCount: 2,
+          shortScore: 10,
+          codeCount: 0,
+          codeScore: 0,
+          isRandom: true,
+          difficulty: 3,
+          knowledgePoint: undefined
+        }
+      }
+      
+      // 设置考试时间范围
+      if (examForm.value.startTime && examForm.value.endTime) {
+        examTimeRange.value = [
+          dayjs(examForm.value.startTime),
+          dayjs(examForm.value.endTime)
+        ]
+      }
+      
+      // 打开编辑弹窗
   examModalVisible.value = true
+      currentStep.value = 0 // 从第一步开始编辑
+    } else {
+      message.error('获取考试详情失败')
+    }
+  } catch (error) {
+    console.error('获取考试详情失败:', error)
+    message.error('获取考试详情失败，请重试')
+  }
 }
 
 // 删除考试

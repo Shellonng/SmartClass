@@ -1,6 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
+// 为路由元数据添加类型声明
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    role?: string
+    mode?: string
+  }
+}
+
 // 布局组件
 const AuthLayout = () => import('@/components/layout/AuthLayout.vue')
 const TeacherLayout = () => import('@/components/layout/TeacherLayout.vue')
@@ -72,6 +81,12 @@ const StudentVideoLearning = () => import('@/views/student/VideoLearning.vue')
 // 学生端 - 作业管理
 const StudentAssignments = () => import('@/views/student/Assignments.vue')
 const StudentAssignmentDetail = () => import('@/views/student/AssignmentDetail.vue')
+
+// 学生端 - 错题集
+const StudentWrongQuestions = () => import('@/views/student/WrongQuestions.vue')
+
+// 学生端 - 学习记录
+const StudentLearningRecords = () => import('@/views/student/LearningRecords.vue')
 
 // 学生端 - 考试管理
 const StudentExamDetail = () => import('@/views/student/ExamDetail.vue')
@@ -263,7 +278,52 @@ const router = createRouter({
         {
           path: '',
           component: StudentExamDetail,
-          props: route => ({ examId: Number(route.params.id) })
+          props: route => ({ id: Number(route.params.id) })
+        },
+        {
+          path: 'do',
+          component: () => import('@/views/student/ExamDo.vue'),
+          props: route => ({ id: Number(route.params.id) })
+        }
+      ]
+    },
+
+    // 作业详情页面(学生端) - 使用独立布局
+    {
+      path: '/student/assignments/:id',
+      name: 'StudentAssignmentDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'STUDENT' },
+      children: [
+        {
+          path: '',
+          component: StudentAssignmentDetail,
+          props: route => ({ id: Number(route.params.id) })
+        },
+        {
+          path: 'do',
+          component: () => import('@/views/student/AssignmentDo.vue'),
+          props: route => ({ id: Number(route.params.id) })
+        }
+      ]
+    },
+
+    // 文件提交型作业(学生端) - 使用独立布局
+    {
+      path: '/student/assignments/file/:id',
+      name: 'StudentFileAssignmentDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'STUDENT' },
+      children: [
+        {
+          path: '',
+          component: StudentAssignmentDetail,
+          props: route => ({ id: Number(route.params.id), isFileMode: true })
+        },
+        {
+          path: 'submit',
+          component: () => import('@/views/student/FileSubmit.vue'),
+          props: route => ({ id: Number(route.params.id) })
         }
       ]
     },
@@ -419,16 +479,19 @@ const router = createRouter({
       children: [
         {
           path: '',
-          name: 'StudentHome',
+          redirect: '/student/dashboard'
+        },
+        {
+          path: 'dashboard',
+          name: 'StudentDashboard',
           component: StudentDashboard
         },
-
         
         // 课程管理
         {
           path: 'courses',
           name: 'StudentCourses',
-          component: StudentCourses
+          component: StudentCourses // 使用学生端课程组件
         },
         {
           path: 'courses/:id',
@@ -441,6 +504,13 @@ const router = createRouter({
           name: 'StudentVideoLearning',
           component: StudentVideoLearning,
           props: true
+        },
+        
+        // 任务管理
+        {
+          path: 'tasks',
+          name: 'StudentTasks',
+          component: StudentDashboard, // 临时使用Dashboard作为占位符
         },
         
         // 作业管理
@@ -482,6 +552,20 @@ const router = createRouter({
         {
           path: 'exams',
           name: 'StudentExams',
+          component: StudentDashboard,  // 临时使用Dashboard作为占位符
+        },
+        
+        // 错题集
+        {
+          path: 'wrong-questions',
+          name: 'StudentWrongQuestions',
+          component: StudentDashboard,  // 临时使用Dashboard作为占位符
+        },
+        
+        // 学习记录
+        {
+          path: 'learning-records',
+          name: 'StudentLearningRecords',
           component: StudentDashboard,  // 临时使用Dashboard作为占位符
         },
         
@@ -613,6 +697,7 @@ router.beforeEach(async (to, from, next) => {
     try {
       console.log('尝试获取用户信息...')
       await authStore.fetchUserInfo()
+      console.log('获取用户信息成功，用户角色:', authStore.user?.role)
     } catch (error) {
       console.error('路由守卫中获取用户信息失败:', error)
     }
@@ -620,8 +705,9 @@ router.beforeEach(async (to, from, next) => {
   
   // 如果已登录用户访问登录页，重定向到对应首页
   if ((to.path === '/login' || to.path === '/register') && authStore.isAuthenticated) {
-    const redirectPath = authStore.user?.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'
-    console.log('已登录用户访问登录页，重定向到:', redirectPath)
+    const userRole = authStore.user?.role?.toUpperCase() || '';
+    const redirectPath = userRole === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'
+    console.log('已登录用户访问登录页，重定向到:', redirectPath, '用户角色:', userRole)
     next(redirectPath)
     return
   }
@@ -633,16 +719,28 @@ router.beforeEach(async (to, from, next) => {
     return
   }
   
-  // 检查角色权限
-  if (to.meta.role && authStore.user?.role && to.meta.role !== authStore.user.role) {
+  // 检查角色权限 - 不区分大小写比较角色
+  if (to.meta.role && authStore.user?.role) {
+    const metaRole = String(to.meta.role).toUpperCase();
+    const userRole = authStore.user.role.toUpperCase();
+    
+    console.log('角色检查:', {
+      路径: to.path,
+      需要角色: metaRole,
+      用户角色: userRole,
+      匹配结果: metaRole === userRole
+    });
+    
+    if (metaRole !== userRole) {
     // 如果角色不匹配，重定向到对应角色的首页
-    const redirectPath = authStore.user.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'
-    console.log('角色不匹配，重定向到:', redirectPath)
+      const redirectPath = userRole === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'
+      console.log('角色不匹配，重定向到:', redirectPath, '用户角色:', userRole, '路由要求角色:', metaRole)
     next(redirectPath)
     return
+    }
   }
   
-  console.log('路由守卫通过，继续导航')
+  console.log('路由守卫通过，继续导航到:', to.path)
   next()
 })
 

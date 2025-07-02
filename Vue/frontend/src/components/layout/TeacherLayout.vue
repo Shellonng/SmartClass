@@ -167,7 +167,6 @@
           </template>
           <template #title>教学资源</template>
           <a-menu-item key="resources-list">资源库</a-menu-item>
-          <a-menu-item key="resources-upload">上传资源</a-menu-item>
           <a-menu-item key="question-bank">题库管理</a-menu-item>
         </a-sub-menu>
         
@@ -533,9 +532,6 @@ function handleMenuClick({ key }: { key: string }) {
       break
     case 'resources-list':
       router.push('/teacher/resources')
-      break
-    case 'resources-upload':
-      router.push('/teacher/resources?mode=upload')
       break
     case 'question-bank':
       router.push('/teacher/question-bank')

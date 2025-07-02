@@ -159,10 +159,42 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam> implements Ex
         IPage<Exam> page = new Page<>(pageRequest.getCurrent(), pageRequest.getPageSize());
         IPage<Exam> result = examMapper.selectPage(page, queryWrapper);
         
+        // 获取所有涉及的课程ID
+        List<Long> courseIds = result.getRecords().stream()
+                .map(Exam::getCourseId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        // 批量查询课程信息
+        Map<Long, String> courseNameMap = new HashMap<>();
+        if (!courseIds.isEmpty()) {
+            try {
+                List<Map<String, Object>> courseInfos = jdbcTemplate.queryForList(
+                    "SELECT id, title FROM course WHERE id IN (" + 
+                    String.join(",", courseIds.stream().map(String::valueOf).collect(Collectors.toList())) + 
+                    ")"
+                );
+                
+                for (Map<String, Object> courseInfo : courseInfos) {
+                    Long id = ((Number) courseInfo.get("id")).longValue();
+                    String title = (String) courseInfo.get("title");
+                    courseNameMap.put(id, title);
+                }
+            } catch (Exception e) {
+                log.error("批量查询课程信息失败: {}", e.getMessage(), e);
+            }
+        }
+        
         // 构建返回结果
         List<ExamDTO> records = result.getRecords().stream().map(exam -> {
             ExamDTO dto = new ExamDTO();
             BeanUtils.copyProperties(exam, dto);
+            
+            // 设置课程名称
+            if (exam.getCourseId() != null) {
+                dto.setCourseName(courseNameMap.getOrDefault(exam.getCourseId(), "未知课程"));
+            }
             
             // 为每个考试/作业添加提交率
             try {

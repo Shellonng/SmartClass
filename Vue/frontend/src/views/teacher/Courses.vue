@@ -5,12 +5,14 @@
       <div class="header-content">
         <h1 class="page-title">
           <BookOutlined />
-          课程管理
+          <span v-if="!isStudent">课程管理</span>
+          <span v-else>我的课程</span>
         </h1>
-        <p class="page-description">管理您的教学课程，掌控教学进度</p>
+        <p class="page-description" v-if="!isStudent">管理您的教学课程，掌控教学进度</p>
+        <p class="page-description" v-else>探索知识海洋，开启学习之旅</p>
       </div>
       <div class="header-actions">
-      <a-button type="primary" @click="showCreateModal = true">
+      <a-button type="primary" @click="showCreateModal = true" v-if="!isStudent">
         <PlusOutlined />
         新建课程
       </a-button>
@@ -430,6 +432,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message, Modal } from 'ant-design-vue'
+import { useAuthStore } from '@/stores/auth'
 import {
   BookOutlined,
   PlusOutlined,
@@ -450,11 +453,15 @@ import {
   UploadOutlined,
   EllipsisOutlined
 } from '@ant-design/icons-vue'
-import { getCourses, createCourse, deleteCourse, updateCourse, type Course, type CourseCreateRequest } from '@/api/teacher'
+import { getCourses, createCourse, deleteCourse, updateCourse, getStudentEnrolledCourses, type Course, type CourseCreateRequest } from '@/api/course'
 import dayjs, { Dayjs } from 'dayjs'
 import axios from 'axios'
 
 const router = useRouter()
+const authStore = useAuthStore()
+
+// 检查用户是否是学生
+const isStudent = computed(() => authStore.user?.role?.toUpperCase() === 'STUDENT')
 
 // 响应式数据
 const loading = ref(false)
@@ -661,7 +668,15 @@ const loadCourses = async () => {
       term: semesterFilter.value || undefined
     }
     
-    const response = await getCourses(params)
+    let response;
+    if (isStudent.value) {
+      // 学生查看自己的课程
+      response = await getStudentEnrolledCourses(params);
+      console.log('获取学生课程响应:', response);
+    } else {
+      // 教师查看自己的课程
+      response = await getCourses(params);
+    }
     
     if (response.data && response.data.code === 200) {
       const result = response.data.data

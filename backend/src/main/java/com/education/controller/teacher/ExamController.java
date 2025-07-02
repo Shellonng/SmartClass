@@ -5,6 +5,7 @@ import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
 import com.education.dto.common.Result;
 import com.education.service.ExamService;
+import com.education.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,12 +21,12 @@ import java.util.Map;
 public class ExamController {
     
     private final ExamService examService;
+    private final SecurityUtil securityUtil;
     
     /**
      * 分页查询考试列表
      * @param pageRequest 分页请求
      * @param courseId 课程ID
-     * @param userId 用户ID
      * @param keyword 关键词
      * @param status 状态
      * @return 分页结果
@@ -33,10 +34,31 @@ public class ExamController {
     @GetMapping
     public Result<PageResponse<ExamDTO>> pageExams(PageRequest pageRequest,
                                                   @RequestParam(required = false) Long courseId,
-                                                  @RequestParam(required = false) Long userId,
                                                   @RequestParam(required = false) String keyword,
-                                                  @RequestParam(required = false) Integer status) {
-        PageResponse<ExamDTO> pageResponse = examService.pageExams(pageRequest, courseId, userId, keyword, status);
+                                                  @RequestParam(required = false) String status) {
+        // 获取当前登录用户ID
+        Long userId = securityUtil.getCurrentUserId();
+        if (userId == null) {
+            return Result.error("未登录");
+        }
+        
+        // 将字符串状态转换为整数状态码（如果需要）
+        Integer statusCode = null;
+        if (status != null) {
+            switch (status) {
+                case "not_started":
+                    statusCode = 0;
+                    break;
+                case "in_progress":
+                    statusCode = 1;
+                    break;
+                case "ended":
+                    statusCode = 2;
+                    break;
+            }
+        }
+        
+        PageResponse<ExamDTO> pageResponse = examService.pageExams(pageRequest, courseId, userId, keyword, statusCode);
         return Result.success(pageResponse);
     }
     
@@ -69,6 +91,16 @@ public class ExamController {
      */
     @PostMapping
     public Result<Long> createExam(@RequestBody ExamDTO examDTO) {
+        // 获取当前登录用户ID
+        Long userId = securityUtil.getCurrentUserId();
+        if (userId == null) {
+            return Result.error("未登录");
+        }
+        
+        // 设置考试创建者ID
+        examDTO.setUserId(userId);
+        examDTO.setType("exam"); // 确保类型为考试
+        
         Long id = examService.createExam(examDTO);
         return Result.success(id);
     }

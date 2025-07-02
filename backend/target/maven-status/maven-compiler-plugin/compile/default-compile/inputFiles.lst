@@ -1,3 +1,5 @@
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\teacher\ResourceController.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\student\StudentCourseController.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\utils\RedisUtils.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\config\CorsConfig.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\DebugController.java
@@ -15,6 +17,7 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\teacher
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\UserDTO.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\common\FileService.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\teacher\SubmissionController.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\AssignmentSubmissionAnswer.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\ExamMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\impl\CourseServiceImpl.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\utils\PasswordUtils.java
@@ -26,11 +29,13 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\security\SecurityU
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\impl\ExamServiceImpl.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\CourseClassMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\CourseResourceMapper.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\AssignmentMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\config\WebMvcConfig.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\common\UserService.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\CourseMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\impl\CourseResourceServiceImpl.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\common\PageRequest.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\AssignmentQuestionMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\QuestionService.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\QuestionBankItem.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\Teacher.java
@@ -42,6 +47,7 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\teacher
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\common\UserController.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\ChapterMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\teacher\StudentController.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\AssignmentSubmission.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\Question.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\QuestionBankMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\SectionMapper.java
@@ -71,9 +77,12 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\EmailDTO.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\ChapterService.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\ClassService.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\teacher\CourseController.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\AssignmentSubmissionAnswerMapper.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\student\StudentAssignmentController.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\SectionCommentDTO.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\utils\DateUtils.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\common\PageResponse.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\AssignmentSubmissionMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\CourseStudent.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\exception\BusinessException.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\CourseResourceDTO.java
@@ -89,6 +98,7 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\SectionComm
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\exception\ResultCode.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\aspect\CacheAspect.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\User.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\StudentAnswerMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\UserMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\QuestionImage.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\ClassStudent.java
@@ -98,7 +108,9 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\ClassStuden
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\CourseResourceService.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\exception\GlobalExceptionHandler.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\config\RedisConfig.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\Assignment.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\common\RedisService.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\StudentAnswer.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\utils\FileUtils.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\config\SwaggerConfig.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\auth\impl\AuthServiceImpl.java
@@ -109,6 +121,7 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\common\
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\CourseEnrollmentRequestMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\ExamDTO.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\impl\DashboardServiceImpl.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\AssignmentQuestion.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\impl\StudentManagementServiceImpl.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\CourseResource.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\ExamQuestion.java
