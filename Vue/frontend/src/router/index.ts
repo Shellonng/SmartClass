@@ -5,12 +5,16 @@ import { useAuthStore } from '@/stores/auth'
 const AuthLayout = () => import('@/components/layout/AuthLayout.vue')
 const TeacherLayout = () => import('@/components/layout/TeacherLayout.vue')
 const StudentLayout = () => import('@/components/layout/StudentLayout.vue')
+const CourseLayout = () => import('@/components/layout/CourseLayout.vue')
 
 // 认证相关页面
 const Login = () => import('@/views/auth/Login.vue')
 
 // 主页
 const HomePage = () => import('@/components/HomePage.vue')
+
+// 公共页面
+const CourseList = () => import('@/views/CourseList.vue')
 
 // 教师端页面
 const TeacherDashboard = () => import('@/views/teacher/Dashboard.vue')
@@ -26,10 +30,19 @@ const TeacherStudentDetail = () => import('@/views/teacher/StudentDetail.vue')
 // 教师端 - 课程管理
 const TeacherCourses = () => import('@/views/teacher/Courses.vue')
 const TeacherCourseDetail = () => import('@/views/teacher/CourseDetail.vue')
+const TeacherSectionDetail = () => import('@/views/teacher/SectionDetail.vue')
 
 // 教师端 - 任务管理
 const TeacherTasks = () => import('@/views/teacher/Tasks.vue')
 const TeacherTaskDetail = () => import('@/views/teacher/TaskDetail.vue')
+
+// 教师端 - 考试管理
+const TeacherExams = () => import('@/views/teacher/Exams.vue')
+const TeacherExamDetail = () => import('@/views/teacher/ExamDetail.vue')
+
+// 教师端 - 作业管理
+const TeacherAssignments = () => import('@/views/teacher/Assignments.vue')
+const TeacherAssignmentDetail = () => import('@/views/teacher/AssignmentDetail.vue')
 
 // 教师端 - 成绩管理
 const TeacherGrades = () => import('@/views/teacher/Grades.vue')
@@ -59,6 +72,9 @@ const StudentVideoLearning = () => import('@/views/student/VideoLearning.vue')
 // 学生端 - 作业管理
 const StudentAssignments = () => import('@/views/student/Assignments.vue')
 const StudentAssignmentDetail = () => import('@/views/student/AssignmentDetail.vue')
+
+// 学生端 - 考试管理
+const StudentExamDetail = () => import('@/views/student/ExamDetail.vue')
 
 // 学生端 - 成绩查看
 const StudentGrades = () => import('@/views/student/Grades.vue')
@@ -105,25 +121,158 @@ const router = createRouter({
       meta: { requiresAuth: false }
     },
     
+    // 公共课程列表
+    {
+      path: '/courses',
+      name: 'CourseList',
+      component: CourseList,
+      meta: { requiresAuth: false }
+    },
+    
+    // 课程详情页面
+    {
+      path: '/courses/:id',
+      name: 'CourseDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: false },
+      children: [
+        {
+          path: '',
+          component: StudentCourseDetail,
+          props: true
+        }
+      ]
+    },
+    
     // 认证相关路由
     {
-      path: '/login',
-      name: 'Login',
-      component: Login,
+          path: '/login',
+          name: 'Login',
+          component: Login,
       meta: { requiresAuth: false, mode: 'login' }
-    },
-    {
-      path: '/register',
-      name: 'Register',
+        },
+        {
+          path: '/register',
+          name: 'Register',
       component: Login,
       meta: { requiresAuth: false, mode: 'register' }
+    },
+
+    // 课程章节页面 - 使用独立布局
+    {
+      path: '/teacher/courses/:courseId/sections/:sectionId',
+      name: 'TeacherSectionDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'TEACHER' },
+      children: [
+        {
+          path: '',
+          component: TeacherSectionDetail,
+          props: true
+        }
+      ]
+    },
+    
+    // 课程题库页面 - 使用独立布局
+    {
+      path: '/teacher/courses/:courseId/question-bank',
+      name: 'TeacherCourseQuestionBank',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'TEACHER' },
+      children: [
+        {
+          path: '',
+          component: TeacherQuestionBank,
+          props: route => ({ courseId: Number(route.params.courseId) })
+        }
+      ]
+    },
+    
+    // 课程题目详情页面
+    {
+      path: '/teacher/courses/:courseId/question-bank/:id',
+      name: 'TeacherCourseQuestionDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'TEACHER' },
+      children: [
+        {
+          path: '',
+          component: TeacherQuestionDetail,
+          props: route => ({ 
+            id: Number(route.params.id),
+            courseId: Number(route.params.courseId)
+          })
+        }
+      ]
+    },
+
+    // 教师考试详情页面 - 使用独立布局
+    {
+      path: '/teacher/exams/:id',
+      name: 'TeacherExamDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'TEACHER' },
+      children: [
+        {
+          path: '',
+          component: TeacherExamDetail,
+          props: route => ({ id: Number(route.params.id) })
+        }
+      ]
+    },
+
+    // 教师作业详情页面 - 使用独立布局
+    {
+      path: '/teacher/assignments/:id',
+      name: 'TeacherAssignmentDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'TEACHER' },
+      children: [
+        {
+          path: '',
+          component: TeacherAssignmentDetail,
+          props: route => ({ id: Number(route.params.id) })
+        },
+        {
+          path: 'edit',
+          component: TeacherExamDetail, // 复用考试编辑组件
+          props: route => ({ 
+            id: Number(route.params.id),
+            isAssignment: true // 标记为作业模式
+          })
+        },
+        {
+          path: 'detail',
+          component: TeacherExamDetail, // 复用考试详情组件
+          props: route => ({ 
+            id: Number(route.params.id),
+            isAssignment: true, // 标记为作业模式
+            viewOnly: true // 标记为查看模式
+          })
+        }
+      ]
+    },
+
+    // 考试详情页面(学生端) - 使用独立布局
+    {
+      path: '/student/exams/:id',
+      name: 'StudentExamDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'STUDENT' },
+      children: [
+        {
+          path: '',
+          component: StudentExamDetail,
+          props: route => ({ examId: Number(route.params.id) })
+        }
+      ]
     },
 
     // 教师端路由
     {
       path: '/teacher',
       component: TeacherLayout,
-      meta: { requiresAuth: true, role: 'teacher' },
+      meta: { requiresAuth: true, role: 'TEACHER' },
       children: [
         {
           path: '',
@@ -168,10 +317,22 @@ const router = createRouter({
           component: TeacherCourses
         },
         {
+          path: 'courses/create',
+          name: 'TeacherCourseCreate',
+          component: TeacherCourseDetail,
+          props: { mode: 'create' }
+        },
+        {
           path: 'courses/:id',
           name: 'TeacherCourseDetail',
           component: TeacherCourseDetail,
           props: true
+        },
+        {
+          path: 'courses/chapters',
+          name: 'TeacherCourseChapters',
+          component: TeacherCourses,
+          props: { mode: 'chapters' }
         },
         
         // 任务管理
@@ -185,6 +346,20 @@ const router = createRouter({
           name: 'TeacherTaskDetail',
           component: TeacherTaskDetail,
           props: true
+        },
+        
+        // 考试管理
+        {
+          path: 'exams',
+          name: 'TeacherExams',
+          component: TeacherExams
+        },
+        
+        // 作业管理
+        {
+          path: 'assignments',
+          name: 'TeacherAssignments',
+          component: TeacherAssignments
         },
         
         // 成绩管理
@@ -240,17 +415,14 @@ const router = createRouter({
     {
       path: '/student',
       component: StudentLayout,
-      meta: { requiresAuth: true, role: 'student' },
+      meta: { requiresAuth: true, role: 'STUDENT' },
       children: [
         {
           path: '',
-          redirect: '/student/dashboard'
-        },
-        {
-          path: 'dashboard',
-          name: 'StudentDashboard',
+          name: 'StudentHome',
           component: StudentDashboard
         },
+
         
         // 课程管理
         {
@@ -304,6 +476,13 @@ const router = createRouter({
           name: 'StudentAssignmentDetail',
           component: StudentAssignmentDetail,
           props: true
+        },
+        
+        // 考试列表
+        {
+          path: 'exams',
+          name: 'StudentExams',
+          component: StudentDashboard,  // 临时使用Dashboard作为占位符
         },
         
         // 成绩查看
@@ -417,30 +596,53 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
+  
+  console.log('路由守卫:', { 
+    to: to.path, 
+    from: from.path, 
+    requiresAuth: to.meta.requiresAuth,
+    role: to.meta.role,
+    userRole: authStore.user?.role,
+    isAuthenticated: authStore.isAuthenticated
+  })
+  
+  // 如果有token或sessionId但没有用户信息，尝试获取用户信息
+  if ((localStorage.getItem('token') || localStorage.getItem('sessionId')) && !authStore.user) {
+    try {
+      console.log('尝试获取用户信息...')
+      await authStore.fetchUserInfo()
+    } catch (error) {
+      console.error('路由守卫中获取用户信息失败:', error)
+    }
+  }
+  
+  // 如果已登录用户访问登录页，重定向到对应首页
+  if ((to.path === '/login' || to.path === '/register') && authStore.isAuthenticated) {
+    const redirectPath = authStore.user?.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'
+    console.log('已登录用户访问登录页，重定向到:', redirectPath)
+    next(redirectPath)
+    return
+  }
   
   // 检查是否需要认证
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    console.log('需要认证但未登录，重定向到登录页')
     next('/login')
     return
   }
   
   // 检查角色权限
-  if (to.meta.role && authStore.user?.role !== to.meta.role) {
+  if (to.meta.role && authStore.user?.role && to.meta.role !== authStore.user.role) {
     // 如果角色不匹配，重定向到对应角色的首页
-    const redirectPath = authStore.user?.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard'
+    const redirectPath = authStore.user.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'
+    console.log('角色不匹配，重定向到:', redirectPath)
     next(redirectPath)
     return
   }
   
-  // 如果已登录用户访问登录页，重定向到对应首页
-  if ((to.path === '/login' || to.path === '/register') && authStore.isAuthenticated) {
-    const redirectPath = authStore.user?.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard'
-    next(redirectPath)
-    return
-  }
-  
+  console.log('路由守卫通过，继续导航')
   next()
 })
 

@@ -2,17 +2,32 @@
 server:
   port: 8080
   servlet:
-    context-path: /api
+    context-path: /
     encoding:
       charset: UTF-8
       enabled: true
       force: true
+    session:
+      cookie:
+        http-only: true
+        secure: false  # 开发环境设为false，生产环境设为true
+        same-site: lax
+        name: JSESSIONID
+        path: /
+      timeout: 86400s  # 会话超时时间，设为24小时
+      tracking-modes: cookie
+      persistent: true
   tomcat:
     uri-encoding: UTF-8
     max-connections: 1000
     threads:
       max: 200
       min-spare: 10
+
+# 视频上传配置
+video:
+  upload:
+    path: D:/my_git_code/SmartClass/resource/video
 
 spring:
   application:
@@ -45,19 +60,19 @@ spring:
       port: 6379
       password: 
       database: 0
-      timeout: 10000ms
+      timeout: 10000
       lettuce:
         pool:
           max-active: 8
-          max-wait: -1ms
+          max-wait: -1
           max-idle: 8
           min-idle: 0
   
   # 文件上传配置
   servlet:
     multipart:
-      max-file-size: 100MB
-      max-request-size: 100MB
+      max-file-size: 500MB
+      max-request-size: 500MB
       enabled: true
   
   # 邮件配置
@@ -100,10 +115,7 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
-      id-type: ASSIGN_ID
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
+      id-type: auto
       table-underline: true
   mapper-locations: classpath*:/mapper/**/*.xml
   type-aliases-package: com.education.entity
@@ -111,10 +123,8 @@ mybatis-plus:
 # 日志配置
 logging:
   level:
-    com.education: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.web: INFO
-    org.mybatis: DEBUG
+    root: info
+    com.education: debug
   pattern:
     console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
     file: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
@@ -171,19 +181,16 @@ knife4j:
 
 # 自定义配置
 education:
-  # JWT配置
-  jwt:
-    secret: education-platform-jwt-secret-key-2024-for-hs512-algorithm-minimum-512-bits-required-security-compliance
-    expiration: 7200000  # 2小时
-    refresh-expiration: 604800000  # 7天
-    header: Authorization
-    prefix: Bearer 
-  
   # 文件存储配置
   file:
-    upload-path: /data/education/uploads/
+    upload-path: ./uploads/  # 使用相对路径，更容易在不同环境中工作
     max-size: 104857600  # 100MB
     allowed-types: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar
+    upload:
+      path: ./uploads  # 文件上传根目录
+    access:
+      url:
+        prefix: /files  # 文件访问URL前缀
   
   # MinIO配置
   minio:

@@ -6,14 +6,23 @@
       :trigger="null"
       collapsible
       class="sidebar"
-      :width="240"
+      :width="200"
       :collapsed-width="80"
     >
       <div class="logo">
-        <img src="/logo.svg" alt="Logo" v-if="!collapsed" />
-        <img src="/logo-mini.svg" alt="Logo" v-else />
+        <span v-if="!collapsed" class="logo-text">SmartClass</span>
+        <div class="logo-spacer"></div>
+        <a-button 
+          v-if="!collapsed"
+          type="text"
+          @click="collapsed = !collapsed"
+          class="sidebar-collapse-btn"
+        >
+          <MenuFoldOutlined />
+        </a-button>
       </div>
       
+      <!-- 主菜单 -->
       <a-menu
         v-model:selectedKeys="selectedKeys"
         v-model:openKeys="openKeys"
@@ -22,11 +31,24 @@
         class="sidebar-menu"
         @click="handleMenuClick"
       >
+        <!-- 折叠按钮，仅在收起状态显示 -->
+        <a-menu-item v-if="collapsed" key="collapse" @click="collapsed = !collapsed" class="collapse-menu-item">
+          <template #icon>
+            <MenuUnfoldOutlined />
+          </template>
+        </a-menu-item>
         <a-menu-item key="dashboard">
           <template #icon>
-            <DashboardOutlined />
+            <HomeOutlined />
           </template>
-          <span>学习中心</span>
+          <span>首页</span>
+        </a-menu-item>
+        
+        <a-menu-item key="courses">
+          <template #icon>
+            <ReadOutlined />
+          </template>
+          <span>我的课程</span>
         </a-menu-item>
         
         <a-sub-menu key="assignments">
@@ -85,21 +107,14 @@
       <!-- 顶部导航 -->
       <a-layout-header class="header">
         <div class="header-left">
-          <a-button
-            type="text"
-            @click="collapsed = !collapsed"
-            class="trigger"
-          >
-            <MenuUnfoldOutlined v-if="collapsed" />
-            <MenuFoldOutlined v-else />
-          </a-button>
-          
+          <div class="page-title">
           <a-breadcrumb class="breadcrumb">
             <a-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path">
               <router-link v-if="item.path" :to="item.path">{{ item.title }}</router-link>
               <span v-else>{{ item.title }}</span>
             </a-breadcrumb-item>
           </a-breadcrumb>
+          </div>
         </div>
         
         <div class="header-right">
@@ -234,7 +249,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore, type User } from '@/stores/auth'
+import { useAuthStore } from '@/stores/auth'
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -250,7 +265,9 @@ import {
   UserOutlined,
   SettingOutlined,
   LogoutOutlined,
-  ClockCircleOutlined
+  ClockCircleOutlined,
+  HomeOutlined,
+  ReadOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 
@@ -264,15 +281,20 @@ const selectedKeys = ref<string[]>(['dashboard'])
 const openKeys = ref<string[]>([])
 
 // 用户信息
-const userInfo = computed(() => authStore.user as User | null)
+const userInfo = computed(() => authStore.user)
 
 // 学习进度
 const todayProgress = ref(65)
 
 // 面包屑导航
 const breadcrumbItems = computed(() => {
-  const items = [{ title: '学习中心', path: '/student' }]
+  // 始终显示首页和全部课程两个面包屑项
+  let items = [
+    { title: '首页', path: '/student' },
+    { title: '全部课程', path: '/courses' }
+  ];
   
+  // 添加额外的面包屑项（如果有）
   if (route.meta?.breadcrumb) {
     items.push(...route.meta.breadcrumb as any[])
   }
@@ -288,16 +310,16 @@ const notifications = ref([
   {
     id: 1,
     title: '新作业通知',
-    description: '数学老师布置了新的作业',
-    time: '5分钟前',
+    description: '数学老师布置了新的作业,',
+    time: '5分钟?,',
     icon: 'FileTextOutlined',
     color: '#1890ff'
   },
   {
     id: 2,
     title: '成绩发布',
-    description: '英语测试成绩已发布',
-    time: '1小时前',
+    description: '英语测试成绩已发布,',
+    time: '1小时?,',
     icon: 'TrophyOutlined',
     color: '#52c41a'
   },
@@ -305,7 +327,7 @@ const notifications = ref([
     id: 3,
     title: '学习提醒',
     description: '今日学习计划还有2项未完成',
-    time: '2小时前',
+    time: '2小时�?,',
     icon: 'CalendarOutlined',
     color: '#faad14'
   }
@@ -350,6 +372,7 @@ function updateSelectedKeys(path: string) {
 function handleMenuClick({ key }: { key: string }) {
   const routeMap: Record<string, string> = {
     'dashboard': '/student',
+  'courses': '/student/courses',
     'assignments-todo': '/student/assignments/todo',
     'assignments-completed': '/student/assignments/completed',
     'assignments-all': '/student/assignments',
@@ -405,7 +428,7 @@ function toggleAITutor() {
 function takeBreak() {
   studyReminderVisible.value = false
   message.success('记得适当休息，保护视力哦！')
-  // 可以添加休息计时器
+  // 可以添加休息计时
 }
 
 // 开始学习计时
@@ -413,7 +436,7 @@ function startStudyTimer() {
   studyTimer = setInterval(() => {
     studyDuration.value += 1
     
-    // 每45分钟提醒一次
+    // 45分钟提醒一次
     if (studyDuration.value % 45 === 0) {
       studyReminderVisible.value = true
     }
@@ -451,6 +474,7 @@ onUnmounted(() => {
 <style scoped>
 .student-layout {
   min-height: 100vh;
+  background: #f5f5f5;
 }
 
 .sidebar {
@@ -459,38 +483,105 @@ onUnmounted(() => {
   top: 0;
   bottom: 0;
   z-index: 100;
+  overflow: auto;
+  height: 100vh;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
 }
 
 .logo {
-  height: 64px;
   display: flex;
   align-items: center;
+  height: 64px;
+  padding: 0 16px;
+  background: #001529;
+  position: relative;
+}
+
+.student-layout :deep(.ant-layout-sider-collapsed) .logo {
+  padding: 0;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 16px;
-  border-radius: 8px;
 }
 
 .logo img {
   height: 32px;
 }
 
+.logo-text {
+  font-size: 18px;
+  font-weight: 500;
+  margin-left: 8px;
+  color: white;
+}
+
+.logo-spacer {
+  flex: 1;
+}
+
+.sidebar-collapse-btn {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 16px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+}
+
+.sidebar-collapse-btn:hover {
+  color: #fff;
+}
+
 .sidebar-menu {
   border-right: none;
 }
 
+/* 确保折叠状态下的图标正确显示 */
+.student-layout :deep(.ant-layout-sider-collapsed) .sidebar-menu .ant-menu-item {
+  padding: 0 calc(50% - 16px) !important;
+  display: flex;
+  justify-content: center;
+}
+
+.student-layout :deep(.ant-layout-sider-collapsed) .sidebar-menu .ant-menu-submenu-title {
+  padding: 0 calc(50% - 16px) !important;
+  display: flex;
+  justify-content: center;
+}
+
+.student-layout :deep(.ant-layout-sider-collapsed) .ant-menu-item .anticon,
+.student-layout :deep(.ant-layout-sider-collapsed) .ant-menu-submenu-title .anticon {
+  margin-right: 0;
+  font-size: 16px;
+}
+
 .main-layout {
-  margin-left: 240px;
+  margin-left: 200px;
   transition: margin-left 0.2s;
-  min-width: 1000px;
+  min-width: 800px;
   max-width: 1800px;
-  width: calc(100vw - 240px);
+  width: calc(100vw - 200px);
 }
 
 .student-layout :deep(.ant-layout-sider-collapsed) + .main-layout {
   margin-left: 80px;
   width: calc(100vw - 80px);
+}
+
+/* 折叠状态下隐藏文本 */
+.student-layout :deep(.ant-layout-sider-collapsed) .ant-menu-item span:not(.anticon),
+.student-layout :deep(.ant-layout-sider-collapsed) .ant-menu-submenu-title span:not(.anticon) {
+  display: none;
+}
+
+/* 折叠状态下的展开按钮样式 */
+.collapse-menu-item {
+  margin-top: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+.student-layout :deep(.ant-layout-sider-collapsed) .collapse-menu-item .anticon {
+  font-size: 18px;
 }
 
 .header {
@@ -511,25 +602,21 @@ onUnmounted(() => {
   gap: 16px;
 }
 
-.trigger {
-  font-size: 18px;
-  line-height: 64px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.trigger:hover {
-  color: #1890ff;
+.page-title {
+  margin-left: 16px;
+  display: flex;
+  align-items: center;
 }
 
 .breadcrumb {
-  margin-left: 16px;
+  font-size: 14px;
+  color: #333;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
 .progress-info {
@@ -579,19 +666,18 @@ onUnmounted(() => {
 }
 
 .content {
-  margin: 24px;
+  margin: 0;
   padding: 0;
-  min-height: calc(100vh - 112px);
-  max-width: 1600px;
-  margin: 24px auto;
+  min-height: calc(100vh - 64px);
+  width: 100%;
 }
 
 .content-wrapper {
   background: #fff;
-  border-radius: 12px;
   min-height: 100%;
   overflow: hidden;
   padding: 24px;
+  border-radius: 0;
 }
 
 .ai-tutor-float {
@@ -606,19 +692,6 @@ onUnmounted(() => {
   height: 56px;
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
   font-size: 24px;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-  }
-  50% {
-    box-shadow: 0 4px 20px rgba(24, 144, 255, 0.5);
-  }
-  100% {
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-  }
 }
 
 .ai-tooltip {
@@ -707,6 +780,4 @@ onUnmounted(() => {
     margin: 16px;
   }
 }
-
-
 </style>

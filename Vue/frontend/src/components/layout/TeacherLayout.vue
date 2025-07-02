@@ -6,15 +6,110 @@
       :trigger="null"
       collapsible
       class="sidebar"
-      :width="240"
+      :width="200"
       :collapsed-width="80"
     >
       <div class="logo">
-        <img src="/logo.svg" alt="Logo" v-if="!collapsed" />
+        <span v-if="!collapsed" class="logo-text">SmartClass</span>
+        <div class="logo-spacer"></div>
+        <a-button 
+          v-if="!collapsed"
+          type="text"
+          @click="collapsed = !collapsed"
+          class="sidebar-collapse-btn"
+        >
+          <MenuFoldOutlined />
+        </a-button>
         <img src="/logo-mini.svg" alt="Logo" v-else />
       </div>
       
+      <!-- 侧边栏折叠按钮，仅在收起状态显示 -->
       <a-menu
+        v-if="collapsed"
+        theme="dark"
+        mode="inline"
+        class="sidebar-menu"
+      >
+        <a-menu-item key="collapse" @click="collapsed = !collapsed">
+          <template #icon>
+            <MenuUnfoldOutlined />
+          </template>
+        </a-menu-item>
+      </a-menu>
+      
+      <!-- 课程详情页侧边栏 -->
+      <template v-if="isCourseDetailPage">
+        <div class="course-sidebar-header">
+          <BookOutlined />
+          <span v-if="!collapsed" class="course-title">{{ currentCourse?.title || currentCourse?.courseName || '课程详情' }}</span>
+        </div>
+        <div v-if="!collapsed" class="course-sidebar-info">
+          <div class="course-semester">{{ currentCourse?.semester || currentCourse?.term || '未设置学期' }}</div>
+          <span>已完成进度: {{ calculateProgress(currentCourse?.startTime, currentCourse?.endTime) }}%</span>
+        </div>
+        <a-menu
+          v-model:selectedKeys="courseSelectedKeys"
+          mode="inline"
+          theme="dark"
+          class="sidebar-menu"
+          @click="handleCourseMenuClick"
+        >
+          <a-sub-menu key="tasks">
+            <template #icon>
+              <FileTextOutlined />
+            </template>
+            <template #title>任务</template>
+            <a-menu-item key="exams">考试</a-menu-item>
+            <a-menu-item key="assignments">作业</a-menu-item>
+          </a-sub-menu>
+          <a-menu-item key="chapters">
+            <template #icon>
+              <OrderedListOutlined />
+            </template>
+            <span>章节</span>
+          </a-menu-item>
+          <a-menu-item key="discussions">
+            <template #icon>
+              <CommentOutlined />
+            </template>
+            <span>讨论</span>
+          </a-menu-item>
+          <a-menu-item key="resources">
+            <template #icon>
+              <FolderOutlined />
+            </template>
+            <span>资料</span>
+          </a-menu-item>
+          <a-menu-item key="question-bank">
+            <template #icon>
+              <FileOutlined />
+            </template>
+            <span>题库</span>
+          </a-menu-item>
+          <a-menu-item key="wrongbook">
+            <template #icon>
+              <EditOutlined />
+            </template>
+            <span>错题集</span>
+          </a-menu-item>
+          <a-menu-item key="records">
+            <template #icon>
+              <HistoryOutlined />
+            </template>
+            <span>学习记录</span>
+          </a-menu-item>
+          <a-menu-item key="knowledge-map">
+            <template #icon>
+              <NodeIndexOutlined />
+            </template>
+            <span>知识图谱</span>
+          </a-menu-item>
+        </a-menu>
+      </template>
+      
+      <!-- 普通侧边栏 -->
+      <a-menu
+        v-else
         v-model:selectedKeys="selectedKeys"
         v-model:openKeys="openKeys"
         mode="inline"
@@ -29,23 +124,27 @@
           <span>工作台</span>
         </a-menu-item>
         
-        <a-sub-menu key="classes">
+        <a-menu-item key="classes">
           <template #icon>
             <TeamOutlined />
           </template>
-          <template #title>班级管理</template>
-          <a-menu-item key="classes-list">班级列表</a-menu-item>
-          <a-menu-item key="classes-create">创建班级</a-menu-item>
-        </a-sub-menu>
+          <span>班级管理</span>
+        </a-menu-item>
         
-        <a-sub-menu key="assignments">
+        <a-menu-item key="courses">
+          <template #icon>
+            <BookOutlined />
+          </template>
+          <span>课程管理</span>
+        </a-menu-item>
+        
+        <a-sub-menu key="tasks">
           <template #icon>
             <FileTextOutlined />
           </template>
-          <template #title>作业管理</template>
-          <a-menu-item key="assignments-list">作业列表</a-menu-item>
-          <a-menu-item key="assignments-create">布置作业</a-menu-item>
-          <a-menu-item key="assignments-review">批改作业</a-menu-item>
+          <template #title>任务管理</template>
+          <a-menu-item key="exams">考试管理</a-menu-item>
+          <a-menu-item key="assignments">作业管理</a-menu-item>
         </a-sub-menu>
         
         <a-sub-menu key="students">
@@ -64,6 +163,7 @@
           <template #title>教学资源</template>
           <a-menu-item key="resources-list">资源库</a-menu-item>
           <a-menu-item key="resources-upload">上传资源</a-menu-item>
+          <a-menu-item key="question-bank">题库管理</a-menu-item>
         </a-sub-menu>
         
         <a-menu-item key="analytics">
@@ -87,21 +187,20 @@
       <!-- 顶部导航 -->
       <a-layout-header class="header">
         <div class="header-left">
-          <a-button
-            type="text"
-            @click="collapsed = !collapsed"
-            class="trigger"
-          >
-            <MenuUnfoldOutlined v-if="collapsed" />
-            <MenuFoldOutlined v-else />
-          </a-button>
-          
-          <a-breadcrumb class="breadcrumb">
-            <a-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path">
-              <router-link v-if="item.path" :to="item.path">{{ item.title }}</router-link>
-              <span v-else>{{ item.title }}</span>
-            </a-breadcrumb-item>
-          </a-breadcrumb>
+          <div class="page-title">
+            <!-- 添加顶部导航链接 -->
+            <div class="top-nav-links">
+              <router-link to="/teacher/dashboard" class="nav-link">首页</router-link>
+              <div class="nav-separator">/</div>
+              <router-link to="/courses" class="nav-link">全部课程</router-link>
+            </div>
+            <a-breadcrumb class="breadcrumb">
+              <a-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path">
+                <router-link v-if="item.path" :to="item.path">{{ item.title }}</router-link>
+                <span v-else>{{ item.title }}</span>
+              </a-breadcrumb-item>
+            </a-breadcrumb>
+          </div>
         </div>
         
         <div class="header-right">
@@ -199,10 +298,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore, type User } from '@/stores/auth'
+import { useAuthStore } from '@/stores/auth'
+import axios from 'axios'
+import dayjs from 'dayjs'
 import {
   DashboardOutlined,
   TeamOutlined,
+  BookOutlined,
   FileTextOutlined,
   UserOutlined,
   FolderOutlined,
@@ -213,7 +315,15 @@ import {
   BellOutlined,
   DownOutlined,
   SettingOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  OrderedListOutlined,
+  CommentOutlined,
+  EditOutlined,
+  HistoryOutlined,
+  NodeIndexOutlined,
+  FileOutlined,
+  FormOutlined,
+  LineChartOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 
@@ -225,9 +335,99 @@ const authStore = useAuthStore()
 const collapsed = ref(false)
 const selectedKeys = ref<string[]>(['dashboard'])
 const openKeys = ref<string[]>([])
+const courseSelectedKeys = ref<string[]>(['chapters'])
 
 // 用户信息
-const userInfo = computed(() => authStore.user as User | null)
+const userInfo = computed(() => authStore.user)
+
+// 判断是否是课程详情页
+const isCourseDetailPage = computed(() => {
+  return /^\/teacher\/courses\/\d+$/.test(route.path);
+})
+
+// 当前课程信息
+const currentCourse = ref<any>(null)
+
+// 计算课程进度
+const calculateProgress = (startTime: string | undefined, endTime: string | undefined): number => {
+  if (!startTime || !endTime) return 0
+
+  try {
+    const start = new Date(startTime).getTime()
+    const end = new Date(endTime).getTime()
+    const now = Date.now()
+
+    if (now <= start) return 0
+    if (now >= end) return 100
+
+    const total = end - start
+    const current = now - start
+    return Math.round((current / total) * 100)
+  } catch (e) {
+    console.error('计算进度错误:', e)
+    return 0
+  }
+}
+
+// 获取课程信息
+const fetchCourseInfo = async (courseId: number) => {
+  try {
+    // 获取token和用户ID
+    const token = localStorage.getItem('user-token') || localStorage.getItem('token');
+    const userInfo = localStorage.getItem('user-info');
+    let userId = '';
+    
+    if (userInfo) {
+      try {
+        const userObj = JSON.parse(userInfo);
+        userId = userObj.id || '';
+      } catch (e) {
+        console.error('解析用户信息失败:', e);
+      }
+    }
+    
+    // 使用简化的token格式
+    const authToken = userId ? `Bearer token-${userId}` : (token ? `Bearer ${token}` : '');
+    
+    const response = await axios.get(`/api/teacher/courses/${courseId}`, {
+      headers: {
+        'Authorization': authToken
+      }
+    });
+    
+    if (response.data && response.data.code === 200) {
+      currentCourse.value = response.data.data;
+      console.log('获取到的课程信息:', currentCourse.value);
+    } else {
+      message.error(response.data?.message || '获取课程信息失败');
+    }
+  } catch (error) {
+    console.error('获取课程信息失败:', error);
+    message.error('获取课程信息失败，请检查网络连接');
+  }
+}
+
+// 监听路由变化，获取课程信息和设置正确的菜单选中状态
+watch(() => route.params.id, (newId) => {
+  if (isCourseDetailPage.value && newId) {
+    fetchCourseInfo(Number(newId));
+    
+    // 根据URL中的view参数设置正确的菜单选中状态
+    const viewParam = route.query.view as string;
+    if (viewParam) {
+      courseSelectedKeys.value = [viewParam];
+    } else {
+      courseSelectedKeys.value = ['chapters'];
+    }
+  }
+}, { immediate: true });
+
+// 监听路由query参数变化，更新菜单选中状态
+watch(() => route.query.view, (newView) => {
+  if (isCourseDetailPage.value && newView) {
+    courseSelectedKeys.value = [newView as string];
+  }
+}, { immediate: true });
 
 // 面包屑导航
 const breadcrumbItems = computed(() => {
@@ -266,18 +466,28 @@ const notifications = ref([
 // AI助手
 const showAIAssistant = ref(true)
 
-// 监听路由变化更新选中菜单
+// 监听路由变化
 watch(
-  () => route.path,
-  (newPath) => {
-    updateSelectedKeys(newPath)
+  () => route.fullPath,
+  () => {
+    updateSelectedKeys()
+    
+    // 处理课程详情页的视图切换
+    if (isCourseDetailPage.value) {
+      const view = route.query.view as string
+      if (view) {
+        courseSelectedKeys.value = [view]
+      } else {
+        courseSelectedKeys.value = ['chapters']
+      }
+    }
   },
   { immediate: true }
 )
 
 // 更新选中的菜单项
-function updateSelectedKeys(path: string) {
-  const pathSegments = path.split('/').filter(Boolean)
+function updateSelectedKeys() {
+  const pathSegments = route.path.split('/').filter(Boolean)
   if (pathSegments.length >= 2) {
     const key = pathSegments.slice(1).join('-')
     selectedKeys.value = [key || 'dashboard']
@@ -296,15 +506,19 @@ function updateSelectedKeys(path: string) {
 function handleMenuClick({ key }: { key: string }) {
   const routeMap: Record<string, string> = {
     'dashboard': '/teacher',
+    'classes': '/teacher/classes',
     'classes-list': '/teacher/classes',
     'classes-create': '/teacher/classes/create',
-    'assignments-list': '/teacher/assignments',
+    'courses': '/teacher/courses',
+    'assignments': '/teacher/assignments',
     'assignments-create': '/teacher/assignments/create',
     'assignments-review': '/teacher/assignments/review',
+    'exams': '/teacher/exams',
     'students-list': '/teacher/students',
     'students-grades': '/teacher/students/grades',
     'resources-list': '/teacher/resources',
     'resources-upload': '/teacher/resources/upload',
+    'question-bank': '/teacher/question-bank',
     'analytics': '/teacher/analytics',
     'ai-assistant': '/teacher/ai-assistant'
   }
@@ -312,6 +526,13 @@ function handleMenuClick({ key }: { key: string }) {
   const targetRoute = routeMap[key]
   if (targetRoute && targetRoute !== route.path) {
     router.push(targetRoute)
+    return
+  }
+
+  // 任务管理 - 其他特殊情况处理
+  if (key === 'exams') {
+    router.push('/teacher/exams')
+    return
   }
 }
 
@@ -331,10 +552,15 @@ function handleUserMenuClick({ key }: { key: string }) {
 }
 
 // 退出登录
-function handleLogout() {
-  authStore.logout()
-  message.success('已退出登录')
-  router.push('/login')
+const handleLogout = async () => {
+  try {
+    await authStore.logout()
+    message.success('退出登录成功')
+    router.push('/login')
+  } catch (error) {
+    console.error('退出登录失败:', error)
+    message.error('退出登录失败')
+  }
 }
 
 // 显示通知
@@ -348,9 +574,35 @@ function toggleAIAssistant() {
   message.info('AI助手功能开发中...')
 }
 
+// 课程详情页菜单点击处理
+function handleCourseMenuClick({ key }: { key: string }) {
+  const courseId = route.params.id
+  if (!courseId) return
+  
+  // 作业菜单项的特殊处理
+  if (key === 'assignments') {
+    console.log('点击了作业菜单项，正在切换到作业视图')
+  
+  // 更新路由查询参数，保持在同一页面但切换视图
+    router.push({
+      path: `/teacher/courses/${courseId}`,
+      query: { view: key }
+    })
+    
+    // 可以在这里添加额外的处理逻辑，例如预加载数据等
+    return
+  }
+  
+  // 其他菜单项的常规处理
+  router.push({
+    path: `/teacher/courses/${courseId}`,
+    query: { view: key }
+  })
+}
+
 onMounted(() => {
   // 初始化时设置正确的菜单选中状态
-  updateSelectedKeys(route.path)
+  updateSelectedKeys()
 })
 </script>
 
@@ -366,20 +618,46 @@ onMounted(() => {
   bottom: 0;
   z-index: 100;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  width: 200px !important;
 }
 
 .logo {
   height: 64px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 16px;
-  border-radius: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-bottom: 16px;
 }
 
 .logo img {
   height: 32px;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 1px;
+}
+
+.logo-spacer {
+  flex: 1;
+}
+
+.sidebar-collapse-btn {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 16px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+}
+
+.sidebar-collapse-btn:hover {
+  color: #fff;
 }
 
 .sidebar-menu {
@@ -387,11 +665,11 @@ onMounted(() => {
 }
 
 .main-layout {
-  margin-left: 240px;
+  margin-left: 200px;
   transition: margin-left 0.2s;
-  min-width: 1000px;
+  min-width: 800px;
   max-width: 1800px;
-  width: calc(100vw - 240px);
+  width: calc(100vw - 200px);
 }
 
 .teacher-layout :deep(.ant-layout-sider-collapsed) + .main-layout {
@@ -417,19 +695,30 @@ onMounted(() => {
   gap: 16px;
 }
 
-.trigger {
+.header-trigger {
   font-size: 18px;
-  line-height: 64px;
   cursor: pointer;
   transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
 }
 
-.trigger:hover {
+.header-trigger:hover {
   color: #1890ff;
 }
 
-.breadcrumb {
+.page-title {
   margin-left: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.breadcrumb {
+  font-size: 14px;
+  color: #333;
 }
 
 .header-right {
@@ -462,19 +751,18 @@ onMounted(() => {
 }
 
 .content {
-  margin: 24px;
+  margin: 0;
   padding: 0;
-  min-height: calc(100vh - 112px);
-  max-width: 1600px;
-  margin: 24px auto;
+  min-height: calc(100vh - 64px);
+  width: 100%;
 }
 
 .content-wrapper {
   background: #fff;
-  border-radius: 12px;
   min-height: 100%;
   overflow: hidden;
   padding: 24px;
+  border-radius: 0;
 }
 
 .ai-assistant-float {
@@ -518,5 +806,65 @@ onMounted(() => {
   }
 }
 
+.course-sidebar-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  color: white;
+}
 
+.course-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin-left: 8px;
+  color: white;
+}
+
+.course-sidebar-info {
+  padding: 0 16px 16px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.course-semester {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.course-progress {
+  margin-bottom: 16px;
+}
+
+.course-progress :deep(.ant-progress-bg) {
+  background-color: #1890ff;
+}
+
+.course-progress span {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* 顶部导航链接样式 */
+.top-nav-links {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.nav-link {
+  font-size: 16px;
+  color: #333;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: #1890ff;
+}
+
+.nav-separator {
+  margin: 0 8px;
+  color: #999;
+}
 </style>
