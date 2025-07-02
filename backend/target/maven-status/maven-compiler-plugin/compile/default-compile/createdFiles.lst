@@ -114,7 +114,9 @@ com\education\utils\DateUtils.class
 com\education\dto\EmailDTO$EmailTemplateUpdateRequest$EmailTemplateUpdateRequestBuilder.class
 com\education\config\WebMvcConfig.class
 com\education\dto\EmailDTO$EmailExportResponse.class
+com\education\controller\teacher\StudentController.class
 com\education\dto\UserDTO$NotificationSettingsResponse.class
+com\education\entity\CourseStudent.class
 com\education\aspect\LoggingAspect.class
 com\education\service\teacher\ChapterService.class
 com\education\dto\UserDTO$DataExportResponse.class
@@ -133,6 +135,7 @@ com\education\dto\UserDTO$UserProfileResponse.class
 com\education\dto\EmailDTO$EmailServiceHealthResponse$EmailServiceHealthResponseBuilder.class
 com\education\dto\EmailDTO$InvitationEmailRequest.class
 com\education\dto\UserDTO$UserProfileUpdateRequest.class
+com\education\entity\CourseEnrollmentRequest.class
 com\education\controller\teacher\SubmissionController.class
 com\education\mapper\QuestionImageMapper.class
 com\education\entity\CourseResource.class
@@ -175,6 +178,7 @@ com\education\dto\UserDTO$TwoFactorAuthRequest.class
 com\education\entity\Teacher.class
 com\education\dto\EmailDTO$EmailQueueStatusResponse.class
 com\education\dto\UserDTO$FeedbackSubmitRequest.class
+com\education\service\teacher\StudentManagementService.class
 com\education\dto\EmailDTO$EmailPreviewResponse$EmailPreviewResponseBuilder.class
 com\education\dto\QuestionDTO.class
 com\education\mapper\CourseMapper.class
@@ -185,6 +189,7 @@ com\education\dto\EmailDTO$EmailSubscriptionUpdateRequest.class
 com\education\controller\teacher\SectionController.class
 com\education\config\MyBatisPlusConfig$1.class
 com\education\dto\UserDTO$UserSearchRequest.class
+com\education\service\teacher\impl\StudentManagementServiceImpl.class
 com\education\service\student\DashboardService.class
 com\education\aspect\Cacheable.class
 com\education\dto\UserDTO$UserPreferencesUpdateRequest.class
@@ -196,6 +201,7 @@ com\education\dto\UserDTO$UserPermissionResponse.class
 com\education\service\common\UserService.class
 com\education\config\SecurityConfig$1.class
 com\education\mapper\CourseClassMapper.class
+com\education\mapper\CourseEnrollmentRequestMapper.class
 com\education\dto\UserDTO$UserSettingsUpdateRequest.class
 com\education\dto\UserDTO$UserUpdateRequest.class
 com\education\dto\UserDTO$OnlineStatusResponse.class
@@ -226,6 +232,7 @@ com\education\dto\QuestionDTO$UpdateRequest.class
 com\education\dto\CourseResourceDTO$ResourceResponse.class
 com\education\dto\EmailDTO$EmailStatusResponse$EmailStatusResponseBuilder.class
 com\education\dto\UserDTO$EmailBindRequest.class
+com\education\mapper\CourseStudentMapper.class
 com\education\dto\EmailDTO$GradeNotificationRequest$GradeNotificationRequestBuilder.class
 com\education\controller\teacher\QuestionController.class
 com\education\controller\common\UserController.class
