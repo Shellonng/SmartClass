@@ -1056,31 +1056,50 @@ const handleCoverUpload = (options: any) => {
   const { file, onSuccess, onError } = options
   uploadLoading.value = true
   
+  console.log('准备上传课程封面图片', file.name, file.size, file.type);
+  
   // 创建FormData对象
   const formData = new FormData()
   formData.append('file', file)
   
-  // 调用上传API
-  fetch('http://localhost:8080/api/common/files/upload/course-cover', {
+  // 获取token
+  const token = localStorage.getItem('token') || localStorage.getItem('user-token') || '';
+  
+  // 调用新的上传API - 使用photo目录
+  fetch('http://localhost:8080/api/common/files/upload/course-photo', {
     method: 'POST',
     body: formData,
     credentials: 'include', // 确保包含凭证
     headers: {
-      'Authorization': localStorage.getItem('token') || ''
+      'Authorization': token ? `Bearer ${token}` : ''
     }
   })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        console.error('上传响应状态异常:', response.status, response.statusText);
+        return response.text().then(text => {
+          try {
+            return JSON.parse(text);
+          } catch (e) {
+            throw new Error(`上传失败: ${response.status} ${response.statusText} - ${text}`);
+          }
+        });
+      }
+      return response.json();
+    })
     .then(result => {
+      console.log('上传响应数据:', result);
       if (result.code === 200) {
         createForm.value.coverImage = result.data.url
         message.success('封面上传成功')
         onSuccess(result)
       } else {
         message.error(result.message || '封面上传失败')
-        onError(result)
+        onError(new Error(result.message || '封面上传失败'))
       }
     })
     .catch(error => {
+      console.error('上传异常:', error);
       message.error('封面上传失败: ' + error.message)
       onError(error)
     })
@@ -1093,8 +1112,12 @@ const handleCoverUpload = (options: any) => {
 const getCourseBackground = (course: Course) => {
   // 如果有封面图，则使用封面图
   if (course.coverImage) {
+    // 直接使用图片URL，新格式的URL已经是/api/photo/...的形式，无需转换
+    let imageUrl = course.coverImage;
+    console.log('课程封面图片URL:', imageUrl);
+    
     return {
-      backgroundImage: `url(${course.coverImage})`,
+      backgroundImage: `url(${imageUrl})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center'
     };

@@ -80,6 +80,21 @@ public class ExamDTO {
     private LocalDateTime createTime;
     
     /**
+     * 类型：exam(考试) 或 homework(作业)
+     */
+    private String type;
+    
+    /**
+     * 作业模式：question-答题型，file-上传型
+     */
+    private String mode;
+    
+    /**
+     * 提交率（百分比，0-100）
+     */
+    private Double submissionRate;
+    
+    /**
      * 考试题目配置
      */
     private ExamPaperConfig paperConfig;

@@ -53,10 +53,13 @@ export interface Assignment {
 export interface Class {
   id: number
   name: string
-  description: string
-  studentCount: number
-  status: 'active' | 'inactive'
-  createTime: string
+    description?: string
+  courseId?: number
+  teacherId?: number
+  studentCount?: number
+  status?: 'active' | 'inactive'
+  isDefault?: boolean
+  createTime?: string
 }
 
 export interface Grade {
@@ -100,6 +103,32 @@ export interface CourseUpdateRequest {
   endTime?: string
   term?: string
   semester?: string
+}
+
+// 定义通用分页响应接口
+interface PageResponse<T> {
+  // 兼容不同的数据字段名
+  records?: T[];
+  content?: T[];
+  list?: T[];
+  
+  // 兼容不同的总数字段名
+  total?: number;
+  totalElements?: number;
+  
+  // 其他可能的分页信息
+  size?: number;
+  current?: number;
+  pages?: number;
+  totalPages?: number;
+  pageNum?: number;
+  pageSize?: number;
+  
+  // 状态标识
+  first?: boolean;
+  last?: boolean;
+  empty?: boolean;
+  number?: number;
 }
 
 // 获取教师仪表板数据
@@ -370,20 +399,87 @@ export const getAssignmentSubmissions = (assignmentId: number, params?: { page?:
 }
 
 // 班级管理
-export const getClasses = (params?: { page?: number; size?: number; keyword?: string }) => {
-  return axios.get<Class[]>('/teacher/classes', { params })
+export const getClasses = (params?: { page?: number; size?: number; keyword?: string; courseId?: number }) => {
+  console.log('调用getClasses，参数:', params)
+  
+  // 获取token和用户ID
+  const token = localStorage.getItem('user-token') || localStorage.getItem('token')
+  const userInfo = localStorage.getItem('user-info')
+  let userId = ''
+  
+  if (userInfo) {
+    try {
+      const userObj = JSON.parse(userInfo)
+      userId = userObj.id || ''
+    } catch (e) {
+      console.error('解析用户信息失败:', e)
+    }
+  }
+  
+  // 使用简化的token格式
+  const authToken = userId ? `Bearer token-${userId}` : (token ? `Bearer ${token}` : '')
+  
+  return axios.get('/api/teacher/classes', { 
+    params,
+    headers: {
+      'Authorization': authToken
+    }
+  })
+    .then(response => {
+      console.log('获取班级列表响应:', response)
+      // 检查响应中的数据格式
+      const responseData = response.data || {};
+      
+      // 如果响应没有直接包含数据数组，尝试从data字段获取
+      if (response.data && typeof response.data === 'object') {
+        if (Array.isArray(responseData.records)) {
+          return responseData;
+        } else if (Array.isArray(responseData.content)) {
+          return responseData;
+        } else if (Array.isArray(responseData.list)) {
+          return responseData;
+        } else if (responseData.data && Array.isArray(responseData.data.content)) {
+          return responseData.data;
+        } else if (responseData.data && Array.isArray(responseData.data.records)) {
+          return responseData.data;
+        } else if (responseData.data && Array.isArray(responseData.data.list)) {
+          return responseData.data;
+        } else if (responseData.data && Array.isArray(responseData.data)) {
+          // 将普通数组转换为分页格式
+          return {
+            content: responseData.data,
+            records: responseData.data,
+            list: responseData.data,
+            total: responseData.data.length,
+            size: responseData.data.length,
+            current: 1,
+            pages: 1
+          };
+        }
+      }
+      return response;
+    })
+    .catch(error => {
+      console.error('获取班级列表错误:', error)
+      throw error
+    })
 }
 
-export const createClass = (data: Omit<Class, 'id' | 'createTime'>) => {
-  return axios.post('/teacher/classes', data)
+export const createClass = (data: { 
+  name: string; 
+  description?: string; 
+  courseId?: number | null;
+  isDefault?: boolean;
+}) => {
+  return axios.post('/api/teacher/classes', data)
 }
 
 export const updateClass = (classId: number, data: Partial<Class>) => {
-  return axios.put(`/teacher/classes/${classId}`, data)
+  return axios.put(`/api/teacher/classes/${classId}`, data)
 }
 
 export const deleteClass = (classId: number) => {
-  return axios.delete(`/teacher/classes/${classId}`)
+  return axios.delete(`/api/teacher/classes/${classId}`)
 }
 
 export const getClassDetail = (classId: number) => {
@@ -580,3 +676,100 @@ export const uploadSectionVideo = (sectionId: number, file: File) => {
     }
   });
 };
+
+// 获取当前教师的课程列表（用于班级绑定）
+export const getTeacherCourses = (params?: { page?: number; size?: number }) => {
+  console.log('调用getTeacherCourses，参数:', params)
+  
+  // 获取token和用户ID
+  const token = localStorage.getItem('user-token') || localStorage.getItem('token')
+  const userInfo = localStorage.getItem('user-info')
+  let userId = ''
+  
+  if (userInfo) {
+    try {
+      const userObj = JSON.parse(userInfo)
+      userId = userObj.id || ''
+      console.log('从用户信息中获取到用户ID:', userId)
+    } catch (e) {
+      console.error('解析用户信息失败:', e)
+    }
+  }
+  
+  // 使用简化的token格式
+  const authToken = userId ? `Bearer token-${userId}` : (token ? `Bearer ${token}` : '')
+  console.log('使用的认证头:', authToken)
+  
+  return axios.get('/api/teacher/classes/courses', { 
+    params,
+    headers: {
+      'Authorization': authToken
+    }
+  })
+    .then(response => {
+      console.log('获取教师课程列表响应:', response)
+      
+      // 处理不同格式的响应
+      if (!response || !response.data) {
+        console.warn('未获取到课程数据或数据结构不符合预期')
+        return { data: [] }
+      }
+
+      // 处理不同的响应结构
+      const responseData = response.data
+
+      // 1. 响应就是数组格式
+      if (Array.isArray(responseData)) {
+        console.log('教师课程数据直接是数组格式')
+        return { data: responseData }
+      }
+      
+      // 2. Result包装类型
+      if (responseData.code === 200 && responseData.data) {
+        // 2.1 Result中的data就是数组
+        if (Array.isArray(responseData.data)) {
+          console.log('教师课程数据在Result.data中')
+          return { data: responseData.data }
+        }
+        
+        // 2.2 Result中的data是分页对象
+        if (responseData.data.records || responseData.data.content || responseData.data.list) {
+          console.log('教师课程数据在Result.data的分页对象中')
+          return { 
+            data: responseData.data.records || 
+                  responseData.data.content || 
+                  responseData.data.list || []
+          }
+        }
+      }
+      
+      // 3. 分页响应直接在外层
+      if (responseData.records || responseData.content || responseData.list) {
+        console.log('教师课程数据在分页对象中')
+        return { 
+          data: responseData.records || 
+                responseData.content || 
+                responseData.list || [] 
+        }
+      }
+      
+      // 4. 其他未知格式
+      console.warn('未能识别的教师课程数据结构:', responseData)
+      return { data: [] }
+    })
+    .catch(error => {
+      console.error('获取教师课程列表错误:', error)
+      console.error('错误详情:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        config: error.config && {
+          url: error.config.url,
+          method: error.config.method,
+          baseURL: error.config.baseURL,
+          headers: error.config.headers
+        }
+      })
+      return { data: [] } // 返回空数组而不是抛出异常
+    })
+}

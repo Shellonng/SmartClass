@@ -64,8 +64,8 @@
             </template>
 
             <!-- 考试状态 -->
-            <template v-else-if="column.dataIndex === 'status'">
-              <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
+            <template v-else-if="column.dataIndex === 'examState'">
+              <a-tag :color="getStatusColor(record.examState)">{{ getStatusText(record.examState) }}</a-tag>
             </template>
 
             <!-- 考试时间 -->
@@ -76,11 +76,18 @@
               </div>
             </template>
 
+            <!-- 发布状态 -->
+            <template v-else-if="column.dataIndex === 'publishStatus'">
+              <a-tag :color="record.status === 0 ? 'orange' : 'green'">
+                {{ record.status === 0 ? '未发布' : '已发布' }}
+              </a-tag>
+            </template>
+            
             <!-- 操作 -->
             <template v-else-if="column.dataIndex === 'action'">
               <div class="exam-actions">
                 <a-tooltip title="查看">
-                  <a-button type="link" @click="viewExam(record)">
+                  <a-button type="link" @click="viewExamDetail(record)">
                     <EyeOutlined />
                   </a-button>
                 </a-tooltip>
@@ -89,9 +96,20 @@
                     <EditOutlined />
                   </a-button>
                 </a-tooltip>
+                <a-tooltip title="发布" v-if="record.status === 0">
+                  <a-button type="link" @click="publishExam(record)" style="color: #52c41a">
+                    <CheckOutlined />
+                  </a-button>
+                </a-tooltip>
+                <a-tooltip title="取消发布" v-if="record.status === 1">
+                  <a-button type="link" @click="unpublishExam(record)" style="color: #faad14">
+                    <CloseCircleOutlined />
+                  </a-button>
+                </a-tooltip>
                 <a-tooltip title="删除">
                   <a-popconfirm
                     title="确定要删除这个考试吗？"
+                    description="删除后将无法恢复，包括考试题目关联数据也会被删除。"
                     @confirm="handleDeleteExam(record.id)"
                     ok-text="确定"
                     cancel-text="取消"
@@ -147,7 +165,9 @@
           
           <div class="step-actions">
             <a-button @click="examModalVisible = false">取消</a-button>
-            <a-button type="primary" @click="nextStep">下一步</a-button>
+            <a-button type="primary" :loading="savingBasicInfo" @click="saveBasicInfo">
+              {{ examForm.id ? '下一步' : (savingBasicInfo ? '保存中...' : '保存') }}
+            </a-button>
           </div>
         </div>
         
@@ -182,167 +202,26 @@
             <!-- 题目配置 -->
             <div class="question-config">
               <a-divider>题目配置</a-divider>
-              <a-form layout="horizontal" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
-                <a-form-item label="单选题">
-                  <a-input-group compact>
-                    <a-input-number
-                      v-model:value="examForm.paperConfig.singleCount"
-                      :min="0"
-                      style="width: 100px"
-                      placeholder="题数"
-                      addon-after="题"
-                      @change="() => toggleAvailableQuestions('single')"
-                    />
-                    <a-input-number
-                      v-model:value="examForm.paperConfig.singleScore"
-                      :min="0"
-                      style="width: 100px; margin-left: 10px"
-                      placeholder="分值"
-                      addon-after="分/题"
-                    />
-                    <a-tag color="blue" style="margin-left: 10px">
-                      共{{ getTotalScoreByType('single') }}分
-                    </a-tag>
-                  </a-input-group>
-                  
-                  <!-- 单选题库 -->
-                  <div class="question-pool" v-if="!examForm.paperConfig.isRandom && examForm.paperConfig.singleCount > 0">
-                    <div class="question-pool-title">
-                      课程题库单选题 (已选 <span class="selected-count">{{ selectedQuestions.single.length }}</span> / {{ examForm.paperConfig.singleCount }})
-                    </div>
-                    <a-empty v-if="questionPool.single.length === 0" description="暂无单选题" />
-                    <div v-else class="question-list">
-                      <div v-for="question in questionPool.single" :key="question.id" class="question-item">
-                        <a-checkbox 
-                          v-model:checked="question.selected" 
-                          :disabled="!question.selected && isQuestionSelectDisabled('single')"
-                          @change="() => handleQuestionSelect(question, 'single')"
-                        >
-                          <div class="question-content">
-                            <div class="question-title">
-                              {{ question.title }}
-                            </div>
-                            <div class="question-info">
-                              <a-tag>难度: {{ question.difficulty }}</a-tag>
-                              <a-tag v-if="question.knowledgePoint">知识点: {{ question.knowledgePoint }}</a-tag>
-                            </div>
-                          </div>
-                        </a-checkbox>
-                      </div>
-                    </div>
+              
+              <!-- 考试项列表 -->
+              <div class="exam-sections">
+                <div v-for="(section, index) in examSections" :key="index" class="exam-section">
+                  <div class="section-header">
+                    <span class="section-title">{{ getRomanNumber(index+1) }}、{{ getQuestionTypeText(section.questionType) }}</span>
+                    <span class="section-summary">共{{ section.count }}题 {{ section.score * section.count }}分</span>
+                    <a-button type="link" danger @click="removeExamSection(index)">
+                      <DeleteOutlined />
+                    </a-button>
                   </div>
-                </a-form-item>
-                
-                <a-form-item label="多选题">
-                  <a-input-group compact>
-                    <a-input-number
-                      v-model:value="examForm.paperConfig.multipleCount"
-                      :min="0"
-                      style="width: 100px"
-                      placeholder="题数"
-                      addon-after="题"
-                    />
-                    <a-input-number
-                      v-model:value="examForm.paperConfig.multipleScore"
-                      :min="0"
-                      style="width: 100px; margin-left: 10px"
-                      placeholder="分值"
-                      addon-after="分/题"
-                    />
-                    <a-tag color="blue" style="margin-left: 10px">
-                      共{{ getTotalScoreByType('multiple') }}分
-                    </a-tag>
-                  </a-input-group>
-                </a-form-item>
-                
-                <a-form-item label="判断题">
-                  <a-input-group compact>
-                    <a-input-number
-                      v-model:value="examForm.paperConfig.trueFalseCount"
-                      :min="0"
-                      style="width: 100px"
-                      placeholder="题数"
-                      addon-after="题"
-                    />
-                    <a-input-number
-                      v-model:value="examForm.paperConfig.trueFalseScore"
-                      :min="0"
-                      style="width: 100px; margin-left: 10px"
-                      placeholder="分值"
-                      addon-after="分/题"
-                    />
-                    <a-tag color="blue" style="margin-left: 10px">
-                      共{{ getTotalScoreByType('trueFalse') }}分
-                    </a-tag>
-                  </a-input-group>
-                </a-form-item>
-                
-                <a-form-item label="填空题">
-                  <a-input-group compact>
-                    <a-input-number
-                      v-model:value="examForm.paperConfig.blankCount"
-                      :min="0"
-                      style="width: 100px"
-                      placeholder="题数"
-                      addon-after="题"
-                    />
-                    <a-input-number
-                      v-model:value="examForm.paperConfig.blankScore"
-                      :min="0"
-                      style="width: 100px; margin-left: 10px"
-                      placeholder="分值"
-                      addon-after="分/题"
-                    />
-                    <a-tag color="blue" style="margin-left: 10px">
-                      共{{ getTotalScoreByType('blank') }}分
-                    </a-tag>
-                  </a-input-group>
-                </a-form-item>
-                
-                <a-form-item label="简答题">
-                  <a-input-group compact>
-                    <a-input-number
-                      v-model:value="examForm.paperConfig.shortCount"
-                      :min="0"
-                      style="width: 100px"
-                      placeholder="题数"
-                      addon-after="题"
-                    />
-                    <a-input-number
-                      v-model:value="examForm.paperConfig.shortScore"
-                      :min="0"
-                      style="width: 100px; margin-left: 10px"
-                      placeholder="分值"
-                      addon-after="分/题"
-                    />
-                    <a-tag color="blue" style="margin-left: 10px">
-                      共{{ getTotalScoreByType('short') }}分
-                    </a-tag>
-                  </a-input-group>
-                </a-form-item>
-                
-                <a-form-item label="编程题">
-                  <a-input-group compact>
-                    <a-input-number
-                      v-model:value="examForm.paperConfig.codeCount"
-                      :min="0"
-                      style="width: 100px"
-                      placeholder="题数"
-                      addon-after="题"
-                    />
-                    <a-input-number
-                      v-model:value="examForm.paperConfig.codeScore"
-                      :min="0"
-                      style="width: 100px; margin-left: 10px"
-                      placeholder="分值"
-                      addon-after="分/题"
-                    />
-                    <a-tag color="blue" style="margin-left: 10px">
-                      共{{ getTotalScoreByType('code') }}分
-                    </a-tag>
-                  </a-input-group>
-                </a-form-item>
-              </a-form>
+                </div>
+              </div>
+              
+              <!-- 添加考试项按钮 -->
+              <div class="add-section">
+                <a-button type="dashed" block @click="showAddSectionModal">
+                  <PlusOutlined /> 添加考试项
+                </a-button>
+              </div>
               
               <div class="total-score">
                 <div class="total-label">总分:</div>
@@ -361,7 +240,7 @@
       </div>
     </a-modal>
 
-    <!-- 查看考试详情弹窗 -->
+        <!-- 查看考试详情弹窗 -->
     <a-modal
       v-model:open="viewModalVisible"
       title="考试详情"
@@ -370,8 +249,8 @@
     >
       <div v-if="currentExam" class="exam-detail">
         <div class="exam-detail-header">
-          <a-tag :color="getStatusColor(currentExam.status)" class="status-tag">
-            {{ getStatusText(currentExam.status) }}
+          <a-tag :color="getStatusColor(currentExam.examState)" class="status-tag">
+            {{ getStatusText(currentExam.examState) }}
           </a-tag>
         </div>
         
@@ -414,18 +293,124 @@
         </div>
       </div>
     </a-modal>
+
+    <!-- 添加考试项弹窗 -->
+    <a-modal
+      v-model:open="addSectionModalVisible"
+      title="添加考试项"
+      :maskClosable="false"
+      :footer="null"
+      width="900px"
+    >
+      <div class="section-form">
+        <a-form layout="horizontal" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+          <a-form-item label="题目类型">
+            <a-select v-model:value="currentSection.questionType" placeholder="选择题目类型">
+              <a-select-option value="single">单选题</a-select-option>
+              <a-select-option value="multiple">多选题</a-select-option>
+              <a-select-option value="true_false">判断题</a-select-option>
+              <a-select-option value="blank">填空题</a-select-option>
+              <a-select-option value="short">简答题</a-select-option>
+              <a-select-option value="code">编程题</a-select-option>
+            </a-select>
+          </a-form-item>
+          
+          <a-form-item label="题目数量">
+            <a-input-number v-model:value="currentSection.count" :min="1" :max="50" />
+          </a-form-item>
+          
+          <a-form-item label="每题分值">
+            <a-input-number v-model:value="currentSection.score" :min="1" :max="100" />
+          </a-form-item>
+        </a-form>
+        
+        <!-- 题目筛选区域 -->
+        <div class="question-filter">
+          <div class="filter-row">
+            <a-form layout="inline">
+              <a-form-item label="难度等级">
+                <a-select v-model:value="questionFilters.difficulty" style="width: 120px" placeholder="全部难度" allowClear>
+                  <a-select-option :value="1">★</a-select-option>
+                  <a-select-option :value="2">★★</a-select-option>
+                  <a-select-option :value="3">★★★</a-select-option>
+                  <a-select-option :value="4">★★★★</a-select-option>
+                  <a-select-option :value="5">★★★★★</a-select-option>
+                </a-select>
+              </a-form-item>
+              
+              <a-form-item label="知识点">
+                <a-select v-model:value="questionFilters.knowledgePoint" style="width: 150px" placeholder="全部知识点" allowClear>
+                  <a-select-option v-for="point in knowledgePoints" :key="point">{{ point }}</a-select-option>
+                </a-select>
+              </a-form-item>
+              
+              <a-form-item>
+                <a-input-search
+                  v-model:value="questionFilters.keyword"
+                  placeholder="搜索题目内容"
+                  style="width: 200px"
+                  @search="handleSearchQuestions"
+                />
+              </a-form-item>
+              
+              <a-form-item>
+                <a-button @click="resetQuestionFilters">重置筛选</a-button>
+              </a-form-item>
+            </a-form>
+          </div>
+        </div>
+        
+        <!-- 题目列表 -->
+        <div class="question-list-container">
+          <a-spin :spinning="loadingQuestions">
+            <a-empty v-if="filteredQuestions.length === 0" description="暂无题目" />
+            
+            <div v-else class="question-list">
+              <div v-for="question in filteredQuestions" :key="question.id" class="question-item">
+                <a-checkbox 
+                  v-model:checked="question.selected" 
+                  :disabled="!question.selected && isMaxQuestionsSelected"
+                >
+                  <div class="question-content">
+                    <div class="question-title">{{ question.title }}</div>
+                    <div class="question-info">
+                      <a-tag>{{ getQuestionTypeText(question.questionType) }}</a-tag>
+                      <a-tag color="orange">难度: {{ getDifficultyStars(question.difficulty) }}</a-tag>
+                      <a-tag v-if="question.knowledgePoint" color="blue">{{ question.knowledgePoint }}</a-tag>
+                    </div>
+                  </div>
+                </a-checkbox>
+              </div>
+            </div>
+            
+            <div class="selection-summary">
+              已选择 {{ selectedQuestionCount }} / {{ currentSection.count }} 题
+            </div>
+          </a-spin>
+        </div>
+        
+        <div class="modal-footer">
+          <a-button @click="addSectionModalVisible = false">取消</a-button>
+          <a-button type="primary" :disabled="selectedQuestionCount !== currentSection.count" @click="confirmAddSection">
+            确定
+          </a-button>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch, defineProps, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
   PlusOutlined,
   EyeOutlined,
   EditOutlined,
   DeleteOutlined,
-  CheckOutlined
+  CheckOutlined,
+  CloseCircleOutlined
 } from '@ant-design/icons-vue'
 import { formatDate } from '@/utils/date'
 import examAPI from '@/api/exam'
@@ -470,12 +455,39 @@ interface SelectedQuestions {
   code: Question[]
 }
 
+// 考试项定义
+interface ExamSection {
+  questionType: string
+  count: number
+  score: number
+  questions: Question[]
+}
+
+// 定义考试数据类型
+interface ExamRecord {
+  id: number;
+  title: string;
+  courseId: number;
+  userId: number;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  status: number;
+  examState?: string;
+  publishStatus?: string;
+  duration?: number;
+  [key: string]: any; // 其他可能的属性
+}
+
 const props = defineProps({
   courseId: {
     type: Number,
     required: true
   }
 })
+
+// 初始化路由
+const router = useRouter()
 
 // 考试状态
 const examStatus = {
@@ -485,7 +497,7 @@ const examStatus = {
 }
 
 // 状态定义
-const exams = ref<any[]>([])
+const exams = ref<ExamRecord[]>([])
 const loading = ref(false)
 const pagination = ref({
   current: 1,
@@ -508,26 +520,32 @@ const columns = [
     dataIndex: 'title',
     key: 'title',
     ellipsis: true,
-    width: '30%'
+    width: '25%'
   },
   {
     title: '状态',
-    dataIndex: 'status',
-    key: 'status',
-    width: '15%'
+    dataIndex: 'examState',
+    key: 'examState',
+    width: '10%'
+  },
+  {
+    title: '发布状态',
+    dataIndex: 'publishStatus',
+    key: 'publishStatus',
+    width: '10%'
   },
   {
     title: '考试时间',
     dataIndex: 'examTime',
     key: 'examTime',
-    width: '25%'
+    width: '20%'
   },
   {
     title: '考试时长',
     dataIndex: 'duration',
     key: 'duration',
-    width: '15%',
-    render: (text: number) => `${text} 分钟`
+    width: '10%',
+    customRender: ({ text }: { text: number }) => `${text} 分钟`
   },
   {
     title: '操作',
@@ -541,11 +559,13 @@ const columns = [
 const examModalVisible = ref(false)
 const isEditing = ref(false)
 const saving = ref(false)
+const savingBasicInfo = ref(false)
 const examTimeRange = ref<[Dayjs, Dayjs] | null>(null)
-const examForm = ref<any>({
+const examForm = ref<ExamRecord>({
   id: undefined,
   title: '',
   courseId: props.courseId,
+  userId: 0,
   startTime: '',
   endTime: '',
   duration: 60,
@@ -573,7 +593,25 @@ const examForm = ref<any>({
 
 // 查看考试相关状态
 const viewModalVisible = ref(false)
-const currentExam = ref<any | null>(null)
+const currentExam = ref<ExamRecord | null>(null)
+
+// 考试项相关状态
+const examSections = ref<ExamSection[]>([])
+const addSectionModalVisible = ref(false)
+const currentSection = ref<ExamSection>({
+  questionType: 'single',
+  count: 10,
+  score: 5,
+  questions: []
+})
+const filteredQuestions = ref<Question[]>([])
+const loadingQuestions = ref(false)
+const questionFilters = ref({
+  type: undefined as string | undefined,
+  difficulty: undefined as number | undefined,
+  knowledgePoint: undefined as string | undefined,
+  keyword: ''
+})
 
 // 步骤控制
 const currentStep = ref(0)
@@ -582,6 +620,61 @@ const nextStep = () => {
     currentStep.value = 1
     // 设置考试总分初始值
     examForm.value.totalScore = calculateTotalScore()
+  }
+}
+
+// 保存基本信息
+const saveBasicInfo = async () => {
+  if (!validateStep1()) {
+    return
+  }
+  
+  // 如果已经有ID，直接进入下一步
+  if (examForm.value.id) {
+    nextStep()
+    return
+  }
+  
+  try {
+    savingBasicInfo.value = true
+    
+    // 设置考试类型为exam
+    examForm.value.type = 'exam'
+    // 设置用户ID为当前登录用户
+    examForm.value.userId = currentUserId.value
+    
+    // 调用API保存基本信息
+    const res = await examAPI.createExam(examForm.value)
+    
+    if (res && res.code === 200) {
+      message.success('考试基本信息保存成功')
+      // 设置ID
+      examForm.value.id = res.data
+      
+      // 添加新创建的考试到列表中，无需刷新页面
+      const newExam: ExamRecord = {
+        id: res.data,
+        title: examForm.value.title,
+        courseId: examForm.value.courseId,
+        userId: examForm.value.userId,
+        startTime: examForm.value.startTime,
+        endTime: examForm.value.endTime,
+        duration: examForm.value.duration,
+        status: 'not_started', // 新创建的考试默认未开始
+        description: examForm.value.description
+      }
+      exams.value.unshift(newExam)
+      
+      // 进入下一步
+      nextStep()
+    } else {
+      message.error(res?.message || '保存失败')
+    }
+  } catch (error) {
+    console.error('保存考试基本信息失败:', error)
+    message.error('保存失败，请重试')
+  } finally {
+    savingBasicInfo.value = false
   }
 }
 
@@ -607,7 +700,7 @@ const validateStep1 = () => {
 }
 
 // 知识点列表
-const knowledgePoints = ref<string[]>([])
+const knowledgePoints = ref<Array<string>>([])
 // 当前用户ID
 const currentUserId = ref<number>(0)
 
@@ -735,11 +828,14 @@ const initExamForm = () => {
     id: undefined,
     title: '',
     courseId: props.courseId,
+    userId: currentUserId.value, // 设置当前用户ID
+    type: 'exam', // 设置类型为exam
     startTime: '',
     endTime: '',
     duration: 90,
     totalScore: 100,
     status: 0,
+    description: '',
     paperConfig: {
       singleCount: 10,
       singleScore: 3,
@@ -763,15 +859,21 @@ const initExamForm = () => {
 
 // 计算总分
 const calculateTotalScore = () => {
-  const config = examForm.value.paperConfig
-  return (
-    (config.singleCount || 0) * (config.singleScore || 0) +
-    (config.multipleCount || 0) * (config.multipleScore || 0) +
-    (config.trueFalseCount || 0) * (config.trueFalseScore || 0) +
-    (config.blankCount || 0) * (config.blankScore || 0) +
-    (config.shortCount || 0) * (config.shortScore || 0) +
-    (config.codeCount || 0) * (config.codeScore || 0)
-  )
+  if (examForm.value.paperConfig.isRandom) {
+    const config = examForm.value.paperConfig
+    return (
+      (config.singleCount || 0) * (config.singleScore || 0) +
+      (config.multipleCount || 0) * (config.multipleScore || 0) +
+      (config.trueFalseCount || 0) * (config.trueFalseScore || 0) +
+      (config.blankCount || 0) * (config.blankScore || 0) +
+      (config.shortCount || 0) * (config.shortScore || 0) +
+      (config.codeCount || 0) * (config.codeScore || 0)
+    )
+  } else {
+    return examSections.value.reduce((total, section) => {
+      return total + (section.count * section.score)
+    }, 0)
+  }
 }
 
 // 计算各题型总分
@@ -795,6 +897,126 @@ const getTotalScoreByType = (type: string) => {
   }
 }
 
+// 显示添加考试项弹窗
+const showAddSectionModal = () => {
+  currentSection.value = {
+    questionType: 'single',
+    count: 10,
+    score: 5,
+    questions: []
+  }
+  filteredQuestions.value = []
+  addSectionModalVisible.value = true
+  // 加载相应题型的题目
+  loadQuestionsByType(currentSection.value.questionType)
+}
+
+// 移除考试项
+const removeExamSection = (index: number) => {
+  examSections.value.splice(index, 1)
+}
+
+// 加载指定类型的题目
+const loadQuestionsByType = async (type: string) => {
+  loadingQuestions.value = true
+  try {
+    const userId = currentUserId.value || await fetchCurrentUserInfo()
+    
+    console.log('调用getQuestionsByType API，参数:', { 
+      courseId: props.courseId, 
+      questionType: type, 
+      difficulty: questionFilters.value.difficulty, 
+      knowledgePoint: questionFilters.value.knowledgePoint,
+      keyword: questionFilters.value.keyword,
+      createdBy: userId 
+    })
+    
+    const response = await examAPI.getQuestionsByType(
+      props.courseId,
+      type,
+      questionFilters.value.difficulty,
+      questionFilters.value.knowledgePoint,
+      userId,
+      questionFilters.value.keyword
+    )
+    
+    console.log('getQuestionsByType API响应:', response)
+    
+    if (response && response.code === 200 && response.data && response.data[type]) {
+      let questions = response.data[type].map((q: any) => ({
+        id: q.id,
+        title: q.title || '无标题',
+        questionType: q.question_type || type,
+        difficulty: q.difficulty || 3,
+        knowledgePoint: q.knowledge_point,
+        selected: false
+      }))
+      
+      // 如果有关键词，在前端进行筛选
+      if (questionFilters.value.keyword) {
+        const keyword = questionFilters.value.keyword.toLowerCase()
+        questions = questions.filter((q: Question) => 
+          q.title.toLowerCase().includes(keyword) || 
+          (q.knowledgePoint && q.knowledgePoint.toLowerCase().includes(keyword))
+        )
+      }
+      
+      filteredQuestions.value = questions
+      console.log(`已加载${type}类型题目:`, filteredQuestions.value.length, '条')
+    } else {
+      console.log(`未找到${type}类型题目`)
+      filteredQuestions.value = []
+    }
+  } catch (error) {
+    console.error('加载题目失败:', error)
+    message.error('加载题目失败')
+    filteredQuestions.value = []
+  } finally {
+    loadingQuestions.value = false
+  }
+}
+
+// 搜索题目
+const handleSearchQuestions = () => {
+  loadQuestionsByType(currentSection.value.questionType)
+}
+
+// 重置题目筛选条件
+const resetQuestionFilters = () => {
+  questionFilters.value.difficulty = undefined
+  questionFilters.value.knowledgePoint = undefined
+  questionFilters.value.keyword = ''
+  loadQuestionsByType(currentSection.value.questionType)
+}
+
+// 计算已选题目数量
+const selectedQuestionCount = computed(() => {
+  return filteredQuestions.value.filter(q => q.selected).length
+})
+
+// 判断是否已达到最大选择数量
+const isMaxQuestionsSelected = computed(() => {
+  return selectedQuestionCount.value >= currentSection.value.count
+})
+
+// 确认添加考试项
+const confirmAddSection = () => {
+  const selectedQuestions = filteredQuestions.value.filter(q => q.selected)
+  
+  if (selectedQuestions.length !== currentSection.value.count) {
+    message.warning(`请选择${currentSection.value.count}道题目`)
+    return
+  }
+  
+  examSections.value.push({
+    ...currentSection.value,
+    questions: [...selectedQuestions]
+  })
+  
+  addSectionModalVisible.value = false
+  message.success('考试项添加成功')
+}
+
 // 保存考试前的处理
 const handleSaveExam = async () => {
   // 更新总分
@@ -810,43 +1032,47 @@ const handleSaveExam = async () => {
     
     // 调用API保存考试信息
     let res: any
-    let examId: number
+    let examId = examForm.value.id
     
-    if (isEditing.value && examForm.value.id) {
-      res = await examAPI.updateExam(examForm.value.id, examForm.value)
-      examId = examForm.value.id
-    } else {
-      res = await examAPI.createExam(examForm.value)
-      examId = res.data
-    }
+    // 只更新考试，因为基本信息已经在第一步保存过了
+    res = await examAPI.updateExam(examId, examForm.value)
     
     // 如果是手动选题模式，保存所选题目
     if (!examForm.value.paperConfig.isRandom && res && res.code === 200) {
-      // 收集所有已选题目
-      const allSelectedQuestions: Question[] = []
+      // 收集所有已选题目及其分值
+      const allQuestionIds: number[] = []
       const allScores: number[] = []
       
-      Object.keys(selectedQuestions.value).forEach(type => {
-        const typedKey = type as keyof SelectedQuestions
-        selectedQuestions.value[typedKey].forEach(q => {
-          allSelectedQuestions.push(q)
-          // 根据题型获取对应的分值
-          const score = examForm.value.paperConfig[`${type}Score`]
-          allScores.push(score)
-        })
+      // 从考试项中收集所有题目
+      examSections.value.forEach(section => {
+        if (section.questions && section.questions.length > 0) {
+          // 将当前section中的所有题目添加到列表中
+          section.questions.forEach((question, index) => {
+            allQuestionIds.push(question.id)
+            allScores.push(section.score) // 使用当前section设置的分值
+          })
+        }
       })
       
-      if (allSelectedQuestions.length > 0) {
-        // 提取题目ID列表
-        const questionIds = allSelectedQuestions.map(q => q.id)
-        
+      console.log('要保存的题目:', allQuestionIds.length, '道')
+      console.log('题目ID:', allQuestionIds)
+      console.log('分值:', allScores)
+      
+      if (allQuestionIds.length > 0) {
         // 保存题目关联
-        await examAPI.selectQuestions(examId, questionIds, allScores)
+        const questionsRes = await examAPI.selectQuestions(examId, allQuestionIds, allScores)
+        if (questionsRes && questionsRes.code === 200) {
+          console.log('题目关联保存成功')
+        } else {
+          console.error('题目关联保存失败:', questionsRes)
+          message.error(questionsRes?.message || '题目关联保存失败')
+          return
+        }
       }
     }
     
     if (res && res.code === 200) {
-      message.success(isEditing.value ? '考试更新成功' : '考试创建成功')
+      message.success('考试更新成功')
       examModalVisible.value = false
       // 重置表单和步骤
       currentStep.value = 0
@@ -930,16 +1156,26 @@ const fetchExams = async () => {
         
         // 处理考试状态
         exams.value.forEach(exam => {
+          // 保存发布状态 (0未发布，1已发布)
+          const publishStatus = exam.status
+          
+          // 处理进行状态
           const now = new Date().getTime()
           const startTime = new Date(exam.startTime).getTime()
           const endTime = new Date(exam.endTime).getTime()
           
+          // 设置进行状态到examState字段，保留原始status字段用于发布状态
           if (now < startTime) {
-            exam.status = examStatus.NOT_STARTED
+            exam.examState = examStatus.NOT_STARTED
           } else if (now >= startTime && now <= endTime) {
-            exam.status = examStatus.IN_PROGRESS
+            exam.examState = examStatus.IN_PROGRESS
           } else {
-            exam.status = examStatus.ENDED
+            exam.examState = examStatus.ENDED
+          }
+          
+          // 如果没有时长信息，根据开始和结束时间计算
+          if (!exam.duration) {
+            exam.duration = calculateDuration(exam.startTime, exam.endTime)
           }
         })
       } else {
@@ -1016,13 +1252,18 @@ const showAddExamModal = () => {
 }
 
 // 查看考试
-const viewExam = (exam: any) => {
+const viewExam = (exam: ExamRecord) => {
   currentExam.value = exam
   viewModalVisible.value = true
 }
 
+// 查看考试详情
+const viewExamDetail = (exam: ExamRecord) => {
+  router.push(`/teacher/exams/${exam.id}`)
+}
+
 // 编辑考试
-const editExam = (exam: any) => {
+const editExam = (exam: ExamRecord) => {
   isEditing.value = true
   examForm.value = { ...exam }
   // 这里应该从API获取完整的考试详情
@@ -1033,16 +1274,15 @@ const editExam = (exam: any) => {
 // 删除考试
 const handleDeleteExam = async (id: number) => {
   try {
-    // 模拟API请求
-    setTimeout(() => {
-      message.success('考试删除成功')
-      fetchExams()
-    }, 500)
+    // 调用API删除考试
+    const response = await examAPI.deleteExam(id)
     
-    // 实际项目中的API调用示例
-    // await axios.delete(`/api/teacher/courses/${props.courseId}/exams/${id}`)
-    // message.success('考试删除成功')
-    // fetchExams()
+    if (response && response.code === 200) {
+      message.success('考试删除成功')
+      fetchExams() // 重新加载考试列表
+    } else {
+      message.error(response?.message || '考试删除失败')
+    }
   } catch (error) {
     console.error('考试删除失败:', error)
     message.error('考试删除失败')
@@ -1067,6 +1307,30 @@ const getStatusColor = (status: string): string => {
     [examStatus.ENDED]: 'gray'
   }
   return colorMap[status] || 'default'
+}
+
+// 获取罗马数字
+const getRomanNumber = (num: number): string => {
+  const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
+  return roman[num - 1] || num.toString()
+}
+
+// 获取题目类型文本
+const getQuestionTypeText = (type: string): string => {
+  const typeMap: Record<string, string> = {
+    'single': '单选题',
+    'multiple': '多选题',
+    'true_false': '判断题',
+    'blank': '填空题',
+    'short': '简答题',
+    'code': '编程题'
+  }
+  return typeMap[type] || ''
+}
+
+// 获取难度星级显示
+const getDifficultyStars = (difficulty: number): string => {
+  return '★'.repeat(difficulty)
 }
 
 // 题目池
@@ -1267,6 +1531,98 @@ watch(() => examForm.value.paperConfig.isRandom, (isRandom) => {
     fetchCourseQuestions()
   }
 })
+
+// 监听难度筛选条件变化
+watch(() => questionFilters.value.difficulty, (newVal) => {
+  if (addSectionModalVisible.value) {
+    // 只有在弹窗显示时才触发重新加载
+    loadQuestionsByType(currentSection.value.questionType)
+  }
+})
+
+// 监听知识点筛选条件变化
+watch(() => questionFilters.value.knowledgePoint, (newVal) => {
+  if (addSectionModalVisible.value) {
+    // 只有在弹窗显示时才触发重新加载
+    loadQuestionsByType(currentSection.value.questionType)
+  }
+})
+
+// 监听题目类型变化
+watch(() => currentSection.value.questionType, (newType) => {
+  if (addSectionModalVisible.value) {
+    // 重置已选题目
+    filteredQuestions.value.forEach(q => q.selected = false)
+    // 重新加载对应类型的题目
+    loadQuestionsByType(newType)
+  }
+})
+
+// 发布考试
+const publishExam = async (exam: any) => {
+  try {
+    const res = await examAPI.publishExam(exam.id)
+    if (res && res.code === 200) {
+      message.success('考试发布成功')
+      // 更新当前考试列表中的考试状态
+      const index = exams.value.findIndex(e => e.id === exam.id)
+      if (index !== -1) {
+        // 将status从0改为1，表示已发布
+        exams.value[index].status = 1
+      }
+    } else {
+      message.error(res?.message || '发布失败')
+    }
+  } catch (error) {
+    console.error('发布考试失败:', error)
+    message.error('发布失败，请重试')
+  }
+}
+
+// 取消发布考试
+const unpublishExam = async (exam: any) => {
+  try {
+    // 只发送必要的字段，确保包含id和status
+    const examInfo = {
+      id: exam.id,
+      title: exam.title || '',
+      courseId: exam.courseId,
+      userId: exam.userId,
+      description: exam.description || '',
+      startTime: exam.startTime,
+      endTime: exam.endTime,
+      status: 0 // 将状态设置为0，表示未发布
+    };
+    
+    console.log('取消发布考试，数据:', examInfo);
+    
+    const res = await examAPI.updateExam(exam.id, examInfo);
+    if (res && res.code === 200) {
+      message.success('取消发布成功');
+      // 更新当前考试列表中的考试状态
+      const index = exams.value.findIndex(e => e.id === exam.id);
+      if (index !== -1) {
+        // 将status从1改为0，表示未发布
+        exams.value[index].status = 0;
+      }
+    } else {
+      message.error(res?.message || '取消发布失败');
+    }
+  } catch (error) {
+    console.error('取消发布考试失败:', error);
+    message.error('取消发布失败，请重试');
+  }
+}
+
+// 计算考试时长（分钟）
+const calculateDuration = (startTime: string, endTime: string): number => {
+  if (!startTime || !endTime) return 0
+  
+  const start = new Date(startTime)
+  const end = new Date(endTime)
+  
+  return Math.round((end.getTime() - start.getTime()) / (1000 * 60))
+}
 </script>
 
 <style scoped>
@@ -1488,5 +1844,80 @@ watch(() => examForm.value.paperConfig.isRandom, (isRandom) => {
 .question-info {
   display: flex;
   gap: 8px;
+}
+
+.exam-sections {
+  margin-bottom: 16px;
+}
+
+.exam-section {
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border: 1px solid #e8e8e8;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.section-summary {
+  color: #1890ff;
+  margin-right: auto;
+  margin-left: 16px;
+}
+
+.add-section {
+  margin-bottom: 20px;
+}
+
+.section-form {
+  margin-top: 16px;
+}
+
+.question-filter {
+  margin: 16px 0;
+  padding: 12px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+}
+
+.question-list-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.question-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.selection-summary {
+  text-align: right;
+  padding: 8px 0;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
 }
 </style> 

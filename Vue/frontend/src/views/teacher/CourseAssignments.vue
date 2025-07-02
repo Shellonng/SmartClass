@@ -67,7 +67,7 @@
           :dataSource="assignments"
           :columns="columns"
           :pagination="pagination"
-          :rowKey="(record) => record.id"
+          :rowKey="(record: any) => record.id"
           @change="handleTableChange"
         >
           <!-- 作业名称 -->
@@ -75,13 +75,17 @@
             <template v-if="column.dataIndex === 'title'">
               <div class="assignment-title">
                 <span>{{ record.title }}</span>
-                <a-tag v-if="record.type" class="assignment-type-tag">{{ getTypeText(record.type) }}</a-tag>
               </div>
             </template>
 
             <!-- 作业状态 -->
             <template v-else-if="column.dataIndex === 'status'">
               <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
+            </template>
+
+            <!-- 作业模式 -->
+            <template v-else-if="column.dataIndex === 'mode'">
+              <a-tag :color="getModeColor(record.mode)">{{ getModeText(record.mode) }}</a-tag>
             </template>
 
             <!-- 作业时间 -->
@@ -153,6 +157,12 @@
         <a-form-item label="作业名称" required>
           <a-input v-model:value="assignmentForm.title" placeholder="请输入作业名称" />
         </a-form-item>
+        <a-form-item label="作业模式" required>
+          <a-radio-group v-model:value="assignmentForm.mode">
+            <a-radio :value="assignmentMode.FILE">上传文件型</a-radio>
+            <a-radio :value="assignmentMode.QUESTION">答题型</a-radio>
+          </a-radio-group>
+        </a-form-item>
         <a-form-item label="作业时间" required>
           <a-range-picker 
             v-model:value="assignmentTimeRange" 
@@ -160,17 +170,6 @@
             format="YYYY-MM-DD HH:mm"
             @change="handleTimeRangeChange"
           />
-        </a-form-item>
-        <a-form-item label="总分值" required>
-          <a-input-number v-model:value="assignmentForm.totalScore" :min="1" :max="100" />
-        </a-form-item>
-        <a-form-item label="作业类型" required>
-          <a-select v-model:value="assignmentForm.type" placeholder="请选择作业类型">
-            <a-select-option value="QUIZ">测验</a-select-option>
-            <a-select-option value="ESSAY">论文</a-select-option>
-            <a-select-option value="PROJECT">项目</a-select-option>
-            <a-select-option value="OTHER">其他</a-select-option>
-          </a-select>
         </a-form-item>
         <a-form-item label="作业说明">
           <a-textarea v-model:value="assignmentForm.description" placeholder="请输入作业说明" :rows="4" />
@@ -196,6 +195,11 @@
         <div class="assignment-detail-item">
           <div class="assignment-detail-label">作业名称：</div>
           <div class="assignment-detail-value">{{ currentAssignment.title }}</div>
+        </div>
+        
+        <div class="assignment-detail-item">
+          <div class="assignment-detail-label">作业模式：</div>
+          <div class="assignment-detail-value">{{ getModeText(currentAssignment.mode) }}</div>
         </div>
         
         <div class="assignment-detail-item">
@@ -243,8 +247,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, defineProps } from 'vue'
-import { message } from 'ant-design-vue'
+import { ref, onMounted, watch, defineProps, defineComponent } from 'vue'
+import { message, Modal } from 'ant-design-vue'
 import {
   PlusOutlined,
   EyeOutlined,
@@ -255,6 +259,12 @@ import {
 import { formatDate } from '@/utils/date'
 import axios from 'axios'
 import type { Dayjs } from 'dayjs'
+import { useRouter } from 'vue-router'
+
+// 定义组件名称，便于调试
+defineComponent({
+  name: 'CourseAssignments'
+})
 
 const props = defineProps({
   courseId: {
@@ -265,9 +275,9 @@ const props = defineProps({
 
 // 作业状态
 const assignmentStatus = {
-  NOT_STARTED: 'not_started',
-  IN_PROGRESS: 'in_progress',
-  ENDED: 'ended'
+  NOT_STARTED: 0,  // 修改为整数类型，0 代表未开始
+  IN_PROGRESS: 1,  // 修改为整数类型，1 代表进行中
+  ENDED: 2         // 修改为整数类型，2 代表已结束
 }
 
 // 作业类型
@@ -276,6 +286,12 @@ const assignmentType = {
   ESSAY: 'ESSAY',
   PROJECT: 'PROJECT',
   OTHER: 'OTHER'
+}
+
+// 作业模式
+const assignmentMode = {
+  QUESTION: 'question', // 答题型
+  FILE: 'file'          // 上传文件型
 }
 
 // 状态定义
@@ -303,12 +319,18 @@ const columns = [
     dataIndex: 'title',
     key: 'title',
     ellipsis: true,
-    width: '25%'
+    width: '20%'
   },
   {
     title: '状态',
     dataIndex: 'status',
     key: 'status',
+    width: '10%'
+  },
+  {
+    title: '模式',
+    dataIndex: 'mode',
+    key: 'mode',
     width: '10%'
   },
   {
@@ -321,7 +343,7 @@ const columns = [
     title: '提交情况',
     dataIndex: 'submissionRate',
     key: 'submissionRate',
-    width: '20%'
+    width: '15%'
   },
   {
     title: '操作',
@@ -342,15 +364,18 @@ const assignmentForm = ref({
   courseId: props.courseId,
   startTime: '',
   endTime: '',
-  totalScore: 100,
-  type: assignmentType.QUIZ,
   description: '',
-  status: assignmentStatus.NOT_STARTED
+  status: assignmentStatus.NOT_STARTED,
+  userId: undefined as number | undefined,
+  mode: assignmentMode.FILE // 默认为上传文件型
 })
 
 // 查看作业相关状态
 const viewModalVisible = ref(false)
 const currentAssignment = ref<any | null>(null)
+
+// 路由实例
+const router = useRouter()
 
 // 监听课程ID变化
 watch(() => props.courseId, (newId) => {
@@ -367,56 +392,118 @@ onMounted(() => {
 // 获取作业列表
 const fetchAssignments = async () => {
   loading.value = true
+  console.log('开始获取课程作业列表，课程ID:', props.courseId)
+  
   try {
-    // 模拟API请求
-    setTimeout(() => {
-      // 这里是模拟数据，实际项目中应该从API获取
-      assignments.value = [
-        {
-          id: 1,
-          title: '第一次作业',
-          courseId: props.courseId,
-          startTime: '2025-07-01 09:00:00',
-          endTime: '2025-07-07 23:59:59',
-          totalScore: 100,
-          type: assignmentType.QUIZ,
-          description: '完成课本第一章习题',
-          status: assignmentStatus.IN_PROGRESS,
-          createTime: '2025-06-20 14:30:00',
-          submissionRate: 0.75,
-          submittedCount: 30,
-          totalCount: 40
-        },
-        {
-          id: 2,
-          title: '第二次作业',
-          courseId: props.courseId,
-          startTime: '2025-07-08 09:00:00',
-          endTime: '2025-07-14 23:59:59',
-          totalScore: 100,
-          type: assignmentType.ESSAY,
-          description: '网络协议分析报告',
-          status: assignmentStatus.NOT_STARTED,
-          createTime: '2025-06-22 10:15:00',
-          submissionRate: 0,
-          submittedCount: 0,
-          totalCount: 40
-        }
-      ]
-      pagination.value.total = assignments.value.length
-      loading.value = false
-    }, 500)
+    // 获取用户Token
+    const token = localStorage.getItem('user-token') || localStorage.getItem('token')
+    const userInfo = localStorage.getItem('user-info')
+    let userId = ''
     
-    // 实际项目中的API调用示例
-    // const res = await axios.get(`/api/teacher/courses/${props.courseId}/assignments`, { params: filters.value })
-    // assignments.value = res.data.data.records
-    // pagination.value.total = res.data.data.total
-  } catch (error) {
-    console.error('获取作业列表失败:', error)
-    message.error('获取作业列表失败，请稍后再试')
+    if (userInfo) {
+      try {
+        const userObj = JSON.parse(userInfo)
+        userId = userObj.id || ''
+        console.log('当前用户ID:', userId)
+      } catch (e) {
+        console.error('解析用户信息失败:', e)
+      }
+    }
+    
+    // 构建认证头
+    const authToken = userId ? `Bearer token-${userId}` : (token ? `Bearer ${token}` : '')
+    console.log('使用认证Token:', authToken)
+    
+    // 构建API请求参数
+    const params = {
+      pageNum: pagination.value.current,
+      pageSize: pagination.value.pageSize,
+      courseId: props.courseId,
+      ...filters.value
+    }
+    console.log('请求参数:', params)
+    
+    // 发送API请求
+    console.log(`请求URL: /api/teacher/assignments，参数包括courseId=${props.courseId}`)
+    const response = await axios.get('/api/teacher/assignments', {
+      params,
+      headers: {
+        'Authorization': authToken
+      }
+    })
+    
+    console.log('API响应:', response.data)
+    
+    if (response.data && response.data.code === 200) {
+      assignments.value = response.data.data.records || []
+      pagination.value.total = response.data.data.total || 0
+      console.log('成功获取作业列表:', assignments.value)
+    } else {
+      console.error('获取作业列表失败:', response.data)
+      message.error(response.data?.message || '获取作业列表失败')
+      // 使用备用方案，加载模拟数据
+      loadMockData()
+    }
+  } catch (error: any) {
+    console.error('获取作业列表异常:', error)
+    if (error.response) {
+      console.error('错误响应:', error.response.data)
+      console.error('状态码:', error.response.status)
+      console.error('响应头:', error.response.headers)
+      message.error(`获取作业列表失败: ${error.response.status} - ${error.response.data?.message || '未知错误'}`)
+    } else if (error.request) {
+      console.error('请求未收到响应:', error.request)
+      message.error('获取作业列表失败: 服务器未响应')
+    } else {
+      console.error('请求配置错误:', error.message)
+      message.error(`获取作业列表失败: ${error.message}`)
+    }
+    
+    // 发生错误时，使用备用方案，加载模拟数据
+    loadMockData()
   } finally {
     loading.value = false
   }
+}
+
+// 加载模拟数据（备用方案）
+const loadMockData = () => {
+  console.log('使用模拟数据')
+  assignments.value = [
+    {
+      id: 1,
+      title: '第一次作业',
+      courseId: props.courseId,
+      startTime: '2025-07-01 09:00:00',
+      endTime: '2025-07-07 23:59:59',
+      totalScore: 100,
+      type: assignmentType.QUIZ,
+      mode: assignmentMode.QUESTION,
+      description: '完成课本第一章习题',
+      status: assignmentStatus.IN_PROGRESS,
+      createTime: '2025-06-20 14:30:00',
+      submissionRate: 0.75,
+      submittedCount: 30,
+      totalCount: 40
+    },
+    {
+      id: 2,
+      title: '第二次作业',
+      courseId: props.courseId,
+      startTime: '2025-07-08 09:00:00',
+      endTime: '2025-07-14 23:59:59',
+      totalScore: 100,
+      type: assignmentType.ESSAY,
+      mode: assignmentMode.FILE,
+      description: '网络协议分析报告',
+      status: assignmentStatus.NOT_STARTED,
+      createTime: '2025-06-22 10:15:00',
+      submissionRate: 0,
+      submittedCount: 0,
+      totalCount: 40
+    }
+  ]
+  pagination.value.total = assignments.value.length
 }
 
 // 筛选变化处理
@@ -444,9 +531,9 @@ const resetFilters = () => {
 
 // 表格变化事件
 const handleTableChange = (pag: any) => {
-  pagination.value.current = pag.current
-  pagination.value.pageSize = pag.pageSize
-  fetchAssignments()
+  pagination.value.current = pag.current;
+  pagination.value.pageSize = pag.pageSize;
+  fetchAssignments();
 }
 
 // 作业时间范围变化
@@ -463,16 +550,37 @@ const handleTimeRangeChange = (dates: [Dayjs, Dayjs] | null) => {
 // 显示添加作业弹窗
 const showAddAssignmentModal = () => {
   isEditing.value = false
+  
+  // 获取当前用户ID
+  const userInfo = localStorage.getItem('user-info')
+  let userId = undefined as number | undefined
+  
+  if (userInfo) {
+    try {
+      const userObj = JSON.parse(userInfo)
+      userId = userObj.id
+      console.log('当前用户ID:', userId)
+    } catch (e) {
+      console.error('解析用户信息失败:', e)
+    }
+  }
+  
+  // 如果无法获取用户ID，使用默认值
+  if (!userId) {
+    userId = 6 // 使用测试教师ID作为默认值
+    console.log('使用默认用户ID:', userId)
+  }
+  
   assignmentForm.value = {
     id: undefined,
     title: '',
     courseId: props.courseId,
     startTime: '',
     endTime: '',
-    totalScore: 100,
-    type: assignmentType.QUIZ,
     description: '',
-    status: assignmentStatus.NOT_STARTED
+    status: assignmentStatus.NOT_STARTED,
+    userId: userId,
+    mode: assignmentMode.FILE // 默认为上传文件型
   }
   assignmentTimeRange.value = null
   assignmentModalVisible.value = true
@@ -480,21 +588,102 @@ const showAddAssignmentModal = () => {
 
 // 查看作业
 const viewAssignment = (assignment: any) => {
-  currentAssignment.value = assignment
-  viewModalVisible.value = true
+  // 跳转到作业详情页并显示提交记录选项卡
+  router.push({
+    path: `/teacher/assignments/${assignment.id}`,
+    query: { tab: 'submissions' }
+  })
 }
 
 // 编辑作业
-const editAssignment = (assignment: any) => {
+const editAssignment = async (assignment: any) => {
   isEditing.value = true
-  assignmentForm.value = { ...assignment }
-  // 这里应该从API获取完整的作业详情
-  assignmentTimeRange.value = null // 应该根据startTime和endTime设置
-  assignmentModalVisible.value = true
   
-  // 如果是从详情弹窗点击的编辑按钮，关闭详情弹窗
-  if (viewModalVisible.value) {
-    viewModalVisible.value = false
+  try {
+    // 从API获取完整的作业详情
+    const response = await axios.get(`/api/teacher/assignments/${assignment.id}`)
+    
+    if (response.data.code === 200) {
+      const data = response.data.data
+      
+      // 如果是答题型作业，直接跳转到组卷设置页面
+      if (data.mode === assignmentMode.QUESTION) {
+        console.log('编辑答题型作业，跳转到组卷设置页面')
+        router.push(`/teacher/assignments/${data.id}/edit`)
+        return
+      }
+      
+      // 如果是文件上传型作业，显示普通编辑弹窗
+      // 只保留需要的字段
+      assignmentForm.value = {
+        id: data.id,
+        title: data.title,
+        courseId: data.courseId,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        description: data.description || '',
+        status: data.status,
+        userId: data.userId, // 保留userId字段
+        mode: data.mode || assignmentMode.FILE // 保留mode字段
+      }
+      
+      console.log('编辑作业表单:', assignmentForm.value)
+      
+      // 如果有开始时间和结束时间，设置日期选择器的值
+      if (data.startTime && data.endTime) {
+        const dayjs = (await import('dayjs')).default
+        assignmentTimeRange.value = [
+          dayjs(data.startTime),
+          dayjs(data.endTime)
+        ] as [Dayjs, Dayjs]
+      } else {
+        assignmentTimeRange.value = null
+      }
+      
+      assignmentModalVisible.value = true
+      
+      // 如果是从详情弹窗点击的编辑按钮，关闭详情弹窗
+      if (viewModalVisible.value) {
+        viewModalVisible.value = false
+      }
+    } else {
+      message.error(response.data?.message || '获取作业详情失败')
+    }
+  } catch (error: any) {
+    console.error('获取作业详情失败:', error)
+    message.error('获取作业详情失败，请稍后再试')
+    
+    // 获取当前用户ID
+    const userInfo = localStorage.getItem('user-info')
+    let userId = null
+    
+    if (userInfo) {
+      try {
+        const userObj = JSON.parse(userInfo)
+        userId = userObj.id
+      } catch (e) {
+        console.error('解析用户信息失败:', e)
+      }
+    }
+    
+    // 如果无法获取用户ID，使用默认值
+    if (!userId) {
+      userId = 6 // 使用测试教师ID作为默认值
+    }
+    
+    // 退回到使用传入的基本信息
+    assignmentForm.value = {
+      id: assignment.id,
+      title: assignment.title,
+      courseId: assignment.courseId || props.courseId,
+      startTime: assignment.startTime || '',
+      endTime: assignment.endTime || '',
+      description: assignment.description || '',
+      status: assignment.status || assignmentStatus.NOT_STARTED,
+      userId: assignment.userId || userId, // 使用传入的userId或默认值
+      mode: assignment.mode || assignmentMode.FILE // 使用传入的mode或默认值
+    }
+    assignmentModalVisible.value = true
   }
 }
 
@@ -507,19 +696,27 @@ const reviewAssignment = (assignment: any) => {
 // 删除作业
 const handleDeleteAssignment = async (id: number) => {
   try {
-    // 模拟API请求
-    setTimeout(() => {
+    const response = await axios.delete(`/api/teacher/assignments/${id}`)
+    
+    if (response.data.code === 200) {
       message.success('作业删除成功')
       fetchAssignments()
-    }, 500)
-    
-    // 实际项目中的API调用示例
-    // await axios.delete(`/api/teacher/courses/${props.courseId}/assignments/${id}`)
-    // message.success('作业删除成功')
-    // fetchAssignments()
-  } catch (error) {
+    } else {
+      message.error(response.data?.message || '删除作业失败')
+      console.error('删除作业失败:', response.data)
+    }
+  } catch (error: any) {
     console.error('作业删除失败:', error)
-    message.error('作业删除失败')
+    if (error.response) {
+      console.error('错误响应:', error.response.data)
+      console.error('状态码:', error.response.status)
+      message.error(`删除作业失败: ${error.response.status} - ${error.response.data?.message || '未知错误'}`)
+    } else if (error.request) {
+      console.error('请求未收到响应:', error.request)
+      message.error('删除作业失败: 服务器未响应')
+    } else {
+      message.error(`删除作业失败: ${error.message}`)
+    }
   }
 }
 
@@ -534,38 +731,116 @@ const handleSaveAssignment = async () => {
     message.error('请选择作业时间')
     return
   }
-  if (!assignmentForm.value.type) {
-    message.error('请选择作业类型')
+  if (!assignmentForm.value.mode) {
+    message.error('请选择作业模式')
     return
   }
 
   saving.value = true
   try {
-    // 模拟API请求
-    setTimeout(() => {
-      if (isEditing.value) {
-        message.success('作业更新成功')
-      } else {
-        message.success('作业添加成功')
-      }
-      assignmentModalVisible.value = false
-      fetchAssignments()
-      saving.value = false
-    }, 1000)
+    // 获取当前用户ID
+    const userInfo = localStorage.getItem('user-info')
+    let userId = null
     
-    // 实际项目中的API调用示例
-    // if (isEditing.value) {
-    //   await axios.put(`/api/teacher/courses/${props.courseId}/assignments/${assignmentForm.value.id}`, assignmentForm.value)
-    //   message.success('作业更新成功')
-    // } else {
-    //   await axios.post(`/api/teacher/courses/${props.courseId}/assignments`, assignmentForm.value)
-    //   message.success('作业添加成功')
-    // }
-    // assignmentModalVisible.value = false
-    // fetchAssignments()
-  } catch (error) {
+    if (userInfo) {
+      try {
+        const userObj = JSON.parse(userInfo)
+        userId = userObj.id
+        console.log('当前用户ID:', userId)
+      } catch (e) {
+        console.error('解析用户信息失败:', e)
+      }
+    }
+    
+    // 如果无法获取用户ID，使用默认值
+    if (!userId) {
+      userId = 6 // 使用测试教师ID作为默认值
+      console.log('使用默认用户ID:', userId)
+    }
+    
+    // 构建作业数据，添加固定字段
+    const assignmentData = {
+      ...assignmentForm.value,
+      type: 'homework', // 固定值，表示作业而非考试
+      status: assignmentForm.value.status, // 确保状态值是整数
+      userId: userId, // 添加用户ID字段
+      mode: assignmentForm.value.mode // 添加mode字段
+    }
+    
+    console.log('保存作业数据:', assignmentData)
+    console.log('作业状态值类型:', typeof assignmentData.status)
+    console.log('作业状态值:', assignmentData.status)
+    console.log('作业模式:', assignmentData.mode)
+    
+    let response: any
+    if (isEditing.value && assignmentData.id) {
+      // 编辑现有作业
+      response = await axios.put(`/api/teacher/assignments/${assignmentData.id}`, assignmentData)
+      console.log('更新作业响应:', response.data)
+      
+      if (response.data.code === 200) {
+        message.success('作业更新成功')
+        
+        // 如果是答题型作业，询问是否跳转到题目编辑页面
+        if (assignmentData.mode === assignmentMode.QUESTION) {
+          Modal.confirm({
+            title: '是否编辑题目？',
+            content: '作业更新成功，是否前往编辑题目？',
+            okText: '是',
+            cancelText: '否',
+            onOk: () => {
+              router.push(`/teacher/assignments/${assignmentData.id}/edit`)
+            }
+          })
+        }
+      } else {
+        message.error(response.data?.message || '更新作业失败')
+        console.error('更新作业失败:', response.data)
+        return
+      }
+    } else {
+      // 创建新作业
+      response = await axios.post('/api/teacher/assignments', assignmentData)
+      console.log('创建作业响应:', response.data)
+      
+      if (response.data.code === 200) {
+        message.success('作业添加成功')
+        
+        // 如果是答题型作业，询问是否跳转到题目编辑页面
+        if (assignmentData.mode === assignmentMode.QUESTION) {
+          Modal.confirm({
+            title: '是否编辑题目？',
+            content: '作业添加成功，是否前往编辑题目？',
+            okText: '是',
+            cancelText: '否',
+            onOk: () => {
+              const assignmentId = response.data.data
+              router.push(`/teacher/assignments/${assignmentId}/edit`)
+            }
+          })
+        }
+      } else {
+        message.error(response.data?.message || '添加作业失败')
+        console.error('添加作业失败:', response.data)
+        return
+      }
+    }
+    
+    // 成功后关闭弹窗并刷新列表
+    assignmentModalVisible.value = false
+    fetchAssignments()
+  } catch (error: any) {
     console.error('保存作业失败:', error)
-    message.error('保存作业失败，请稍后再试')
+    if (error.response) {
+      console.error('错误响应:', error.response.data)
+      console.error('状态码:', error.response.status)
+      message.error(`保存作业失败: ${error.response.status} - ${error.response.data?.message || '未知错误'}`)
+    } else if (error.request) {
+      console.error('请求未收到响应:', error.request)
+      message.error('保存作业失败: 服务器未响应')
+    } else {
+      message.error(`保存作业失败: ${error.message}`)
+    }
   } finally {
     saving.value = false
   }
@@ -580,8 +855,8 @@ const getSubmissionStatus = (rate: number): string => {
 }
 
 // 获取状态显示文本
-const getStatusText = (status: string): string => {
-  const statusMap: Record<string, string> = {
+const getStatusText = (status: number): string => {
+  const statusMap: Record<number, string> = {
     [assignmentStatus.NOT_STARTED]: '未开始',
     [assignmentStatus.IN_PROGRESS]: '进行中',
     [assignmentStatus.ENDED]: '已结束'
@@ -590,8 +865,8 @@ const getStatusText = (status: string): string => {
 }
 
 // 获取状态标签颜色
-const getStatusColor = (status: string): string => {
-  const colorMap: Record<string, string> = {
+const getStatusColor = (status: number): string => {
+  const colorMap: Record<number, string> = {
     [assignmentStatus.NOT_STARTED]: 'blue',
     [assignmentStatus.IN_PROGRESS]: 'green',
     [assignmentStatus.ENDED]: 'gray'
@@ -607,7 +882,25 @@ const getTypeText = (type: string): string => {
     [assignmentType.PROJECT]: '项目',
     [assignmentType.OTHER]: '其他'
   }
-  return typeMap[type] || '未知类型'
+  return typeMap[type] || ''
+}
+
+// 获取作业模式文本
+const getModeText = (mode: string): string => {
+  const modeMap: Record<string, string> = {
+    [assignmentMode.QUESTION]: '答题型',
+    [assignmentMode.FILE]: '上传文件型'
+  }
+  return modeMap[mode] || '未知模式'
+}
+
+// 获取作业模式颜色
+const getModeColor = (mode: string): string => {
+  const colorMap: Record<string, string> = {
+    [assignmentMode.QUESTION]: 'blue',
+    [assignmentMode.FILE]: 'green'
+  }
+  return colorMap[mode] || 'default'
 }
 </script>
 

@@ -224,7 +224,9 @@
 
         <!-- 作业管理内容 -->
         <div v-if="currentView === 'assignments'" class="management-content">
-          <CourseAssignments :courseId="courseId" />
+          <a-spin :spinning="false" tip="正在加载作业数据...">
+            <CourseAssignments :courseId="courseId" />
+          </a-spin>
         </div>
 
         <!-- 错题集管理内容 -->
@@ -418,7 +420,13 @@ const courseId = computed(() => {
 // 监听路由变化，更新当前视图
 watch(() => route.query.view, (newView) => {
   if (newView) {
+    console.log('视图切换:', newView)
     currentView.value = newView as string
+    
+    // 如果切换到作业视图，添加额外的处理逻辑
+    if (newView === 'assignments') {
+      console.log('切换到作业视图，课程ID:', courseId.value)
+    }
   } else {
     currentView.value = 'chapters'
   }

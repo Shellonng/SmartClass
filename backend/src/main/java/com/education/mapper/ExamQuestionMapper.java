@@ -28,7 +28,7 @@ public interface ExamQuestionMapper extends BaseMapper<ExamQuestion> {
             "  WHEN 'blank' THEN '填空题' " +
             "  WHEN 'short' THEN '简答题' " +
             "  WHEN 'code' THEN '编程题' " +
-            "  ELSE '未知类型' " +
+            "  ELSE '' " +
             "END as question_type_desc " +
             "FROM assignment_question eq " +
             "JOIN question q ON eq.question_id = q.id " +

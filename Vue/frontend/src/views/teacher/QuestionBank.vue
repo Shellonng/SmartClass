@@ -265,7 +265,7 @@
         <!-- 题目类型和难度水平排列 -->
         <div class="question-detail-header">
           <a-tag :color="getQuestionTypeColor(currentQuestion.questionType)" class="question-type-tag">
-            {{ (currentQuestion.questionTypeDesc || QuestionTypeDesc[currentQuestion.questionType] || '未知类型') }}
+            {{ (currentQuestion.questionTypeDesc || QuestionTypeDesc[currentQuestion.questionType] || '') }}
           </a-tag>
           <a-rate :value="currentQuestion.difficulty || 1" disabled :count="5" class="difficulty-stars" />
         </div>

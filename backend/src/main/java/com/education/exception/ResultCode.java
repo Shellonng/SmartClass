@@ -16,6 +16,7 @@ public enum ResultCode {
     NOT_FOUND(404, "资源不存在"),
     METHOD_NOT_ALLOWED(405, "请求方法不支持"),
     INTERNAL_SERVER_ERROR(500, "系统错误"),
+    SYSTEM_ERROR(500, "系统错误"),
     
     // 用户相关 (2000-2999)
     USER_NOT_FOUND(2001, "用户不存在"),

@@ -68,6 +68,8 @@ public class SecurityConfig {
                 .requestMatchers("/files/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/debug/**").permitAll()
+                .requestMatchers("/api/courses/public", "/api/courses/public/**").permitAll()
+                .requestMatchers("/api/courses/categories").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(sessionAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -150,7 +152,8 @@ public class SecurityConfig {
         private static final List<String> AUTH_WHITELIST = Arrays.asList(
             "/auth/login", "/auth/register", "/auth/logout",
             "/api/auth/login", "/api/auth/register", "/api/auth/logout",
-            "/swagger-ui", "/v3/api-docs", "/debug", "/files", "/api/common/files"
+            "/swagger-ui", "/v3/api-docs", "/debug", "/files", "/api/common/files",
+            "/api/courses/public", "/api/courses/categories"
         );
 
         @Override

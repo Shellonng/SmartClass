@@ -90,6 +90,21 @@ export default {
   },
 
   /**
+   * 取消发布考试
+   * @param id 考试ID
+   * @returns 取消发布结果
+   */
+  unpublishExam(id: number): Promise<ApiResponse> {
+    return request({
+      url: `/api/teacher/exams/${id}`,
+      method: 'put',
+      data: {
+        status: 0 // 将状态设置为0，表示未发布
+      }
+    })
+  },
+
+  /**
    * 自动组卷
    * @param data 组卷配置
    * @returns 组卷结果
@@ -113,9 +128,10 @@ export default {
     return request({
       url: `/api/teacher/exams/${examId}/select-questions`,
       method: 'post',
-      params: {
-        questionIds,
-        scores
+      data: {
+        examId: examId,
+        questionIds: questionIds,
+        scores: scores
       }
     })
   },
@@ -168,10 +184,25 @@ export default {
    * @param difficulty 难度（可选）
    * @param knowledgePoint 知识点（可选）
    * @param createdBy 创建者ID（可选）
+   * @param keyword 关键词（可选）
    * @returns 题目列表（按题型分类）
    */
-  getQuestionsByType(courseId: number, questionType?: string, difficulty?: number, knowledgePoint?: string, createdBy?: number): Promise<ApiResponse> {
-    console.log('调用getQuestionsByType API，参数:', { courseId, questionType, difficulty, knowledgePoint, createdBy })
+  getQuestionsByType(
+    courseId: number, 
+    questionType?: string, 
+    difficulty?: number, 
+    knowledgePoint?: string, 
+    createdBy?: number,
+    keyword?: string
+  ): Promise<ApiResponse> {
+    console.log('调用getQuestionsByType API，参数:', { 
+      courseId, 
+      questionType, 
+      difficulty, 
+      knowledgePoint, 
+      createdBy,
+      keyword
+    })
     return request({
       url: `/api/teacher/exams/questions`,
       method: 'get',
@@ -180,8 +211,54 @@ export default {
         questionType,
         difficulty,
         knowledgePoint,
-        createdBy
+        createdBy,
+        keyword
       }
     })
-  }
+  },
+
+  /**
+   * 获取考试题目 (学生端)
+   * @param examId 考试ID
+   * @returns 考试题目列表
+   */
+  getExamQuestions(examId: number): Promise<ApiResponse> {
+    return request({
+      url: `/api/student/exams/${examId}/questions`,
+      method: 'get'
+    })
+  },
+
+  /**
+   * 获取考试题目 (教师端)
+   * @param examId 考试ID
+   * @returns 考试题目列表（包含答案）
+   */
+  getTeacherExamQuestions(examId: number): Promise<ApiResponse> {
+    return request({
+      url: `/api/teacher/exams/${examId}/questions`,
+      method: 'get'
+    })
+  },
+
+  /**
+   * 保存考试答案
+   * @param examId 考试ID
+   * @param questionId 题目ID
+   * @param answer 答案内容
+   * @returns 保存结果
+   */
+  saveExamAnswer(examId: number, questionId: number, answer: any): Promise<ApiResponse> {
+    return request({
+      url: `/api/student/exams/${examId}/answer`,
+      method: 'post',
+      data: {
+        examId,
+        questionId,
+        answer
+      }
+    })
+  },
+
+
 } 

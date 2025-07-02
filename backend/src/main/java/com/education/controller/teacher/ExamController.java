@@ -52,6 +52,17 @@ public class ExamController {
     }
     
     /**
+     * 获取考试提交率
+     * @param id 考试ID
+     * @return 提交率（百分比，0-100）
+     */
+    @GetMapping("/{id}/submission-rate")
+    public Result<Double> getSubmissionRate(@PathVariable Long id) {
+        double submissionRate = examService.getSubmissionRate(id);
+        return Result.success(submissionRate);
+    }
+    
+    /**
      * 创建考试
      * @param examDTO 考试信息
      * @return 创建的考试ID
@@ -111,14 +122,46 @@ public class ExamController {
     /**
      * 手动选题
      * @param examId 考试ID
-     * @param questionIds 题目ID列表
-     * @param scores 分值列表
+     * @param requestBody 包含题目ID和分值的请求体
      * @return 是否成功
      */
     @PostMapping("/{examId}/select-questions")
-    public Result<Boolean> selectQuestions(@PathVariable Long examId,
-                                          @RequestParam List<Long> questionIds,
-                                          @RequestParam List<Integer> scores) {
+    public Result<Boolean> selectQuestions(
+            @PathVariable Long examId,
+            @RequestBody Map<String, Object> requestBody) {
+        
+        @SuppressWarnings("unchecked")
+        List<Object> questionIdObjects = (List<Object>) requestBody.get("questionIds");
+        List<Long> questionIds = questionIdObjects.stream()
+                .map(obj -> {
+                    if (obj instanceof Integer) {
+                        return ((Integer) obj).longValue();
+                    } else if (obj instanceof Long) {
+                        return (Long) obj;
+                    } else if (obj instanceof Double) {
+                        return ((Double) obj).longValue();
+                    } else if (obj instanceof String) {
+                        return Long.parseLong((String) obj);
+                    }
+                    return 0L;
+                })
+                .toList();
+        
+        @SuppressWarnings("unchecked")
+        List<Object> scoreObjects = (List<Object>) requestBody.get("scores");
+        List<Integer> scores = scoreObjects.stream()
+                .map(obj -> {
+                    if (obj instanceof Integer) {
+                        return (Integer) obj;
+                    } else if (obj instanceof Double) {
+                        return ((Double) obj).intValue();
+                    } else if (obj instanceof String) {
+                        return Integer.parseInt((String) obj);
+                    }
+                    return 0;
+                })
+                .toList();
+        
         boolean success = examService.selectQuestions(examId, questionIds, scores);
         return Result.success(success);
     }
@@ -143,6 +186,7 @@ public class ExamController {
      * @param difficulty 难度
      * @param knowledgePoint 知识点
      * @param createdBy 创建者ID
+     * @param keyword 关键词
      * @return 题目列表
      */
     @GetMapping("/questions")
@@ -151,9 +195,10 @@ public class ExamController {
             @RequestParam(required = false) String questionType,
             @RequestParam(required = false) Integer difficulty,
             @RequestParam(required = false) String knowledgePoint,
-            @RequestParam(required = false) Long createdBy) {
+            @RequestParam(required = false) Long createdBy,
+            @RequestParam(required = false) String keyword) {
         Map<String, List<Map<String, Object>>> questions = examService.getQuestionsByType(
-                courseId, questionType, difficulty, knowledgePoint, createdBy);
+                courseId, questionType, difficulty, knowledgePoint, createdBy, keyword);
         return Result.success(questions);
     }
 } 

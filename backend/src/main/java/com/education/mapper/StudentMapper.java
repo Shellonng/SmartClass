@@ -1,6 +1,8 @@
 package com.education.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.education.entity.Student;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -375,4 +377,28 @@ public interface StudentMapper extends BaseMapper<Student> {
      */
     @Select("SELECT MAX(student_id) FROM student WHERE student_id LIKE CONCAT(#{year}, '%')")
     String getMaxStudentIdByYear(@Param("year") String year);
+
+    /**
+     * 根据班级ID分页查询学生列表
+     *
+     * @param page 分页参数
+     * @param classId 班级ID
+     * @param keyword 关键词
+     * @return 学生列表
+     */
+    @Select("<script>" +
+            "SELECT s.*, u.username, u.real_name, u.email, u.avatar " +
+            "FROM student s " +
+            "JOIN user u ON s.user_id = u.id " +
+            "JOIN class_student cs ON s.id = cs.student_id " +
+            "WHERE cs.class_id = #{classId} " +
+            "<if test='keyword != null and keyword != \"\"'>" +
+            "  AND (u.real_name LIKE CONCAT('%', #{keyword}, '%') " +
+            "  OR u.username LIKE CONCAT('%', #{keyword}, '%')) " +
+            "</if>" +
+            "ORDER BY cs.join_time DESC" +
+            "</script>")
+    IPage<Student> selectPageByClassId(Page<Student> page,
+                                      @Param("classId") Long classId,
+                                      @Param("keyword") String keyword);
 }
