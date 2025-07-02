@@ -41,9 +41,11 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\Co
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\teacher\AssignmentController.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\common\UserController.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\ChapterMapper.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\teacher\StudentController.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\Question.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\QuestionBankMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\SectionMapper.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\StudentManagementService.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\impl\QuestionServiceImpl.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\EducationApplication.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\QuestionBankItemMapper.java
@@ -56,6 +58,7 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\common\imp
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\SectionService.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\ExamService.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\impl\ClassServiceImpl.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\CourseEnrollmentRequest.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\teacher\CourseResourceController.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\AuthDTO.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\common\Result.java
@@ -71,6 +74,7 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\teacher
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\SectionCommentDTO.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\utils\DateUtils.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\common\PageResponse.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\CourseStudent.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\exception\BusinessException.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\CourseResourceDTO.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\common\FileController.java
@@ -78,6 +82,7 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\QuestionBan
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\Section.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\Exam.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\Chapter.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\CourseStudentMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\utils\ValidationUtils.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\QuestionOption.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\SectionCommentMapper.java
@@ -101,8 +106,10 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\Se
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\TeacherMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\monitor\DataSourceMonitor.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\common\PublicCourseController.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\CourseEnrollmentRequestMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\dto\ExamDTO.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\impl\DashboardServiceImpl.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\impl\StudentManagementServiceImpl.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\CourseResource.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\ExamQuestion.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\service\teacher\impl\ChapterServiceImpl.java
