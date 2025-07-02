@@ -41,6 +41,7 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const isLoading = ref(false)
   const sessionId = ref<string | null>(localStorage.getItem('sessionId'))
+  const token = ref<string | null>(localStorage.getItem('token'))
 
   // 计算属性
   const isAuthenticated = computed(() => !!user.value)
@@ -53,6 +54,15 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('sessionId', newSessionId)
   }
 
+  // 设置token
+  const setToken = (newToken: string) => {
+    token.value = newToken
+    localStorage.setItem('token', newToken)
+    // 立即设置到axios默认头部
+    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
+    console.log('Token已设置到axios默认头部')
+  }
+
   // 设置用户信息
   const setUser = (userData: User) => {
     user.value = userData
@@ -63,6 +73,7 @@ export const useAuthStore = defineStore('auth', () => {
   const clearAuth = () => {
     user.value = null
     sessionId.value = null
+    token.value = null
     localStorage.removeItem('token')  // 清除旧的token
     localStorage.removeItem('user-token')  // 清除旧的token
     localStorage.removeItem('userInfo')
@@ -78,11 +89,25 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await loginApi(credentials)
       
       if (response.data.success) {
-        const { userInfo, sessionId: newSessionId } = response.data.data
+        const { userInfo, sessionId: newSessionId, token: newToken } = response.data.data
+        
+        // 保存用户信息
         setUser(userInfo)
+        
+        // 保存sessionId
         if (newSessionId) {
           setSessionId(newSessionId)
         }
+        
+        // 保存token并设置到axios头部
+        if (newToken) {
+          setToken(newToken)
+          // 额外确认token已正确设置
+          console.log('登录成功，token已保存:', newToken.substring(0, 10) + '...')
+        } else {
+          console.warn('登录响应中没有token')
+        }
+        
         return { success: true, data: response.data.data }
       } else {
         return { success: false, message: response.data.message }
@@ -129,16 +154,26 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 初始化 - 先验证session，再决定是否恢复用户信息
   const init = async () => {
+    // 先检查token是否存在
+    const savedToken = localStorage.getItem('token')
+    if (savedToken) {
+      // 如果token存在，设置到axios头部
+      setToken(savedToken)
+    }
+    
     const savedUserInfo = localStorage.getItem('userInfo')
     if (savedUserInfo) {
       try {
-        // 先验证session是否仍然有效，不设置用户信息
+        // 先从localStorage恢复用户信息
+        const userInfo = JSON.parse(savedUserInfo)
+        setUser(userInfo)
+        
+        // 然后验证session是否仍然有效
         const isValid = await fetchUserInfo()
         if (!isValid) {
           // 如果session无效，清除所有数据
           clearAuth()
         }
-        // 如果session有效，fetchUserInfo已经设置了用户信息
         } catch (error) {
         console.error('初始化用户信息失败:', error)
         clearAuth()
@@ -158,6 +193,7 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     isLoading,
     sessionId,
+    token,
     // 计算属性
     isAuthenticated,
     isTeacher,
@@ -168,6 +204,7 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUserInfo,
     init,
     setUser,
+    setToken,
     clearAuth
   }
 })

@@ -13,6 +13,9 @@ const Login = () => import('@/views/auth/Login.vue')
 // 主页
 const HomePage = () => import('@/components/HomePage.vue')
 
+// 公共页面
+const CourseList = () => import('@/views/CourseList.vue')
+
 // 教师端页面
 const TeacherDashboard = () => import('@/views/teacher/Dashboard.vue')
 
@@ -35,9 +38,11 @@ const TeacherTaskDetail = () => import('@/views/teacher/TaskDetail.vue')
 
 // 教师端 - 考试管理
 const TeacherExams = () => import('@/views/teacher/Exams.vue')
+const TeacherExamDetail = () => import('@/views/teacher/ExamDetail.vue')
 
 // 教师端 - 作业管理
 const TeacherAssignments = () => import('@/views/teacher/Assignments.vue')
+const TeacherAssignmentDetail = () => import('@/views/teacher/AssignmentDetail.vue')
 
 // 教师端 - 成绩管理
 const TeacherGrades = () => import('@/views/teacher/Grades.vue')
@@ -67,6 +72,9 @@ const StudentVideoLearning = () => import('@/views/student/VideoLearning.vue')
 // 学生端 - 作业管理
 const StudentAssignments = () => import('@/views/student/Assignments.vue')
 const StudentAssignmentDetail = () => import('@/views/student/AssignmentDetail.vue')
+
+// 学生端 - 考试管理
+const StudentExamDetail = () => import('@/views/student/ExamDetail.vue')
 
 // 学生端 - 成绩查看
 const StudentGrades = () => import('@/views/student/Grades.vue')
@@ -111,6 +119,29 @@ const router = createRouter({
       name: 'Home',
       component: HomePage,
       meta: { requiresAuth: false }
+    },
+    
+    // 公共课程列表
+    {
+      path: '/courses',
+      name: 'CourseList',
+      component: CourseList,
+      meta: { requiresAuth: false }
+    },
+    
+    // 课程详情页面
+    {
+      path: '/courses/:id',
+      name: 'CourseDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: false },
+      children: [
+        {
+          path: '',
+          component: StudentCourseDetail,
+          props: true
+        }
+      ]
     },
     
     // 认证相关路由
@@ -171,6 +202,68 @@ const router = createRouter({
             id: Number(route.params.id),
             courseId: Number(route.params.courseId)
           })
+        }
+      ]
+    },
+
+    // 教师考试详情页面 - 使用独立布局
+    {
+      path: '/teacher/exams/:id',
+      name: 'TeacherExamDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'TEACHER' },
+      children: [
+        {
+          path: '',
+          component: TeacherExamDetail,
+          props: route => ({ id: Number(route.params.id) })
+        }
+      ]
+    },
+
+    // 教师作业详情页面 - 使用独立布局
+    {
+      path: '/teacher/assignments/:id',
+      name: 'TeacherAssignmentDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'TEACHER' },
+      children: [
+        {
+          path: '',
+          component: TeacherAssignmentDetail,
+          props: route => ({ id: Number(route.params.id) })
+        },
+        {
+          path: 'edit',
+          component: TeacherExamDetail, // 复用考试编辑组件
+          props: route => ({ 
+            id: Number(route.params.id),
+            isAssignment: true // 标记为作业模式
+          })
+        },
+        {
+          path: 'detail',
+          component: TeacherExamDetail, // 复用考试详情组件
+          props: route => ({ 
+            id: Number(route.params.id),
+            isAssignment: true, // 标记为作业模式
+            viewOnly: true // 标记为查看模式
+          })
+        }
+      ]
+    },
+
+    // 考试详情页面(学生端) - 使用独立布局
+    {
+      path: '/student/exams/:id',
+      name: 'StudentExamDetail',
+      component: CourseLayout,
+      meta: { requiresAuth: true, role: 'STUDENT' },
+      children: [
+        {
+          path: '',
+          component: StudentExamDetail,
+          props: route => ({ examId: Number(route.params.id) })
         }
       ]
     },
@@ -326,13 +419,10 @@ const router = createRouter({
       children: [
         {
           path: '',
-          redirect: '/student/dashboard'
-        },
-        {
-          path: 'dashboard',
-          name: 'StudentDashboard',
+          name: 'StudentHome',
           component: StudentDashboard
         },
+
         
         // 课程管理
         {
@@ -386,6 +476,13 @@ const router = createRouter({
           name: 'StudentAssignmentDetail',
           component: StudentAssignmentDetail,
           props: true
+        },
+        
+        // 考试列表
+        {
+          path: 'exams',
+          name: 'StudentExams',
+          component: StudentDashboard,  // 临时使用Dashboard作为占位符
         },
         
         // 成绩查看

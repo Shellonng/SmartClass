@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,7 +20,6 @@ import java.util.Objects;
  * @param <T> 数据类型
  */
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -31,45 +29,241 @@ public class PageResponse<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Schema(description = "数据列表")
-    private List<T> records;
+    private List<T> content;
 
     @Schema(description = "总记录数", example = "100")
-    private Long total;
+    private Long totalElements;
 
     @Schema(description = "当前页码", example = "1")
-    private Integer current;
+    private Integer number;
 
     @Schema(description = "每页大小", example = "10")
-    private Integer pageSize;
+    private Integer size;
 
     @Schema(description = "总页数", example = "10")
-    private Long pages;
+    private Integer totalPages;
 
-    @Schema(description = "是否有下一页")
-    private Boolean hasNext;
+    @Schema(description = "是否为第一页")
+    private Boolean first;
 
-    @Schema(description = "是否有上一页")
-    private Boolean hasPrevious;
+    @Schema(description = "是否为最后一页")
+    private Boolean last;
 
-    @Schema(description = "分页导航信息")
-    private PageNavigation navigation;
+    @Schema(description = "是否为空")
+    private Boolean empty;
 
     /**
-     * 构造函数 - 兼容旧版本
+     * 兼容性构造函数，用于支持直接构造PageResponse(current, size, total, records)
+     * 
+     * @param current 当前页码
+     * @param size 每页大小
+     * @param total 总记录数
+     * @param content 数据列表
      */
-    public PageResponse(Integer current, Integer pageSize, Long total, List<T> records) {
-        this.current = current;
-        this.pageSize = pageSize;
-        this.total = total;
-        this.records = records;
-        this.pages = total == null || pageSize == null || pageSize == 0 ? 0L : (total + pageSize - 1) / pageSize;
-        this.hasNext = current != null && pages != null && current < pages;
-        this.hasPrevious = current != null && current > 1;
-        this.navigation = new PageNavigation();
-        this.navigation.setFirstPage(1);
-        this.navigation.setLastPage(pages != null ? pages.intValue() : 0);
-        this.navigation.setNextPage(hasNext ? current + 1 : null);
-        this.navigation.setPreviousPage(hasPrevious ? current - 1 : null);
+    public PageResponse(int current, int size, long total, List<T> content) {
+        int totalPages = size > 0 ? (int) Math.ceil((double) total / size) : 0;
+        
+        this.content = content;
+        this.totalElements = total;
+        this.number = current - 1; // 转换为0-based索引
+        this.size = size;
+        this.totalPages = totalPages;
+        this.first = (current == 1);
+        this.last = (current == totalPages);
+        this.empty = (content == null || content.isEmpty());
+    }
+
+    // 兼容方法 - 为了支持不同的命名约定
+    
+    // Records 命名约定兼容
+    public List<T> getRecords() {
+        return this.content;
+    }
+    
+    public void setRecords(List<T> records) {
+        this.content = records;
+    }
+    
+    // List 命名约定兼容
+    public List<T> getList() {
+        return this.content;
+    }
+
+    public void setList(List<T> list) {
+        this.content = list;
+    }
+
+    // Current 命名约定兼容
+    public int getCurrent() {
+        return this.number != null ? this.number + 1 : 1; // 转换回1-based索引
+    }
+    
+    public void setCurrent(int current) {
+        this.number = current - 1; // 存储为0-based索引
+        this.first = (current == 1);
+    }
+
+    // PageNum 命名约定兼容
+    public int getPageNum() {
+        return getCurrent();
+    }
+    
+    public void setPageNum(int pageNum) {
+        setCurrent(pageNum);
+    }
+
+    public void setPageNum(Integer pageNum) {
+        if (pageNum != null) {
+            setCurrent(pageNum);
+        }
+    }
+    
+    // PageSize 命名约定兼容
+    public int getPageSize() {
+        return this.size != null ? this.size : 0;
+    }
+    
+    public void setPageSize(int pageSize) {
+        this.size = pageSize;
+    }
+    
+    // Total 命名约定兼容
+    public long getTotal() {
+        return this.totalElements != null ? this.totalElements : 0;
+        }
+    
+    public void setTotal(long total) {
+        this.totalElements = total;
+    }
+
+    // Pages 命名约定兼容
+    public long getPages() {
+        return this.totalPages != null ? this.totalPages : 0;
+    }
+
+    public void setPages(long pages) {
+        this.totalPages = (int) pages;
+        this.last = (this.number != null && this.totalPages != null && (this.number + 1) == this.totalPages);
+    }
+
+    // 自定义 Builder 类
+    public static class PageResponseBuilder<T> {
+        private List<T> content;
+        private Long totalElements;
+        private Integer number;
+        private Integer size;
+        private Integer totalPages;
+        private Boolean first;
+        private Boolean last;
+        private Boolean empty;
+        
+        public PageResponseBuilder() {
+            // 空构造函数
+        }
+        
+        // 原始字段设置方法
+        public PageResponseBuilder<T> content(List<T> content) {
+            this.content = content;
+            return this;
+        }
+        
+        public PageResponseBuilder<T> totalElements(Long totalElements) {
+            this.totalElements = totalElements;
+            return this;
+        }
+        
+        public PageResponseBuilder<T> number(Integer number) {
+            this.number = number;
+            return this;
+        }
+        
+        public PageResponseBuilder<T> size(Integer size) {
+            this.size = size;
+            return this;
+        }
+        
+        public PageResponseBuilder<T> totalPages(Integer totalPages) {
+            this.totalPages = totalPages;
+            return this;
+        }
+        
+        public PageResponseBuilder<T> first(Boolean first) {
+            this.first = first;
+            return this;
+        }
+        
+        public PageResponseBuilder<T> last(Boolean last) {
+            this.last = last;
+            return this;
+        }
+        
+        public PageResponseBuilder<T> empty(Boolean empty) {
+            this.empty = empty;
+            return this;
+        }
+        
+        // 兼容方法 - 为了支持不同的命名约定
+        
+        // 支持 records() 方法
+        public PageResponseBuilder<T> records(List<T> records) {
+            this.content = records;
+            return this;
+        }
+        
+        // 支持 list() 方法
+        public PageResponseBuilder<T> list(List<T> list) {
+            this.content = list;
+            return this;
+        }
+
+        // 支持 total() 方法
+        public PageResponseBuilder<T> total(Long total) {
+            this.totalElements = total;
+            return this;
+        }
+
+        // 支持 current() 方法
+        public PageResponseBuilder<T> current(Integer current) {
+            this.number = current - 1; // 存储为0-based索引
+            this.first = (current == 1);
+            return this;
+        }
+
+        // 支持 pageNum() 方法
+        public PageResponseBuilder<T> pageNum(Integer pageNum) {
+            return current(pageNum);
+        }
+        
+        // 支持 pageSize() 方法
+        public PageResponseBuilder<T> pageSize(Integer pageSize) {
+            this.size = pageSize;
+            return this;
+        }
+        
+        // 支持 pages() 方法
+        public PageResponseBuilder<T> pages(Integer pages) {
+            this.totalPages = pages;
+            return this;
+        }
+
+        // build 方法
+        public PageResponse<T> build() {
+            PageResponse<T> response = new PageResponse<>();
+            response.content = this.content;
+            response.totalElements = this.totalElements;
+            response.number = this.number;
+            response.size = this.size;
+            response.totalPages = this.totalPages;
+            response.first = this.first;
+            response.last = this.last;
+            response.empty = this.empty;
+            return response;
+        }
+    }
+    
+    // 提供静态builder方法以支持泛型
+    public static <T> PageResponseBuilder<T> builder() {
+        return new PageResponseBuilder<T>();
     }
 
     /**
@@ -80,307 +274,73 @@ public class PageResponse<T> implements Serializable {
      * @return 分页响应对象
      */
     public static <T> PageResponse<T> of(IPage<T> page) {
-        Long current = page.getCurrent();
-        Long size = page.getSize();
-        
-        return new PageResponse<>(
-            Objects.isNull(current) ? 1 : current.intValue(),
-            Objects.isNull(size) ? 10 : size.intValue(),
-            page.getTotal(),
-            page.getRecords()
-        );
-    }
-
-    /**
-     * 创建空的分页响应
-     * 
-     * @param current 当前页码
-     * @param size 每页大小
-     * @param <T> 数据类型
-     * @return 空的分页响应对象
-     */
-    public static <T> PageResponse<T> empty(Integer current, Integer size) {
-        return new PageResponse<>(current, size, 0L, Collections.emptyList());
-    }
-
-    /**
-     * 获取列表 - 兼容方法
-     */
-    public List<T> getList() {
-        return this.records;
-    }
-
-    /**
-     * 设置列表 - 兼容方法
-     */
-    public void setList(List<T> list) {
-        this.records = list;
-    }
-
-    /**
-     * 获取页码 - 兼容方法
-     */
-    public Integer getPageNum() {
-        return this.current;
-    }
-
-    /**
-     * 设置页码 - 兼容方法
-     */
-    public void setPageNum(Integer pageNum) {
-        this.current = pageNum;
-    }
-
-    /**
-     * 计算并设置分页信息
-     */
-    private void calculatePageInfo() {
-        if (total != null && pageSize != null && pageSize > 0) {
-            this.pages = (total + pageSize - 1) / pageSize;
-            this.hasNext = current != null && current < pages;
-            this.hasPrevious = current != null && current > 1;
-            
-            if (this.navigation == null) {
-                this.navigation = new PageNavigation();
-            }
-            this.navigation.setFirstPage(1);
-            this.navigation.setLastPage(pages != null ? pages.intValue() : 0);
-            this.navigation.setNextPage(hasNext ? current + 1 : null);
-            this.navigation.setPreviousPage(hasPrevious ? current - 1 : null);
-        }
-    }
-
-    /**
-     * 设置总数时自动计算分页信息
-     */
-    public void setTotal(Long total) {
-        this.total = total;
-        calculatePageInfo();
-    }
-
-    /**
-     * 设置当前页时自动计算分页信息
-     */
-    public void setCurrent(Integer current) {
-        this.current = current;
-        calculatePageInfo();
-    }
-
-    /**
-     * 设置页面大小时自动计算分页信息
-     */
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
-        calculatePageInfo();
-    }
-
-    /**
-     * 静态builder方法 - 兼容链式调用
-     */
-    public static <T> PageResponseBuilder<T> builder() {
-        return new PageResponseBuilder<T>();
-    }
-
-    /**
-     * PageResponse构建器
-     */
-    public static class PageResponseBuilder<T> {
-        private List<T> records;
-        private Long total;
-        private Integer current;
-        private Integer pageSize;
-
-        public PageResponseBuilder<T> records(List<T> records) {
-            this.records = records;
-            return this;
-        }
-
-        public PageResponseBuilder<T> total(Long total) {
-            this.total = total;
-            return this;
-        }
-
-        public PageResponseBuilder<T> current(Integer current) {
-            this.current = current;
-            return this;
-        }
-
-        public PageResponseBuilder<T> pageSize(Integer pageSize) {
-            this.pageSize = pageSize;
-            return this;
-        }
-
-        public PageResponse<T> build() {
-            return new PageResponse<>(current, pageSize, total, records);
-        }
-    }
-
-    /**
-     * 创建单页响应
-     * 
-     * @param records 数据列表
-     * @param <T> 数据类型
-     * @return 单页响应对象
-     */
-    public static <T> PageResponse<T> of(List<T> records) {
-        int total = records != null ? records.size() : 0;
-        return new PageResponse<>(1, total, (long) total, records);
+        return PageResponse.<T>builder()
+                .content(page.getRecords())
+                .totalElements(page.getTotal())
+                .number((int) page.getCurrent() - 1) // 转换为0-based索引
+                .size((int) page.getSize())
+                .totalPages((int) page.getPages())
+                .first(page.getCurrent() == 1)
+                .last(page.getCurrent() == page.getPages())
+                .empty(page.getRecords() == null || page.getRecords().isEmpty())
+                .build();
     }
 
     /**
      * 创建自定义分页响应
      * 
-     * @param current 当前页码
-     * @param size 每页大小
+     * @param pageNum 当前页码 (1-based)
+     * @param pageSize 每页大小
      * @param total 总记录数
-     * @param records 数据列表
+     * @param content 数据列表
      * @param <T> 数据类型
      * @return 分页响应对象
      */
-    public static <T> PageResponse<T> of(Integer current, Integer size, Long total, List<T> records) {
-        return new PageResponse<>(current, size, total, records);
+    public static <T> PageResponse<T> of(int pageNum, int pageSize, long total, List<T> content) {
+        int totalPages = pageSize > 0 ? (int) Math.ceil((double) total / pageSize) : 0;
+        return PageResponse.<T>builder()
+                .content(content)
+                .totalElements(total)
+                .number(pageNum - 1) // 转换为0-based索引
+                .size(pageSize)
+                .totalPages(totalPages)
+                .first(pageNum == 1)
+                .last(pageNum == totalPages)
+                .empty(content == null || content.isEmpty())
+                .build();
     }
 
     /**
-     * 转换数据类型
+     * 创建单页响应
      * 
-     * @param mapper 转换函数
-     * @param <R> 目标数据类型
-     * @return 转换后的分页响应对象
+     * @param content 数据列表
+     * @param <T> 数据类型
+     * @return 单页响应对象
      */
-    public <R> PageResponse<R> map(java.util.function.Function<T, R> mapper) {
-        List<R> mappedRecords = this.records.stream()
-            .map(mapper)
-            .collect(java.util.stream.Collectors.toList());
-        return new PageResponse<>(this.current, this.pageSize, this.total, mappedRecords);
+    public static <T> PageResponse<T> of(List<T> content) {
+        int total = content != null ? content.size() : 0;
+        return of(1, total, total, content);
     }
 
     /**
-     * 获取开始记录索引（从1开始）
-     * 
-     * @return 开始记录索引
-     */
-    public Long getStartIndex() {
-        if (current == null || pageSize == null || current <= 0 || pageSize <= 0) {
-            return 0L;
-        }
-        return (long) ((current - 1) * pageSize + 1);
-    }
-
-    /**
-     * 获取结束记录索引
-     * 
-     * @return 结束记录索引
-     */
-    public Long getEndIndex() {
-        if (current == null || pageSize == null || total == null || current <= 0 || pageSize <= 0) {
-            return 0L;
-        }
-        long endIndex = (long) (current * pageSize);
-        return Math.min(endIndex, total);
-    }
-
-    /**
-     * 判断是否为空页面
-     * 
-     * @return 是否为空
-     */
-    public Boolean isEmpty() {
-        return records == null || records.isEmpty();
-    }
-
-    /**
-     * 获取当前页记录数
-     * 
-     * @return 当前页记录数
-     */
-    public Integer getCurrentPageSize() {
-        return records != null ? records.size() : 0;
-    }
-
-    /**
-     * 获取分页信息摘要
-     * 
-     * @return 分页信息摘要
-     */
-    @Schema(description = "分页信息摘要")
-    public String getSummary() {
-        if (total == null || total == 0) {
-            return "暂无数据";
-        }
-        return String.format("第 %d-%d 条，共 %d 条记录，第 %d/%d 页", 
-            getStartIndex(), getEndIndex(), total, current, pages);
-    }
-
-    /**
-     * 构建分页导航信息
-     * 
-     * @param displayPages 显示的页码数量
-     * @return 分页导航信息
-     */
-    public PageNavigation buildNavigation(int displayPages) {
-        return new PageNavigation(current, pages != null ? pages.intValue() : 0, displayPages);
-    }
-
-    /**
-     * 分页导航信息
-     */
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class PageNavigation {
-        private Integer firstPage;
-        private Integer lastPage;
-        private Integer nextPage;
-        private Integer previousPage;
-        private Boolean hasNext;
-        private Boolean hasPrevious;
-
-        public PageNavigation(Integer current, Integer total, int displayPages) {
-            if (total <= displayPages) {
-                this.firstPage = 1;
-                this.lastPage = total;
-            } else {
-                int half = displayPages / 2;
-                this.firstPage = Math.max(1, current - half);
-                this.lastPage = Math.min(total, this.firstPage + displayPages - 1);
-                
-                if (this.lastPage - this.firstPage + 1 < displayPages) {
-                    this.firstPage = Math.max(1, this.lastPage - displayPages + 1);
-                }
-            }
-            
-            this.nextPage = current < total ? current + 1 : null;
-            this.previousPage = current > 1 ? current - 1 : null;
-            this.hasNext = current < total;
-            this.hasPrevious = current > 1;
-        }
-    }
-
-    /**
-     * 从MyBatis-Plus的IPage对象创建PageResponse对象
+     * 创建空的分页响应
      * 
      * @param <T> 数据类型
-     * @param page MyBatis-Plus的IPage对象
-     * @return 分页响应数据
+     * @return 空的分页响应对象
      */
-    public static <T> PageResponse<T> fromIPage(IPage<T> page) {
-        PageResponse<T> response = new PageResponse<>();
-        response.setCurrent((int)page.getCurrent());
-        response.setPageSize((int)page.getSize());
-        response.setTotal(page.getTotal());
-        response.setPages(page.getPages());
-        response.setRecords(page.getRecords());
-        
-        // 设置分页导航信息
-        PageNavigation navigation = new PageNavigation();
-        navigation.setHasNext(page.getCurrent() < page.getPages());
-        navigation.setHasPrevious(page.getCurrent() > 1);
-        navigation.setFirstPage(1);
-        navigation.setLastPage((int) page.getPages());
-        response.setNavigation(navigation);
-        
-        return response;
+    public static <T> PageResponse<T> empty() {
+        return of(1, 10, 0, Collections.emptyList());
+                }
+
+    /**
+     * 创建空的分页响应（指定页码和大小）
+     * 
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @param <T> 数据类型
+     * @return 空的分页响应对象
+     */
+    public static <T> PageResponse<T> empty(int pageNum, int pageSize) {
+        return of(pageNum, pageSize, 0, Collections.emptyList());
     }
 }

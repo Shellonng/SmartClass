@@ -12,8 +12,9 @@ export interface ApiResponse<T = any> {
 
 // 创建axios实例
 const service = axios.create({
-  baseURL: '', // API基础URL
-  timeout: 15000 // 请求超时时间
+  baseURL: 'http://localhost:8080', // API基础URL
+  timeout: 15000, // 请求超时时间
+  withCredentials: true // 跨域请求时发送cookies
 })
 
 // 请求拦截器
@@ -21,9 +22,27 @@ service.interceptors.request.use(
   config => {
     // 从localStorage获取token
     const token = localStorage.getItem('token')
+    
     if (token) {
       // 设置请求头Authorization
       config.headers['Authorization'] = `Bearer ${token}`
+      console.log(`请求 ${config.url} 添加token成功`)
+    } else {
+      console.warn(`请求 ${config.url} 未找到token`)
+      
+      // 尝试从其他可能的位置获取token
+      const userToken = localStorage.getItem('user-token')
+      if (userToken) {
+        config.headers['Authorization'] = `Bearer ${userToken}`
+        console.log(`请求 ${config.url} 使用备用token`)
+      } else {
+        // 如果实在没有token，尝试从全局axios默认头部获取
+        const globalToken = axios.defaults.headers.common['Authorization']
+        if (globalToken) {
+          config.headers['Authorization'] = globalToken
+          console.log(`请求 ${config.url} 使用全局token`)
+        }
+      }
     }
     return config
   },

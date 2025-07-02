@@ -32,6 +32,13 @@ axios.interceptors.request.use(
     // 确保请求包含cookie（用于Session认证）
     config.withCredentials = true
     
+    // 从localStorage获取token并添加到请求头
+    const token = localStorage.getItem('token')
+    if (token && !config.headers['Authorization']) {
+      config.headers['Authorization'] = `Bearer ${token}`
+      console.log('请求自动添加token')
+    }
+    
     return config
   },
   (error) => {
@@ -99,10 +106,28 @@ app.use(router)
 app.use(Antd)
 app.use(ElementPlus)
 
-// 初始化认证状态
-const authStore = useAuthStore()
-authStore.init().catch((error) => {
-  console.error('认证初始化失败:', error)
-})
+// 初始化认证状态，并在完成后挂载应用
+const initApp = async () => {
+  const authStore = useAuthStore()
+  
+  try {
+    // 检查是否有token
+    const token = localStorage.getItem('token')
+    if (token) {
+      // 设置全局axios默认头部
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      console.log('启动时设置全局token')
+    }
+    
+    // 初始化认证状态
+    await authStore.init()
+    console.log('认证初始化完成')
+  } catch (error) {
+    console.error('认证初始化失败:', error)
+  } finally {
+    // 无论认证是否成功，都挂载应用
+    app.mount('#app')
+  }
+}
 
-app.mount('#app')
+initApp()

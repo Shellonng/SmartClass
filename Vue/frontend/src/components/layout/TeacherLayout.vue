@@ -124,24 +124,19 @@
           <span>工作台</span>
         </a-menu-item>
         
-        <a-sub-menu key="classes">
+        <a-menu-item key="classes">
           <template #icon>
             <TeamOutlined />
           </template>
-          <template #title>班级管理</template>
-          <a-menu-item key="classes-list">班级列表</a-menu-item>
-          <a-menu-item key="classes-create">创建班级</a-menu-item>
-        </a-sub-menu>
+          <span>班级管理</span>
+        </a-menu-item>
         
-        <a-sub-menu key="courses">
+        <a-menu-item key="courses">
           <template #icon>
             <BookOutlined />
           </template>
-          <template #title>课程管理</template>
-          <a-menu-item key="courses-list">课程列表</a-menu-item>
-          <a-menu-item key="courses-create">创建课程</a-menu-item>
-          <a-menu-item key="courses-chapters">章节管理</a-menu-item>
-        </a-sub-menu>
+          <span>课程管理</span>
+        </a-menu-item>
         
         <a-sub-menu key="tasks">
           <template #icon>
@@ -193,6 +188,12 @@
       <a-layout-header class="header">
         <div class="header-left">
           <div class="page-title">
+            <!-- 添加顶部导航链接 -->
+            <div class="top-nav-links">
+              <router-link to="/teacher/dashboard" class="nav-link">首页</router-link>
+              <div class="nav-separator">/</div>
+              <router-link to="/courses" class="nav-link">全部课程</router-link>
+            </div>
             <a-breadcrumb class="breadcrumb">
               <a-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path">
                 <router-link v-if="item.path" :to="item.path">{{ item.title }}</router-link>
@@ -320,7 +321,9 @@ import {
   EditOutlined,
   HistoryOutlined,
   NodeIndexOutlined,
-  FileOutlined
+  FileOutlined,
+  FormOutlined,
+  LineChartOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 
@@ -503,12 +506,11 @@ function updateSelectedKeys() {
 function handleMenuClick({ key }: { key: string }) {
   const routeMap: Record<string, string> = {
     'dashboard': '/teacher',
+    'classes': '/teacher/classes',
     'classes-list': '/teacher/classes',
     'classes-create': '/teacher/classes/create',
-    'courses-list': '/teacher/courses',
-    'courses-create': '/teacher/courses/create',
-    'courses-chapters': '/teacher/courses/chapters',
-    'assignments-list': '/teacher/assignments',
+    'courses': '/teacher/courses',
+    'assignments': '/teacher/assignments',
     'assignments-create': '/teacher/assignments/create',
     'assignments-review': '/teacher/assignments/review',
     'exams': '/teacher/exams',
@@ -524,16 +526,12 @@ function handleMenuClick({ key }: { key: string }) {
   const targetRoute = routeMap[key]
   if (targetRoute && targetRoute !== route.path) {
     router.push(targetRoute)
-  }
-
-  // 任务管理
-  if (key === 'exams') {
-    router.push('/teacher/exams')
     return
   }
-  
-  if (key === 'assignments') {
-    router.push('/teacher/assignments')
+
+  // 任务管理 - 其他特殊情况处理
+  if (key === 'exams') {
+    router.push('/teacher/exams')
     return
   }
 }
@@ -581,7 +579,21 @@ function handleCourseMenuClick({ key }: { key: string }) {
   const courseId = route.params.id
   if (!courseId) return
   
+  // 作业菜单项的特殊处理
+  if (key === 'assignments') {
+    console.log('点击了作业菜单项，正在切换到作业视图')
+  
   // 更新路由查询参数，保持在同一页面但切换视图
+    router.push({
+      path: `/teacher/courses/${courseId}`,
+      query: { view: key }
+    })
+    
+    // 可以在这里添加额外的处理逻辑，例如预加载数据等
+    return
+  }
+  
+  // 其他菜单项的常规处理
   router.push({
     path: `/teacher/courses/${courseId}`,
     query: { view: key }
@@ -700,7 +712,8 @@ onMounted(() => {
 .page-title {
   margin-left: 16px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .breadcrumb {
@@ -830,5 +843,28 @@ onMounted(() => {
   margin-top: 8px;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.65);
+}
+
+/* 顶部导航链接样式 */
+.top-nav-links {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.nav-link {
+  font-size: 16px;
+  color: #333;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: #1890ff;
+}
+
+.nav-separator {
+  margin: 0 8px;
+  color: #999;
 }
 </style>

@@ -39,6 +39,11 @@ public class Exam {
     private String type = "exam";
     
     /**
+     * 作业模式：question-答题型，file-上传型
+     */
+    private String mode;
+    
+    /**
      * 考试说明
      */
     private String description;

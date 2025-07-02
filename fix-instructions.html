@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>修复重复"首页"问题的说明</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .highlight {
+            background-color: #ffff00;
+            padding: 2px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .step {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>修复重复"首页"问题的说明</h1>
+    
+    <div class="step">
+        <h2>问题描述</h2>
+        <p>在教师端仪表盘页面中，顶部导航栏出现了重复的"首页"字样。一个是顶部导航链接中的"首页"，另一个是面包屑导航中的"首页"。</p>
+    </div>
+    
+    <div class="step">
+        <h2>问题定位</h2>
+        <p>问题出现在 <code>Vue/frontend/src/components/layout/TeacherLayout.vue</code> 文件中：</p>
+        <p>1. 顶部导航链接中的"首页"（第194行左右）:</p>
+        <pre>&lt;router-link to="/teacher/dashboard" class="nav-link"&gt;首页&lt;/router-link&gt;</pre>
+        
+        <p>2. 面包屑导航中的"首页"（第432行左右）:</p>
+        <pre>const breadcrumbItems = computed(() => {
+  const items = [{ title: '首页', path: '/teacher' }]
+  
+  if (route.meta?.breadcrumb) {
+    items.push(...route.meta.breadcrumb as any[])
+  }
+  
+  return items
+})</pre>
+    </div>
+    
+    <div class="step">
+        <h2>解决方案</h2>
+        <p>请修改 <code>TeacherLayout.vue</code> 文件中的面包屑导航代码，将初始的"首页"项移除：</p>
+        <pre>// 面包屑导航
+const breadcrumbItems = computed(() => {
+  // 移除首页项，因为已经在顶部导航中有了
+  const items: { title: string; path?: string }[] = []
+  
+  if (route.meta?.breadcrumb) {
+    items.push(...route.meta.breadcrumb as any[])
+  }
+  
+  return items
+})</pre>
+        <p>或者，如果您希望完全移除面包屑导航，可以注释掉或删除以下部分：</p>
+        <pre>&lt;a-breadcrumb class="breadcrumb"&gt;
+  &lt;a-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path"&gt;
+    &lt;router-link v-if="item.path" :to="item.path"&gt;{{ item.title }}&lt;/router-link&gt;
+    &lt;span v-else&gt;{{ item.title }}&lt;/span&gt;
+  &lt;/a-breadcrumb-item&gt;
+&lt;/a-breadcrumb&gt;</pre>
+    </div>
+</body>
+</html> 
