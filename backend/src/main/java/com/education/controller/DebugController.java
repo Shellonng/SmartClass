@@ -10,6 +10,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.time.LocalDateTime;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * 调试控制器 - 用于诊断CORS和路径问题
@@ -48,6 +50,31 @@ public class DebugController {
         return Result.success("Test successful!");
     }
 
+    @Operation(summary = "JWT认证测试", description = "需要认证的测试接口")
+    @GetMapping("/auth-test")
+    public Result<Map<String, Object>> authTest(HttpServletRequest request) {
+        log.info("Debug auth test called");
+        
+        Map<String, Object> result = new HashMap<>();
+        
+        // 获取认证信息
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            result.put("authenticated", auth.isAuthenticated());
+            result.put("username", auth.getName());
+            result.put("authorities", auth.getAuthorities());
+        } else {
+            result.put("authenticated", false);
+            result.put("message", "No authentication found");
+        }
+        
+        // 获取Authorization头
+        String authHeader = request.getHeader("Authorization");
+        result.put("authorizationHeader", authHeader);
+        
+        return Result.success(result);
+    }
+
     @GetMapping("/info")
     public Map<String, Object> getDebugInfo(HttpServletRequest request) {
         Map<String, Object> info = new HashMap<>();
@@ -73,8 +100,8 @@ public class DebugController {
         return info;
     }
     
-    @PostMapping("/auth-test")
-    public Map<String, Object> testAuth(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+    @PostMapping("/post-test")
+    public Map<String, Object> testPost(@RequestBody Map<String, Object> body, HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
         result.put("message", "调试接口收到POST请求");
         result.put("method", request.getMethod());

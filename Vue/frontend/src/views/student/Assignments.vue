@@ -733,7 +733,7 @@ const getTypeText = (type: string) => {
     project: '项目作业',
     report: '实验报告'
   }
-  return typeMap[type as keyof typeof typeMap] || '未知类型'
+  return typeMap[type as keyof typeof typeMap] || ''
 }
 
 const getTypeColor = (type: string) => {

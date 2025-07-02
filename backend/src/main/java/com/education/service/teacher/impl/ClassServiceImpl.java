@@ -1,583 +1,363 @@
 package com.education.service.teacher.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.education.dto.ClassDTO;
-import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
-import com.education.dto.clazz.*;
-import com.education.entity.Class;
+import com.education.entity.ClassStudent;
+import com.education.entity.Course;
+import com.education.entity.CourseClass;
 import com.education.entity.Student;
-import com.education.entity.User;
-import com.education.mapper.ClassMapper;
-import com.education.mapper.StudentMapper;
-import com.education.mapper.UserMapper;
-import com.education.service.teacher.ClassService;
+import com.education.entity.Teacher;
 import com.education.exception.BusinessException;
 import com.education.exception.ResultCode;
-import com.education.utils.SecurityUtils;
+import com.education.mapper.ClassStudentMapper;
+import com.education.mapper.CourseClassMapper;
+import com.education.mapper.CourseMapper;
+import com.education.mapper.StudentMapper;
+import com.education.mapper.TeacherMapper;
+import com.education.security.SecurityUtil;
+import com.education.service.teacher.ClassService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * 教师端班级服务实现类
- * 
- * @author Education Platform Team
- * @version 1.0.0
- * @since 2024
+ * 班级管理服务实现类
  */
-@Slf4j
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ClassServiceImpl implements ClassService {
 
-    private final ClassMapper classMapper;
-    private final UserMapper userMapper;
+    private final CourseClassMapper courseClassMapper;
+    private final CourseMapper courseMapper;
     private final StudentMapper studentMapper;
+    private final ClassStudentMapper classStudentMapper;
+    private final TeacherMapper teacherMapper;
+    private final SecurityUtil securityUtil;
 
     @Override
-    public PageResponse<ClassResponse> getClassList(PageRequest pageRequest, String name, String grade, String status) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
+    public PageResponse<CourseClass> getClassesByTeacher(int page, int size, String keyword, Long courseId) {
+        // 获取当前登录教师ID
+        Long teacherId = securityUtil.getCurrentUserId();
         
-        // 构建查询条件
-        Long offset = (long) ((pageRequest.getCurrent() - 1) * pageRequest.getPageSize());
-        List<Class> classes = classMapper.selectClassesByTeacherWithConditions(
-                teacherId, name, grade, status, offset, (long) pageRequest.getPageSize());
+        // 查询分页数据
+        Page<CourseClass> pageParam = new Page<>(page + 1, size); // 后端是1-based索引
+        IPage<CourseClass> result = courseClassMapper.selectPageByTeacherId(pageParam, teacherId, keyword, courseId);
         
-        Long total = classMapper.countClassesByTeacherWithConditions(teacherId, name, grade, status);
+        // 直接使用IPage转换
+        return PageResponse.of(result);
+    }
+
+    @Override
+    public CourseClass getClassById(Long id) {
+        // 获取班级信息
+        CourseClass courseClass = courseClassMapper.selectById(id);
+        if (courseClass == null) {
+            throw new BusinessException(ResultCode.DATA_NOT_FOUND, "班级不存在");
+        }
         
-        List<ClassResponse> responses = classes.stream()
-                .map(this::convertToClassResponse)
-                .collect(Collectors.toList());
+        // 检查权限
+        checkPermission(courseClass);
         
-        return PageResponse.<ClassResponse>builder()
-                .records(responses)
-                .total(total)
-                .current(pageRequest.getCurrent())
-                .pageSize(pageRequest.getPageSize())
-                .build();
+        // 获取关联的课程信息
+        if (courseClass.getCourseId() != null) {
+            Course course = courseMapper.selectById(courseClass.getCourseId());
+            courseClass.setCourse(course);
+        }
+        
+        // 获取班级学生数量
+        Integer studentCount = classStudentMapper.countByClassId(id);
+        courseClass.setStudentCount(studentCount);
+        
+        return courseClass;
     }
 
     @Override
     @Transactional
-    public ClassResponse createClass(ClassCreateRequest request) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
+    public CourseClass createClass(CourseClass courseClass) {
+        // 设置当前教师ID
+        Long teacherId = securityUtil.getCurrentUserId();
+        courseClass.setTeacherId(teacherId);
         
-        // 检查班级名称是否重复
-        if (classMapper.existsByNameAndTeacherId(request.getName(), teacherId)) {
-            throw new BusinessException(ResultCode.BUSINESS_ERROR, "班级名称已存在");
+        // 如果设置了课程ID，检查课程是否存在
+        if (courseClass.getCourseId() != null) {
+            Course course = courseMapper.selectById(courseClass.getCourseId());
+            if (course == null) {
+                throw new BusinessException(ResultCode.PARAM_ERROR, "所选课程不存在");
+            }
+            
+            // 检查课程是否属于当前教师
+            if (!teacherId.equals(course.getTeacherId())) {
+                throw new BusinessException(ResultCode.FORBIDDEN, "无权操作该课程");
+            }
+            
+            // 如果设置为默认班级，需要取消其他班级的默认设置
+            if (Boolean.TRUE.equals(courseClass.getIsDefault())) {
+                CourseClass defaultClass = courseClassMapper.selectDefaultClassByCourseId(courseClass.getCourseId());
+                if (defaultClass != null) {
+                    defaultClass.setIsDefault(false);
+                    courseClassMapper.updateById(defaultClass);
+                }
+            }
+        } else {
+            // 如果没有指定课程ID，确保isDefault为false
+            courseClass.setIsDefault(false);
         }
         
-        Class clazz = new Class();
-        clazz.setClassName(request.getName());
-        clazz.setGrade(Integer.parseInt(request.getGrade()));
-        clazz.setMajor(request.getMajor());
-        clazz.setDescription(request.getDescription());
-        clazz.setMaxStudentCount(request.getCapacity());
-        clazz.setSemester(request.getSemester());
-        clazz.setHeadTeacherId(teacherId);
-        clazz.setStatus("ACTIVE");
-        clazz.setCreateTime(LocalDateTime.now());
-        clazz.setUpdateTime(LocalDateTime.now());
-        
-        classMapper.insert(clazz);
-        
-        log.info("班级创建成功，班级ID：{}，名称：{}", clazz.getId(), clazz.getClassName());
-        return convertToClassResponse(clazz);
-    }
-
-    @Override
-    public ClassDetailResponse getClassDetail(Long classId) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
-        
-        Class clazz = classMapper.selectByIdAndTeacherId(classId, teacherId);
-        if (clazz == null) {
-            throw new BusinessException(ResultCode.NOT_FOUND, "班级不存在");
+        try {
+            // 插入班级记录
+            courseClassMapper.insertWithNullCourseId(courseClass);
+        } catch (Exception e) {
+            log.error("创建班级失败", e);
+            throw new BusinessException(ResultCode.SYSTEM_ERROR, "创建班级失败：" + e.getMessage());
         }
         
-        ClassDetailResponse response = convertToClassDetailResponse(clazz);
-        
-        // 获取班级统计信息
-        ClassDetailResponse.ClassStatistics statistics = getClassStatisticsData(classId);
-        response.setStatistics(statistics);
-        
-        // 获取最近活动
-        List<ClassDetailResponse.RecentActivity> activities = getRecentActivities(classId);
-        response.setRecentActivities(activities);
-        
-        return response;
+        return courseClass;
     }
 
     @Override
     @Transactional
-    public ClassResponse updateClass(Long classId, ClassUpdateRequest request) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
-        
-        Class clazz = classMapper.selectByIdAndTeacherId(classId, teacherId);
-        if (clazz == null) {
-            throw new BusinessException(ResultCode.NOT_FOUND, "班级不存在");
+    public CourseClass updateClass(CourseClass courseClass) {
+        // 获取原班级信息
+        CourseClass existingClass = courseClassMapper.selectById(courseClass.getId());
+        if (existingClass == null) {
+            log.warn("更新班级失败：班级不存在，ID: {}", courseClass.getId());
+            throw new BusinessException(ResultCode.DATA_NOT_FOUND, "班级不存在");
         }
         
-        // 更新字段
-        if (request.getName() != null) {
-            clazz.setClassName(request.getName());
-        }
-        if (request.getGrade() != null) {
-            clazz.setGrade(Integer.parseInt(request.getGrade()));
-        }
-        if (request.getMajor() != null) {
-            clazz.setMajor(request.getMajor());
-        }
-        if (request.getDescription() != null) {
-            clazz.setDescription(request.getDescription());
-        }
-        if (request.getCapacity() != null) {
-            clazz.setMaxStudentCount(request.getCapacity());
-        }
-        if (request.getSemester() != null) {
-            clazz.setSemester(request.getSemester());
-        }
-        if (request.getStatus() != null) {
-            clazz.setStatus(request.getStatus());
+        // 记录原始信息和更新信息
+        log.info("更新班级开始，班级ID: {}, 原课程ID: {}, 新课程ID: {}", 
+            courseClass.getId(), existingClass.getCourseId(), courseClass.getCourseId());
+        
+        // 获取当前用户ID
+        Long currentUserId = securityUtil.getCurrentUserId();
+        log.info("当前用户ID: {}, 班级所属教师ID: {}", currentUserId, existingClass.getTeacherId());
+        
+        // 检查权限 - 直接比较用户ID和班级的teacherId
+        if (!currentUserId.equals(existingClass.getTeacherId())) {
+            log.warn("权限检查失败：当前用户ID: {}, 班级所属教师ID: {}", currentUserId, existingClass.getTeacherId());
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权限");
         }
         
-        clazz.setUpdateTime(LocalDateTime.now());
-        classMapper.updateById(clazz);
+        // 如果修改了课程绑定
+        if (courseClass.getCourseId() != null && !courseClass.getCourseId().equals(existingClass.getCourseId())) {
+            log.info("检测到课程ID变更，从 {} 变为 {}", existingClass.getCourseId(), courseClass.getCourseId());
+            
+            // 检查课程是否存在
+            Course course = courseMapper.selectById(courseClass.getCourseId());
+            if (course == null) {
+                log.warn("更新班级失败：指定的课程不存在，课程ID: {}", courseClass.getCourseId());
+                throw new BusinessException(ResultCode.PARAM_ERROR, "所选课程不存在");
+            }
+            
+            // 查询用户对应的教师ID
+            Long teacherId = getTeacherIdByUserId(currentUserId);
+            log.info("当前用户ID {} 对应的教师ID: {}", currentUserId, teacherId);
+            
+            // 检查课程是否属于当前教师
+            if (!teacherId.equals(course.getTeacherId())) {
+                log.warn("更新班级失败：课程不属于当前教师，课程ID: {}, 课程教师ID: {}, 当前教师ID: {}", 
+                    courseClass.getCourseId(), course.getTeacherId(), teacherId);
+                throw new BusinessException(ResultCode.FORBIDDEN, "无权操作该课程");
+            }
+            
+            log.info("课程绑定检查通过，课程ID: {}, 课程名称: {}", 
+                course.getId(), course.getTitle() != null ? course.getTitle() : course.getCourseName());
+            
+            // 单独更新课程ID，确保能正确保存
+            try {
+                int updateResult = courseClassMapper.updateCourseId(courseClass.getId(), courseClass.getCourseId());
+                log.info("单独更新课程ID结果: {}, 影响行数: {}", updateResult > 0 ? "成功" : "失败", updateResult);
+            } catch (Exception e) {
+                log.error("单独更新课程ID失败", e);
+                throw new BusinessException(ResultCode.SYSTEM_ERROR, "更新课程ID失败：" + e.getMessage());
+            }
+        }
         
-        log.info("班级更新成功，班级ID：{}", classId);
-        return convertToClassResponse(clazz);
+        // 如果设置为默认班级，需要取消其他班级的默认设置
+        if (Boolean.TRUE.equals(courseClass.getIsDefault()) && 
+            (existingClass.getIsDefault() == null || !existingClass.getIsDefault())) {
+            CourseClass defaultClass = courseClassMapper.selectDefaultClassByCourseId(
+                courseClass.getCourseId() != null ? courseClass.getCourseId() : existingClass.getCourseId());
+            if (defaultClass != null && !defaultClass.getId().equals(courseClass.getId())) {
+                defaultClass.setIsDefault(false);
+                courseClassMapper.updateById(defaultClass);
+                log.info("取消了课程ID: {}的原默认班级: {}", 
+                    courseClass.getCourseId() != null ? courseClass.getCourseId() : existingClass.getCourseId(), 
+                    defaultClass.getId());
+            }
+        }
+        
+        // 确保teacherId字段不会被更新
+        courseClass.setTeacherId(existingClass.getTeacherId());
+        
+        try {
+            // 更新班级信息
+            log.info("准备更新班级信息，班级ID: {}, 班级名称: {}, 课程ID: {}", 
+                courseClass.getId(), courseClass.getName(), courseClass.getCourseId());
+            int result = courseClassMapper.updateById(courseClass);
+            log.info("班级更新结果: {}, 影响行数: {}", result > 0 ? "成功" : "失败", result);
+            
+            // 验证更新是否成功
+            CourseClass updatedClass = courseClassMapper.selectById(courseClass.getId());
+            if (updatedClass != null) {
+                log.info("验证更新结果 - 班级ID: {}, 课程ID: {}", updatedClass.getId(), updatedClass.getCourseId());
+            }
+        } catch (Exception e) {
+            log.error("更新班级失败", e);
+            throw new BusinessException(ResultCode.SYSTEM_ERROR, "更新班级失败：" + e.getMessage());
+        }
+        
+        // 返回更新后的完整信息
+        CourseClass updatedClass = getClassById(courseClass.getId());
+        log.info("班级更新成功，ID: {}, 课程ID: {}", updatedClass.getId(), updatedClass.getCourseId());
+        return updatedClass;
     }
 
     @Override
     @Transactional
-    public void deleteClass(Long classId) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
-        
-        Class clazz = classMapper.selectByIdAndTeacherId(classId, teacherId);
-        if (clazz == null) {
-            throw new BusinessException(ResultCode.NOT_FOUND, "班级不存在");
+    public void deleteClass(Long id) {
+        // 获取班级信息
+        CourseClass courseClass = courseClassMapper.selectById(id);
+        if (courseClass == null) {
+            throw new BusinessException(ResultCode.DATA_NOT_FOUND, "班级不存在");
         }
         
-        // 检查是否有学生
-        Integer studentCount = classMapper.getStudentCount(classId);
-        if (studentCount > 0) {
-            throw new BusinessException(ResultCode.BUSINESS_ERROR, "班级内还有学生，无法删除");
-        }
+        // 检查权限
+        checkPermission(courseClass);
         
-        classMapper.deleteById(classId);
-        log.info("班级删除成功，班级ID：{}", classId);
+        // 删除班级关联的学生记录
+        LambdaQueryWrapper<ClassStudent> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ClassStudent::getClassId, id);
+        classStudentMapper.delete(wrapper);
+        
+        // 删除班级
+        courseClassMapper.deleteById(id);
     }
 
     @Override
-    public PageResponse<ClassStudentResponse> getClassStudents(Long classId, PageRequest pageRequest, String keyword) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
-        
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+    public PageResponse<Student> getStudentsByClassId(Long classId, int page, int size, String keyword) {
+        // 获取班级信息
+        CourseClass courseClass = courseClassMapper.selectById(classId);
+        if (courseClass == null) {
+            throw new BusinessException(ResultCode.DATA_NOT_FOUND, "班级不存在");
         }
         
-        Long offset = (long) ((pageRequest.getCurrent() - 1) * pageRequest.getPageSize());
-        List<User> students = classMapper.selectStudentsByClassId(classId, keyword, offset, (long) pageRequest.getPageSize());
-        Long total = classMapper.countStudentsByClassId(classId, keyword);
+        // 检查权限
+        checkPermission(courseClass);
         
-        List<ClassStudentResponse> responses = students.stream()
-                .map(this::convertToClassStudentResponse)
-                .collect(Collectors.toList());
+        // 查询分页数据
+        Page<Student> pageParam = new Page<>(page + 1, size); // 后端是1-based索引
+        IPage<Student> result = studentMapper.selectPageByClassId(pageParam, classId, keyword);
         
-        return PageResponse.<ClassStudentResponse>builder()
-                .records(responses)
-                .total(total)
-                .current(pageRequest.getCurrent())
-                .pageSize(pageRequest.getPageSize())
-                .build();
+        // 直接使用IPage转换
+        return PageResponse.of(result);
     }
 
     @Override
     @Transactional
     public void addStudentsToClass(Long classId, List<Long> studentIds) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
-        
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+        if (studentIds == null || studentIds.isEmpty()) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "学生ID列表不能为空");
         }
         
-        // 批量添加学生
-        for (Long studentId : studentIds) {
-            classMapper.addStudent(classId, studentId);
+        // 获取班级信息
+        CourseClass courseClass = courseClassMapper.selectById(classId);
+        if (courseClass == null) {
+            throw new BusinessException(ResultCode.DATA_NOT_FOUND, "班级不存在");
         }
-        log.info("批量添加学生到班级成功，班级ID：{}，学生数量：{}", classId, studentIds.size());
+        
+        // 检查权限
+        checkPermission(courseClass);
+        
+        // 批量添加学生到班级
+        List<ClassStudent> classStudents = studentIds.stream()
+            .map(studentId -> {
+                // 检查学生是否已经在班级中
+                LambdaQueryWrapper<ClassStudent> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(ClassStudent::getClassId, classId)
+                       .eq(ClassStudent::getStudentId, studentId);
+                if (classStudentMapper.selectCount(wrapper) > 0) {
+                    return null; // 已存在，跳过
+                }
+                
+                // 创建新关联
+                ClassStudent classStudent = new ClassStudent();
+                classStudent.setClassId(classId);
+                classStudent.setStudentId(studentId);
+                return classStudent;
+            })
+            .filter(cs -> cs != null) // 过滤掉已存在的
+            .collect(Collectors.toList());
+        
+        // 批量插入
+        if (!classStudents.isEmpty()) {
+            for (ClassStudent cs : classStudents) {
+                classStudentMapper.insert(cs);
+            }
+        }
     }
 
     @Override
     @Transactional
     public void removeStudentFromClass(Long classId, Long studentId) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
-        
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+        // 获取班级信息
+        CourseClass courseClass = courseClassMapper.selectById(classId);
+        if (courseClass == null) {
+            throw new BusinessException(ResultCode.DATA_NOT_FOUND, "班级不存在");
         }
         
-        classMapper.removeStudent(classId, studentId);
-        log.info("从班级移除学生成功，班级ID：{}，学生ID：{}", classId, studentId);
+        // 检查权限
+        checkPermission(courseClass);
+        
+        // 删除关联
+        LambdaQueryWrapper<ClassStudent> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ClassStudent::getClassId, classId)
+               .eq(ClassStudent::getStudentId, studentId);
+        classStudentMapper.delete(wrapper);
+    }
+    
+    /**
+     * 检查当前用户是否有权限操作班级
+     */
+    private void checkPermission(CourseClass courseClass) {
+        Long currentUserId = securityUtil.getCurrentUserId();
+        if (!currentUserId.equals(courseClass.getTeacherId())) {
+            log.warn("权限检查失败：当前用户ID: {}, 班级所属教师ID: {}", currentUserId, courseClass.getTeacherId());
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权操作该班级");
+        }
     }
 
+    /**
+     * 根据用户ID查询教师ID
+     * 
+     * @param userId 用户ID
+     * @return 教师ID，如果不存在则返回null
+     */
     @Override
-    @Transactional
-    public void removeStudentsFromClass(Long classId, List<Long> studentIds) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
-        
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
+    public Long getTeacherIdByUserId(Long userId) {
+        if (userId == null) {
+            log.warn("传入的用户ID为null");
+            return null;
         }
         
-        for (Long studentId : studentIds) {
-            classMapper.removeStudent(classId, studentId);
+        log.info("查询用户ID为{}的教师信息", userId);
+        
+        // 使用TeacherMapper查询教师信息
+        Teacher teacher = teacherMapper.selectByUserId(userId);
+        
+        if (teacher == null) {
+            log.warn("未找到用户ID为{}的教师信息", userId);
+            return null;
         }
-        log.info("批量从班级移除学生成功，班级ID：{}，学生数量：{}", classId, studentIds.size());
+        
+        log.info("查询到用户ID为{}的教师ID为{}", userId, teacher.getId());
+        return teacher.getId();
     }
-
-    @Override
-    public Object getClassStatistics(Long classId) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
-        
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
-        }
-        
-        return getClassStatisticsData(classId);
-    }
-
-    @Override
-    @Transactional
-    public void updateClassStatus(Long classId, String status) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
-        
-        Class clazz = classMapper.selectByIdAndTeacherId(classId, teacherId);
-        if (clazz == null) {
-            throw new BusinessException(ResultCode.NOT_FOUND, "班级不存在");
-        }
-        
-        clazz.setStatus(status);
-        clazz.setUpdateTime(LocalDateTime.now());
-        classMapper.updateById(clazz);
-        
-        log.info("班级状态更新成功，班级ID：{}，状态：{}", classId, status);
-    }
-
-    @Override
-    @Transactional
-    public ClassResponse copyClass(Long classId, String newName) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
-        
-        Class originalClass = classMapper.selectByIdAndTeacherId(classId, teacherId);
-        if (originalClass == null) {
-            throw new BusinessException(ResultCode.NOT_FOUND, "班级不存在");
-        }
-        
-        // 检查新名称是否重复
-        if (classMapper.existsByNameAndTeacherId(newName, teacherId)) {
-            throw new BusinessException(ResultCode.BUSINESS_ERROR, "班级名称已存在");
-        }
-        
-        Class newClass = new Class();
-        newClass.setClassName(newName);
-        newClass.setGrade(originalClass.getGrade());
-        newClass.setMajor(originalClass.getMajor());
-        newClass.setDescription(originalClass.getDescription());
-        newClass.setMaxStudentCount(originalClass.getMaxStudentCount());
-        newClass.setSemester(originalClass.getSemester());
-        newClass.setHeadTeacherId(teacherId);
-        newClass.setStatus("ACTIVE");
-        newClass.setCreateTime(LocalDateTime.now());
-        newClass.setUpdateTime(LocalDateTime.now());
-        
-        classMapper.insert(newClass);
-        
-        log.info("班级复制成功，原班级ID：{}，新班级ID：{}", classId, newClass.getId());
-        return convertToClassResponse(newClass);
-    }
-
-    @Override
-    public String exportClassStudents(Long classId) {
-        Long teacherId = SecurityUtils.getCurrentUserId();
-        
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
-        }
-        
-        // TODO: 实现Excel导出逻辑
-        // 这里应该调用文件服务生成Excel文件并返回下载URL
-        String downloadUrl = "/api/downloads/class-students-" + classId + ".xlsx";
-        
-        log.info("班级学生名单导出成功，班级ID：{}，下载URL：{}", classId, downloadUrl);
-        return downloadUrl;
-    }
-
-    @Override
-    public List<Object> getInviteCodes(Long classId, Long teacherId) {
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
-        }
-        
-        // 获取邀请码列表
-        return classMapper.selectInviteCodes(classId);
-    }
-
-    @Override
-    public Boolean disableInviteCode(Long inviteCodeId, Long teacherId) {
-        // 验证邀请码权限
-        if (!classMapper.isInviteCodeOwnedByTeacher(inviteCodeId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限操作该邀请码");
-        }
-        
-        // 禁用邀请码
-        return classMapper.disableInviteCode(inviteCodeId) > 0;
-    }
-
-    @Override
-    public List<Object> getClassCourses(Long classId, Long teacherId) {
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
-        }
-        
-        // 获取班级课程列表
-        return classMapper.selectClassCourses(classId);
-    }
-
-    @Override
-    public Boolean assignCourses(Long classId, List<Long> courseIds, Long teacherId) {
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
-        }
-        
-        // 分配课程
-        return classMapper.assignCourses(classId, courseIds) > 0;
-    }
-
-    @Override
-    public Boolean removeCourse(Long classId, Long courseId, Long teacherId) {
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
-        }
-        
-        // 移除课程
-        return classMapper.removeCourse(classId, courseId) > 0;
-    }
-
-    @Override
-    public PageResponse<Object> getClassTasks(Long classId, Long teacherId, PageRequest pageRequest) {
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
-        }
-        
-        // 获取班级任务列表
-        Long offset = (long) ((pageRequest.getCurrent() - 1) * pageRequest.getPageSize());
-        List<Object> tasks = classMapper.selectClassTasks(classId, offset, (long) pageRequest.getPageSize());
-        Long total = classMapper.countClassTasks(classId);
-        
-        return PageResponse.builder()
-                .records(tasks)
-                .total(total)
-                .current(pageRequest.getCurrent())
-                .pageSize(pageRequest.getPageSize())
-                .build();
-    }
-
-    @Override
-    public Object getClassGradeOverview(Long classId, Long teacherId) {
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
-        }
-        
-        // 获取班级成绩概览
-        return classMapper.selectClassGradeOverview(classId);
-    }
-
-    @Override
-    public Boolean sendClassNotification(Long classId, String title, String content, Long teacherId) {
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
-        }
-        
-        // 发送班级通知
-        return classMapper.insertClassNotification(classId, title, content, teacherId) > 0;
-    }
-
-    @Override
-    public PageResponse<Object> getClassNotifications(Long classId, Long teacherId, PageRequest pageRequest) {
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
-        }
-        
-        // 获取班级通知列表
-        Long offset = (long) ((pageRequest.getCurrent() - 1) * pageRequest.getPageSize());
-        List<Object> notifications = classMapper.selectClassNotifications(classId, offset, (long) pageRequest.getPageSize());
-        Long total = classMapper.countClassNotifications(classId);
-        
-        return PageResponse.builder()
-                .records(notifications)
-                .total(total)
-                .current(pageRequest.getCurrent())
-                .pageSize(pageRequest.getPageSize())
-                .build();
-    }
-
-    @Override
-    public Boolean archiveClass(Long classId, Long teacherId) {
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
-        }
-        
-        // 归档班级
-        Class clazz = classMapper.selectById(classId);
-        if (clazz == null) {
-            throw new BusinessException(ResultCode.NOT_FOUND, "班级不存在");
-        }
-        
-        clazz.setStatus("ARCHIVED");
-        clazz.setUpdateTime(LocalDateTime.now());
-        
-        return classMapper.updateById(clazz) > 0;
-    }
-
-    @Override
-    public Boolean restoreClass(Long classId, Long teacherId) {
-        // 验证班级权限
-        if (!classMapper.existsByIdAndTeacherId(classId, teacherId)) {
-            throw new BusinessException(ResultCode.FORBIDDEN, "无权限访问该班级");
-        }
-        
-        // 恢复归档班级
-        Class clazz = classMapper.selectById(classId);
-        if (clazz == null) {
-            throw new BusinessException(ResultCode.NOT_FOUND, "班级不存在");
-        }
-        
-        clazz.setStatus("ACTIVE");
-        clazz.setUpdateTime(LocalDateTime.now());
-        
-        return classMapper.updateById(clazz) > 0;
-    }
-
-    // 私有辅助方法
-    private ClassResponse convertToClassResponse(Class clazz) {
-        ClassResponse response = new ClassResponse();
-        response.setId(clazz.getId());
-        response.setName(clazz.getClassName());
-        response.setGrade(String.valueOf(clazz.getGrade()));
-        response.setMajor(clazz.getMajor());
-        response.setDescription(clazz.getDescription());
-        response.setCapacity(clazz.getMaxStudentCount());
-        response.setStudentCount(classMapper.getStudentCount(clazz.getId()));
-        response.setSemester(clazz.getSemester());
-        response.setStatus(clazz.getStatus());
-        response.setCreateTime(clazz.getCreateTime());
-        response.setUpdateTime(clazz.getUpdateTime());
-        
-        // 获取教师姓名
-        User teacher = userMapper.selectById(clazz.getHeadTeacherId());
-        if (teacher != null) {
-            response.setTeacherName(teacher.getUsername());
-        }
-        
-        return response;
-    }
-
-    private ClassDetailResponse convertToClassDetailResponse(Class clazz) {
-        ClassDetailResponse response = new ClassDetailResponse();
-        response.setId(clazz.getId());
-        response.setName(clazz.getClassName());
-        response.setGrade(String.valueOf(clazz.getGrade()));
-        response.setMajor(clazz.getMajor());
-        response.setDescription(clazz.getDescription());
-        response.setCapacity(clazz.getMaxStudentCount());
-        response.setStudentCount(classMapper.getStudentCount(clazz.getId()));
-        response.setSemester(clazz.getSemester());
-        response.setStatus(clazz.getStatus());
-        response.setCreateTime(clazz.getCreateTime());
-        response.setUpdateTime(clazz.getUpdateTime());
-        
-        // 获取教师姓名
-        User teacher = userMapper.selectById(clazz.getHeadTeacherId());
-        if (teacher != null) {
-            response.setTeacherName(teacher.getUsername());
-        }
-        
-        return response;
-    }
-
-    private ClassStudentResponse convertToClassStudentResponse(User student) {
-        ClassStudentResponse response = new ClassStudentResponse();
-        response.setId(student.getId());
-        response.setStudentId(student.getId().toString());  // Convert Long to String
-        response.setName(student.getUsername());
-        response.setEmail(student.getEmail());
-        response.setPhone(student.getPhone());
-        
-        // Default gender to "未知" as User entity doesn't have gender field
-        response.setGender("未知");
-        
-        // Try to get extField1 as gender if available
-        if (student.getExtField1() != null && !student.getExtField1().isEmpty()) {
-            response.setGender(student.getExtField1());
-        }
-        
-        response.setJoinTime(student.getCreateTime());
-        response.setStatus("ACTIVE");
-        
-        // TODO: 获取学习统计数据
-        response.setCompletedAssignments(0);
-        response.setTotalAssignments(0);
-        response.setAverageScore(0.0);
-        response.setAttendance(0);
-        response.setLastActiveTime(LocalDateTime.now());
-        
-        return response;
-    }
-
-    private ClassDetailResponse.ClassStatistics getClassStatisticsData(Long classId) {
-        ClassDetailResponse.ClassStatistics statistics = new ClassDetailResponse.ClassStatistics();
-        
-        // TODO: 实现真实的统计逻辑
-        statistics.setTotalStudents(classMapper.getStudentCount(classId));
-        statistics.setActiveStudents(classMapper.getStudentCount(classId));
-        statistics.setTotalCourses(0);
-        statistics.setTotalAssignments(0);
-        statistics.setAverageScore(0.0);
-        statistics.setCompletedAssignments(0);
-        
-        return statistics;
-    }
-
-    private List<ClassDetailResponse.RecentActivity> getRecentActivities(Long classId) {
-        // TODO: 实现获取最近活动的逻辑
-        return List.of();
-    }
-}
+} 

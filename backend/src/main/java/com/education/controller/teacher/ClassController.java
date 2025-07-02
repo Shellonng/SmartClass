@@ -1,213 +1,173 @@
 package com.education.controller.teacher;
 
-import com.education.dto.common.Result;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
-import com.education.dto.clazz.ClassCreateRequest;
-import com.education.dto.clazz.ClassUpdateRequest;
-import com.education.dto.clazz.ClassResponse;
-import com.education.dto.clazz.ClassDetailResponse;
-import com.education.dto.clazz.ClassStudentResponse;
+import com.education.dto.common.Result;
+import com.education.entity.Course;
+import com.education.entity.CourseClass;
+import com.education.entity.Student;
+import com.education.mapper.CourseMapper;
+import com.education.security.SecurityUtil;
 import com.education.service.teacher.ClassService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * 教师端班级管理控制器
- * 
- * @author Education Platform Team
- * @version 1.0.0
- * @since 2024
+ * 班级管理控制器
  */
-@Tag(name = "教师端班级管理", description = "班级的创建、编辑、删除、查询等功能")
 @RestController
 @RequestMapping("/api/teacher/classes")
+@Tag(name = "班级管理", description = "教师班级管理相关接口")
 @RequiredArgsConstructor
 @Slf4j
 public class ClassController {
 
     private final ClassService classService;
+    private final CourseMapper courseMapper;
+    private final SecurityUtil securityUtil;
 
-    /**
-     * 分页查询班级列表
-     */
-    @Operation(summary = "分页查询班级列表")
     @GetMapping
-    public Result<PageResponse<ClassResponse>> getClassList(
-            @Valid PageRequest pageRequest,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String grade,
-            @RequestParam(required = false) String status) {
-        log.info("分页查询班级列表，页码：{}，页大小：{}，班级名称：{}，年级：{}，状态：{}", 
-                pageRequest.getCurrent(), pageRequest.getPageSize(), name, grade, status);
+    @Operation(summary = "获取班级列表", description = "分页获取当前教师的班级列表")
+    public Result<PageResponse<CourseClass>> getClasses(
+            @Parameter(description = "分页参数") PageRequest pageRequest,
+            @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword,
+            @Parameter(description = "课程ID") @RequestParam(required = false) Long courseId) {
         
-        PageResponse<ClassResponse> response = classService.getClassList(pageRequest, name, grade, status);
+        PageResponse<CourseClass> response = classService.getClassesByTeacher(
+                pageRequest.getCurrent() - 1, // 前端是0-based索引
+                pageRequest.getPageSize(),
+                keyword,
+                courseId
+        );
+        
         return Result.success(response);
     }
 
-    /**
-     * 创建班级
-     */
-    @Operation(summary = "创建班级")
+    @GetMapping("/{id}")
+    @Operation(summary = "获取班级详情", description = "根据ID获取班级详细信息")
+    public Result<CourseClass> getClassDetail(
+            @Parameter(description = "班级ID") @PathVariable Long id) {
+        
+        CourseClass courseClass = classService.getClassById(id);
+        return Result.success(courseClass);
+    }
+
     @PostMapping
-    public Result<ClassResponse> createClass(@Valid @RequestBody ClassCreateRequest request) {
-        log.info("创建班级，班级名称：{}，年级：{}，专业：{}", 
-                request.getName(), request.getGrade(), request.getMajor());
+    @Operation(summary = "创建班级", description = "创建新的班级")
+    public Result<CourseClass> createClass(
+            @Parameter(description = "班级信息") @RequestBody CourseClass courseClass) {
         
-        ClassResponse response = classService.createClass(request);
-        return Result.success("班级创建成功", response);
+        CourseClass createdClass = classService.createClass(courseClass);
+        return Result.success(createdClass);
     }
 
-    /**
-     * 获取班级详情
-     */
-    @Operation(summary = "获取班级详情")
-    @GetMapping("/{classId}")
-    public Result<ClassDetailResponse> getClassDetail(@PathVariable Long classId) {
-        log.info("获取班级详情，班级ID：{}", classId);
+    @PutMapping("/{id}")
+    @Operation(summary = "更新班级", description = "更新班级信息")
+    public Result<CourseClass> updateClass(
+            @Parameter(description = "班级ID") @PathVariable Long id,
+            @Parameter(description = "班级信息") @RequestBody CourseClass courseClass) {
         
-        ClassDetailResponse response = classService.getClassDetail(classId);
+        // 设置ID
+        courseClass.setId(id);
+        
+        // 记录接收到的班级信息，特别关注课程ID
+        log.info("接收到更新班级请求，班级ID: {}, 班级名称: {}, 课程ID: {}", 
+            id, courseClass.getName(), courseClass.getCourseId());
+        
+        CourseClass updatedClass = classService.updateClass(courseClass);
+        
+        // 记录更新后的班级信息
+        log.info("班级更新成功，ID: {}, 名称: {}, 课程ID: {}", 
+            updatedClass.getId(), updatedClass.getName(), updatedClass.getCourseId());
+        
+        return Result.success(updatedClass);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "删除班级", description = "删除指定班级")
+    public Result<Void> deleteClass(
+            @Parameter(description = "班级ID") @PathVariable Long id) {
+        
+        classService.deleteClass(id);
+        return Result.success();
+    }
+
+    @GetMapping("/{id}/students")
+    @Operation(summary = "获取班级学生列表", description = "分页获取班级学生列表")
+    public Result<PageResponse<Student>> getClassStudents(
+            @Parameter(description = "班级ID") @PathVariable Long id,
+            @Parameter(description = "分页参数") PageRequest pageRequest,
+            @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword) {
+        
+        PageResponse<Student> response = classService.getStudentsByClassId(
+                id,
+                pageRequest.getCurrent() - 1, // 前端是0-based索引
+                pageRequest.getPageSize(),
+                keyword
+        );
+        
         return Result.success(response);
     }
 
-    /**
-     * 更新班级信息
-     */
-    @Operation(summary = "更新班级信息")
-    @PutMapping("/{classId}")
-    public Result<ClassResponse> updateClass(
-            @PathVariable Long classId, 
-            @Valid @RequestBody ClassUpdateRequest request) {
-        log.info("更新班级信息，班级ID：{}，班级名称：{}", classId, request.getName());
-        
-        ClassResponse response = classService.updateClass(classId, request);
-        return Result.success("班级信息更新成功", response);
-    }
-
-    /**
-     * 删除班级
-     */
-    @Operation(summary = "删除班级")
-    @DeleteMapping("/{classId}")
-    public Result<Void> deleteClass(@PathVariable Long classId) {
-        log.info("删除班级，班级ID：{}", classId);
-        
-        classService.deleteClass(classId);
-        return Result.success("班级删除成功");
-    }
-
-    /**
-     * 获取班级学生列表
-     */
-    @Operation(summary = "获取班级学生列表")
-    @GetMapping("/{classId}/students")
-    public Result<PageResponse<ClassStudentResponse>> getClassStudents(
-            @PathVariable Long classId,
-            @Valid PageRequest pageRequest,
-            @RequestParam(required = false) String keyword) {
-        log.info("获取班级学生列表，班级ID：{}，关键词：{}", classId, keyword);
-        
-        PageResponse<ClassStudentResponse> response = classService.getClassStudents(classId, pageRequest, keyword);
-        return Result.success(response);
-    }
-
-    /**
-     * 添加学生到班级
-     */
-    @Operation(summary = "添加学生到班级")
-    @PostMapping("/{classId}/students")
+    @PostMapping("/{id}/students")
+    @Operation(summary = "添加学生到班级", description = "批量添加学生到班级")
     public Result<Void> addStudentsToClass(
-            @PathVariable Long classId,
-            @RequestBody List<Long> studentIds) {
-        log.info("添加学生到班级，班级ID：{}，学生数量：{}", classId, studentIds.size());
+            @Parameter(description = "班级ID") @PathVariable Long id,
+            @Parameter(description = "学生ID列表") @RequestBody List<Long> studentIds) {
         
-        classService.addStudentsToClass(classId, studentIds);
-        return Result.success("学生添加成功");
+        classService.addStudentsToClass(id, studentIds);
+        return Result.success();
     }
 
-    /**
-     * 从班级移除学生
-     */
-    @Operation(summary = "从班级移除学生")
-    @DeleteMapping("/{classId}/students/{studentId}")
+    @DeleteMapping("/{id}/students/{studentId}")
+    @Operation(summary = "从班级移除学生", description = "从班级中移除指定学生")
     public Result<Void> removeStudentFromClass(
-            @PathVariable Long classId,
-            @PathVariable Long studentId) {
-        log.info("从班级移除学生，班级ID：{}，学生ID：{}", classId, studentId);
+            @Parameter(description = "班级ID") @PathVariable Long id,
+            @Parameter(description = "学生ID") @PathVariable Long studentId) {
         
-        classService.removeStudentFromClass(classId, studentId);
-        return Result.success("学生移除成功");
+        classService.removeStudentFromClass(id, studentId);
+        return Result.success();
     }
 
     /**
-     * 批量从班级移除学生
+     * 获取当前教师的课程列表（用于班级绑定）
      */
-    @Operation(summary = "批量从班级移除学生")
-    @DeleteMapping("/{classId}/students")
-    public Result<Void> removeStudentsFromClass(
-            @PathVariable Long classId,
-            @RequestBody List<Long> studentIds) {
-        log.info("批量从班级移除学生，班级ID：{}，学生数量：{}", classId, studentIds.size());
+    @GetMapping("/courses")
+    @Operation(summary = "获取当前教师的课程列表", description = "获取当前教师的课程列表，用于班级绑定")
+    public Result<List<Course>> getTeacherCourses() {
+        // 获取当前登录的用户ID
+        Long userId = securityUtil.getCurrentUserId();
         
-        classService.removeStudentsFromClass(classId, studentIds);
-        return Result.success("学生批量移除成功");
-    }
-
-    /**
-     * 获取班级统计信息
-     */
-    @Operation(summary = "获取班级统计信息")
-    @GetMapping("/{classId}/statistics")
-    public Result<Object> getClassStatistics(@PathVariable Long classId) {
-        log.info("获取班级统计信息，班级ID：{}", classId);
+        // 打印日志，便于调试
+        log.info("当前用户ID: {}", userId);
         
-        Object statistics = classService.getClassStatistics(classId);
-        return Result.success(statistics);
-    }
-
-    /**
-     * 设置班级状态
-     */
-    @Operation(summary = "设置班级状态")
-    @PutMapping("/{classId}/status")
-    public Result<Void> updateClassStatus(
-            @PathVariable Long classId,
-            @RequestParam String status) {
-        log.info("设置班级状态，班级ID：{}，状态：{}", classId, status);
+        // 查询用户ID对应的教师记录
+        Long teacherId = classService.getTeacherIdByUserId(userId);
         
-        classService.updateClassStatus(classId, status);
-        return Result.success("班级状态更新成功");
-    }
-
-    /**
-     * 复制班级
-     */
-    @Operation(summary = "复制班级")
-    @PostMapping("/{classId}/copy")
-    public Result<ClassResponse> copyClass(
-            @PathVariable Long classId,
-            @RequestParam String newName) {
-        log.info("复制班级，原班级ID：{}，新班级名称：{}", classId, newName);
+        // 打印日志，便于调试
+        log.info("查询到的教师ID: {}", teacherId);
         
-        ClassResponse response = classService.copyClass(classId, newName);
-        return Result.success("班级复制成功", response);
-    }
-
-    /**
-     * 导出班级学生名单
-     */
-    @Operation(summary = "导出班级学生名单")
-    @GetMapping("/{classId}/export")
-    public Result<String> exportClassStudents(@PathVariable Long classId) {
-        log.info("导出班级学生名单，班级ID：{}", classId);
+        if (teacherId == null) {
+            log.warn("未找到当前用户对应的教师信息，用户ID: {}", userId);
+            return Result.success(Collections.emptyList());
+        }
         
-        String downloadUrl = classService.exportClassStudents(classId);
-        return Result.success("学生名单导出成功", downloadUrl);
+        // 使用教师ID查询课程
+        List<Course> courses = courseMapper.selectList(
+            new LambdaQueryWrapper<Course>()
+                .eq(Course::getTeacherId, teacherId)
+                .orderByDesc(Course::getCreateTime)
+        );
+        
+        log.info("查询到{}门课程", courses.size());
+        return Result.success(courses);
     }
-}
+} 

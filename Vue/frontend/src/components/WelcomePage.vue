@@ -679,7 +679,7 @@ const goToDashboard = () => {
 // 处理退出登录
 const handleLogout = async () => {
   try {
-    await authStore.logout()
+    await authStore.logoutUser()
     message.success('已退出登录')
   } catch (error) {
     console.error('退出登录失败:', error)

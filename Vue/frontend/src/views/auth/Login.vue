@@ -265,8 +265,7 @@ import {
   MailOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/stores/auth'
-import type { LoginRequest } from '@/api/auth'
-import { register } from '@/api/auth'
+import { register, login } from '@/api/auth'
 
 const router = useRouter()
 const route = useRoute()
@@ -357,19 +356,45 @@ const handleLogin = async () => {
     loading.value = true
     
     // 准备登录数据
-    const loginData: LoginRequest = {
+    const loginData = {
       username: loginForm.username,
       password: loginForm.password,
-
+      role: selectedRole.value.toUpperCase()
     }
     
-    // 调用登录接口
-    const result = await authStore.loginUser(loginData)
+    console.log('🚀 提交登录数据:', loginData)
     
-
+    // 调用auth store的登录方法
+    const result = await authStore.login(loginData)
+    
+    if (result.success) {
+      message.success('登录成功')
+      
+      // 根据用户角色跳转到对应页面
+      const userRole = result.data.userInfo.role
+      console.log('登录成功，用户角色:', userRole)
+      
+      if (userRole === 'TEACHER') {
+        console.log('跳转到教师端...')
+        await router.push('/teacher/dashboard')
+      } else if (userRole === 'STUDENT') {
+        console.log('跳转到学生端...')  
+        await router.push('/student/dashboard')
+      } else {
+        console.log('跳转到首页...')
+        await router.push('/')
+      }
+    } else {
+      message.error(result.message || '登录失败')
+    }
     
   } catch (error: any) {
-    message.error(error.message || '登录失败，请检查用户名和密码')
+    console.error('❌ 登录失败:', error)
+    if (error.response?.data?.message) {
+      message.error(error.response.data.message)
+    } else {
+      message.error(error.message || '登录失败，请检查用户名和密码')
+    }
   } finally {
     loading.value = false
   }
@@ -385,7 +410,7 @@ const handleRegister = async () => {
   try {
     loading.value = true
     
-    // 调用注册API
+    // 准备注册数据
     const registerData = {
       username: registerForm.username,
       password: registerForm.password,
@@ -395,21 +420,37 @@ const handleRegister = async () => {
       role: registerForm.role
     }
     
+    // 调用注册API
     const response = await register(registerData)
     
-    if (response.data.code === 200) {
-      message.success('注册成功！已自动登录')
+    if (response.data.success) {
+      message.success('注册成功！正在登录...')
       
-      // 保存token和用户信息
-      const { token, userInfo } = response.data.data
-      authStore.setToken(token)
-      authStore.user = userInfo
+      // 注册成功后自动登录
+      const loginData = {
+        username: registerForm.username,
+        password: registerForm.password,
+        role: registerForm.role
+      }
       
-      // 根据用户角色跳转到对应页面
-      if (userInfo.role === 'student') {
-        router.push('/student/dashboard')
-      } else if (userInfo.role === 'teacher') {
-        router.push('/teacher/dashboard')
+      // 使用authStore登录
+      const loginResult = await authStore.login(loginData)
+      
+      if (loginResult.success) {
+        message.success('登录成功')
+        
+        // 根据用户角色跳转到对应页面
+        const userRole = loginResult.data.userInfo.role
+        if (userRole === 'TEACHER') {
+          router.push('/teacher/dashboard')
+        } else if (userRole === 'STUDENT') {
+          router.push('/student/dashboard')
+      } else {
+          router.push('/')
+        }
+      } else {
+        message.error('自动登录失败，请手动登录')
+        router.push('/login') // 跳转回登录页面
       }
     } else {
       message.error(response.data.message || '注册失败')

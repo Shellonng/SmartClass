@@ -10,12 +10,13 @@ public enum ResultCode {
     SUCCESS(200, "操作成功"),
     FAIL(500, "操作失败"),
     PARAM_ERROR(400, "参数错误"),
-    UNAUTHORIZED(401, "未授权"),
-    FORBIDDEN(403, "禁止访问"),
+    UNAUTHORIZED(401, "未登录或登录已过期"),
+    FORBIDDEN(403, "无权限"),
     ACCESS_DENIED(403, "访问被拒绝"),
     NOT_FOUND(404, "资源不存在"),
-    METHOD_NOT_ALLOWED(405, "请求方法不允许"),
-    INTERNAL_SERVER_ERROR(500, "服务器内部错误"),
+    METHOD_NOT_ALLOWED(405, "请求方法不支持"),
+    INTERNAL_SERVER_ERROR(500, "系统错误"),
+    SYSTEM_ERROR(500, "系统错误"),
     
     // 用户相关 (2000-2999)
     USER_NOT_FOUND(2001, "用户不存在"),
@@ -36,21 +37,25 @@ public enum ResultCode {
     DATA_DELETE_ERROR(3005, "数据删除失败"),
     
     // 业务相关 (4000-4999)
-    BUSINESS_ERROR(4001, "业务处理失败"),
+    BUSINESS_ERROR(501, "业务错误"),
     VALIDATION_ERROR(4002, "数据验证失败"),
     
+    // 课程相关错误码
+    COURSE_NOT_FOUND(4101, "课程不存在"),
+    
     // 文件相关 (5000-5999)
-    FILE_UPLOAD_ERROR(5001, "文件上传失败"),
+    FILE_UPLOAD_ERROR(10001, "文件上传失败"),
     FILE_UPLOAD_FAILED(5002, "文件上传失败"),
-    FILE_DOWNLOAD_ERROR(5003, "文件下载失败"),
+    FILE_DOWNLOAD_ERROR(10002, "文件下载失败"),
     FILE_NOT_FOUND(5004, "文件不存在"),
-    FILE_TYPE_ERROR(5005, "文件类型不支持"),
-    FILE_SIZE_ERROR(5006, "文件大小超出限制"),
+    FILE_TYPE_ERROR(10003, "文件类型不支持"),
+    FILE_SIZE_ERROR(10004, "文件大小超出限制"),
     FILE_SIZE_EXCEEDED(5007, "文件大小超出限制"),
     FILE_TYPE_NOT_ALLOWED(5008, "文件类型不允许"),
     NO_PERMISSION(5009, "没有权限"),
     SHARE_NOT_FOUND(5010, "分享不存在"),
     FILE_OPERATION_FAILED(5011, "文件操作失败"),
+    FILE_DELETE_ERROR(10005, "文件删除失败"),
     
     // AI服务相关 (6000-6999)
     AI_SERVICE_ERROR(6001, "AI服务调用失败"),
@@ -65,7 +70,12 @@ public enum ResultCode {
     TASK_OVERDUE(7005, "任务已过期"),
     
     // 资源相关 (8000-8999)
-    RESOURCE_NOT_FOUND(8001, "资源不存在");
+    RESOURCE_NOT_FOUND(8001, "资源不存在"),
+    RESOURCE_UPLOAD_ERROR(8002, "资源上传失败"),
+    RESOURCE_DOWNLOAD_ERROR(8003, "资源下载失败"),
+    RESOURCE_DELETE_ERROR(8004, "资源删除失败"),
+    RESOURCE_ACCESS_DENIED(8005, "无权访问该资源"),
+    PERMISSION_DENIED(8006, "权限不足");
     
     private final int code;
     private final String message;

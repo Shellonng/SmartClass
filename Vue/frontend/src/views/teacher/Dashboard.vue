@@ -120,9 +120,9 @@
 
       <!-- 主要内容区域 -->
       <div class="dashboard-content">
-        <a-row :gutter="24">
+        <a-row :gutter="12" type="flex" justify="space-between">
           <!-- 左侧主要内容 -->
-          <a-col :span="16">
+          <a-col :xs="24" :sm="24" :md="17" :lg="17" :xl="18" class="left-content">
             <!-- 我的课程 -->
             <div class="content-section">
               <div class="section-header">
@@ -149,9 +149,8 @@
                   class="course-card"
                 >
                   <div class="course-header">
-                    <div class="course-cover" :style="{ background: getCourseGradient(course.subject) }">
-                      <div class="course-category">{{ course.subject }}</div>
-                      <div class="course-level">{{ course.difficulty }}</div>
+                    <div class="course-cover" :style="getCourseCoverStyle(course)">
+                      <div class="course-status">{{ getCourseStatusText(course.status) }}</div>
                     </div>
                     <div class="course-actions">
                       <a-dropdown>
@@ -171,62 +170,63 @@
                   </div>
                   
                   <div class="course-content">
-                    <h4 class="course-title">{{ course.name }}</h4>
-                    <p class="course-description">{{ course.description }}</p>
+                    <h4 class="course-title">{{ course.title || course.courseName }}</h4>
+                    <p class="course-description">{{ course.description || '暂无描述' }}</p>
                     
                     <div class="course-meta">
                       <div class="meta-item">
                         <UserOutlined />
-                        <span>{{ course.studentCount }}名学生</span>
+                        <span>{{ course.studentCount || 0 }}名学生</span>
                       </div>
                       <div class="meta-item">
                         <PlayCircleOutlined />
-                        <span>{{ course.chapterCount }}个章节</span>
+                        <span>{{ course.chapterCount || 0 }}个章节</span>
                       </div>
                       <div class="meta-item">
                         <StarOutlined />
-                        <span>{{ course.rating }}分</span>
+                        <span>{{ course.credit || course.credits || 3 }}学分</span>
                       </div>
                     </div>
                     
                     <div class="course-progress">
                       <div class="progress-header">
                         <span>教学进度</span>
-                        <span>{{ course.progress }}%</span>
+                        <span>{{ course.progress || calculateProgress(course.startTime, course.endTime) }}%</span>
                       </div>
                       <a-progress 
-                        :percent="course.progress" 
+                        :percent="course.progress || calculateProgress(course.startTime, course.endTime)" 
                         size="small" 
                         :show-info="false"
-                        :stroke-color="getCourseColor(course.subject)"
+                        :stroke-color="getCourseStatusColor(course.status)"
                       />
                     </div>
                     
                     <div class="course-stats">
                       <div class="stat-item">
-                        <span class="stat-value">{{ course.weeklyActive }}</span>
-                        <span class="stat-label">周活跃</span>
+                        <span class="stat-value">{{ course.term || course.semester || '-' }}</span>
+                        <span class="stat-label">学期</span>
                       </div>
                       <div class="stat-item">
-                        <span class="stat-value">{{ course.completionRate }}%</span>
-                        <span class="stat-label">完成率</span>
+                        <span class="stat-value">{{ formatSimpleDate(course.startTime) }}</span>
+                        <span class="stat-label">开始</span>
                       </div>
                       <div class="stat-item">
-                        <span class="stat-value">{{ course.avgScore }}</span>
-                        <span class="stat-label">平均分</span>
+                        <span class="stat-value">{{ formatSimpleDate(course.endTime) }}</span>
+                        <span class="stat-label">结束</span>
                       </div>
                     </div>
                   </div>
                   
                   <div class="course-footer">
                     <a-space>
-                      <a-button type="primary" size="small">
+                      <a-button type="primary" size="small" @click="viewCourse(course)">
                         进入课程
                       </a-button>
                       <a-button size="small">
                         查看数据
                       </a-button>
                     </a-space>
+                    <div class="course-type">{{ course.courseType || course.category || "必修课" }}</div>
                   </div>
                 </div>
                 
@@ -254,7 +254,7 @@
                     <a-select-option value="pending">待批改</a-select-option>
                     <a-select-option value="graded">已批改</a-select-option>
                   </a-select>
-                  <a-button type="link">
+                  <a-button type="link" @click="router.push('/teacher/assignments')">
                     查看全部 <ArrowRightOutlined />
                   </a-button>
                 </div>
@@ -262,46 +262,46 @@
               
               <div class="assignment-list">
                 <div 
-                  v-for="assignment in mockAssignments" 
+                  v-for="assignment in assignments" 
                   :key="assignment.id"
                   class="assignment-card"
                 >
                   <div class="assignment-header">
                     <div class="assignment-priority">
-                      <div class="priority-indicator" :class="assignment.priority"></div>
-                      <span class="assignment-course">{{ assignment.courseName }}</span>
+                      <div class="priority-indicator" :class="getPriorityClass(assignment)"></div>
+                      <span class="assignment-course">{{ assignment.courseName || '未知课程' }}</span>
                     </div>
-                    <div class="assignment-deadline" :class="{ urgent: isUrgent(assignment.dueDate) }">
+                    <div class="assignment-deadline" :class="{ urgent: isUrgent(assignment.endTime) }">
                       <ClockCircleOutlined />
-                      {{ formatDeadline(assignment.dueDate) }}
+                      {{ formatDeadline(assignment.endTime) }}
                     </div>
                   </div>
                   
                   <h4 class="assignment-title">{{ assignment.title }}</h4>
-                  <p class="assignment-description">{{ assignment.description }}</p>
+                  <p class="assignment-description">{{ assignment.description || '无作业描述' }}</p>
                   
                   <div class="assignment-progress">
                     <div class="progress-stats">
                       <div class="stat">
-                        <span class="number">{{ assignment.submittedCount }}</span>
+                        <span class="number">{{ assignment.submittedCount || 0 }}</span>
                         <span class="label">已提交</span>
                       </div>
                       <div class="stat">
-                        <span class="number">{{ assignment.totalStudents }}</span>
+                        <span class="number">{{ assignment.totalStudents || 0 }}</span>
                         <span class="label">总人数</span>
                       </div>
                       <div class="stat">
-                        <span class="number">{{ assignment.gradedCount }}</span>
+                        <span class="number">{{ assignment.gradedCount || 0 }}</span>
                         <span class="label">已批改</span>
                       </div>
                     </div>
                     <div class="progress-bar">
                       <div class="progress-info">
                         <span>提交进度</span>
-                        <span>{{ Math.round((assignment.submittedCount / assignment.totalStudents) * 100) }}%</span>
+                        <span>{{ calculateSubmissionRate(assignment) }}%</span>
                       </div>
                       <a-progress 
-                        :percent="Math.round((assignment.submittedCount / assignment.totalStudents) * 100)" 
+                        :percent="calculateSubmissionRate(assignment)" 
                         size="small" 
                         :show-info="false"
                       />
@@ -310,20 +310,20 @@
                   
                   <div class="assignment-actions">
                     <a-space>
-                      <a-button size="small" type="primary">
+                      <a-button size="small" type="primary" @click="viewAssignment(assignment.id)">
                         查看提交
                       </a-button>
-                      <a-button size="small" v-if="assignment.submittedCount > 0">
+                      <a-button size="small" v-if="assignment.submittedCount > 0" @click="gradeAssignment(assignment.id)">
                         开始批改
                       </a-button>
-                      <a-button size="small" type="text">
+                      <a-button size="small" type="text" @click="analyzeAssignment(assignment.id)">
                         统计分析
                       </a-button>
                     </a-space>
                   </div>
                 </div>
                 
-                <div v-if="mockAssignments.length === 0" class="empty-state">
+                <div v-if="assignments.length === 0" class="empty-state">
                   <FileTextOutlined />
                   <p>暂无作业</p>
                   <a-button type="primary" @click="showCreateTaskModal = true">
@@ -335,7 +335,7 @@
           </a-col>
 
           <!-- 右侧辅助内容 -->
-          <a-col :span="8">
+          <a-col :xs="24" :sm="24" :md="7" :lg="7" :xl="6" class="right-content">
             <!-- 教学日历 -->
             <div class="content-section">
               <div class="section-header">
@@ -512,57 +512,129 @@
       <!-- 创建课程弹窗 -->
       <a-modal
         v-model:open="showCreateCourseModal"
-        title="创建新课程"
+        title="新建课程"
         width="600px"
-        @ok="handleCreateCourse"
+        @ok="handleCreateOrUpdateCourse"
+        @cancel="resetCreateForm"
       >
-        <a-form :model="courseForm" layout="vertical">
-          <a-row :gutter="16">
-            <a-col :span="12">
-              <a-form-item label="课程名称" required>
-                <a-input v-model:value="courseForm.name" placeholder="请输入课程名称" />
-              </a-form-item>
-            </a-col>
-            <a-col :span="12">
-              <a-form-item label="课程代码" required>
-                <a-input v-model:value="courseForm.code" placeholder="如：CS101" />
-              </a-form-item>
-            </a-col>
-          </a-row>
-          
-          <a-row :gutter="16">
-            <a-col :span="12">
-              <a-form-item label="学科类别">
-                <a-select v-model:value="courseForm.subject" placeholder="请选择学科">
-                  <a-select-option value="计算机科学">计算机科学</a-select-option>
-                  <a-select-option value="数学">数学</a-select-option>
-                  <a-select-option value="物理">物理</a-select-option>
-                  <a-select-option value="化学">化学</a-select-option>
-                  <a-select-option value="生物">生物</a-select-option>
-                  <a-select-option value="英语">英语</a-select-option>
-                  <a-select-option value="历史">历史</a-select-option>
-                  <a-select-option value="地理">地理</a-select-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-            <a-col :span="12">
-              <a-form-item label="难度等级">
-                <a-select v-model:value="courseForm.difficulty" placeholder="请选择难度">
-                  <a-select-option value="初级">初级</a-select-option>
-                  <a-select-option value="中级">中级</a-select-option>
-                  <a-select-option value="高级">高级</a-select-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-          </a-row>
-          
-          <a-form-item label="课程描述">
-            <a-textarea 
-              v-model:value="courseForm.description" 
-              placeholder="请输入课程描述，包括课程目标、内容概述等"
-              :rows="4"
+        <a-form
+          ref="createFormRef"
+          :model="createForm"
+          :rules="createRules"
+          layout="vertical"
+        >
+          <a-form-item label="课程名称" name="courseName">
+            <a-input 
+              v-model:value="createForm.courseName" 
+              placeholder="请输入课程名称" 
+              @input="(value: string) => { createForm.title = value }"
             />
           </a-form-item>
+          
+          <a-form-item label="课程描述" name="description">
+            <a-textarea 
+              v-model:value="createForm.description" 
+              placeholder="请输入课程描述"
+              :rows="3"
+            />
+          </a-form-item>
+          
+          <a-form-item label="课程封面" name="coverImage">
+            <div class="course-cover-upload">
+              <a-upload
+                v-model:file-list="coverFileList"
+                list-type="picture-card"
+                :show-upload-list="true"
+                :before-upload="beforeCoverUpload"
+                :customRequest="handleCoverUpload"
+                :maxCount="1"
+              >
+                <div v-if="!createForm.coverImage">
+                  <upload-outlined />
+                  <div style="margin-top: 8px">上传封面</div>
+                </div>
+              </a-upload>
+              <div class="cover-preview" v-if="createForm.coverImage">
+                <img :src="createForm.coverImage" alt="课程封面预览" />
+              </div>
+            </div>
+            <div class="upload-hint">建议上传16:9比例的图片，大小不超过2MB</div>
+          </a-form-item>
+          
+          <a-row :gutter="16">
+            <a-col :span="12">
+              <a-form-item label="学分" name="credit">
+                <a-input-number 
+                  v-model:value="createForm.credit" 
+                  :min="1" 
+                  :max="10" 
+                  style="width: 100%"
+                  placeholder="学分"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12">
+              <a-form-item label="课程类型" name="category">
+                <a-select v-model:value="createForm.category" placeholder="选择课程类型">
+                  <a-select-option value="REQUIRED">必修课</a-select-option>
+                  <a-select-option value="ELECTIVE">选修课</a-select-option>
+                  <a-select-option value="PUBLIC">公共课</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+          </a-row>
+          
+          <a-row :gutter="16">
+            <a-col :span="12">
+              <a-form-item label="开始时间" name="startTime">
+                <a-date-picker 
+                  v-model:value="createForm.startTime" 
+                  style="width: 100%"
+                  placeholder="选择开始时间"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12">
+              <a-form-item label="结束时间" name="endTime">
+                <a-date-picker 
+                  v-model:value="createForm.endTime" 
+                  style="width: 100%"
+                  placeholder="选择结束时间"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+
+          <a-row :gutter="16">
+            <a-col :span="12">
+              <a-form-item label="学年" name="year">
+                <a-select
+                  v-model:value="selectedYear"
+                  placeholder="选择年份"
+                  style="width: 100%"
+                  @change="updateSemester"
+                >
+                  <a-select-option v-for="year in yearOptions" :key="year" :value="year">
+                    {{ year }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12">
+              <a-form-item label="季度" name="term">
+                <a-select
+                  v-model:value="selectedTerm"
+                  placeholder="选择季度"
+                  style="width: 100%"
+                  @change="updateSemester"
+                >
+                  <a-select-option v-for="term in termOptions" :key="term.value" :value="term.value">
+                    {{ term.label }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+          </a-row>
         </a-form>
       </a-modal>
 
@@ -692,7 +764,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { message } from 'ant-design-vue'
 import dayjs, { Dayjs } from 'dayjs'
 import {
@@ -718,11 +790,17 @@ import {
   QuestionCircleOutlined,
   ThunderboltOutlined,
   FolderOutlined,
-  SettingOutlined
+  SettingOutlined,
+  UploadOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/stores/auth'
+import { getCourses, createCourse } from '@/api/teacher'
+import { useRouter } from 'vue-router'
+import assignment from '@/api/assignment'
+import axios from 'axios'
 
 const authStore = useAuthStore()
+const router = useRouter()
 
 // 响应式数据
 const loading = ref(false)
@@ -751,87 +829,159 @@ const stats = reactive({
 })
 
 // 模拟课程数据
-const mockCourses = ref([
-  {
-    id: 1,
-    name: '高等数学A',
-    description: '本课程是理工科学生的必修课程，主要讲授微积分、线性代数等内容',
-    subject: '数学',
-    difficulty: '中级',
-    studentCount: 45,
-    chapterCount: 12,
-    rating: '4.8',
-    progress: 75,
-    weeklyActive: 38,
-    completionRate: 85,
-    avgScore: '82.5'
-  },
-  {
-    id: 2,
-    name: '数据结构与算法',
-    description: '深入学习各种数据结构和算法设计思想，培养编程思维',
-    subject: '计算机科学',
-    difficulty: '高级',
-    studentCount: 32,
-    chapterCount: 15,
-    rating: '4.9',
-    progress: 60,
-    weeklyActive: 28,
-    completionRate: 78,
-    avgScore: '85.2'
-  },
-  {
-    id: 3,
-    name: '大学英语',
-    description: '提升英语听说读写能力，培养国际化视野',
-    subject: '英语',
-    difficulty: '中级',
-    studentCount: 52,
-    chapterCount: 10,
-    rating: '4.6',
-    progress: 90,
-    weeklyActive: 45,
-    completionRate: 92,
-    avgScore: '78.9'
-  }
-])
+const mockCourses = ref<any[]>([])
 
-// 模拟作业数据
-const mockAssignments = ref([
-  {
-    id: 1,
-    title: '微积分练习题集',
-    description: '完成第三章导数相关练习题，包括基础题和提高题',
-    courseName: '高等数学A',
-    dueDate: '2024-12-30',
-    priority: 'high',
-    submittedCount: 38,
-    totalStudents: 45,
-    gradedCount: 25
-  },
-  {
-    id: 2,
-    title: '二叉树遍历算法实现',
-    description: '用Java或Python实现二叉树的前序、中序、后序遍历',
-    courseName: '数据结构与算法',
-    dueDate: '2025-01-05',
-    priority: 'medium',
-    submittedCount: 28,
-    totalStudents: 32,
-    gradedCount: 15
-  },
-  {
-    id: 3,
-    title: '英语口语展示',
-    description: '准备5分钟的英语口语展示，主题自选',
-    courseName: '大学英语',
-    dueDate: '2025-01-08',
-    priority: 'low',
-    submittedCount: 48,
-    totalStudents: 52,
-    gradedCount: 40
+// 加载课程列表
+const loadCourses = async () => {
+  try {
+    const authStore = useAuthStore();
+    
+    // 确保已经有token
+    if (!authStore.token && !localStorage.getItem('token')) {
+      console.warn('加载课程列表: 未找到token，尝试从authStore获取')
+      if (authStore.isAuthenticated) {
+        console.log('用户已认证，但token未设置，尝试重新设置token')
+        // 如果用户已认证但token未设置，可能需要重新获取token
+        await authStore.fetchUserInfo()
+      } else {
+        console.error('用户未认证，无法加载课程列表')
+        return
+      }
+    }
+    
+    const params = {
+      page: 1,
+      size: 7 // 修改为显示7个课程
+    }
+    
+    console.log('开始请求课程列表API')
+    const response = await getCourses(params)
+    console.log('课程列表API响应:', response.status)
+    
+    if (response.data && response.data.code === 200) {
+      const result = response.data.data
+      mockCourses.value = result.records || result.list || []
+      
+      // 更新统计数据
+      stats.courseCount = mockCourses.value.length
+      
+      console.log('获取到的课程列表:', mockCourses.value.length, '条记录')
+    } else {
+      console.warn('获取课程列表返回异常:', response.data)
+      // 不在初始加载时显示错误提示
+      if (!loading.value) {
+        message.error(response.data?.message || '获取课程列表失败')
+      }
+      mockCourses.value = []
+    }
+  } catch (error) {
+    console.error('获取课程列表失败:', error)
+    // 不在初始加载时显示错误提示
+    if (!loading.value) {
+      message.error('获取课程列表失败，请检查网络连接')
+    }
+    mockCourses.value = []
   }
-])
+}
+
+// 模拟作业数据 - 替换为真实数据变量
+const assignments = ref<any[]>([])
+
+// 添加获取作业列表的方法
+const loadAssignments = async () => {
+  try {
+    const authStore = useAuthStore();
+    
+    // 确保已经有token
+    if (!authStore.token && !localStorage.getItem('token')) {
+      console.warn('加载作业列表: 未找到token，尝试从authStore获取')
+      if (authStore.isAuthenticated) {
+        console.log('用户已认证，但token未设置，尝试重新设置token')
+        // 如果用户已认证但token未设置，可能需要重新获取token
+        await authStore.fetchUserInfo()
+      } else {
+        console.error('用户未认证，无法加载作业列表')
+        return
+      }
+    }
+    
+    const params: any = {
+      current: 1,
+      pageSize: 3, // 只显示3条最新作业
+      sort: 'createTime,desc' // 按创建时间降序排序
+    }
+    
+    // 根据筛选条件过滤
+    if (assignmentFilter.value !== 'all') {
+      if (assignmentFilter.value === 'pending') {
+        params.status = '1' // 发布状态 - 进行中
+      } else if (assignmentFilter.value === 'graded') {
+        params.status = '2' // 已结束
+      }
+    }
+    
+    console.log('开始请求作业列表API')
+    const response = await assignment.getAssignmentList(params)
+    console.log('作业列表API响应:', response)
+    
+    if (response && response.code === 200) {
+      assignments.value = response.data.records || []
+      
+      // 更新统计数据
+      if (assignments.value.length > 0) {
+        stats.assignmentCount = response.data.total || assignments.value.length
+        stats.pendingCount = assignments.value.filter(a => 
+          (a.submittedCount || 0) > (a.gradedCount || 0)
+        ).length
+      }
+      
+      console.log('获取到的作业列表:', assignments.value.length, '条记录')
+    } else {
+      console.warn('获取作业列表返回异常:', response)
+      // 不在初始加载时显示错误提示
+      if (!loading.value) {
+        message.error(response?.message || '获取作业列表失败')
+      }
+    }
+  } catch (error) {
+    console.error('获取作业列表失败:', error)
+    // 不在初始加载时显示错误提示
+    if (!loading.value) {
+      message.error('获取作业列表失败，请检查网络连接')
+    }
+  }
+}
+
+// 计算提交率
+const calculateSubmissionRate = (assignment: any) => {
+  if (!assignment.totalStudents || assignment.totalStudents <= 0) return 0
+  return Math.round(((assignment.submittedCount || 0) / assignment.totalStudents) * 100)
+}
+
+// 获取优先级样式类
+const getPriorityClass = (assignment: any) => {
+  // 根据截止时间判断优先级
+  const now = new Date()
+  const dueDate = new Date(assignment.endTime)
+  const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  
+  if (diffDays <= 1) return 'high' // 紧急
+  if (diffDays <= 3) return 'medium' // 中等
+  return 'low' // 普通
+}
+
+// 作业操作方法
+const viewAssignment = (id: number) => {
+  router.push(`/teacher/assignments/${id}`)
+}
+
+const gradeAssignment = (id: number) => {
+  router.push(`/teacher/assignments/${id}/grade`)
+}
+
+const analyzeAssignment = (id: number) => {
+  router.push(`/teacher/assignments/${id}/analysis`)
+}
 
 // 今日事件
 const todayEvents = ref([
@@ -888,73 +1038,284 @@ const taskForm = reactive({
   submitType: 'BOTH'
 })
 
-// 工具函数
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long'
-  })
+// 新增 - 创建课程相关数据和方法
+// 封面上传相关
+const uploadLoading = ref(false)
+const coverFileList = ref<any[]>([])
+
+// 创建表单
+interface CreateForm {
+  title: string;
+  courseName: string;
+  description: string;
+  coverImage: string;
+  credit: number | string;
+  category: string;
+  courseType: string;
+  startTime: string | Dayjs;
+  endTime: string | Dayjs;
+  term: string;
+  semester: string;
 }
 
-const formatDeadline = (dateStr: string) => {
-  const date = dayjs(dateStr)
-  const now = dayjs()
-  const diffDays = date.diff(now, 'day')
+// 表单数据
+const createForm = reactive({
+  courseName: '',
+  title: '',
+  description: '',
+  coverImage: '', // 添加课程封面属性
+  credit: 3,
+  category: 'REQUIRED',
+  courseType: '必修课', // 添加课程类型属性
+  startTime: null,
+  endTime: null,
+  semester: '',
+  status: 0
+})
+
+// 表单验证规则
+const createRules = {
+  courseName: [
+    { required: true, message: '请输入课程名称', trigger: 'blur' }
+  ],
+  category: [
+    { required: true, message: '请选择课程类型', trigger: 'change' }
+  ],
+  semester: [
+    { required: true, message: '请选择学期', trigger: 'change' }
+  ]
+}
+
+// 学期相关数据
+const yearOptions = ref([
+  '2023-2024', '2024-2025', '2025-2026', '2026-2027', '2027-2028', '2028-2029'
+])
+const termOptions = ref([
+  { label: '秋季', value: '1' },
+  { label: '春季', value: '2' },
+  { label: '夏季', value: '3' }
+])
+const selectedYear = ref('2024-2025') // 设置默认值
+const selectedTerm = ref('1') // 设置默认值
+
+// 监听学期选择变化
+const updateSemester = () => {
+  if (selectedYear.value && selectedTerm.value) {
+    createForm.semester = `${selectedYear.value}-${selectedTerm.value}`
+    console.log('学期已更新:', createForm.semester)
+  } else {
+    createForm.semester = ''
+  }
+}
+
+// 重置创建表单
+const resetCreateForm = () => {
+  createForm.courseName = ''
+  createForm.title = ''
+  createForm.description = ''
+  createForm.coverImage = ''
+  createForm.credit = 3
+  createForm.category = 'REQUIRED'
+  createForm.startTime = null
+  createForm.endTime = null
+  selectedYear.value = '2024-2025'
+  selectedTerm.value = '1'
+  coverFileList.value = []
+}
+
+// 上传前检查文件
+const beforeCoverUpload = (file: File) => {
+  // 检查文件类型
+  const isImage = file.type.startsWith('image/')
+  if (!isImage) {
+    message.error('只能上传图片文件!')
+    return false
+  }
   
-  if (diffDays < 0) return '已过期'
-  if (diffDays === 0) return '今天到期'
-  if (diffDays === 1) return '明天到期'
-  if (diffDays <= 7) return `${diffDays}天后到期`
-  return date.format('MM月DD日')
-}
-
-const isUrgent = (dateStr: string) => {
-  const date = dayjs(dateStr)
-  const now = dayjs()
-  return date.diff(now, 'day') <= 2
-}
-
-const getCourseGradient = (subject: string) => {
-  const gradients: Record<string, string> = {
-    '计算机科学': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    '数学': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    '物理': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    '化学': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    '英语': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    '历史': 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-    '地理': 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-    '生物': 'linear-gradient(135deg, #a8e6cf 0%, #dcedc1 100%)'
+  // 检查文件大小 (2MB)
+  const isLt2M = file.size / 1024 / 1024 < 2
+  if (!isLt2M) {
+    message.error('图片大小不能超过2MB!')
+    return false
   }
-  return gradients[subject] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  
+  return true
 }
 
-const getCourseColor = (subject: string) => {
-  const colors: Record<string, string> = {
-    '计算机科学': '#667eea',
-    '数学': '#f5576c',
-    '物理': '#4facfe',
-    '化学': '#43e97b',
-    '英语': '#fa709a',
-    '历史': '#a8edea',
-    '地理': '#ffecd2',
-    '生物': '#a8e6cf'
+// 自定义上传方法
+const handleCoverUpload = async (options: any) => {
+  const { file, onSuccess, onError } = options
+  uploadLoading.value = true
+  
+  try {
+    console.log('开始上传课程封面图片:', file.name)
+    
+    // 创建FormData对象
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    // 发送上传请求
+    const response = await axios.post('http://localhost:8080/api/common/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    
+    console.log('封面上传响应:', response)
+    
+    if (response.data && response.data.code === 200) {
+      // 获取上传后的文件URL
+      const fileUrl = response.data.data
+      console.log('文件上传成功，原始URL:', fileUrl)
+      
+      // 确保URL是完整的
+      let fullUrl = fileUrl
+      if (!fileUrl.startsWith('http')) {
+        if (fileUrl.startsWith('/')) {
+          fullUrl = `http://localhost:8080${fileUrl}`
+        } else {
+          fullUrl = `http://localhost:8080/${fileUrl}`
+        }
+      }
+      
+      console.log('处理后的完整URL:', fullUrl)
+      
+      // 设置课程封面
+      createForm.coverImage = fullUrl
+      
+      message.success('封面上传成功')
+      onSuccess(response)
+    } else {
+      console.error('封面上传失败:', response)
+      message.error('封面上传失败')
+      onError(new Error('Upload failed'))
+    }
+  } catch (error) {
+    console.error('封面上传出错:', error)
+    message.error('封面上传出错')
+    onError(new Error('Upload error'))
+  } finally {
+    uploadLoading.value = false
   }
-  return colors[subject] || '#667eea'
 }
 
-// 事件处理
-const handleCreateCourse = async () => {
-  message.success('课程创建成功')
-  showCreateCourseModal.value = false
-  Object.assign(courseForm, {
-    name: '',
-    code: '',
-    subject: '',
-    difficulty: '中级',
-    description: ''
-  })
+// 根据category获取courseType
+const getCourseTypeFromCategory = (category?: string) => {
+  if (!category) return '必修课'
+  
+  const categoryMap: Record<string, string> = {
+    'REQUIRED': '必修课',
+    'ELECTIVE': '选修课',
+    'PUBLIC': '公共课'
+  }
+  
+  return categoryMap[category] || '必修课'
+}
+
+// 创建或更新课程
+const handleCreateOrUpdateCourse = async () => {
+  try {
+    loading.value = true;
+    
+    // 表单验证
+    if (!createForm.courseName || createForm.courseName.trim() === '') {
+      message.error('请输入课程名称');
+      loading.value = false;
+      return;
+    }
+    
+    // 确保学分是数字类型
+    let creditValue = createForm.credit;
+    if (typeof creditValue === 'string') {
+      creditValue = parseFloat(creditValue);
+    }
+    
+    // 格式化开始和结束时间
+    const startTime = createForm.startTime 
+      ? (typeof createForm.startTime === 'string' 
+        ? createForm.startTime 
+        : dayjs(createForm.startTime).format('YYYY-MM-DD HH:mm:ss')) 
+      : undefined;
+    
+    const endTime = createForm.endTime 
+      ? (typeof createForm.endTime === 'string' 
+        ? createForm.endTime 
+        : dayjs(createForm.endTime).format('YYYY-MM-DD HH:mm:ss')) 
+      : undefined;
+    
+    // 如果没有选择开始时间，使用当前时间
+    const formattedStartTime = startTime || dayjs().format('YYYY-MM-DD HH:mm:ss');
+    // 如果没有选择结束时间，使用开始时间后3个月
+    const formattedEndTime = endTime || dayjs(formattedStartTime).add(3, 'month').format('YYYY-MM-DD HH:mm:ss');
+    
+    // 确保学期格式正确
+    let term = createForm.semester || '2024-2025-1';
+    if (selectedYear.value && selectedTerm.value) {
+      term = `${selectedYear.value}-${selectedTerm.value}`;
+    }
+    
+    const formData = {
+      title: createForm.courseName, // 使用courseName作为title
+      courseName: createForm.courseName,
+      description: createForm.description || '',
+      coverImage: createForm.coverImage || '',
+      credit: creditValue,
+      category: createForm.category || 'REQUIRED',
+      courseType: createForm.courseType || getCourseTypeFromCategory(createForm.category),
+      startTime: formattedStartTime,
+      endTime: formattedEndTime,
+      term: term,
+      semester: term,
+      status: '未开始'
+    };
+    
+    console.log('提交的课程数据:', JSON.stringify(formData));
+    const response = await createCourse(formData);
+    
+    if (response.data.code === 200) {
+      message.success('课程创建成功');
+      showCreateCourseModal.value = false;
+      resetCreateForm();
+      await loadCourses(); // 重新加载课程列表
+    } else {
+      message.error(response.data.message || '课程创建失败');
+    }
+  } catch (error: any) {
+    console.error('创建课程失败:', error);
+    
+    // 处理不同类型的错误
+    if (error.response) {
+      // 服务器返回了错误响应
+      if (error.response.status === 401) {
+        message.error('请先登录后再操作课程');
+        setTimeout(() => {
+          router.push('/login');
+        }, 1500);
+      } else if (error.response.data && error.response.data.message) {
+        message.error(error.response.data.message);
+      } else {
+        message.error(`操作失败 (${error.response.status})`);
+      }
+    } else if (error.request) {
+      // 请求已经发出，但没有收到响应
+      message.error('服务器无响应，请检查网络连接');
+    } else {
+      // 请求设置时发生错误
+      message.error('请求错误: ' + error.message);
+    }
+  } finally {
+    loading.value = false;
+  }
+}
+
+// 查看课程详情
+const viewCourse = (course: any) => {
+  if (course && course.id) {
+    router.push(`/teacher/courses/${course.id}`)
+  } else {
+    message.error('无效的课程数据')
+  }
 }
 
 const handleCreateClass = async () => {
@@ -993,16 +1354,271 @@ const handleAIFeature = (type: string) => {
 }
 
 // 初始化
-onMounted(() => {
-  // 模拟数据加载
+onMounted(async () => {
+  // 加载数据
   loading.value = true
+  
+  // 确保认证信息已加载
+  const initializeData = async () => {
+    try {
+      // 确保token已经设置
+      const authStore = useAuthStore();
+      if (!authStore.token) {
+        console.log('Dashboard初始化: 尝试恢复token')
+        const savedToken = localStorage.getItem('token')
+        if (savedToken) {
+          authStore.setToken(savedToken)
+        }
+      }
+      
+      // 等待一小段时间确保token已经设置到axios头部
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      // 先加载课程数据
+      await loadCourses()
+      
+      // 再加载作业列表
+      await loadAssignments()
+    } catch (error) {
+      console.error('初始化数据失败:', error)
+    } finally {
   setTimeout(() => {
     loading.value = false
-  }, 1000)
+      }, 500)
+    }
+  }
+  
+  initializeData()
 })
+
+// 监听作业筛选条件变化
+watch(assignmentFilter, () => {
+  loadAssignments()
+})
+
+// 获取课程封面样式
+const getCourseCoverStyle = (course: any) => {
+  console.log('处理课程封面:', course.id, course.title, '封面图片:', course.coverImage)
+  
+  // 判断课程是否有有效的封面图片
+  if (course.coverImage && course.coverImage.trim() && !course.coverImage.includes('undefined')) {
+    // 检查URL是否已经是完整URL
+    let imageUrl = course.coverImage
+    
+    // 确保URL是完整的
+    if (!imageUrl.startsWith('http')) {
+      // 如果以/开头，直接添加基础URL
+      if (imageUrl.startsWith('/')) {
+        imageUrl = `http://localhost:8080${imageUrl}`
+      } else {
+        // 否则添加斜杠再添加基础URL
+        imageUrl = `http://localhost:8080/${imageUrl}`
+      }
+    }
+    
+    console.log('处理后的课程封面URL:', imageUrl)
+    
+    return {
+      background: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("${imageUrl}") no-repeat center center / cover`
+    }
+  }
+  
+  // 如果没有封面图片，使用渐变色背景
+  // 创建多种五彩缤纷的渐变色
+  const gradients = [
+    'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%)',
+    'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+    'linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%)',
+    'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)',
+    'linear-gradient(135deg, #fdcbf1 0%, #fdcbf1 1%, #e6dee9 100%)',
+    'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
+    'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)',
+    'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
+    'linear-gradient(135deg, #f6d365 0%, #fda085 100%)'
+  ]
+  
+  // 使用课程ID或名称的哈希值来选择渐变色
+  const courseId = course.id || 0
+  const courseName = course.title || course.courseName || ''
+  const hash = Math.abs(courseId + courseName.length)
+  const index = hash % gradients.length
+  
+  console.log('使用渐变色背景:', gradients[index])
+  
+  return {
+    background: gradients[index]
+  }
+}
+
+// 简单的字符串哈希函数，用于将课程名称转换为数字
+const hashCode = (str: string): number => {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i)
+    hash |= 0 // Convert to 32bit integer
+  }
+  return Math.abs(hash)
+}
+
+// 工具函数
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long'
+  })
+}
+
+const formatDeadline = (dateStr: string) => {
+  const date = dayjs(dateStr)
+  const now = dayjs()
+  const diffDays = date.diff(now, 'day')
+  
+  if (diffDays < 0) return '已过期'
+  if (diffDays === 0) return '今天到期'
+  if (diffDays === 1) return '明天到期'
+  if (diffDays <= 7) return `${diffDays}天后到期`
+  return date.format('MM月DD日')
+}
+
+// 简化的日期格式化
+const formatSimpleDate = (dateStr?: string) => {
+  if (!dateStr) return '-'
+  return dayjs(dateStr).format('MM-DD')
+}
+
+const isUrgent = (dateStr: string) => {
+  const date = dayjs(dateStr)
+  const now = dayjs()
+  return date.diff(now, 'day') <= 2
+}
+
+// 计算课程进度
+const calculateProgress = (startTime?: string, endTime?: string): number => {
+  if (!startTime || !endTime) return 0
+  
+  const start = dayjs(startTime)
+  const end = dayjs(endTime)
+  const now = dayjs()
+  
+  // 如果未开始，进度为0
+  if (now.isBefore(start)) return 0
+  // 如果已结束，进度为100
+  if (now.isAfter(end)) return 100
+  
+  // 计算总时长和已过时长
+  const totalDuration = end.diff(start, 'day')
+  const passedDuration = now.diff(start, 'day')
+  
+  // 计算百分比，限制在0-100之间
+  return Math.min(100, Math.max(0, Math.round((passedDuration / totalDuration) * 100)))
+}
+
+// 根据课程状态获取文本描述
+const getCourseStatusText = (status?: string | number) => {
+  if (!status) return '未开始'
+  
+  // 处理数字状态（0: 未开始, 1: 进行中, 2: 已结束）
+  if (typeof status === 'number') {
+    if (status === 0) return '未开始'
+    if (status === 1) return '进行中'
+    if (status === 2) return '已结束'
+    return '未知'
+  }
+  
+  // 处理字符串状态
+  const statusMap: Record<string, string> = {
+    '0': '未开始',
+    '1': '进行中',
+    '2': '已结束',
+    'not_started': '未开始',
+    'in_progress': '进行中',
+    'ended': '已结束',
+    '未开始': '未开始',
+    '进行中': '进行中',
+    '已结束': '已结束'
+  }
+  
+  return statusMap[status] || '未开始'
+}
+
+// 根据课程状态获取颜色
+const getCourseStatusColor = (status?: string | number) => {
+  const statusText = getCourseStatusText(status)
+  
+  const colors: Record<string, string> = {
+    '未开始': '#2F80ED',
+    '进行中': '#764ba2',
+    '已结束': '#f9748f'
+  }
+  
+  return colors[statusText] || '#764ba2'
+}
+
+// 课程封面上传
+const handleUploadCover = async (info: any) => {
+  if (info.file.status === 'uploading') {
+    uploadLoading.value = true
+    return
+  }
+  
+  if (info.file.status === 'done') {
+    uploadLoading.value = false
+    
+    // 检查响应数据
+    if (info.file.response && info.file.response.code === 200) {
+      // 获取上传后的文件URL
+      const fileUrl = info.file.response.data
+      console.log('文件上传成功，URL:', fileUrl)
+      
+      // 确保URL是完整的
+      createForm.coverImage = fileUrl.startsWith('http') 
+        ? fileUrl 
+        : `http://localhost:8080${fileUrl}`
+        
+      console.log('设置课程封面:', createForm.coverImage)
+      message.success('封面上传成功')
+    } else {
+      console.error('文件上传失败:', info.file.response)
+      message.error('封面上传失败')
+    }
+  } else if (info.file.status === 'error') {
+    uploadLoading.value = false
+    console.error('文件上传错误:', info.file)
+    message.error('封面上传失败')
+  }
+}
 </script>
 
 <style scoped>
+/* 课程封面上传样式 */
+.course-cover-upload {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+
+.cover-preview {
+  width: 160px;
+  height: 90px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cover-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* 全局样式 */
 .teacher-dashboard {
   min-height: 100vh;
@@ -1240,9 +1856,10 @@ onMounted(() => {
 
 /* 主要内容区域样式 */
 .dashboard-content {
-  max-width: 1200px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0;
 }
 
 /* 内容区块通用样式 */
@@ -1261,11 +1878,11 @@ onMounted(() => {
 }
 
 .section-header {
-  padding: 24px 32px 0 32px;
+  padding: 24px 24px 0 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .section-title {
@@ -1291,25 +1908,29 @@ onMounted(() => {
 /* 课程网格样式 */
 .course-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-  padding: 0 32px 32px 32px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  padding: 0 20px 20px 20px;
 }
 
 .course-card {
   background: white;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  border: none;
   overflow: hidden;
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .course-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-  border-color: #667eea;
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  border-color: transparent;
 }
 
 .course-header {
@@ -1324,9 +1945,14 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 16px;
+  padding: 14px;
   color: white;
   position: relative;
+  transition: all 0.3s ease;
+}
+
+.course-card:hover .course-cover {
+  transform: scale(1.05);
 }
 
 .course-cover::before {
@@ -1336,57 +1962,63 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 0;
 }
 
-.course-category {
-  font-size: 0.75rem;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4px 8px;
-  border-radius: 6px;
+.course-status {
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(5px);
+  padding: 3px 8px;
+  border-radius: 4px;
+  z-index: 1;
+  position: relative;
+  display: inline-block;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   align-self: flex-start;
-  backdrop-filter: blur(10px);
-  z-index: 1;
-  position: relative;
 }
 
-.course-level {
-  font-size: 0.75rem;
+.course-type {
+  font-size: 11px;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4px 8px;
-  border-radius: 6px;
-  align-self: flex-end;
-  backdrop-filter: blur(10px);
-  z-index: 1;
-  position: relative;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #667eea;
+  margin-left: auto;
 }
 
 .course-actions {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 10px;
+  right: 10px;
   z-index: 2;
 }
 
 .course-content {
-  padding: 20px;
+  padding: 16px;
 }
 
 .course-title {
-  font-size: 1.125rem;
+  font-size: 16px;
   font-weight: 600;
   color: #1a202c;
-  margin: 0 0 8px 0;
-  line-height: 1.4;
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .course-description {
-  font-size: 0.875rem;
+  font-size: 13px;
   color: #64748b;
-  margin: 0 0 16px 0;
-  line-height: 1.5;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -1395,33 +2027,29 @@ onMounted(() => {
 
 .course-meta {
   display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.75rem;
+  gap: 3px;
+  font-size: 12px;
   color: #64748b;
 }
 
-.meta-item .anticon {
-  color: #94a3b8;
-}
-
 .course-progress {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .progress-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-  font-size: 0.75rem;
+  margin-bottom: 4px;
+  font-size: 12px;
   color: #64748b;
   font-weight: 500;
 }
@@ -1429,11 +2057,11 @@ onMounted(() => {
 .course-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
-  padding: 16px;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 10px;
   background: #f8fafc;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .course-stats .stat-item {
@@ -1442,7 +2070,7 @@ onMounted(() => {
 
 .stat-value {
   display: block;
-  font-size: 1.125rem;
+  font-size: 13px;
   font-weight: 600;
   color: #1a202c;
   line-height: 1;
@@ -1450,39 +2078,44 @@ onMounted(() => {
 
 .stat-label {
   display: block;
-  font-size: 0.75rem;
+  font-size: 11px;
   color: #64748b;
 }
 
 .course-footer {
-  padding: 0 20px 20px 20px;
+  padding: 0 16px 16px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
 }
 
 .create-card {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border: 2px dashed #cbd5e0;
+  background: #f8f9fa;
+  border: 2px dashed #d0d7de;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
+  min-height: 280px;
   transition: all 0.3s ease;
 }
 
 .create-card:hover {
-  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
-  border-color: #667eea;
-  transform: translateY(-4px);
+  background: #f0f2f5;
+  border-color: #a0a8b0;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
 }
 
 .create-content {
   text-align: center;
-  color: #64748b;
+  color: #6c757d;
 }
 
 .create-icon {
-  font-size: 3rem;
+  font-size: 2.5rem;
   margin-bottom: 16px;
-  color: #94a3b8;
+  color: #6c757d;
 }
 
 .create-content h4 {
@@ -1865,7 +2498,20 @@ onMounted(() => {
 
 /* 日历样式 */
 .calendar-widget {
-  padding: 32px;
+  padding: 20px;
+}
+
+/* 调整ant-design日历组件的样式 */
+:deep(.calendar-widget .ant-picker-calendar) {
+  font-size: 0.875rem;
+}
+
+:deep(.calendar-widget .ant-picker-calendar-header) {
+  padding: 8px 0;
+}
+
+:deep(.calendar-widget .ant-picker-panel) {
+  border-top: none;
 }
 
 .calendar-cell {
@@ -1901,30 +2547,30 @@ onMounted(() => {
 }
 
 .calendar-events {
-  margin-top: 24px;
-  padding-top: 24px;
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid #e2e8f0;
 }
 
 .calendar-events h4 {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: #1a202c;
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
 }
 
 .event-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .event-item {
   display: flex;
-  gap: 12px;
-  padding: 12px;
+  gap: 10px;
+  padding: 10px;
   background: #f8fafc;
-  border-radius: 8px;
+  border-radius: 6px;
   border-left: 3px solid #667eea;
 }
 
@@ -2082,6 +2728,33 @@ onMounted(() => {
   }
 }
 
+/* 课程封面上传样式 */
+.course-cover-upload {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+
+.cover-preview {
+  width: 160px;
+  height: 90px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cover-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* 自定义滚动条 */
 ::-webkit-scrollbar {
   width: 6px;
@@ -2199,5 +2872,32 @@ onMounted(() => {
   font-size: 0.75rem;
   font-weight: 500;
   padding: 2px 8px;
+}
+
+/* 修正Ant Design Row的默认样式 */
+:deep(.dashboard-content .ant-row) {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  width: 100%;
+}
+
+/* 左右内容区域定位 */
+.left-content {
+  padding-left: 0 !important;
+  padding-right: 6px !important;
+}
+
+.right-content {
+  padding-right: 0 !important;
+  padding-left: 6px !important;
+}
+
+@media (max-width: 768px) {
+  .left-content,
+  .right-content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-bottom: 24px;
+  }
 }
 </style>

@@ -34,9 +34,23 @@ public class PasswordUtils {
     }
 
     /**
+     * 加密密码（别名方法）
+     */
+    public String encrypt(String rawPassword) {
+        return passwordEncoder.encode(rawPassword);
+    }
+
+    /**
      * 验证密码
      */
     public boolean matches(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+
+    /**
+     * 验证密码（别名方法）
+     */
+    public boolean verify(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
