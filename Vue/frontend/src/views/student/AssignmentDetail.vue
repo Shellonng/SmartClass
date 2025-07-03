@@ -78,20 +78,28 @@ const loadAssignmentDetail = async () => {
   try {
     loading.value = true
     const response = await assignmentApi.getStudentAssignmentDetail(assignmentId.value)
-    assignment.value = response
+    console.log('接收到的作业详情数据:', response)
     
-    // 根据当前时间和截止时间判断状态
-    const now = new Date()
-    if (assignment.value.endTime && now > new Date(assignment.value.endTime)) {
-      assignment.value.status = 'completed' // 已截止
-    } else if (assignment.value.startTime && now < new Date(assignment.value.startTime)) {
-      assignment.value.status = 'pending' // 未开始
+    // 解析API返回的数据结构
+    if (response && response.code === 200 && response.data) {
+      assignment.value = response.data.assignment
+      console.log('解析后的作业信息:', assignment.value)
+      
+      // 根据当前时间和截止时间判断状态
+      const now = new Date()
+      if (assignment.value.endTime && now > new Date(assignment.value.endTime)) {
+        assignment.value.status = 'completed' // 已截止
+      } else if (assignment.value.startTime && now < new Date(assignment.value.startTime)) {
+        assignment.value.status = 'pending' // 未开始
+      } else {
+        assignment.value.status = 'in_progress' // 进行中
+      }
     } else {
-      assignment.value.status = 'in_progress' // 进行中
+      message.error('获取作业详情失败: ' + (response?.message || '未知错误'))
     }
   } catch (error) {
     console.error('获取作业详情失败:', error)
-    message.error('获取作业详情失败')
+    message.error('获取作业详情失败: ' + (error instanceof Error ? error.message : '未知错误'))
   } finally {
     loading.value = false
   }
@@ -147,17 +155,77 @@ const startAssignment = () => {
   const type = assignment.value.type
   const mode = assignment.value.mode
   
-  if (type === 'homework') {
-    if (mode === 'question') {
-      // 答题型作业
-      router.push(`/student/assignments/${assignmentId.value}/do`)
+  console.log('开始作业/考试:', type, mode)
+  console.log('作业完整信息:', assignment.value)
+  
+  try {
+    // 构建完整的URL
+    const baseUrl = window.location.origin
+    
+    if (type === 'homework') {
+      if (mode === 'question') {
+        // 答题型作业 - 统一使用/student/exams/:id/do路径
+        const url = `${baseUrl}/student/exams/${assignmentId.value}/do`
+        console.log('跳转到答题页面:', url)
+        // 延迟跳转，确保页面准备就绪
+        message.loading('正在准备答题页面...', 1)
+        setTimeout(() => {
+          try {
+            router.push(`/student/exams/${assignmentId.value}/do`)
+          } catch (err) {
+            console.error('Router导航失败，使用location:', err)
+            window.location.href = url
+          }
+        }, 500)
+      } else if (mode === 'file') {
+        // 文件上传型作业
+        const url = `${baseUrl}/student/assignments/file/${assignmentId.value}/submit`
+        console.log('跳转到文件上传页面:', url)
+        // 延迟跳转，确保页面准备就绪
+        message.loading('正在准备上传页面...', 1)
+        setTimeout(() => {
+          try {
+            router.push(`/student/assignments/file/${assignmentId.value}/submit`)
+          } catch (err) {
+            console.error('Router导航失败，使用location:', err)
+            window.location.href = url
+          }
+        }, 500)
+      } else {
+        // 未知模式，默认按答题型处理
+        console.warn(`未知的作业模式: ${mode}，默认按答题型处理`)
+        const url = `${baseUrl}/student/exams/${assignmentId.value}/do`
+        message.loading('正在准备答题页面...', 1)
+        setTimeout(() => {
+          try {
+            router.push(`/student/exams/${assignmentId.value}/do`)
+          } catch (err) {
+            console.error('Router导航失败，使用location:', err)
+            window.location.href = url
+          }
+        }, 500)
+      }
+    } else if (type === 'exam') {
+      // 考试路径
+      const url = `${baseUrl}/student/exams/${assignmentId.value}/do`
+      console.log('跳转到考试页面:', url)
+      message.loading('正在准备考试页面...', 1)
+      setTimeout(() => {
+        try {
+          router.push(`/student/exams/${assignmentId.value}/do`)
+        } catch (err) {
+          console.error('Router导航失败，使用location:', err)
+          window.location.href = url
+        }
+      }, 500)
     } else {
-      // 文件上传型作业
-      router.push(`/student/assignments/file/${assignmentId.value}/submit`)
+      // 未知类型
+      console.error(`不支持的任务类型: ${type}`)
+      message.error(`不支持的任务类型: ${type}`)
     }
-  } else {
-    // 考试
-    router.push(`/student/exams/${assignmentId.value}/do`)
+  } catch (error) {
+    console.error('路由跳转失败:', error)
+    message.error('跳转失败，请刷新页面后重试')
   }
 }
 
@@ -229,7 +297,12 @@ const getStatusColor = (status: string) => {
 }
 
 onMounted(() => {
-  loadAssignmentDetail()
+  loadAssignmentDetail().then(() => {
+    if (assignment.value) {
+      console.log('检测到作业类型:', assignment.value.type, '模式:', assignment.value.mode)
+      // 不再自动跳转，等待用户点击"开始作业"或"开始考试"按钮
+    }
+  })
 })
 </script>
 

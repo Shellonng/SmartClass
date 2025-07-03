@@ -171,6 +171,7 @@ com\education\dto\ExamDTO$ExamQuestionDTO.class
 com\education\entity\ClassStudent.class
 com\education\dto\SectionCommentDTO$CreateRequest.class
 com\education\dto\common\PageRequest.class
+com\education\controller\student\StudentClassController.class
 com\education\dto\EmailDTO$BatchEmailRequest$BatchEmailRequestBuilder.class
 com\education\dto\EmailDTO$EmailStatusResponse.class
 com\education\dto\CourseResourceDTO.class

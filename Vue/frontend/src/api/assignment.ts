@@ -2,7 +2,7 @@ import request from '@/utils/request'
 import type { ApiResponse } from '@/utils/request'
 
 /**
- * 作业相关API
+ * 任务相关API
  */
 export default {
   /**
@@ -17,9 +17,9 @@ export default {
   },
 
   /**
-   * 获取作业列表
+   * 获取任务列表
    * @param params 查询参数
-   * @returns 作业列表
+   * @returns 任务列表
    */
   getAssignmentList(params: any): Promise<ApiResponse> {
     console.log('调用getAssignmentList API，参数:', params)
@@ -38,9 +38,9 @@ export default {
   },
 
   /**
-   * 获取作业详情
-   * @param id 作业ID
-   * @returns 作业详情
+   * 获取任务详情
+   * @param id 任务ID
+   * @returns 任务详情
    */
   getAssignmentDetail(id: number): Promise<ApiResponse> {
     return request({
@@ -50,8 +50,8 @@ export default {
   },
 
   /**
-   * 创建作业
-   * @param data 作业信息
+   * 创建任务
+   * @param data 任务信息
    * @returns 创建结果
    */
   createAssignment(data: any): Promise<ApiResponse> {
@@ -63,9 +63,9 @@ export default {
   },
 
   /**
-   * 更新作业
-   * @param id 作业ID
-   * @param data 作业信息
+   * 更新任务
+   * @param id 任务ID
+   * @param data 任务信息
    * @returns 更新结果
    */
   updateAssignment(id: number, data: any): Promise<ApiResponse> {
@@ -77,8 +77,8 @@ export default {
   },
 
   /**
-   * 删除作业
-   * @param id 作业ID
+   * 删除任务
+   * @param id 任务ID
    * @returns 删除结果
    */
   deleteAssignment(id: number): Promise<ApiResponse> {
@@ -89,8 +89,8 @@ export default {
   },
 
   /**
-   * 发布作业
-   * @param id 作业ID
+   * 发布任务
+   * @param id 任务ID
    * @returns 发布结果
    */
   publishAssignment(id: number): Promise<ApiResponse> {
@@ -101,8 +101,8 @@ export default {
   },
 
   /**
-   * 取消发布作业
-   * @param id 作业ID
+   * 取消发布任务
+   * @param id 任务ID
    * @returns 取消发布结果
    */
   unpublishAssignment(id: number): Promise<ApiResponse> {
@@ -130,7 +130,7 @@ export default {
 
   /**
    * 手动选题
-   * @param assignmentId 作业ID
+   * @param assignmentId 任务ID
    * @param questionIds 题目ID列表
    * @param scores 分值列表
    * @returns 选题结果
@@ -206,9 +206,9 @@ export default {
   },
 
   /**
-   * 获取作业题目 (学生端)
-   * @param assignmentId 作业ID
-   * @returns 作业题目列表
+   * 获取任务题目 (学生端)
+   * @param assignmentId 任务ID
+   * @returns 任务题目列表
    */
   getAssignmentQuestions(assignmentId: number): Promise<any[]> {
     return request({
@@ -218,9 +218,9 @@ export default {
   },
 
   /**
-   * 获取作业题目 (教师端)
-   * @param assignmentId 作业ID
-   * @returns 作业题目列表（包含答案）
+   * 获取任务题目 (教师端)
+   * @param assignmentId 任务ID
+   * @returns 任务题目列表（包含答案）
    */
   getTeacherAssignmentQuestions(assignmentId: number): Promise<ApiResponse> {
     return request({
@@ -230,8 +230,8 @@ export default {
   },
   
   /**
-   * 获取作业提交记录列表
-   * @param assignmentId 作业ID
+   * 获取任务提交记录列表
+   * @param assignmentId 任务ID
    * @param params 查询参数
    * @returns 提交记录列表
    */
@@ -248,7 +248,7 @@ export default {
   },
   
   /**
-   * 批改作业提交
+   * 批改任务提交
    * @param submissionId 提交记录ID
    * @param data 批改信息
    * @returns 批改结果
@@ -262,7 +262,7 @@ export default {
   },
   
   /**
-   * 删除作业提交记录
+   * 删除任务提交记录
    * @param submissionId 提交记录ID
    * @returns 删除结果
    */
@@ -274,9 +274,9 @@ export default {
   },
 
   /**
-   * 获取作业详情（学生端）
-   * @param id 作业ID
-   * @returns 作业详情
+   * 获取任务详情（学生端）
+   * @param id 任务ID
+   * @returns 任务详情
    */
   getStudentAssignmentDetail(id: number): Promise<ApiResponse> {
     return request({
@@ -286,8 +286,8 @@ export default {
   },
 
   /**
-   * 提交作业答案（学生端）
-   * @param assignmentId 作业ID
+   * 提交任务答案（学生端）
+   * @param assignmentId 任务ID
    * @param answers 答案数据
    * @returns 提交结果
    */
@@ -314,8 +314,8 @@ export default {
   },
 
   /**
-   * 提交文件作业（学生端）
-   * @param assignmentId 作业ID
+   * 提交文件任务（学生端）
+   * @param assignmentId 任务ID
    * @param formData 包含文件的FormData
    * @returns 提交结果
    */
@@ -332,20 +332,20 @@ export default {
 
   /**
    * 获取学生提交记录（学生端）
-   * @param assignmentId 作业ID
+   * @param assignmentId 任务ID
    * @returns 提交记录
    */
-  getStudentSubmission(assignmentId: number): Promise<any> {
+  getStudentSubmission(assignmentId: number): Promise<ApiResponse> {
     return request({
       url: `/api/student/assignments/${assignmentId}/submission`,
       method: 'get'
-    }).then(response => response.data)
+    })
   },
 
   /**
-   * 获取作业列表
+   * 获取任务列表
    * @param params 查询参数
-   * @returns 作业列表
+   * @returns 任务列表
    */
   getAssignmentListStudent(params: any): Promise<ApiResponse> {
     return request({
@@ -356,9 +356,9 @@ export default {
   },
 
   /**
-   * 获取作业详情
-   * @param id 作业ID
-   * @returns 作业详情
+   * 获取任务详情
+   * @param id 任务ID
+   * @returns 任务详情
    */
   getAssignmentDetailStudent(id: number): Promise<ApiResponse> {
     return request({
@@ -368,9 +368,9 @@ export default {
   },
 
   /**
-   * 获取作业题目
-   * @param id 作业ID
-   * @returns 作业题目
+   * 获取任务题目
+   * @param id 任务ID
+   * @returns 任务题目
    */
   getAssignmentQuestionsStudent(id: number): Promise<ApiResponse> {
     return request({
@@ -380,8 +380,8 @@ export default {
   },
 
   /**
-   * 提交作业/考试答案
-   * @param id 作业ID
+   * 提交任务/考试答案
+   * @param id 任务ID
    * @param data 答案数据
    * @returns 提交结果
    */
@@ -394,9 +394,9 @@ export default {
   },
 
   /**
-   * 获取已提交的作业列表
+   * 获取已提交的任务列表
    * @param params 查询参数
-   * @returns 已提交的作业列表
+   * @returns 已提交的任务列表
    */
   getSubmittedAssignments(params: any): Promise<ApiResponse> {
     return request({
@@ -408,7 +408,7 @@ export default {
 
   /**
    * 保存单题答案
-   * @param id 作业ID
+   * @param id 任务ID
    * @param questionId 题目ID
    * @param data 答案数据
    * @returns 保存结果

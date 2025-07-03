@@ -1,3 +1,14 @@
+<script lang="ts">
+// 创建事件总线
+import mitt from 'mitt'
+export const emitter = mitt()
+
+// 导出供其他组件使用
+export const APP_EVENTS = {
+  COLLAPSE_SIDEBAR: 'collapse-sidebar'
+}
+</script>
+
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { onMounted } from 'vue'

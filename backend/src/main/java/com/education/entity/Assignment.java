@@ -91,4 +91,16 @@ public class Assignment {
      */
     @TableField("time_limit")
     private Integer timeLimit;
+
+    /**
+     * 课程名称（非数据库字段）
+     */
+    @TableField(exist = false)
+    private String courseName;
+
+    /**
+     * 教师名称（非数据库字段）
+     */
+    @TableField(exist = false)
+    private String teacherName;
 } 

@@ -93,6 +93,7 @@ D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\Exam.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\Chapter.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\CourseStudentMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\utils\ValidationUtils.java
+D:\my_git_code\SmartClass\backend\src\main\java\com\education\controller\student\StudentClassController.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\entity\QuestionOption.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\mapper\SectionCommentMapper.java
 D:\my_git_code\SmartClass\backend\src\main\java\com\education\exception\ResultCode.java

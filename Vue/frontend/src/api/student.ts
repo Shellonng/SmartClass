@@ -133,6 +133,50 @@ export interface EnrollmentRequest {
   }
 }
 
+// 班级相关接口
+
+/**
+ * 班级信息接口
+ */
+export interface ClassInfo {
+  id: number
+  name: string
+  description?: string
+  courseId?: number
+  teacherId?: number
+  isDefault?: boolean
+  createTime?: string
+  studentCount?: number
+  course?: {
+    id: number
+    title: string
+    description?: string
+    coverImage?: string
+  }
+}
+
+/**
+ * 班级学生接口
+ */
+export interface ClassStudent {
+  id: number
+  userId: number
+  enrollmentStatus?: string
+  gpa?: number
+  gpaLevel?: string
+  createTime?: string
+  updateTime?: string
+  user?: {
+    id: number
+    username: string
+    email?: string
+    realName?: string
+    avatar?: string
+    role?: string
+    status?: string
+  }
+}
+
 // 获取学生仪表板数据
 export const getDashboardData = () => {
   return axios.get('/api/student/dashboard')
@@ -568,4 +612,38 @@ export const updateStudent = (id: number, data: Student) => {
       'Content-Type': 'application/json'
     }
   })
+}
+
+/**
+ * 获取班级信息
+ */
+export const getClassInfo = async (): Promise<ClassInfo> => {
+  try {
+    const response = await axios.get('/api/student/classes/info')
+    if (response.data && response.data.code === 200) {
+      return response.data.data
+    } else {
+      throw new Error(response.data?.message || '获取班级信息失败')
+    }
+  } catch (error) {
+    console.error('获取班级信息API错误:', error)
+    throw error
+  }
+}
+
+/**
+ * 获取班级同学列表
+ */
+export const getClassMembers = async (): Promise<{classId: number, students: ClassStudent[]}> => {
+  try {
+    const response = await axios.get('/api/student/classes/members')
+    if (response.data && response.data.code === 200) {
+      return response.data.data
+    } else {
+      throw new Error(response.data?.message || '获取班级同学列表失败')
+    }
+  } catch (error) {
+    console.error('获取班级同学列表API错误:', error)
+    throw error
+  }
 }

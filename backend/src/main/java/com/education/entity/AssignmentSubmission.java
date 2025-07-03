@@ -74,4 +74,14 @@ public class AssignmentSubmission {
      * 更新时间
      */
     private Date updateTime;
+    
+    /**
+     * 文件名称
+     */
+    private String fileName;
+    
+    /**
+     * 文件路径
+     */
+    private String filePath;
 } 

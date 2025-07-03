@@ -391,8 +391,8 @@ const startTimer = () => {
       if (timer.value) clearInterval(timer.value)
       // 检查是否已提交
       if (submissionStatus.value === 0) {
-        ElMessage.warning('考试时间已到，系统将自动提交您的答案')
-        submitExam()
+      ElMessage.warning('考试时间已到，系统将自动提交您的答案')
+      submitExam()
       } else {
         ElMessage.info('考试已结束')
       }
@@ -494,7 +494,7 @@ const loadExamQuestions = async () => {
       
       // 只有未提交状态才开始倒计时
       if (submissionStatus.value === 0) {
-        startTimer()
+      startTimer()
       }
     } else {
       error.value = response.message || '加载题目失败'
