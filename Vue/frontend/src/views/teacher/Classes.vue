@@ -205,7 +205,7 @@ import {
   CheckOutlined
 } from '@ant-design/icons-vue'
 import { 
-  getClasses, 
+  getTeacherClasses, 
   createClass, 
   updateClass, 
   deleteClass, 
@@ -348,12 +348,7 @@ const pagination = reactive<TablePaginationConfig>({
 const fetchClassList = async () => {
   try {
     loading.value = true
-    const res = await getClasses({
-      page: pagination.current,
-      size: pagination.pageSize,
-      keyword: searchKeyword.value,
-      courseId: courseFilter.value === '' ? undefined : (typeof courseFilter.value === 'string' ? parseInt(courseFilter.value) : courseFilter.value)
-    })
+    const res = await getTeacherClasses()
     
     console.log('班级列表原始响应:', res)
     
@@ -367,18 +362,18 @@ const fetchClassList = async () => {
       totalItems = res.data.total || res.data.totalElements || 0
     }
     // 检查数据是否直接在外层
-    else if (res.records || res.content || res.list) {
-      classData = res.records || res.content || res.list
-      totalItems = res.total || res.totalElements || 0
+    else if (res.data.records || res.data.content || res.data.list) {
+      classData = res.data.records || res.data.content || res.data.list
+      totalItems = res.data.total || res.data.totalElements || 0
     }
     // 检查是否为Result包装类型
-    else if (res.code === 200 && res.data) {
-      if (Array.isArray(res.data)) {
-        classData = res.data
-        totalItems = res.data.length
-      } else if (res.data.records || res.data.content || res.data.list) {
-        classData = res.data.records || res.data.content || res.data.list
-        totalItems = res.data.total || res.data.totalElements || 0
+    else if (res.data.code === 200 && res.data.data) {
+      if (Array.isArray(res.data.data)) {
+        classData = res.data.data
+        totalItems = res.data.data.length
+      } else if (res.data.data.records || res.data.data.content || res.data.data.list) {
+        classData = res.data.data.records || res.data.data.content || res.data.data.list
+        totalItems = res.data.data.total || res.data.data.totalElements || 0
       }
     }
     
