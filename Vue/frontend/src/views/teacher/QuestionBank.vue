@@ -310,31 +310,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, watch, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
   PlusOutlined,
   EyeOutlined,
   EditOutlined,
-  DeleteOutlined
+  DeleteOutlined,
+  UploadOutlined
 } from '@ant-design/icons-vue'
+import dayjs from 'dayjs'
 import { formatDate } from '@/utils/date'
 import {
   QuestionType,
   QuestionTypeDesc,
   DifficultyLevels,
-  Question,
-  QuestionOption,
-  PageResponse,
   addQuestion,
   updateQuestion,
   deleteQuestion,
-  getQuestionDetail,
   getQuestionPage,
-  getQuestionsByCourse
+  getQuestionsByCourse,
+  type Question,
+  type QuestionOption,
+  type PageResponse,
+  type QuestionQueryRequest
 } from '@/api/question'
 import axios from 'axios'
+import request from '@/utils/request'
+import type { ApiResponse } from '@/utils/request'
 
 // 定义组件属性
 const props = defineProps<{
@@ -493,82 +497,45 @@ watch(() => props.courseId, (newVal) => {
 const fetchQuestions = async () => {
   loading.value = true
   try {
+    // 构建查询参数
     const params = {
       pageNum: pagination.value.current,
       pageSize: pagination.value.pageSize,
-      courseId: currentCourseId.value > 0 ? currentCourseId.value : undefined,
       questionType: filters.value.questionType,
       difficulty: filters.value.difficulty,
       knowledgePoint: filters.value.knowledgePoint,
-      keyword: filters.value.keyword || undefined
+      keyword: filters.value.keyword
     }
-
-    if (currentCourseId.value > 0) {
-      // 如果有课程ID，使用课程相关API
-      const res = await getQuestionsByCourse(currentCourseId.value)
+    
+    // 调用API获取题目列表
+    const response = await request({
+      url: '/api/teacher/questions/list',
+      method: 'get',
+      params
+    }) as ApiResponse
+    
+    if (response && response.code === 200) {
+      const data = response.data
+      // 处理分页数据
+      questions.value = data.records || []
+      pagination.value.total = data.total || 0
       
-      // 提取所有题目数据用于自动补全建议
-      extractSuggestionsFromQuestions(res.data || [])
+      // 处理题目数据
+      questions.value.forEach(question => {
+        question.questionTypeDesc = QuestionTypeDesc[question.questionType as QuestionType]
+      })
       
-      // 在前端进行筛选，确保同时满足所有筛选条件
-      let filteredQuestions = res.data || []
-      
-      // 按题目类型筛选
-      if (filters.value.questionType) {
-        filteredQuestions = filteredQuestions.filter(q => 
-          q.questionType === filters.value.questionType
-        )
+      // 如果没有找到题目，显示空状态
+      if (questions.value.length === 0 && !filters.value.keyword && !filters.value.questionType 
+          && !filters.value.difficulty && !filters.value.knowledgePoint) {
+        // 如果没有应用过滤条件且没有结果，则显示提示
+        console.log('没有找到题目')
       }
-      
-      // 按难度筛选
-      if (filters.value.difficulty) {
-        filteredQuestions = filteredQuestions.filter(q => 
-          q.difficulty === filters.value.difficulty
-        )
-      }
-      
-      // 按知识点筛选
-      if (filters.value.knowledgePoint) {
-        filteredQuestions = filteredQuestions.filter(q => 
-          q.knowledgePoint && q.knowledgePoint.toLowerCase().includes(filters.value.knowledgePoint!.toLowerCase())
-        )
-      }
-      
-      // 按关键词筛选题目内容
-      if (filters.value.keyword) {
-        filteredQuestions = filteredQuestions.filter(q => 
-          q.title && q.title.toLowerCase().includes(filters.value.keyword.toLowerCase())
-        )
-      }
-      
-      // 保存完整的筛选结果，用于前端分页
-      allFilteredQuestions.value = filteredQuestions
-      
-      // 计算当前页的数据
-      const start = (pagination.value.current - 1) * pagination.value.pageSize
-      const end = start + pagination.value.pageSize
-      questions.value = filteredQuestions.slice(start, end)
-      
-      pagination.value.total = filteredQuestions.length
     } else {
-      // 否则使用分页查询
-      const res = await getQuestionPage(params)
-      if (res.data && res.data.records) {
-        questions.value = res.data.records
-        pagination.value.total = res.data.total
-        
-        // 提取建议列表用于自动补全
-        extractSuggestionsFromQuestions(res.data.records)
-      } else {
-        questions.value = []
-        pagination.value.total = 0
-      }
+      message.error(response?.message || '获取题目列表失败')
     }
   } catch (error) {
     console.error('获取题目列表失败:', error)
-    // 设置为空数组，防止界面卡死
-    questions.value = []
-    pagination.value.total = 0
     message.error('获取题目列表失败，请稍后再试')
   } finally {
     loading.value = false

@@ -1,5 +1,5 @@
 <template>
-  <div>待完成作业功能开发中...</div>
+  <div>待完成任务功能开发中...</div>
 </template>
 
 <script setup lang="ts">

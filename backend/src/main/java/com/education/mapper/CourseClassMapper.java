@@ -11,6 +11,8 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.Options;
 
+import java.util.List;
+
 /**
  * 课程班级数据访问层
  */
@@ -43,6 +45,19 @@ public interface CourseClassMapper extends BaseMapper<CourseClass> {
                                            @Param("teacherId") Long teacherId,
                                            @Param("keyword") String keyword,
                                            @Param("courseId") Long courseId);
+    
+    /**
+     * 查询教师的班级列表（不分页）
+     * 
+     * @param teacherId 教师ID
+     * @return 班级列表
+     */
+    @Select("SELECT cc.*, " +
+            "(SELECT COUNT(1) FROM class_student cs WHERE cs.class_id = cc.id) AS student_count " +
+            "FROM course_class cc " +
+            "WHERE cc.teacher_id = #{teacherId} " +
+            "ORDER BY cc.create_time DESC")
+    List<CourseClass> selectListByTeacherId(@Param("teacherId") Long teacherId);
     
     /**
      * 根据课程ID查询默认班级

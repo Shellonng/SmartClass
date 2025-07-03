@@ -45,8 +45,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 计算属性
   const isAuthenticated = computed(() => !!user.value)
-  const isTeacher = computed(() => user.value?.role === 'TEACHER')
-  const isStudent = computed(() => user.value?.role === 'STUDENT')
+  const isTeacher = computed(() => user.value?.role?.toUpperCase() === 'TEACHER')
+  const isStudent = computed(() => user.value?.role?.toUpperCase() === 'STUDENT')
 
   // 设置sessionId（用于调试目的，实际认证依赖cookie）
   const setSessionId = (newSessionId: string) => {

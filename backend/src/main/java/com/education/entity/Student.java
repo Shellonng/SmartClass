@@ -39,8 +39,7 @@ public class Student implements Serializable {
     private Long userId;
 
     @Schema(description = "学号", example = "2024001")
-    @TableField("student_id")
-    @NotBlank(message = "学号不能为空")
+    @TableField(exist = false) // 标记为非数据库字段
     @Size(max = 50, message = "学号长度不能超过50个字符")
     private String studentId;
 
@@ -121,7 +120,26 @@ public class Student implements Serializable {
      * @return 显示名称
      */
     public String getDisplayName() {
-        return user != null ? user.getDisplayName() : studentId;
+        return user != null ? user.getDisplayName() : String.valueOf(id);
+    }
+
+    /**
+     * 获取学生学号（使用id作为学号）
+     *
+     * @return 学号
+     */
+    public String getStudentId() {
+        // 如果设置了studentId则返回，否则返回id的字符串表示
+        return studentId != null ? studentId : (id != null ? String.valueOf(id) : null);
+    }
+
+    /**
+     * 设置学生学号
+     *
+     * @param studentId 学号
+     */
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
     }
 
     /**

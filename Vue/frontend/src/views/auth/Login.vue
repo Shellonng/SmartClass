@@ -374,12 +374,14 @@ const handleLogin = async () => {
       const userRole = result.data.userInfo.role
       console.log('登录成功，用户角色:', userRole)
       
-      if (userRole === 'TEACHER') {
+      // 强制转为大写进行比较，确保角色匹配不区分大小写
+      if (userRole.toUpperCase() === 'TEACHER') {
         console.log('跳转到教师端...')
         await router.push('/teacher/dashboard')
-      } else if (userRole === 'STUDENT') {
+      } else if (userRole.toUpperCase() === 'STUDENT') {
         console.log('跳转到学生端...')  
-        await router.push('/student/dashboard')
+        // 使用 replace 而不是 push，避免历史记录问题
+        await router.replace('/student/dashboard')
       } else {
         console.log('跳转到首页...')
         await router.push('/')
@@ -441,10 +443,11 @@ const handleRegister = async () => {
         
         // 根据用户角色跳转到对应页面
         const userRole = loginResult.data.userInfo.role
-        if (userRole === 'TEACHER') {
-          router.push('/teacher/dashboard')
-        } else if (userRole === 'STUDENT') {
-          router.push('/student/dashboard')
+        // 强制转为大写进行比较，确保角色匹配不区分大小写
+        if (userRole.toUpperCase() === 'TEACHER') {
+          router.replace('/teacher/dashboard')
+        } else if (userRole.toUpperCase() === 'STUDENT') {
+          router.replace('/student/dashboard')
       } else {
           router.push('/')
         }

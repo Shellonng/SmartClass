@@ -15,30 +15,59 @@ export interface CourseListParams {
   categoryId?: string | number
   level?: string
   sortBy?: string
+  status?: string
+  term?: string
 }
 
-// 课程类型定义
+// 课程类型定义，扩展现有的类型
 export interface Course {
   id: number
   title: string
   description: string
   coverImage?: string
-  instructor: string
-  instructorId: number
-  category: string
-  categoryId: number
-  level: string
-  price: number
-  rating: number
-  students: number
-  duration: string
-  tags: string[]
+  instructor?: string
+  instructorId?: number
+  category?: string
+  categoryId?: number
+  level?: string
+  price?: number
+  rating?: number
+  students?: number
+  duration?: string
+  tags?: string[]
   type?: string
-  createdAt: string
-  updatedAt: string
+  createdAt?: string
+  updatedAt?: string
   status?: string        // 课程状态：未开始/进行中/已结束
   courseType?: string    // 课程类型：必修课/选修课
   credit?: number        // 课程学分
+  // 添加教师版本课程需要的字段
+  teacherId?: number
+  startTime?: string
+  endTime?: string
+  term?: string
+  semester?: string
+  studentCount?: number
+  averageScore?: number
+  chapterCount?: number
+  createTime?: string
+  updateTime?: string
+  courseName?: string // 用于兼容两种命名方式
+}
+
+// 课程创建请求
+export interface CourseCreateRequest {
+  title: string
+  courseName?: string
+  description?: string
+  coverImage?: string
+  credit?: number
+  courseType?: string
+  category?: string
+  startTime?: string
+  endTime?: string
+  term?: string
+  semester?: string
 }
 
 // 课程分类类型定义
@@ -286,7 +315,18 @@ export function adaptBackendCourse(backendCourse: any): Course {
     updatedAt: backendCourse.updateTime || '',
     status: backendCourse.status || '未开始',
     courseType: backendCourse.courseType || '',
-    credit: backendCourse.credit || 0
+    credit: backendCourse.credit || 0,
+    teacherId: backendCourse.teacherId || 0,
+    startTime: backendCourse.startTime || '',
+    endTime: backendCourse.endTime || '',
+    term: backendCourse.term || '',
+    semester: backendCourse.semester || '',
+    studentCount: backendCourse.studentCount || 0,
+    averageScore: backendCourse.averageScore || 0,
+    chapterCount: backendCourse.chapterCount || 0,
+    createTime: backendCourse.createTime || '',
+    updateTime: backendCourse.updateTime || '',
+    courseName: backendCourse.courseName || ''
   }
 }
 
@@ -373,15 +413,20 @@ export async function enrollCourse(courseId: number): Promise<void> {
  * 获取已加入的课程
  */
 export async function getEnrolledCourses(): Promise<Course[]> {
-  // 模拟已加入的课程
-  console.log('使用模拟数据替代API调用: getEnrolledCourses')
-  return new Promise(resolve => {
-    setTimeout(() => {
+  try {
+    // 调用真实API获取学生已加入的课程
+    const response = await axios.get('/api/student/courses/enrolled');
+    if (response.data && response.data.success) {
+      return response.data.data || [];
+    }
+    return [];
+  } catch (error) {
+    console.error('获取已加入课程失败:', error);
+    // 模拟已加入的课程作为备选
+    console.log('使用模拟数据替代API调用: getEnrolledCourses');
       // 返回ID为1、3、7的课程
-      const enrolledCourses = mockCourses.filter(course => [1, 3, 7].includes(course.id))
-      resolve(enrolledCourses)
-    }, 300)
-  })
+    return mockCourses.filter(course => [1, 3, 7].includes(course.id));
+  }
 }
 
 /**
@@ -396,6 +441,42 @@ export async function checkEnrollment(courseId: number): Promise<boolean> {
       resolve([1, 3, 7].includes(courseId))
     }, 200)
   })
+}
+
+/**
+ * 检查学生是否已加入某课程
+ */
+export async function checkStudentEnrollment(studentId: number, courseId: number): Promise<boolean> {
+  try {
+    // 调用真实API检查学生是否已加入课程
+    const response = await axios.get(`/api/student/${studentId}/courses/${courseId}/check-enrollment`);
+    if (response.data && response.data.success) {
+      return response.data.data || false;
+    }
+    return false;
+  } catch (error) {
+    console.error('检查课程加入状态失败:', error);
+    // 假设ID为1、3、7的课程已加入
+    return [1, 3, 7].includes(courseId);
+  }
+}
+
+/**
+ * 获取学生已加入的所有课程ID
+ */
+export async function getStudentEnrolledCourseIds(studentId: number): Promise<number[]> {
+  try {
+    // 调用真实API获取学生已加入的所有课程ID
+    const response = await axios.get(`/api/student/${studentId}/enrolled-course-ids`);
+    if (response.data && response.data.success) {
+      return response.data.data || [];
+    }
+    return [];
+  } catch (error) {
+    console.error('获取学生已加入课程ID失败:', error);
+    // 假设ID为1、3、7的课程已加入
+    return [1, 3, 7];
+  }
 }
 
 /**
@@ -415,18 +496,18 @@ export async function getCourseCategories(): Promise<CourseCategory[]> {
  * 获取课程详情
  */
 export async function getCourseDetail(courseId: number): Promise<Course> {
-  // 模拟获取课程详情
-  console.log('使用模拟数据替代API调用: getCourseDetail', courseId)
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const course = mockCourses.find(c => c.id === courseId)
-      if (course) {
-        resolve(course)
-      } else {
-        reject(new Error('课程不存在'))
-      }
-    }, 300)
-  })
+  console.log('调用真实API: getCourseDetail', courseId)
+  try {
+    const response = await axios.get(`/api/courses/${courseId}`)
+    if (response.data && response.data.code === 200) {
+      return response.data.data
+    } else {
+      throw new Error(response.data?.message || '获取课程详情失败')
+    }
+  } catch (error) {
+    console.error('获取课程详情API错误:', error)
+    throw error
+  }
 }
 
 // 搜索课程
@@ -446,12 +527,22 @@ export const getRelatedCourses = (courseId: number, limit: number = 4): Promise<
 
 // 获取课程讲师信息
 export const getCourseInstructor = (courseId: number): Promise<ApiResponse<Instructor>> => {
-  return axios.get(`/api/courses/${courseId}/instructor`)
+  console.log('调用真实API: getCourseInstructor', courseId)
+  return axios.get(`/api/courses/${courseId}/teacher`)
+    .then(response => {
+      console.log('获取教师信息成功:', response.data)
+      return response.data
+    })
+    .catch(error => {
+      console.error('获取教师信息失败:', error)
+      throw error
+    })
 }
 
 // 获取课程章节
 export const getCourseChapters = (courseId: number): Promise<ApiResponse<Chapter[]>> => {
-  return axios.get(`/api/courses/${courseId}/chapters`)
+  console.log('调用真实API: getCourseChapters', courseId)
+  return axios.get(`/api/teacher/chapters/course/${courseId}`)
 }
 
 // 获取章节详情
@@ -461,7 +552,16 @@ export const getChapterDetail = (chapterId: number): Promise<ApiResponse<Chapter
 
 // 获取课程资源
 export const getCourseResources = (courseId: number): Promise<ApiResponse<Resource[]>> => {
+  console.log('调用真实API: getCourseResources', courseId)
   return axios.get(`/api/courses/${courseId}/resources`)
+    .then(response => {
+      console.log('获取课程资源成功:', response.data)
+      return response.data
+    })
+    .catch(error => {
+      console.error('获取课程资源失败:', error)
+      throw error
+    })
 }
 
 // 学生课程相关API
@@ -645,6 +745,13 @@ export function getResourcePreviewUrl(resourceId: number) {
   return `/api/teacher/courses/resources/${resourceId}/preview`
 }
 
+// 获取当前用户上传的所有资源
+export function getUserResources(page = 1, size = 10) {
+  return axios.get('/api/teacher/resources/user', {
+    params: { page, size }
+  })
+}
+
 // 直接下载资源（返回blob）
 export function downloadResourceDirectly(resourceId: number) {
   return axios.get(`/api/teacher/courses/resources/${resourceId}/download`, {
@@ -657,4 +764,129 @@ export function previewResourceDirectly(resourceId: number) {
   return axios.get(`/api/teacher/courses/resources/${resourceId}/preview`, {
     responseType: 'blob'
   })
+}
+
+// 获取教师的所有课程
+export function getTeacherCourses() {
+  return axios.get('/api/teacher/courses')
+}
+
+/**
+ * 获取学生已选课程列表
+ * @param params 查询参数
+ * @returns API响应
+ */
+export const getStudentEnrolledCourses = (params: CourseListParams = {}): Promise<ApiResponse<PageResponse<Course>>> => {
+  return axios.get('/api/student/courses', { params });
+}
+
+/**
+ * 获取教师课程列表
+ */
+export async function getCourses(params: CourseListParams = {}) {
+  return axios.get('/api/teacher/courses', { params })
+}
+
+/**
+ * 创建课程
+ */
+export async function createCourse(data: CourseCreateRequest) {
+  return axios.post('/api/teacher/courses', data)
+}
+
+/**
+ * 更新课程
+ */
+export async function updateCourse(id: number, data: CourseCreateRequest) {
+  return axios.put(`/api/teacher/courses/${id}`, data)
+}
+
+/**
+ * 删除课程
+ */
+export async function deleteCourse(id: number) {
+  return axios.delete(`/api/teacher/courses/${id}`)
+}
+
+// 获取章节小节列表
+export const getSectionsByChapterId = (chapterId: number): Promise<ApiResponse<any[]>> => {
+  console.log('调用真实API: getSectionsByChapterId', chapterId)
+  return axios.get(`/api/teacher/sections/chapter/${chapterId}`)
+    .then(response => {
+      console.log('获取小节数据成功:', response.data)
+      return response.data
+    })
+    .catch(error => {
+      console.error('获取小节数据失败:', error)
+      throw error
+    })
+}
+
+// 获取小节详情
+export const getSectionById = (sectionId: number): Promise<ApiResponse<any>> => {
+  return axios.get(`/api/teacher/sections/${sectionId}`)
+}
+
+// 获取学生课程详情
+export async function getStudentCourseDetail(courseId: number): Promise<any> {
+  console.log('调用真实API: getStudentCourseDetail', courseId)
+  try {
+    const response = await axios.get(`/api/student/courses/${courseId}`)
+    if (response.data && response.data.code === 200) {
+      return response.data.data
+    } else {
+      throw new Error(response.data?.message || '获取课程详情失败')
+    }
+  } catch (error) {
+    console.error('获取学生课程详情API错误:', error)
+    throw error
+  }
+}
+
+// 获取学生课程资源
+export async function getStudentCourseResources(courseId: number): Promise<CourseResource[]> {
+  console.log('调用API: getStudentCourseResources', courseId)
+  try {
+    const response = await axios.get(`/api/student/courses/${courseId}/resources`)
+    if (response.data && response.data.code === 200) {
+      return response.data.data
+    } else {
+      throw new Error(response.data?.message || '获取课程资源失败')
+    }
+  } catch (error) {
+    console.error('获取学生课程资源API错误:', error)
+    throw error
+  }
+}
+
+// 获取学生课程任务（作业和考试）
+export async function getStudentCourseTasks(courseId: number): Promise<any[]> {
+  console.log('调用API: getStudentCourseTasks', courseId)
+  try {
+    const response = await axios.get(`/api/student/courses/${courseId}/assignments`)
+    if (response.data && response.data.code === 200) {
+      return response.data.data
+    } else {
+      throw new Error(response.data?.message || '获取课程任务失败')
+    }
+  } catch (error) {
+    console.error('获取学生课程任务API错误:', error)
+    throw error
+  }
+}
+
+// 获取学生所有课程的资源列表
+export async function getAllStudentResources(): Promise<CourseResource[]> {
+  console.log('调用API: getAllStudentResources')
+  try {
+    const response = await axios.get('/api/student/courses/resources')
+    if (response.data && response.data.code === 200) {
+      return response.data.data
+    } else {
+      throw new Error(response.data?.message || '获取所有课程资源失败')
+    }
+  } catch (error) {
+    console.error('获取学生所有课程资源API错误:', error)
+    throw error
+  }
 }

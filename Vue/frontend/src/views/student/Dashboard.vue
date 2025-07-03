@@ -486,43 +486,114 @@ const completedHours = ref(15)
 const targetHours = ref(20)
 
 // 各科目进度
-const subjectsProgress = ref([
-  { name: '数学', progress: 85, color: '#1890ff' },
-  { name: '英语', progress: 78, color: '#52c41a' },
-  { name: '物理', progress: 92, color: '#722ed1' },
-  { name: '化学', progress: 68, color: '#fa8c16' }
-])
+import * as courseApi from '@/api/course'
+import * as studentApi from '@/api/student'
+const subjectsProgress = ref([])
+
+// 获取课程进度
+const loadCourseProgress = async () => {
+  try {
+    // 获取当前登录用户的信息
+    const userId = userStore.user?.id
+    if (!userId) {
+      console.error('无法获取当前用户ID')
+      return
+    }
+    
+    console.log('当前用户ID:', userId)
+    
+    // 获取学生选课信息 - 使用已有的API
+    const courses = await courseApi.getEnrolledCourses()
+    console.log('课程API响应:', courses)
+    
+    // 获取真实的课程数据
+    if (!courses || !courses.length) {
+      console.error('获取课程数据失败')
+      return
+    }
+    
+    console.log('获取到的课程数据:', courses)
+    
+    // 处理课程数据，计算进度
+    subjectsProgress.value = courses.map(course => {
+      // 计算课程进度
+      let progress = 0
+      if (course.startTime && course.endTime) {
+        const startTime = new Date(course.startTime).getTime()
+        const endTime = new Date(course.endTime).getTime()
+        const currentTime = new Date().getTime()
+        
+        if (currentTime <= startTime) {
+          progress = 0
+        } else if (currentTime >= endTime) {
+          progress = 100
+        } else {
+          progress = Math.round(((currentTime - startTime) / (endTime - startTime)) * 100)
+        }
+      } else if (course.progress !== undefined) {
+        progress = course.progress
+      }
+      
+      // 设置课程颜色
+      const colorList = ['#1890ff', '#52c41a', '#722ed1', '#fa8c16', '#eb2f96', '#faad14']
+      const colorIndex = course.id % colorList.length
+      
+      return {
+        name: course.title || course.courseName || '未命名课程',
+        progress: progress,
+        color: colorList[colorIndex]
+      }
+    })
+  } catch (error) {
+    console.error('获取课程进度失败:', error)
+  }
+}
 
 // 待完成作业
-const pendingAssignments = ref([
-  {
-    id: 1,
-    title: '数学函数综合练习',
-    description: '完成第三章函数基础练习题，包括一次函数和二次函数的综合应用',
-    subject: '数学',
-    subjectColor: '#1890ff',
-    deadline: new Date('2024-01-20T23:59:59'),
-    isUrgent: true
-  },
-  {
-    id: 2,
-    title: '英语阅读理解训练',
-    description: '阅读指定文章并完成相关理解题目，提升阅读能力',
-    subject: '英语',
-    subjectColor: '#52c41a',
-    deadline: new Date('2024-01-22T23:59:59'),
-    isUrgent: false
-  },
-  {
-    id: 3,
-    title: '物理实验报告',
-    description: '撰写光学实验的详细报告，包括数据分析和结论',
-    subject: '物理',
-    subjectColor: '#722ed1',
-    deadline: new Date('2024-01-25T23:59:59'),
-    isUrgent: false
+import assignmentApi from '@/api/assignment'
+const pendingAssignments = ref([])
+
+// 获取待完成作业列表
+const loadPendingAssignments = async () => {
+  try {
+    const response = await assignmentApi.getAssignmentListStudent({
+      status: 'pending'
+    })
+    
+    if (response && response.code === 200 && response.data) {
+      pendingAssignments.value = response.data.map((item: any) => {
+        // 根据课程类型设置颜色
+        const colorMap: Record<string, string> = {
+          'homework': '#1890ff',
+          'exam': '#ff4d4f',
+          'project': '#52c41a',
+          'report': '#722ed1'
+        }
+        
+        return {
+          id: item.id,
+          title: item.title,
+          description: item.description || '暂无描述',
+          subject: item.courseName || '未知课程',
+          subjectColor: colorMap[item.type] || '#1890ff',
+          deadline: new Date(item.deadline),
+          isUrgent: isUrgent(new Date(item.deadline))
+        }
+      })
+    }
+  } catch (error) {
+    console.error('获取待完成作业失败:', error)
+    message.error('获取待完成作业失败')
   }
-])
+}
+
+// 判断是否紧急（截止日期在24小时内）
+const isUrgent = (deadline: Date) => {
+  const now = new Date()
+  const diffTime = deadline.getTime() - now.getTime()
+  const diffHours = diffTime / (1000 * 60 * 60)
+  return diffHours > 0 && diffHours <= 24
+}
 
 // 最近成绩
 const recentGrades = ref([
@@ -717,7 +788,9 @@ const startTask = (item: any) => {
 
 // 页面初始化
 onMounted(() => {
-  // 这里可以调用API获取数据
+  // 加载真实数据
+  loadPendingAssignments()
+  loadCourseProgress()
   console.log('学生Dashboard初始化完成')
 })
 </script>

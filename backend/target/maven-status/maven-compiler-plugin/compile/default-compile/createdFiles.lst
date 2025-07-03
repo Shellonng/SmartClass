@@ -7,8 +7,10 @@ com\education\controller\teacher\ChapterController.class
 com\education\dto\EmailDTO$EmailWithAttachmentRequest$EmailWithAttachmentRequestBuilder.class
 com\education\controller\teacher\ClassController.class
 com\education\dto\EmailDTO$EmailConfigResponse.class
+com\education\entity\StudentAnswer.class
 com\education\mapper\StudentMapper.class
 com\education\dto\UserDTO$SecuritySettingsUpdateRequest.class
+com\education\mapper\AssignmentQuestionMapper.class
 com\education\dto\EmailDTO$EmailReportResponse$EmailReportResponseBuilder.class
 com\education\dto\UserDTO$UserPointsResponse.class
 com\education\dto\UserDTO$UserInfoResponse.class
@@ -45,6 +47,7 @@ com\education\controller\auth\AuthController.class
 com\education\entity\Course$Status.class
 com\education\service\teacher\impl\ChapterServiceImpl.class
 com\education\exception\BusinessException.class
+com\education\controller\student\StudentCourseController.class
 com\education\dto\EmailDTO$SubscriptionEmailRequest.class
 com\education\dto\EmailDTO$EmailWithAttachmentRequest.class
 com\education\dto\EmailDTO$MaintenanceNotificationRequest$MaintenanceNotificationRequestBuilder.class
@@ -64,6 +67,7 @@ com\education\mapper\QuestionMapper.class
 com\education\entity\User$Status.class
 com\education\dto\EmailDTO$EmailTemplateCreateRequest$EmailTemplateCreateRequestBuilder.class
 com\education\dto\EmailDTO$EmailHistoryRequest.class
+com\education\mapper\StudentAnswerMapper.class
 com\education\service\teacher\ClassService.class
 com\education\dto\UserDTO$TwoFactorAuthDisableRequest.class
 com\education\dto\SectionCommentDTO.class
@@ -73,6 +77,7 @@ com\education\dto\UserDTO$DataExportRequest.class
 com\education\config\WebConfig.class
 com\education\dto\EmailDTO$EmailSubscriptionUpdateRequest$EmailSubscriptionUpdateRequestBuilder.class
 com\education\dto\AuthDTO$LoginRequest.class
+com\education\entity\AssignmentSubmissionAnswer.class
 com\education\dto\EmailDTO$CourseReminderRequest.class
 com\education\dto\common\PageResponse$PageResponseBuilder.class
 com\education\dto\UserDTO$UserPreferencesResponse.class
@@ -102,6 +107,7 @@ com\education\entity\Student.class
 com\education\dto\EmailDTO$BatchEmailRequest.class
 com\education\dto\common\Result.class
 com\education\dto\UserDTO$NotificationSettingsUpdateRequest.class
+com\education\mapper\AssignmentSubmissionAnswerMapper.class
 com\education\dto\EmailDTO$EmailHistoryRequest$EmailHistoryRequestBuilder.class
 com\education\dto\EmailDTO$EmailCleanupResponse.class
 com\education\dto\UserDTO$StudyTimeStatisticsResponse.class
@@ -114,7 +120,9 @@ com\education\utils\DateUtils.class
 com\education\dto\EmailDTO$EmailTemplateUpdateRequest$EmailTemplateUpdateRequestBuilder.class
 com\education\config\WebMvcConfig.class
 com\education\dto\EmailDTO$EmailExportResponse.class
+com\education\controller\teacher\StudentController.class
 com\education\dto\UserDTO$NotificationSettingsResponse.class
+com\education\entity\CourseStudent.class
 com\education\aspect\LoggingAspect.class
 com\education\service\teacher\ChapterService.class
 com\education\dto\UserDTO$DataExportResponse.class
@@ -133,6 +141,7 @@ com\education\dto\UserDTO$UserProfileResponse.class
 com\education\dto\EmailDTO$EmailServiceHealthResponse$EmailServiceHealthResponseBuilder.class
 com\education\dto\EmailDTO$InvitationEmailRequest.class
 com\education\dto\UserDTO$UserProfileUpdateRequest.class
+com\education\entity\CourseEnrollmentRequest.class
 com\education\controller\teacher\SubmissionController.class
 com\education\mapper\QuestionImageMapper.class
 com\education\entity\CourseResource.class
@@ -145,6 +154,7 @@ com\education\dto\UserDTO$UserSearchResponse.class
 com\education\dto\EmailDTO$TaskDeadlineReminderRequest$TaskDeadlineReminderRequestBuilder.class
 com\education\exception\GlobalExceptionHandler.class
 com\education\dto\EmailDTO$BatchRetryResponse.class
+com\education\entity\AssignmentQuestion.class
 com\education\dto\EmailDTO$EmailQueueStatusResponse$EmailQueueStatusResponseBuilder.class
 com\education\dto\EmailDTO$EmailTemplateCreateRequest.class
 com\education\mapper\SectionMapper.class
@@ -152,6 +162,7 @@ com\education\service\common\impl\UserServiceImpl.class
 com\education\service\common\RedisService.class
 com\education\dto\EmailDTO$EmailHistoryResponse.class
 com\education\service\student\impl\DashboardServiceImpl.class
+com\education\controller\student\StudentAssignmentController.class
 com\education\service\teacher\impl\QuestionServiceImpl.class
 com\education\service\teacher\impl\SectionCommentServiceImpl.class
 com\education\aspect\CacheAspect.class
@@ -160,6 +171,7 @@ com\education\dto\ExamDTO$ExamQuestionDTO.class
 com\education\entity\ClassStudent.class
 com\education\dto\SectionCommentDTO$CreateRequest.class
 com\education\dto\common\PageRequest.class
+com\education\controller\student\StudentClassController.class
 com\education\dto\EmailDTO$BatchEmailRequest$BatchEmailRequestBuilder.class
 com\education\dto\EmailDTO$EmailStatusResponse.class
 com\education\dto\CourseResourceDTO.class
@@ -168,6 +180,7 @@ com\education\utils\RedisUtils.class
 com\education\dto\UserDTO$UserFollowResponse.class
 com\education\dto\UserDTO$PhoneBindRequest.class
 com\education\dto\UserDTO$UserLevelResponse.class
+com\education\entity\Assignment.class
 com\education\service\teacher\impl\CourseResourceServiceImpl.class
 com\education\dto\EmailDTO$EmailTemplateDetailResponse.class
 com\education\entity\QuestionBankItem.class
@@ -175,6 +188,7 @@ com\education\dto\UserDTO$TwoFactorAuthRequest.class
 com\education\entity\Teacher.class
 com\education\dto\EmailDTO$EmailQueueStatusResponse.class
 com\education\dto\UserDTO$FeedbackSubmitRequest.class
+com\education\service\teacher\StudentManagementService.class
 com\education\dto\EmailDTO$EmailPreviewResponse$EmailPreviewResponseBuilder.class
 com\education\dto\QuestionDTO.class
 com\education\mapper\CourseMapper.class
@@ -185,6 +199,7 @@ com\education\dto\EmailDTO$EmailSubscriptionUpdateRequest.class
 com\education\controller\teacher\SectionController.class
 com\education\config\MyBatisPlusConfig$1.class
 com\education\dto\UserDTO$UserSearchRequest.class
+com\education\service\teacher\impl\StudentManagementServiceImpl.class
 com\education\service\student\DashboardService.class
 com\education\aspect\Cacheable.class
 com\education\dto\UserDTO$UserPreferencesUpdateRequest.class
@@ -196,6 +211,7 @@ com\education\dto\UserDTO$UserPermissionResponse.class
 com\education\service\common\UserService.class
 com\education\config\SecurityConfig$1.class
 com\education\mapper\CourseClassMapper.class
+com\education\mapper\CourseEnrollmentRequestMapper.class
 com\education\dto\UserDTO$UserSettingsUpdateRequest.class
 com\education\dto\UserDTO$UserUpdateRequest.class
 com\education\dto\UserDTO$OnlineStatusResponse.class
@@ -215,10 +231,14 @@ com\education\service\teacher\SectionService.class
 com\education\dto\QuestionDTO$AddRequest.class
 com\education\service\teacher\impl\SectionServiceImpl.class
 com\education\config\CorsConfig.class
+com\education\entity\AssignmentSubmission.class
 com\education\dto\EmailDTO$TaskDeadlineReminderRequest.class
+com\education\mapper\AssignmentSubmissionMapper.class
 com\education\service\teacher\impl\ClassServiceImpl.class
 com\education\exception\ResultCode.class
 com\education\dto\EmailDTO$EmailConfigUpdateRequest$EmailConfigUpdateRequestBuilder.class
+com\education\mapper\AssignmentMapper.class
+com\education\controller\teacher\ResourceController.class
 com\education\dto\UserDTO$UserPointsResponse$PointSource.class
 com\education\service\teacher\SectionCommentService.class
 com\education\dto\EmailDTO$EmailReportResponse.class
@@ -226,6 +246,7 @@ com\education\dto\QuestionDTO$UpdateRequest.class
 com\education\dto\CourseResourceDTO$ResourceResponse.class
 com\education\dto\EmailDTO$EmailStatusResponse$EmailStatusResponseBuilder.class
 com\education\dto\UserDTO$EmailBindRequest.class
+com\education\mapper\CourseStudentMapper.class
 com\education\dto\EmailDTO$GradeNotificationRequest$GradeNotificationRequestBuilder.class
 com\education\controller\teacher\QuestionController.class
 com\education\controller\common\UserController.class

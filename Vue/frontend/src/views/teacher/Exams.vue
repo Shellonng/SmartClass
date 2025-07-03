@@ -34,7 +34,9 @@
               allowClear
               @change="handleFilterChange"
             >
-              <a-select-option v-for="course in courses" :key="course.id" :value="course.id">{{ course.name }}</a-select-option>
+              <a-select-option v-for="course in courses" :key="course.id" :value="course.id">
+                {{ course.name }}
+              </a-select-option>
             </a-select>
           </div>
         </div>
@@ -64,15 +66,13 @@
           :dataSource="exams"
           :columns="columns"
           :pagination="pagination"
-          :rowKey="(record) => record.id"
+          :rowKey="(record: any) => record.id"
           @change="handleTableChange"
         >
-          <!-- 考试名称 -->
+          <!-- 所属课程 -->
           <template #bodyCell="{ column, record }">
-            <template v-if="column.dataIndex === 'title'">
-              <div class="exam-title">
-                <span>{{ record.title }}</span>
-              </div>
+            <template v-if="column.dataIndex === 'courseName'">
+              {{ record.courseName || (record.courseId ? `课程ID: ${record.courseId}` : '未关联课程') }}
             </template>
 
             <!-- 考试状态 -->
@@ -86,6 +86,11 @@
                 <div>开始：{{ formatDate(record.startTime) }}</div>
                 <div>结束：{{ formatDate(record.endTime) }}</div>
               </div>
+            </template>
+            
+            <!-- 考试时长 -->
+            <template v-else-if="column.dataIndex === 'duration'">
+              {{ record.duration }} 分钟
             </template>
 
             <!-- 操作 -->
@@ -122,12 +127,10 @@
 
     <!-- 添加/编辑考试弹窗 -->
     <a-modal
-      v-model:open="examModalVisible"
+      v-model:visible="examModalVisible"
       :title="isEditing ? '编辑考试' : '添加考试'"
-      :maskClosable="false"
+      :confirmLoading="saving"
       @ok="handleSaveExam"
-      :okButtonProps="{ loading: saving }"
-      :okText="saving ? '保存中...' : '保存'"
       width="700px"
     >
       <a-form :model="examForm" layout="vertical">
@@ -135,8 +138,14 @@
           <a-input v-model:value="examForm.title" placeholder="请输入考试名称" />
         </a-form-item>
         <a-form-item label="所属课程" required>
-          <a-select v-model:value="examForm.courseId" placeholder="请选择课程">
-            <a-select-option v-for="course in courses" :key="course.id" :value="course.id">{{ course.name }}</a-select-option>
+          <a-select 
+            v-model:value="examForm.courseId" 
+            placeholder="请选择课程"
+            style="width: 100%"
+          >
+            <a-select-option v-for="course in courses" :key="course.id" :value="course.id">
+              {{ course.name }}
+            </a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item label="考试时间" required>
@@ -145,13 +154,8 @@
             :show-time="{ format: 'HH:mm' }" 
             format="YYYY-MM-DD HH:mm"
             @change="handleTimeRangeChange"
+            style="width: 100%"
           />
-        </a-form-item>
-        <a-form-item label="考试时长(分钟)" required>
-          <a-input-number v-model:value="examForm.duration" :min="1" :max="300" />
-        </a-form-item>
-        <a-form-item label="总分值" required>
-          <a-input-number v-model:value="examForm.totalScore" :min="1" :max="1000" />
         </a-form-item>
         <a-form-item label="考试说明">
           <a-textarea v-model:value="examForm.description" placeholder="请输入考试说明" :rows="4" />
@@ -161,7 +165,7 @@
 
     <!-- 查看考试详情弹窗 -->
     <a-modal
-      v-model:open="viewModalVisible"
+      v-model:visible="viewModalVisible"
       title="考试详情"
       :footer="null"
       width="700px"
@@ -208,7 +212,7 @@
         
         <div class="exam-detail-item">
           <div class="exam-detail-label">创建时间：</div>
-          <div class="exam-detail-value">{{ formatDate(currentExam.createTime) }}</div>
+          <div class="exam-detail-value">{{ formatDate(String(currentExam.createTime)) }}</div>
         </div>
       </div>
     </a-modal>
@@ -227,6 +231,25 @@ import {
 import { formatDate } from '@/utils/date'
 import axios from 'axios'
 import type { Dayjs } from 'dayjs'
+import request from '@/utils/request'
+import type { ApiResponse } from '@/utils/request'
+import { getTeacherCourses, type Course } from '@/api/teacher'
+
+// 定义考试接口
+interface Exam {
+  id: number;
+  title: string;
+  courseId?: number;
+  courseName?: string;
+  startTime: string | Date | any[];
+  endTime: string | Date | any[];
+  duration?: number;
+  totalScore?: number;
+  description?: string;
+  status: string;
+  createTime?: string | Date | any[];
+  updateTime?: string | Date | any[];
+}
 
 // 考试状态
 const examStatus = {
@@ -236,8 +259,8 @@ const examStatus = {
 }
 
 // 状态定义
-const exams = ref<any[]>([])
-const courses = ref<any[]>([])
+const exams = ref<Exam[]>([])
+const courses = ref<{id: number, name: string}[]>([])
 const loading = ref(false)
 const pagination = ref({
   current: 1,
@@ -285,8 +308,7 @@ const columns = [
     title: '考试时长',
     dataIndex: 'duration',
     key: 'duration',
-    width: '10%',
-    render: (text: number) => `${text} 分钟`
+    width: '10%'
   },
   {
     title: '操作',
@@ -319,93 +341,158 @@ const currentExam = ref<any | null>(null)
 
 // 生命周期钩子
 onMounted(() => {
+  // 先获取课程列表，再获取考试列表
+  fetchCourses().then(() => {
   fetchExams()
-  fetchCourses()
+  })
 })
+
+// 更新考试的课程名称
+const updateExamCourseNames = () => {
+  exams.value.forEach(exam => {
+    if (exam.courseId && !exam.courseName) {
+      const course = courses.value.find(c => c.id === exam.courseId);
+      exam.courseName = course ? course.name : `课程ID: ${exam.courseId}`;
+    }
+  });
+}
 
 // 获取考试列表
 const fetchExams = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    // 模拟API请求
-    setTimeout(() => {
-      // 这里是模拟数据，实际项目中应该从API获取
-      exams.value = [
-        {
-          id: 1,
-          title: '期中考试',
-          courseId: 1,
-          courseName: '计算机网络',
-          startTime: '2025-07-10 09:00:00',
-          endTime: '2025-07-10 11:00:00',
-          duration: 120,
-          totalScore: 100,
-          description: '期中考试，包含选择题和简答题',
-          status: examStatus.NOT_STARTED,
-          createTime: '2025-06-20 14:30:00'
-        },
-        {
-          id: 2,
-          title: '期末考试',
-          courseId: 1,
-          courseName: '计算机网络',
-          startTime: '2025-08-10 09:00:00',
-          endTime: '2025-08-10 11:00:00',
-          duration: 120,
-          totalScore: 100,
-          description: '期末考试，包含选择题和简答题',
-          status: examStatus.NOT_STARTED,
-          createTime: '2025-06-20 14:30:00'
-        }
-      ]
-      pagination.value.total = exams.value.length
-      loading.value = false
-    }, 500)
+    const params = {
+      courseId: filters.value.courseId,
+      status: filters.value.status,
+      keyword: filters.value.keyword,
+      current: pagination.value.current,
+      pageSize: pagination.value.pageSize
+    };
     
-    // 实际项目中的API调用示例
-    // const res = await axios.get('/api/teacher/exams', { params: filters.value })
-    // exams.value = res.data.data.records
-    // pagination.value.total = res.data.data.total
+    console.log('发送请求参数:', params);
+
+    const response = await axios.get('/api/teacher/exams', { params });
+    console.log('API响应:', response.data);
+    
+    if (response.data && response.data.code === 200) {
+      const { records, total } = response.data.data;
+      console.log('原始考试数据:', records);
+      
+      // 处理考试数据
+      exams.value = records.map((exam: any) => {
+        // 计算考试状态
+        const now = new Date().getTime();
+        const startTime = Array.isArray(exam.startTime) 
+          ? new Date(exam.startTime[0], exam.startTime[1]-1, exam.startTime[2], exam.startTime[3], exam.startTime[4], exam.startTime[5]).getTime()
+          : new Date(exam.startTime).getTime();
+        const endTime = Array.isArray(exam.endTime)
+          ? new Date(exam.endTime[0], exam.endTime[1]-1, exam.endTime[2], exam.endTime[3], exam.endTime[4], exam.endTime[5]).getTime()
+          : new Date(exam.endTime).getTime();
+        
+        console.log(`考试ID: ${exam.id}, 标题: ${exam.title}, 开始时间: ${startTime}, 结束时间: ${endTime}, 当前时间: ${now}`);
+        
+        let status;
+        if (now < startTime) {
+          status = examStatus.NOT_STARTED;
+          console.log(`考试 ${exam.id} 状态: 未开始`);
+        } else if (now >= startTime && now <= endTime) {
+          status = examStatus.IN_PROGRESS;
+          console.log(`考试 ${exam.id} 状态: 进行中`);
+        } else {
+          status = examStatus.ENDED;
+          console.log(`考试 ${exam.id} 状态: 已结束`);
+        }
+        
+        // 计算考试时长（分钟）
+        const durationMinutes = Math.round((endTime - startTime) / (1000 * 60));
+        
+        return {
+          ...exam,
+          status,
+          duration: exam.duration || durationMinutes,
+          examTime: {
+            startTime: exam.startTime,
+            endTime: exam.endTime
+          }
+        };
+      });
+      
+      pagination.value.total = total;
+      console.log('处理后的考试数据:', exams.value);
+      
+      // 更新考试的课程名称
+      updateExamCourseNames();
+      
+      return Promise.resolve();
+    } else {
+      message.error(response.data?.message || '获取考试列表失败');
+      return Promise.reject(response.data?.message || '获取考试列表失败');
+    }
   } catch (error) {
-    console.error('获取考试列表失败:', error)
-    message.error('获取考试列表失败，请稍后再试')
+    console.error('获取考试列表失败:', error);
+    message.error('获取考试列表失败，请稍后再试');
+    return Promise.reject(error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 // 获取课程列表
 const fetchCourses = async () => {
   try {
-    // 模拟API请求
-    setTimeout(() => {
-      // 这里是模拟数据
-      courses.value = [
-        { id: 1, name: '计算机网络' },
-        { id: 2, name: '数据结构' },
-        { id: 3, name: '操作系统' }
-      ]
-    }, 500)
+    const response = await getTeacherCourses();
     
-    // 实际项目中的API调用示例
-    // const res = await axios.get('/api/teacher/courses/list')
-    // courses.value = res.data.data
+    if (response && response.data) {
+      // 处理API返回的数据
+      let coursesData = [];
+      
+      // 根据返回数据结构处理
+      if (Array.isArray(response.data)) {
+        coursesData = response.data;
+      } else if (response.data.records || response.data.content || response.data.list) {
+        coursesData = response.data.records || response.data.content || response.data.list;
+      } else if (response.data.code === 200 && response.data.data) {
+        if (Array.isArray(response.data.data)) {
+          coursesData = response.data.data;
+        } else if (response.data.data.records || response.data.data.content || response.data.data.list) {
+          coursesData = response.data.data.records || response.data.data.content || response.data.data.list;
+        }
+      }
+      
+      // 格式化课程数据
+      courses.value = coursesData.map((course: Course) => ({
+        id: course.id,
+        name: course.title || course.courseName || '未命名课程'
+      }));
+      
+      console.log('获取到课程列表:', courses.value);
+      return Promise.resolve();
+    } else {
+      message.error('获取课程列表失败');
+      return Promise.reject('获取课程列表失败');
+    }
   } catch (error) {
-    console.error('获取课程列表失败:', error)
-    message.error('获取课程列表失败')
+    console.error('获取课程列表失败:', error);
+    message.error('获取课程列表失败');
+    return Promise.reject(error);
   }
 }
 
 // 筛选变化处理
 const handleFilterChange = () => {
+  console.log('筛选条件变化:', filters.value);
   pagination.value.current = 1
-  fetchExams()
+  fetchExams().then(() => {
+    updateExamCourseNames()
+  })
 }
 
 // 搜索处理
 const handleSearch = () => {
   pagination.value.current = 1
-  fetchExams()
+  fetchExams().then(() => {
+    updateExamCourseNames()
+  })
 }
 
 // 重置筛选条件
@@ -416,7 +503,9 @@ const resetFilters = () => {
     keyword: ''
   }
   pagination.value.current = 1
-  fetchExams()
+  fetchExams().then(() => {
+    updateExamCourseNames()
+  })
 }
 
 // 表格变化事件
@@ -431,9 +520,16 @@ const handleTimeRangeChange = (dates: [Dayjs, Dayjs] | null) => {
   if (dates) {
     examForm.value.startTime = dates[0].format('YYYY-MM-DD HH:mm:ss')
     examForm.value.endTime = dates[1].format('YYYY-MM-DD HH:mm:ss')
+    
+    // 自动计算考试时长（分钟）
+    const startTime = dates[0]
+    const endTime = dates[1]
+    const durationMinutes = endTime.diff(startTime, 'minute')
+    examForm.value.duration = durationMinutes
   } else {
     examForm.value.startTime = ''
     examForm.value.endTime = ''
+    examForm.value.duration = 60 // 默认60分钟
   }
 }
 

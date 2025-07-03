@@ -1,30 +1,31 @@
-2025-07-02 00:17:54.207 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.6 with PID 39408 (D:\my_git_code\SmartClass\backend\target\classes started by 28255 in D:\my_git_code\SmartClass\backend)
-2025-07-02 00:17:54.217 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
-2025-07-02 00:17:54.218 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
-2025-07-02 00:17:54.846 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-02 00:17:54.848 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-07-02 00:17:54.866 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 10 ms. Found 0 Redis repository interfaces.
-2025-07-02 00:17:55.553 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
-2025-07-02 00:17:55.559 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-07-02 00:17:55.559 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
-2025-07-02 00:17:55.599 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
-2025-07-02 00:17:55.599 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1346 ms
-2025-07-02 00:17:55.700 [main] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - Filter 'securityConfig.SessionAuthenticationFilter' configured for use
-2025-07-02 00:17:56.834 [main] INFO  com.education.config.SecurityConfig - 配置UserDetailsService - 基于Session认证
-2025-07-02 00:17:57.003 [main] INFO  com.education.config.WebConfig - 配置静态资源映射: /files/** -> file:./uploads/
-2025-07-02 00:17:57.005 [main] INFO  com.education.config.WebConfig - 静态资源映射配置完成
-2025-07-02 00:17:57.563 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
-2025-07-02 00:17:57.589 [main] INFO  com.education.config.SecurityConfig - 配置Spring Security过滤链 - 基于Session认证
-2025-07-02 00:17:57.591 [main] INFO  com.education.config.SecurityConfig - 配置CORS
-2025-07-02 00:17:57.591 [main] INFO  com.education.config.SecurityConfig - CORS配置完成
-2025-07-02 00:17:57.601 [main] INFO  com.education.config.SecurityConfig - Spring Security配置完成 - 使用Session认证
-2025-07-02 00:17:57.635 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@491f3fb0, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@3d0ce151, org.springframework.security.web.context.SecurityContextHolderFilter@6662974a, org.springframework.security.web.header.HeaderWriterFilter@762d2e4c, org.springframework.web.filter.CorsFilter@58a0f75b, org.springframework.security.web.authentication.logout.LogoutFilter@701da311, com.education.config.SecurityConfig$SessionAuthenticationFilter@5b1ff8cd, org.springframework.security.web.session.ConcurrentSessionFilter@16eb01d4, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@df5f657, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@487ee2a, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@2b569858, org.springframework.security.web.session.SessionManagementFilter@790ea58f, org.springframework.security.web.access.ExceptionTranslationFilter@1bcca516, org.springframework.security.web.access.intercept.AuthorizationFilter@134ec0f3]
-2025-07-02 00:17:58.062 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-2025-07-02 00:17:58.078 [main] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
-2025-07-02 00:17:58.087 [main] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
+2025-07-03 13:47:04.097 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.6 with PID 7640 (D:\my_git_code\SmartClass\backend\target\classes started by 28255 in D:\my_git_code\SmartClass\backend)
+2025-07-03 13:47:04.103 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
+2025-07-03 13:47:04.104 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
+2025-07-03 13:47:04.715 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-07-03 13:47:04.715 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-07-03 13:47:04.742 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 15 ms. Found 0 Redis repository interfaces.
+2025-07-03 13:47:05.436 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+2025-07-03 13:47:05.436 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-07-03 13:47:05.436 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2025-07-03 13:47:05.477 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-07-03 13:47:05.477 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1347 ms
+2025-07-03 13:47:05.578 [main] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - Filter 'securityConfig.SessionAuthenticationFilter' configured for use
+2025-07-03 13:47:07.354 [main] INFO  com.education.config.SecurityConfig - 配置UserDetailsService - 基于Session认证
+2025-07-03 13:47:07.638 [main] INFO  com.education.config.WebConfig - 配置静态资源映射: /files/** -> file:./uploads/
+2025-07-03 13:47:07.640 [main] INFO  com.education.config.WebConfig - 配置实际文件目录映射: /resource/file/** -> file:D:/my_git_code/SmartClass/resource/file/
+2025-07-03 13:47:07.640 [main] INFO  com.education.config.WebConfig - 静态资源映射配置完成
+2025-07-03 13:47:08.279 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
+2025-07-03 13:47:08.308 [main] INFO  com.education.config.SecurityConfig - 配置Spring Security过滤链 - 基于Session认证
+2025-07-03 13:47:08.308 [main] INFO  com.education.config.SecurityConfig - 配置CORS
+2025-07-03 13:47:08.308 [main] INFO  com.education.config.SecurityConfig - CORS配置完成
+2025-07-03 13:47:08.322 [main] INFO  com.education.config.SecurityConfig - Spring Security配置完成 - 使用Session认证
+2025-07-03 13:47:08.351 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@5c3e7128, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5ce03a9d, org.springframework.security.web.context.SecurityContextHolderFilter@299cddbf, org.springframework.security.web.header.HeaderWriterFilter@6956081d, org.springframework.web.filter.CorsFilter@10c67c1c, org.springframework.security.web.authentication.logout.LogoutFilter@554a2f3, com.education.config.SecurityConfig$SessionAuthenticationFilter@4f581211, org.springframework.security.web.session.ConcurrentSessionFilter@20040c6e, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@13da6bc9, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@4509414e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@1067192a, org.springframework.security.web.session.SessionManagementFilter@7f69c4c0, org.springframework.security.web.access.ExceptionTranslationFilter@3fae357f, org.springframework.security.web.access.intercept.AuthorizationFilter@73d7e7aa]
+2025-07-03 13:47:08.833 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2025-07-03 13:47:08.859 [main] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
+2025-07-03 13:47:08.862 [main] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
 
 Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-07-02 00:17:58.095 [main] ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter - 
+2025-07-03 13:47:08.880 [main] ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter - 
 
 ***************************
 APPLICATION FAILED TO START
@@ -38,67 +39,575 @@ Action:
 
 Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
 
-2025-07-02 00:25:46.938 [main] INFO  com.education.EducationApplication - Starting EducationApplication v1.0.0 using Java 21.0.6 with PID 29408 (D:\my_git_code\SmartClass\backend\target\education-platform-1.0.0.jar started by 28255 in D:\my_git_code\SmartClass\backend)
-2025-07-02 00:25:46.939 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
-2025-07-02 00:25:46.939 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
-2025-07-02 00:25:48.004 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-02 00:25:48.014 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-07-02 00:25:48.033 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 10 ms. Found 0 Redis repository interfaces.
-2025-07-02 00:25:49.350 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
-2025-07-02 00:25:49.360 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-07-02 00:25:49.360 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
-2025-07-02 00:25:49.396 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
-2025-07-02 00:25:49.396 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2393 ms
-2025-07-02 00:25:49.646 [main] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - Filter 'securityConfig.SessionAuthenticationFilter' configured for use
-2025-07-02 00:25:52.203 [main] INFO  com.education.config.SecurityConfig - 配置UserDetailsService - 基于Session认证
-2025-07-02 00:25:52.813 [main] INFO  com.education.config.WebConfig - 配置静态资源映射: /files/** -> file:./uploads/
-2025-07-02 00:25:52.815 [main] INFO  com.education.config.WebConfig - 静态资源映射配置完成
-2025-07-02 00:25:54.100 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
-2025-07-02 00:25:54.140 [main] INFO  com.education.config.SecurityConfig - 配置Spring Security过滤链 - 基于Session认证
-2025-07-02 00:25:54.144 [main] INFO  com.education.config.SecurityConfig - 配置CORS
-2025-07-02 00:25:54.144 [main] INFO  com.education.config.SecurityConfig - CORS配置完成
-2025-07-02 00:25:54.181 [main] INFO  com.education.config.SecurityConfig - Spring Security配置完成 - 使用Session认证
-2025-07-02 00:25:54.250 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@ab2e6d2, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@71664560, org.springframework.security.web.context.SecurityContextHolderFilter@22825e1e, org.springframework.security.web.header.HeaderWriterFilter@2a50b32d, org.springframework.web.filter.CorsFilter@4d4436d0, org.springframework.security.web.authentication.logout.LogoutFilter@4ef4f627, com.education.config.SecurityConfig$SessionAuthenticationFilter@73ab3aac, org.springframework.security.web.session.ConcurrentSessionFilter@171dc7c3, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@63fd4dda, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2d258eff, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@39da5e49, org.springframework.security.web.session.SessionManagementFilter@5d5c41e5, org.springframework.security.web.access.ExceptionTranslationFilter@2b80e5a9, org.springframework.security.web.access.intercept.AuthorizationFilter@30c19bff]
-2025-07-02 00:25:55.090 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-2025-07-02 00:25:55.183 [main] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
-2025-07-02 00:25:55.210 [main] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
-
-Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-07-02 00:25:55.249 [main] ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter - 
-
-***************************
-APPLICATION FAILED TO START
-***************************
-
-Description:
-
-Web server failed to start. Port 8080 was already in use.
-
-Action:
-
-Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
-
-2025-07-02 00:29:59.914 [main] INFO  com.education.EducationApplication - Starting EducationApplication v1.0.0 using Java 21.0.6 with PID 16528 (D:\my_git_code\SmartClass\backend\target\education-platform-1.0.0.jar started by 28255 in D:\my_git_code\SmartClass\backend)
-2025-07-02 00:29:59.914 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
-2025-07-02 00:29:59.914 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
-2025-07-02 00:30:00.985 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-02 00:30:00.985 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-07-02 00:30:01.006 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 11 ms. Found 0 Redis repository interfaces.
-2025-07-02 00:30:02.548 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8081 (http)
-2025-07-02 00:30:02.560 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-07-02 00:30:02.560 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
-2025-07-02 00:30:02.589 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
-2025-07-02 00:30:02.589 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2623 ms
-2025-07-02 00:30:02.827 [main] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - Filter 'securityConfig.SessionAuthenticationFilter' configured for use
-2025-07-02 00:30:05.565 [main] INFO  com.education.config.SecurityConfig - 配置UserDetailsService - 基于Session认证
-2025-07-02 00:30:06.221 [main] INFO  com.education.config.WebConfig - 配置静态资源映射: /files/** -> file:./uploads/
-2025-07-02 00:30:06.231 [main] INFO  com.education.config.WebConfig - 静态资源映射配置完成
-2025-07-02 00:30:07.475 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
-2025-07-02 00:30:07.505 [main] INFO  com.education.config.SecurityConfig - 配置Spring Security过滤链 - 基于Session认证
-2025-07-02 00:30:07.515 [main] INFO  com.education.config.SecurityConfig - 配置CORS
-2025-07-02 00:30:07.515 [main] INFO  com.education.config.SecurityConfig - CORS配置完成
-2025-07-02 00:30:07.547 [main] INFO  com.education.config.SecurityConfig - Spring Security配置完成 - 使用Session认证
-2025-07-02 00:30:07.617 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@2b44d6d0, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@3e900e1a, org.springframework.security.web.context.SecurityContextHolderFilter@21ea996f, org.springframework.security.web.header.HeaderWriterFilter@2233cac0, org.springframework.web.filter.CorsFilter@196624bf, org.springframework.security.web.authentication.logout.LogoutFilter@1e3f0aea, com.education.config.SecurityConfig$SessionAuthenticationFilter@73ab3aac, org.springframework.security.web.session.ConcurrentSessionFilter@1b57c345, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@2f79f192, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2a8b33ba, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@50085d9c, org.springframework.security.web.session.SessionManagementFilter@8e25d3f, org.springframework.security.web.access.ExceptionTranslationFilter@d325518, org.springframework.security.web.access.intercept.AuthorizationFilter@2e71240b]
-2025-07-02 00:30:08.549 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port(s): 8081 (http) with context path ''
-2025-07-02 00:30:08.556 [scheduling-1] WARN  com.education.monitor.DataSourceMonitor - 连接池监控跳过: HikariCP连接池尚未完全初始化
-2025-07-02 00:30:08.569 [main] INFO  com.education.EducationApplication - Started EducationApplication in 9.054 seconds (process running for 9.589)
+2025-07-03 13:51:55.834 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.6 with PID 27604 (D:\my_git_code\SmartClass\backend\target\classes started by 28255 in D:\my_git_code\SmartClass\backend)
+2025-07-03 13:51:55.834 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
+2025-07-03 13:51:55.834 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
+2025-07-03 13:51:56.406 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-07-03 13:51:56.406 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-07-03 13:51:56.422 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 9 ms. Found 0 Redis repository interfaces.
+2025-07-03 13:51:57.060 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+2025-07-03 13:51:57.060 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-07-03 13:51:57.060 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2025-07-03 13:51:57.120 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-07-03 13:51:57.120 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1263 ms
+2025-07-03 13:51:57.203 [main] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - Filter 'securityConfig.SessionAuthenticationFilter' configured for use
+2025-07-03 13:51:58.509 [main] INFO  com.education.config.SecurityConfig - 配置UserDetailsService - 基于Session认证
+2025-07-03 13:51:58.673 [main] INFO  com.education.config.WebConfig - 配置静态资源映射: /files/** -> file:./uploads/
+2025-07-03 13:51:58.673 [main] INFO  com.education.config.WebConfig - 配置实际文件目录映射: /resource/file/** -> file:D:/my_git_code/SmartClass/resource/file/
+2025-07-03 13:51:58.673 [main] INFO  com.education.config.WebConfig - 静态资源映射配置完成
+2025-07-03 13:51:59.208 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
+2025-07-03 13:51:59.231 [main] INFO  com.education.config.SecurityConfig - 配置Spring Security过滤链 - 基于Session认证
+2025-07-03 13:51:59.232 [main] INFO  com.education.config.SecurityConfig - 配置CORS
+2025-07-03 13:51:59.232 [main] INFO  com.education.config.SecurityConfig - CORS配置完成
+2025-07-03 13:51:59.241 [main] INFO  com.education.config.SecurityConfig - Spring Security配置完成 - 使用Session认证
+2025-07-03 13:51:59.272 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@50bc0bbd, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@6956081d, org.springframework.security.web.context.SecurityContextHolderFilter@72fa021, org.springframework.security.web.header.HeaderWriterFilter@2ef812b, org.springframework.web.filter.CorsFilter@5d94c50e, org.springframework.security.web.authentication.logout.LogoutFilter@4d0e6424, com.education.config.SecurityConfig$SessionAuthenticationFilter@fe08eaf, org.springframework.security.web.session.ConcurrentSessionFilter@425376cc, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@7be9e9fc, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@ccea4be, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@135f160e, org.springframework.security.web.session.SessionManagementFilter@51d6c42d, org.springframework.security.web.access.ExceptionTranslationFilter@4981b83, org.springframework.security.web.access.intercept.AuthorizationFilter@206de1f]
+2025-07-03 13:51:59.646 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path ''
+2025-07-03 13:51:59.651 [scheduling-1] WARN  com.education.monitor.DataSourceMonitor - 连接池监控跳过: HikariCP连接池尚未完全初始化
+2025-07-03 13:51:59.651 [main] INFO  com.education.EducationApplication - Started EducationApplication in 4.041 seconds (process running for 4.263)
+2025-07-03 13:52:08.613 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-03 13:52:08.614 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-07-03 13:52:08.616 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2025-07-03 13:52:08.663 [http-nio-8080-exec-1] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 没有找到Session，路径: /auth/user-info
+2025-07-03 13:52:08.680 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:08.683 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 13:52:08.683 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:08.683 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:08.685 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 13:52:08.686 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@6ab11fa6]]
+2025-07-03 13:52:08.688 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 8ms
+2025-07-03 13:52:08.724 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"用户未登录","timestamp":[2025,7,3,13,52,8,688134800],"error":true,"success":false}
+2025-07-03 13:52:08.724 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:08.826 [http-nio-8080-exec-2] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 没有找到Session，路径: /auth/user-info
+2025-07-03 13:52:08.827 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:08.828 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 13:52:08.828 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:08.828 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:08.828 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 13:52:08.828 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@28675fd2]]
+2025-07-03 13:52:08.829 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 2ms
+2025-07-03 13:52:08.829 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"用户未登录","timestamp":[2025,7,3,13,52,8,829456200],"error":true,"success":false}
+2025-07-03 13:52:08.829 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:15.283 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:15.283 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/login
+2025-07-03 13:52:15.283 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求方法: POST
+2025-07-03 13:52:15.285 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:15.285 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.login
+2025-07-03 13:52:15.285 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求参数: [com.education.dto.AuthDTO$LoginRequest@3bd55475, SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@517badb1]]
+2025-07-03 13:52:15.316 [http-nio-8080-exec-5] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-Education - Starting...
+2025-07-03 13:52:15.521 [http-nio-8080-exec-5] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-Education - Added connection com.mysql.cj.jdbc.ConnectionImpl@5ac5c703
+2025-07-03 13:52:15.521 [http-nio-8080-exec-5] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-Education - Start completed.
+2025-07-03 13:52:15.679 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 396ms
+2025-07-03 13:52:15.687 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"userInfo":{"realName":"测试学生","role":"STUDENT","id":12,"avatar":null,"email":"20234042@stu.neu.edu.cn","username":"stu01"},"sessionId":"95C42CF36FB523A48D5048AEB9791857"},"timestamp":[2025,7,3,13,52,15,679233400],"error":false,"success":true}
+2025-07-03 13:52:15.687 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:17.345 [http-nio-8080-exec-6] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:52:17.347 [http-nio-8080-exec-6] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:52:17.358 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:17.358 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/courses
+2025-07-03 13:52:17.358 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:17.358 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:17.358 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentCourseController.getStudentCourses
+2025-07-03 13:52:17.358 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求参数: [0, 10, null]
+2025-07-03 13:52:17.358 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 获取学生课程列表 - 页码: 0, 每页大小: 10, 关键词: null
+2025-07-03 13:52:17.433 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 查询到学生选课ID: [9, 19, 22]
+2025-07-03 13:52:17.534 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 课程查询结果: result.getRecords() = 3
+2025-07-03 13:52:17.534 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 课程信息: id=19, 标题=Java程序设计, 教师ID=2025002
+2025-07-03 13:52:17.534 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 课程信息: id=22, 标题=微观经济学原理, 教师ID=2025002
+2025-07-03 13:52:17.534 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 课程信息: id=9, 标题=计算机组成原理, 教师ID=2025002
+2025-07-03 13:52:17.534 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 查询到学生课程总数: 3, 实际返回课程数: 3
+2025-07-03 13:52:17.534 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 176ms
+2025-07-03 13:52:17.546 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"content":[{"id":19,"title":"Java程序设计","courseName":null,"description":"Java编程基础课程，零基础向对象编程思想和Java核心技术，为开发企业级应用打下基础","coverImage":"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-05-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":16421,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":22,"title":"微观经济学原理","courseName":null,"description":"介绍微观经济学的基本理论，包括供需关系、市场结构、消费行为、生产理论等","coverImage":"https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-06-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":11201,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":9,"title":"计算机组成原理","courseName":null,"description":"本课程介绍计算机系统的基本组成和工作原理，包括数字逻辑、CPU结构、存储系统、输入输出系统等内容。","coverImage":"https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg","credit":4.0,"courseType":"必修课","category":null,"startTime":"2025-06-04 02:52:20","endTime":"2025-06-26 02:52:22","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":1,"averageScore":null,"createTime":"2025-06-29 02:52:54","updateTime":"2025-07-03 01:13:39","progress":100}],"totalElements":3,"number":0,"size":10,"totalPages":1,"first":true,"last":true,"empty":false,"pageSize":10,"current":1,"records":[{"id":19,"title":"Java程序设计","courseName":null,"description":"Java编程基础课程，零基础向对象编程思想和Java核心技术，为开发企业级应用打下基础","coverImage":"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-05-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":16421,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":22,"title":"微观经济学原理","courseName":null,"description":"介绍微观经济学的基本理论，包括供需关系、市场结构、消费行为、生产理论等","coverImage":"https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-06-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":11201,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":9,"title":"计算机组成原理","courseName":null,"description":"本课程介绍计算机系统的基本组成和工作原理，包括数字逻辑、CPU结构、存储系统、输入输出系统等内容。","coverImage":"https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg","credit":4.0,"courseType":"必修课","category":null,"startTime":"2025-06-04 02:52:20","endTime":"2025-06-26 02:52:22","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":1,"averageScore":null,"createTime":"2025-06-29 02:52:54","updateTime":"2025-07-03 01:13:39","progress":100}],"pages":1,"total":3,"list":[{"id":19,"title":"Java程序设计","courseName":null,"description":"Java编程基础课程，零基础向对象编程思想和Java核心技术，为开发企业级应用打下基础","coverImage":"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-05-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":16421,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":22,"title":"微观经济学原理","courseName":null,"description":"介绍微观经济学的基本理论，包括供需关系、市场结构、消费行为、生产理论等","coverImage":"https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-06-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":11201,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":9,"title":"计算机组成原理","courseName":null,"description":"本课程介绍计算机系统的基本组成和工作原理，包括数字逻辑、CPU结构、存储系统、输入输出系统等内容。","coverImage":"https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg","credit":4.0,"courseType":"必修课","category":null,"startTime":"2025-06-04 02:52:20","endTime":"2025-06-26 02:52:22","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":1,"averageScore":null,"createTime":"2025-06-29 02:52:54","updateTime":"2025-07-03 01:13:39","progress":100}],"pageNum":1},"timestamp":[2025,7,3,13,52,17,534079600],"error":false,"success":true}
+2025-07-03 13:52:17.546 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:19.039 [http-nio-8080-exec-8] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:52:19.039 [http-nio-8080-exec-7] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:52:19.039 [http-nio-8080-exec-8] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:52:19.039 [http-nio-8080-exec-7] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:52:19.040 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:19.041 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/teacher/assignments/courses
+2025-07-03 13:52:19.041 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:19.041 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:19.041 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.teacher.AssignmentController.getTeacherCourses
+2025-07-03 13:52:19.041 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求参数: []
+2025-07-03 13:52:19.044 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:19.045 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/assignments
+2025-07-03 13:52:19.045 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:19.045 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 5ms
+2025-07-03 13:52:19.045 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:19.045 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentAssignmentController.getAssignmentList
+2025-07-03 13:52:19.046 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求参数: [null, null, null, null]
+2025-07-03 13:52:19.046 [http-nio-8080-exec-8] INFO  c.e.controller.student.StudentAssignmentController - 获取学生任务列表，状态: null, 课程ID: null, 类型: null, 关键词: null
+2025-07-03 13:52:19.048 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,13,52,19,45928300],"error":false,"success":true}
+2025-07-03 13:52:19.048 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:19.059 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 15ms
+2025-07-03 13:52:19.059 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,13,52,19,59813900],"error":false,"success":true}
+2025-07-03 13:52:19.059 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:22.457 [http-nio-8080-exec-9] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:52:22.458 [http-nio-8080-exec-9] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:52:22.467 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:22.468 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/assignments
+2025-07-03 13:52:22.468 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:22.468 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:22.468 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentAssignmentController.getAssignmentList
+2025-07-03 13:52:22.468 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 请求参数: [pending, null, null, null]
+2025-07-03 13:52:22.469 [http-nio-8080-exec-9] INFO  c.e.controller.student.StudentAssignmentController - 获取学生任务列表，状态: pending, 课程ID: null, 类型: null, 关键词: null
+2025-07-03 13:52:22.490 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 23ms
+2025-07-03 13:52:22.490 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,13,52,22,490772200],"error":false,"success":true}
+2025-07-03 13:52:22.490 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:22.637 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:22.637 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/login
+2025-07-03 13:52:22.637 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求方法: POST
+2025-07-03 13:52:22.637 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:22.637 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.login
+2025-07-03 13:52:22.637 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求参数: [com.education.dto.AuthDTO$LoginRequest@35ad172f, SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@3b6affea]]
+2025-07-03 13:52:22.737 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 100ms
+2025-07-03 13:52:22.737 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"登录失败: 密码错误","timestamp":[2025,7,3,13,52,22,737670000],"error":true,"success":false}
+2025-07-03 13:52:22.737 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:23.179 [http-nio-8080-exec-10] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:52:23.179 [http-nio-8080-exec-10] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:52:23.181 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:23.181 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/assignments
+2025-07-03 13:52:23.182 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:23.182 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:23.182 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentAssignmentController.getAssignmentList
+2025-07-03 13:52:23.182 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求参数: [completed, null, null, null]
+2025-07-03 13:52:23.182 [http-nio-8080-exec-10] INFO  c.e.controller.student.StudentAssignmentController - 获取学生任务列表，状态: completed, 课程ID: null, 类型: null, 关键词: null
+2025-07-03 13:52:23.195 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 14ms
+2025-07-03 13:52:23.196 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,13,52,23,195493800],"error":false,"success":true}
+2025-07-03 13:52:23.196 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:24.012 [http-nio-8080-exec-1] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:52:24.013 [http-nio-8080-exec-1] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:52:24.015 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:24.016 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/assignments
+2025-07-03 13:52:24.016 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:24.016 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:24.017 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentAssignmentController.getAssignmentList
+2025-07-03 13:52:24.017 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求参数: [overdue, null, null, null]
+2025-07-03 13:52:24.017 [http-nio-8080-exec-1] INFO  c.e.controller.student.StudentAssignmentController - 获取学生任务列表，状态: overdue, 课程ID: null, 类型: null, 关键词: null
+2025-07-03 13:52:24.029 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 14ms
+2025-07-03 13:52:24.029 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,13,52,24,29888400],"error":false,"success":true}
+2025-07-03 13:52:24.029 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:25.107 [http-nio-8080-exec-2] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:52:25.108 [http-nio-8080-exec-2] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:52:25.110 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:25.110 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/assignments
+2025-07-03 13:52:25.110 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:25.110 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:25.111 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentAssignmentController.getAssignmentList
+2025-07-03 13:52:25.111 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求参数: [null, null, null, null]
+2025-07-03 13:52:25.112 [http-nio-8080-exec-2] INFO  c.e.controller.student.StudentAssignmentController - 获取学生任务列表，状态: null, 课程ID: null, 类型: null, 关键词: null
+2025-07-03 13:52:25.124 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 14ms
+2025-07-03 13:52:25.125 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,13,52,25,124147100],"error":false,"success":true}
+2025-07-03 13:52:25.125 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:27.070 [http-nio-8080-exec-3] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:52:27.070 [http-nio-8080-exec-3] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:52:27.073 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:27.073 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/assignments
+2025-07-03 13:52:27.073 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:27.074 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:27.074 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentAssignmentController.getAssignmentList
+2025-07-03 13:52:27.074 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求参数: [null, null, null, null]
+2025-07-03 13:52:27.074 [http-nio-8080-exec-3] INFO  c.e.controller.student.StudentAssignmentController - 获取学生任务列表，状态: null, 课程ID: null, 类型: null, 关键词: null
+2025-07-03 13:52:27.081 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 8ms
+2025-07-03 13:52:27.082 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,13,52,27,81925700],"error":false,"success":true}
+2025-07-03 13:52:27.082 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:28.878 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:28.878 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/login
+2025-07-03 13:52:28.878 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求方法: POST
+2025-07-03 13:52:28.878 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:28.878 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.login
+2025-07-03 13:52:28.878 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求参数: [com.education.dto.AuthDTO$LoginRequest@60f7bba, SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@546264a2]]
+2025-07-03 13:52:28.991 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 113ms
+2025-07-03 13:52:28.991 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"登录失败: 密码错误","timestamp":[2025,7,3,13,52,28,991027200],"error":true,"success":false}
+2025-07-03 13:52:28.991 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:40.490 [http-nio-8080-exec-7] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:52:40.491 [http-nio-8080-exec-7] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:52:40.492 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:40.492 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 13:52:40.492 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:40.492 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:40.492 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 13:52:40.492 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@db9caf9]]
+2025-07-03 13:52:40.493 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 1ms
+2025-07-03 13:52:40.493 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"realName":"测试学生","role":"STUDENT","id":12,"avatar":null,"email":"20234042@stu.neu.edu.cn","username":"stu01"},"timestamp":[2025,7,3,13,52,40,493536900],"error":false,"success":true}
+2025-07-03 13:52:40.493 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:40.515 [http-nio-8080-exec-8] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:52:40.516 [http-nio-8080-exec-8] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:52:40.516 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:40.516 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 13:52:40.516 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:40.516 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:40.518 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 13:52:40.518 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@5fe61dc6]]
+2025-07-03 13:52:40.518 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 2ms
+2025-07-03 13:52:40.518 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"realName":"测试学生","role":"STUDENT","id":12,"avatar":null,"email":"20234042@stu.neu.edu.cn","username":"stu01"},"timestamp":[2025,7,3,13,52,40,518130400],"error":false,"success":true}
+2025-07-03 13:52:40.518 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:40.758 [http-nio-8080-exec-9] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:52:40.758 [http-nio-8080-exec-4] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:52:40.759 [http-nio-8080-exec-9] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:52:40.759 [http-nio-8080-exec-4] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:52:40.759 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:40.759 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:52:40.759 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/teacher/assignments/courses
+2025-07-03 13:52:40.759 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/assignments
+2025-07-03 13:52:40.759 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:40.759 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:52:40.759 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:40.759 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:52:40.759 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.teacher.AssignmentController.getTeacherCourses
+2025-07-03 13:52:40.759 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentAssignmentController.getAssignmentList
+2025-07-03 13:52:40.759 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 请求参数: []
+2025-07-03 13:52:40.759 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求参数: [null, null, null, null]
+2025-07-03 13:52:40.759 [http-nio-8080-exec-4] INFO  c.e.controller.student.StudentAssignmentController - 获取学生任务列表，状态: null, 课程ID: null, 类型: null, 关键词: null
+2025-07-03 13:52:40.761 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 2ms
+2025-07-03 13:52:40.761 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,13,52,40,761282000],"error":false,"success":true}
+2025-07-03 13:52:40.761 [http-nio-8080-exec-9] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:52:40.763 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 4ms
+2025-07-03 13:52:40.763 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,13,52,40,763360200],"error":false,"success":true}
+2025-07-03 13:52:40.763 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:53:22.719 [http-nio-8080-exec-1] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:53:22.721 [http-nio-8080-exec-1] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:53:22.722 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:53:22.722 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 13:53:22.722 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:53:22.722 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:53:22.722 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 13:53:22.722 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@72b0d038]]
+2025-07-03 13:53:22.723 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 2ms
+2025-07-03 13:53:22.723 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"realName":"测试学生","role":"STUDENT","id":12,"avatar":null,"email":"20234042@stu.neu.edu.cn","username":"stu01"},"timestamp":[2025,7,3,13,53,22,723077400],"error":false,"success":true}
+2025-07-03 13:53:22.723 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:53:22.737 [http-nio-8080-exec-2] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:53:22.737 [http-nio-8080-exec-2] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:53:22.738 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:53:22.738 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 13:53:22.739 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:53:22.739 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:53:22.739 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 13:53:22.739 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@d513ff3]]
+2025-07-03 13:53:22.739 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 1ms
+2025-07-03 13:53:22.740 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"realName":"测试学生","role":"STUDENT","id":12,"avatar":null,"email":"20234042@stu.neu.edu.cn","username":"stu01"},"timestamp":[2025,7,3,13,53,22,739689600],"error":false,"success":true}
+2025-07-03 13:53:22.740 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:53:23.048 [http-nio-8080-exec-5] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:53:23.048 [http-nio-8080-exec-3] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 13:53:23.050 [http-nio-8080-exec-5] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:53:23.050 [http-nio-8080-exec-3] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 13:53:23.050 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:53:23.052 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 13:53:23.052 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/teacher/assignments/courses
+2025-07-03 13:53:23.052 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:53:23.052 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/assignments
+2025-07-03 13:53:23.052 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:53:23.052 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.teacher.AssignmentController.getTeacherCourses
+2025-07-03 13:53:23.052 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 13:53:23.052 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求参数: []
+2025-07-03 13:53:23.052 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 13:53:23.053 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentAssignmentController.getAssignmentList
+2025-07-03 13:53:23.053 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求参数: [null, null, null, null]
+2025-07-03 13:53:23.053 [http-nio-8080-exec-5] INFO  c.e.controller.student.StudentAssignmentController - 获取学生任务列表，状态: null, 课程ID: null, 类型: null, 关键词: null
+2025-07-03 13:53:23.058 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 8ms
+2025-07-03 13:53:23.059 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,13,53,23,58484700],"error":false,"success":true}
+2025-07-03 13:53:23.059 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:53:23.061 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 9ms
+2025-07-03 13:53:23.061 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,13,53,23,61519100],"error":false,"success":true}
+2025-07-03 13:53:23.061 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 13:56:59.660 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - === 连接池监控报告 ===
+2025-07-03 13:56:59.660 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 连接池名称: HikariPool-Education
+2025-07-03 13:56:59.660 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 活跃连接: 0/10
+2025-07-03 13:56:59.660 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 空闲连接: 3
+2025-07-03 13:56:59.660 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 总连接数: 3
+2025-07-03 13:56:59.660 [scheduling-1] INFO  com.education.monitor.DataSourceMonitor - 等待连接的线程: 0
+2025-07-03 14:05:12.549 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.6 with PID 9180 (D:\my_git_code\SmartClass\backend\target\classes started by 28255 in D:\my_git_code\SmartClass\backend)
+2025-07-03 14:05:12.549 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
+2025-07-03 14:05:12.550 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
+2025-07-03 14:05:13.140 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-07-03 14:05:13.140 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-07-03 14:05:13.174 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 16 ms. Found 0 Redis repository interfaces.
+2025-07-03 14:05:13.863 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+2025-07-03 14:05:13.879 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-07-03 14:05:13.879 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2025-07-03 14:05:13.926 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-07-03 14:05:13.926 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1347 ms
+2025-07-03 14:05:14.016 [main] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - Filter 'securityConfig.SessionAuthenticationFilter' configured for use
+2025-07-03 14:05:15.484 [main] INFO  com.education.config.SecurityConfig - 配置UserDetailsService - 基于Session认证
+2025-07-03 14:05:15.638 [main] INFO  com.education.config.WebConfig - 配置静态资源映射: /files/** -> file:./uploads/
+2025-07-03 14:05:15.648 [main] INFO  com.education.config.WebConfig - 配置实际文件目录映射: /resource/file/** -> file:D:/my_git_code/SmartClass/resource/file/
+2025-07-03 14:05:15.648 [main] INFO  com.education.config.WebConfig - 静态资源映射配置完成
+2025-07-03 14:05:16.585 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
+2025-07-03 14:05:16.607 [main] INFO  com.education.config.SecurityConfig - 配置Spring Security过滤链 - 基于Session认证
+2025-07-03 14:05:16.607 [main] INFO  com.education.config.SecurityConfig - 配置CORS
+2025-07-03 14:05:16.607 [main] INFO  com.education.config.SecurityConfig - CORS配置完成
+2025-07-03 14:05:16.618 [main] INFO  com.education.config.SecurityConfig - Spring Security配置完成 - 使用Session认证
+2025-07-03 14:05:16.645 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@50bc0bbd, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@6956081d, org.springframework.security.web.context.SecurityContextHolderFilter@72fa021, org.springframework.security.web.header.HeaderWriterFilter@2ef812b, org.springframework.web.filter.CorsFilter@5d94c50e, org.springframework.security.web.authentication.logout.LogoutFilter@4d0e6424, com.education.config.SecurityConfig$SessionAuthenticationFilter@fe08eaf, org.springframework.security.web.session.ConcurrentSessionFilter@425376cc, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@7be9e9fc, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@ccea4be, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@135f160e, org.springframework.security.web.session.SessionManagementFilter@51d6c42d, org.springframework.security.web.access.ExceptionTranslationFilter@4981b83, org.springframework.security.web.access.intercept.AuthorizationFilter@206de1f]
+2025-07-03 14:05:17.046 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path ''
+2025-07-03 14:05:17.057 [scheduling-1] WARN  com.education.monitor.DataSourceMonitor - 连接池监控跳过: HikariCP连接池尚未完全初始化
+2025-07-03 14:05:17.057 [main] INFO  com.education.EducationApplication - Started EducationApplication in 4.788 seconds (process running for 5.018)
+2025-07-03 14:05:40.043 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-03 14:05:40.044 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-07-03 14:05:40.045 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-07-03 14:05:40.072 [http-nio-8080-exec-1] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 没有找到Session，路径: /auth/user-info
+2025-07-03 14:05:40.087 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:05:40.088 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 14:05:40.089 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:05:40.089 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:05:40.090 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 14:05:40.090 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@14e10a9a]]
+2025-07-03 14:05:40.092 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 5ms
+2025-07-03 14:05:40.125 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"用户未登录","timestamp":[2025,7,3,14,5,40,92264200],"error":true,"success":false}
+2025-07-03 14:05:40.126 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:05:40.148 [http-nio-8080-exec-3] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 没有找到Session，路径: /auth/user-info
+2025-07-03 14:05:40.150 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:05:40.150 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 14:05:40.150 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:05:40.151 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:05:40.151 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 14:05:40.151 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@44b4cefc]]
+2025-07-03 14:05:40.152 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 2ms
+2025-07-03 14:05:40.152 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"用户未登录","timestamp":[2025,7,3,14,5,40,152026900],"error":true,"success":false}
+2025-07-03 14:05:40.152 [http-nio-8080-exec-3] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:05:40.452 [http-nio-8080-exec-5] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 没有找到Session，路径: /api/student/assignments
+2025-07-03 14:05:40.452 [http-nio-8080-exec-4] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 没有找到Session，路径: /api/student/courses/enrolled
+2025-07-03 14:05:42.422 [http-nio-8080-exec-6] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 没有找到Session，路径: /auth/user-info
+2025-07-03 14:05:42.424 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:05:42.425 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 14:05:42.425 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:05:42.425 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:05:42.427 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 14:05:42.427 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@56b8bf42]]
+2025-07-03 14:05:42.427 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 3ms
+2025-07-03 14:05:42.428 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"用户未登录","timestamp":[2025,7,3,14,5,42,427049500],"error":true,"success":false}
+2025-07-03 14:05:42.428 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:05:42.448 [http-nio-8080-exec-7] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 没有找到Session，路径: /auth/user-info
+2025-07-03 14:05:42.450 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:05:42.450 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 14:05:42.451 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:05:42.451 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:05:42.451 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 14:05:42.452 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@4180c7a8]]
+2025-07-03 14:05:42.452 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 2ms
+2025-07-03 14:05:42.452 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"用户未登录","timestamp":[2025,7,3,14,5,42,452640000],"error":true,"success":false}
+2025-07-03 14:05:42.453 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:05:51.784 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:05:51.784 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/login
+2025-07-03 14:05:51.784 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求方法: POST
+2025-07-03 14:05:51.784 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:05:51.784 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.login
+2025-07-03 14:05:51.784 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求参数: [com.education.dto.AuthDTO$LoginRequest@79f65ea7, SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@14e36914]]
+2025-07-03 14:05:51.809 [http-nio-8080-exec-8] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-Education - Starting...
+2025-07-03 14:05:51.959 [http-nio-8080-exec-8] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-Education - Added connection com.mysql.cj.jdbc.ConnectionImpl@4ba28863
+2025-07-03 14:05:51.959 [http-nio-8080-exec-8] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-Education - Start completed.
+2025-07-03 14:05:52.126 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 342ms
+2025-07-03 14:05:52.131 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"userInfo":{"realName":"测试学生","role":"STUDENT","id":12,"avatar":null,"email":"20234042@stu.neu.edu.cn","username":"stu01"},"sessionId":"5141F7A20A096C57144E16ACD0B9E86E"},"timestamp":[2025,7,3,14,5,52,126198900],"error":false,"success":true}
+2025-07-03 14:05:52.131 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:05:55.227 [http-nio-8080-exec-9] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 14:05:55.227 [http-nio-8080-exec-2] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 14:05:55.230 [http-nio-8080-exec-9] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 14:05:55.230 [http-nio-8080-exec-2] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 14:05:55.245 [http-nio-8080-exec-9] WARN  com.education.exception.GlobalExceptionHandler - 参数类型不匹配: Failed to convert value of type 'java.lang.String' to required type 'java.lang.Long'; For input string: "enrolled"
+2025-07-03 14:05:55.246 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:05:55.246 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/assignments
+2025-07-03 14:05:55.246 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:05:55.247 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:05:55.247 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentAssignmentController.getAssignmentList
+2025-07-03 14:05:55.247 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求参数: [null, null, null, null]
+2025-07-03 14:05:55.247 [http-nio-8080-exec-2] INFO  c.e.controller.student.StudentAssignmentController - 获取学生任务列表，状态: null, 课程ID: null, 类型: null, 关键词: null
+2025-07-03 14:05:55.248 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 2ms
+2025-07-03 14:05:55.248 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"未登录或登录已过期","timestamp":[2025,7,3,14,5,55,248488300],"error":true,"success":false}
+2025-07-03 14:05:55.249 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:05:57.960 [http-nio-8080-exec-10] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - Session中没有完整的用户信息，路径: /auth/user-info
+2025-07-03 14:05:57.961 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:05:57.962 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 14:05:57.962 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:05:57.962 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:05:57.962 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 14:05:57.962 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@396df531]]
+2025-07-03 14:05:57.962 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 1ms
+2025-07-03 14:05:57.962 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"用户未登录","timestamp":[2025,7,3,14,5,57,962655700],"error":true,"success":false}
+2025-07-03 14:05:57.962 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:05:58.017 [http-nio-8080-exec-1] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - Session中没有完整的用户信息，路径: /auth/user-info
+2025-07-03 14:05:58.018 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:05:58.019 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 14:05:58.019 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:05:58.019 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:05:58.019 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 14:05:58.020 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@702d62ad]]
+2025-07-03 14:05:58.020 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 2ms
+2025-07-03 14:05:58.020 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"用户未登录","timestamp":[2025,7,3,14,5,58,20679100],"error":true,"success":false}
+2025-07-03 14:05:58.021 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:05:58.292 [http-nio-8080-exec-4] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - Session中没有完整的用户信息，路径: /api/student/assignments
+2025-07-03 14:05:58.292 [http-nio-8080-exec-3] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - Session中没有完整的用户信息，路径: /api/student/courses/enrolled
+2025-07-03 14:05:58.293 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:05:58.294 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/assignments
+2025-07-03 14:05:58.294 [http-nio-8080-exec-3] WARN  com.education.exception.GlobalExceptionHandler - 参数类型不匹配: Failed to convert value of type 'java.lang.String' to required type 'java.lang.Long'; For input string: "enrolled"
+2025-07-03 14:05:58.294 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:05:58.294 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:05:58.294 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentAssignmentController.getAssignmentList
+2025-07-03 14:05:58.294 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求参数: [null, null, null, null]
+2025-07-03 14:05:58.294 [http-nio-8080-exec-4] INFO  c.e.controller.student.StudentAssignmentController - 获取学生任务列表，状态: null, 课程ID: null, 类型: null, 关键词: null
+2025-07-03 14:05:58.294 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 1ms
+2025-07-03 14:05:58.294 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"未登录或登录已过期","timestamp":[2025,7,3,14,5,58,294299600],"error":true,"success":false}
+2025-07-03 14:05:58.296 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:06:27.157 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:06:27.157 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/login
+2025-07-03 14:06:27.158 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求方法: POST
+2025-07-03 14:06:27.158 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:06:27.158 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.login
+2025-07-03 14:06:27.158 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 请求参数: [com.education.dto.AuthDTO$LoginRequest@f787e47, SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@225a564b]]
+2025-07-03 14:06:27.222 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 65ms
+2025-07-03 14:06:27.222 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"userInfo":{"realName":"测试学生","role":"STUDENT","id":12,"avatar":null,"email":"20234042@stu.neu.edu.cn","username":"stu01"},"sessionId":"CDFEC85A8322522CE5AFAB6B15453266"},"timestamp":[2025,7,3,14,6,27,222044100],"error":false,"success":true}
+2025-07-03 14:06:27.222 [http-nio-8080-exec-5] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:06:29.097 [http-nio-8080-exec-6] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 14:06:29.097 [http-nio-8080-exec-6] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 14:06:29.099 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:06:29.099 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/courses
+2025-07-03 14:06:29.100 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:06:29.100 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:06:29.100 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentCourseController.getStudentCourses
+2025-07-03 14:06:29.100 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 请求参数: [0, 10, null]
+2025-07-03 14:06:29.100 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 获取学生课程列表 - 页码: 0, 每页大小: 10, 关键词: null
+2025-07-03 14:06:29.142 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 查询到学生选课ID: [9, 19, 22]
+2025-07-03 14:06:29.190 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 课程查询结果: result.getRecords() = 3
+2025-07-03 14:06:29.190 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 课程信息: id=19, 标题=Java程序设计, 教师ID=2025002
+2025-07-03 14:06:29.190 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 课程信息: id=22, 标题=微观经济学原理, 教师ID=2025002
+2025-07-03 14:06:29.190 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 课程信息: id=9, 标题=计算机组成原理, 教师ID=2025002
+2025-07-03 14:06:29.190 [http-nio-8080-exec-6] INFO  c.e.controller.student.StudentCourseController - 查询到学生课程总数: 3, 实际返回课程数: 3
+2025-07-03 14:06:29.190 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 91ms
+2025-07-03 14:06:29.192 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"content":[{"id":19,"title":"Java程序设计","courseName":null,"description":"Java编程基础课程，零基础向对象编程思想和Java核心技术，为开发企业级应用打下基础","coverImage":"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-05-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":16421,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":22,"title":"微观经济学原理","courseName":null,"description":"介绍微观经济学的基本理论，包括供需关系、市场结构、消费行为、生产理论等","coverImage":"https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-06-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":11201,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":9,"title":"计算机组成原理","courseName":null,"description":"本课程介绍计算机系统的基本组成和工作原理，包括数字逻辑、CPU结构、存储系统、输入输出系统等内容。","coverImage":"https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg","credit":4.0,"courseType":"必修课","category":null,"startTime":"2025-06-04 02:52:20","endTime":"2025-06-26 02:52:22","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":1,"averageScore":null,"createTime":"2025-06-29 02:52:54","updateTime":"2025-07-03 01:13:39","progress":100}],"totalElements":3,"number":0,"size":10,"totalPages":1,"first":true,"last":true,"empty":false,"pageSize":10,"total":3,"pages":1,"current":1,"records":[{"id":19,"title":"Java程序设计","courseName":null,"description":"Java编程基础课程，零基础向对象编程思想和Java核心技术，为开发企业级应用打下基础","coverImage":"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-05-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":16421,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":22,"title":"微观经济学原理","courseName":null,"description":"介绍微观经济学的基本理论，包括供需关系、市场结构、消费行为、生产理论等","coverImage":"https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-06-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":11201,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":9,"title":"计算机组成原理","courseName":null,"description":"本课程介绍计算机系统的基本组成和工作原理，包括数字逻辑、CPU结构、存储系统、输入输出系统等内容。","coverImage":"https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg","credit":4.0,"courseType":"必修课","category":null,"startTime":"2025-06-04 02:52:20","endTime":"2025-06-26 02:52:22","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":1,"averageScore":null,"createTime":"2025-06-29 02:52:54","updateTime":"2025-07-03 01:13:39","progress":100}],"pageNum":1,"list":[{"id":19,"title":"Java程序设计","courseName":null,"description":"Java编程基础课程，零基础向对象编程思想和Java核心技术，为开发企业级应用打下基础","coverImage":"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-05-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":16421,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":22,"title":"微观经济学原理","courseName":null,"description":"介绍微观经济学的基本理论，包括供需关系、市场结构、消费行为、生产理论等","coverImage":"https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-06-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":11201,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":9,"title":"计算机组成原理","courseName":null,"description":"本课程介绍计算机系统的基本组成和工作原理，包括数字逻辑、CPU结构、存储系统、输入输出系统等内容。","coverImage":"https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg","credit":4.0,"courseType":"必修课","category":null,"startTime":"2025-06-04 02:52:20","endTime":"2025-06-26 02:52:22","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":1,"averageScore":null,"createTime":"2025-06-29 02:52:54","updateTime":"2025-07-03 01:13:39","progress":100}]},"timestamp":[2025,7,3,14,6,29,190023000],"error":false,"success":true}
+2025-07-03 14:06:29.198 [http-nio-8080-exec-6] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:06:30.970 [http-nio-8080-exec-7] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 14:06:30.970 [http-nio-8080-exec-7] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 14:06:30.971 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:06:30.972 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/courses
+2025-07-03 14:06:30.972 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:06:30.972 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:06:30.972 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentCourseController.getStudentCourses
+2025-07-03 14:06:30.972 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 请求参数: [0, 10, null]
+2025-07-03 14:06:30.972 [http-nio-8080-exec-7] INFO  c.e.controller.student.StudentCourseController - 获取学生课程列表 - 页码: 0, 每页大小: 10, 关键词: null
+2025-07-03 14:06:30.980 [http-nio-8080-exec-7] INFO  c.e.controller.student.StudentCourseController - 查询到学生选课ID: [9, 19, 22]
+2025-07-03 14:06:30.988 [http-nio-8080-exec-7] INFO  c.e.controller.student.StudentCourseController - 课程查询结果: result.getRecords() = 3
+2025-07-03 14:06:30.988 [http-nio-8080-exec-7] INFO  c.e.controller.student.StudentCourseController - 课程信息: id=19, 标题=Java程序设计, 教师ID=2025002
+2025-07-03 14:06:30.988 [http-nio-8080-exec-7] INFO  c.e.controller.student.StudentCourseController - 课程信息: id=22, 标题=微观经济学原理, 教师ID=2025002
+2025-07-03 14:06:30.988 [http-nio-8080-exec-7] INFO  c.e.controller.student.StudentCourseController - 课程信息: id=9, 标题=计算机组成原理, 教师ID=2025002
+2025-07-03 14:06:30.988 [http-nio-8080-exec-7] INFO  c.e.controller.student.StudentCourseController - 查询到学生课程总数: 3, 实际返回课程数: 3
+2025-07-03 14:06:30.988 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 17ms
+2025-07-03 14:06:30.988 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"content":[{"id":19,"title":"Java程序设计","courseName":null,"description":"Java编程基础课程，零基础向对象编程思想和Java核心技术，为开发企业级应用打下基础","coverImage":"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-05-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":16421,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":22,"title":"微观经济学原理","courseName":null,"description":"介绍微观经济学的基本理论，包括供需关系、市场结构、消费行为、生产理论等","coverImage":"https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-06-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":11201,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":9,"title":"计算机组成原理","courseName":null,"description":"本课程介绍计算机系统的基本组成和工作原理，包括数字逻辑、CPU结构、存储系统、输入输出系统等内容。","coverImage":"https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg","credit":4.0,"courseType":"必修课","category":null,"startTime":"2025-06-04 02:52:20","endTime":"2025-06-26 02:52:22","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":1,"averageScore":null,"createTime":"2025-06-29 02:52:54","updateTime":"2025-07-03 01:13:39","progress":100}],"totalElements":3,"number":0,"size":10,"totalPages":1,"first":true,"last":true,"empty":false,"pageSize":10,"total":3,"pages":1,"current":1,"records":[{"id":19,"title":"Java程序设计","courseName":null,"description":"Java编程基础课程，零基础向对象编程思想和Java核心技术，为开发企业级应用打下基础","coverImage":"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-05-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":16421,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":22,"title":"微观经济学原理","courseName":null,"description":"介绍微观经济学的基本理论，包括供需关系、市场结构、消费行为、生产理论等","coverImage":"https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-06-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":11201,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":9,"title":"计算机组成原理","courseName":null,"description":"本课程介绍计算机系统的基本组成和工作原理，包括数字逻辑、CPU结构、存储系统、输入输出系统等内容。","coverImage":"https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg","credit":4.0,"courseType":"必修课","category":null,"startTime":"2025-06-04 02:52:20","endTime":"2025-06-26 02:52:22","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":1,"averageScore":null,"createTime":"2025-06-29 02:52:54","updateTime":"2025-07-03 01:13:39","progress":100}],"pageNum":1,"list":[{"id":19,"title":"Java程序设计","courseName":null,"description":"Java编程基础课程，零基础向对象编程思想和Java核心技术，为开发企业级应用打下基础","coverImage":"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-05-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":16421,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":22,"title":"微观经济学原理","courseName":null,"description":"介绍微观经济学的基本理论，包括供需关系、市场结构、消费行为、生产理论等","coverImage":"https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-06-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":11201,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":9,"title":"计算机组成原理","courseName":null,"description":"本课程介绍计算机系统的基本组成和工作原理，包括数字逻辑、CPU结构、存储系统、输入输出系统等内容。","coverImage":"https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg","credit":4.0,"courseType":"必修课","category":null,"startTime":"2025-06-04 02:52:20","endTime":"2025-06-26 02:52:22","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":1,"averageScore":null,"createTime":"2025-06-29 02:52:54","updateTime":"2025-07-03 01:13:39","progress":100}]},"timestamp":[2025,7,3,14,6,30,988405400],"error":false,"success":true}
+2025-07-03 14:06:30.988 [http-nio-8080-exec-7] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:06:32.114 [http-nio-8080-exec-8] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 14:06:32.116 [http-nio-8080-exec-8] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 14:06:32.118 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:06:32.119 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/courses
+2025-07-03 14:06:32.119 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:06:32.119 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:06:32.121 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentCourseController.getStudentCourses
+2025-07-03 14:06:32.122 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 请求参数: [0, 10, null]
+2025-07-03 14:06:32.122 [http-nio-8080-exec-8] INFO  c.e.controller.student.StudentCourseController - 获取学生课程列表 - 页码: 0, 每页大小: 10, 关键词: null
+2025-07-03 14:06:32.151 [http-nio-8080-exec-8] INFO  c.e.controller.student.StudentCourseController - 查询到学生选课ID: [9, 19, 22]
+2025-07-03 14:06:32.184 [http-nio-8080-exec-8] INFO  c.e.controller.student.StudentCourseController - 课程查询结果: result.getRecords() = 3
+2025-07-03 14:06:32.184 [http-nio-8080-exec-8] INFO  c.e.controller.student.StudentCourseController - 课程信息: id=19, 标题=Java程序设计, 教师ID=2025002
+2025-07-03 14:06:32.184 [http-nio-8080-exec-8] INFO  c.e.controller.student.StudentCourseController - 课程信息: id=22, 标题=微观经济学原理, 教师ID=2025002
+2025-07-03 14:06:32.184 [http-nio-8080-exec-8] INFO  c.e.controller.student.StudentCourseController - 课程信息: id=9, 标题=计算机组成原理, 教师ID=2025002
+2025-07-03 14:06:32.184 [http-nio-8080-exec-8] INFO  c.e.controller.student.StudentCourseController - 查询到学生课程总数: 3, 实际返回课程数: 3
+2025-07-03 14:06:32.184 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 66ms
+2025-07-03 14:06:32.189 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"content":[{"id":19,"title":"Java程序设计","courseName":null,"description":"Java编程基础课程，零基础向对象编程思想和Java核心技术，为开发企业级应用打下基础","coverImage":"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-05-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":16421,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":22,"title":"微观经济学原理","courseName":null,"description":"介绍微观经济学的基本理论，包括供需关系、市场结构、消费行为、生产理论等","coverImage":"https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-06-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":11201,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":9,"title":"计算机组成原理","courseName":null,"description":"本课程介绍计算机系统的基本组成和工作原理，包括数字逻辑、CPU结构、存储系统、输入输出系统等内容。","coverImage":"https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg","credit":4.0,"courseType":"必修课","category":null,"startTime":"2025-06-04 02:52:20","endTime":"2025-06-26 02:52:22","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":1,"averageScore":null,"createTime":"2025-06-29 02:52:54","updateTime":"2025-07-03 01:13:39","progress":100}],"totalElements":3,"number":0,"size":10,"totalPages":1,"first":true,"last":true,"empty":false,"pageSize":10,"total":3,"pages":1,"current":1,"records":[{"id":19,"title":"Java程序设计","courseName":null,"description":"Java编程基础课程，零基础向对象编程思想和Java核心技术，为开发企业级应用打下基础","coverImage":"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-05-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":16421,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":22,"title":"微观经济学原理","courseName":null,"description":"介绍微观经济学的基本理论，包括供需关系、市场结构、消费行为、生产理论等","coverImage":"https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-06-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":11201,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":9,"title":"计算机组成原理","courseName":null,"description":"本课程介绍计算机系统的基本组成和工作原理，包括数字逻辑、CPU结构、存储系统、输入输出系统等内容。","coverImage":"https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg","credit":4.0,"courseType":"必修课","category":null,"startTime":"2025-06-04 02:52:20","endTime":"2025-06-26 02:52:22","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":1,"averageScore":null,"createTime":"2025-06-29 02:52:54","updateTime":"2025-07-03 01:13:39","progress":100}],"pageNum":1,"list":[{"id":19,"title":"Java程序设计","courseName":null,"description":"Java编程基础课程，零基础向对象编程思想和Java核心技术，为开发企业级应用打下基础","coverImage":"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-05-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":16421,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":22,"title":"微观经济学原理","courseName":null,"description":"介绍微观经济学的基本理论，包括供需关系、市场结构、消费行为、生产理论等","coverImage":"https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg","credit":3.0,"courseType":"必修课","category":null,"startTime":"2024-06-01 00:00:00","endTime":"2024-12-31 00:00:00","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":11201,"averageScore":null,"createTime":"2025-07-02 02:13:16","updateTime":"2025-07-02 02:13:16","progress":100},{"id":9,"title":"计算机组成原理","courseName":null,"description":"本课程介绍计算机系统的基本组成和工作原理，包括数字逻辑、CPU结构、存储系统、输入输出系统等内容。","coverImage":"https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg","credit":4.0,"courseType":"必修课","category":null,"startTime":"2025-06-04 02:52:20","endTime":"2025-06-26 02:52:22","teacherId":2025002,"teacherName":null,"status":"已结束","term":"2024-2025-1","semester":null,"studentCount":1,"averageScore":null,"createTime":"2025-06-29 02:52:54","updateTime":"2025-07-03 01:13:39","progress":100}]},"timestamp":[2025,7,3,14,6,32,184835500],"error":false,"success":true}
+2025-07-03 14:06:32.189 [http-nio-8080-exec-8] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:06:39.722 [http-nio-8080-exec-2] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 14:06:39.723 [http-nio-8080-exec-9] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 14:06:39.725 [http-nio-8080-exec-9] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 14:06:39.724 [http-nio-8080-exec-2] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 14:06:39.725 [http-nio-8080-exec-9] WARN  com.education.exception.GlobalExceptionHandler - 参数类型不匹配: Failed to convert value of type 'java.lang.String' to required type 'java.lang.Long'; For input string: "enrolled"
+2025-07-03 14:06:39.726 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:06:39.727 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/assignments
+2025-07-03 14:06:39.728 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:06:39.728 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:06:39.729 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentAssignmentController.getAssignmentList
+2025-07-03 14:06:39.730 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 请求参数: [null, null, null, null]
+2025-07-03 14:06:39.730 [http-nio-8080-exec-2] INFO  c.e.controller.student.StudentAssignmentController - 获取学生任务列表，状态: null, 课程ID: null, 类型: null, 关键词: null
+2025-07-03 14:06:39.742 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 16ms
+2025-07-03 14:06:39.742 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,14,6,39,742553500],"error":false,"success":true}
+2025-07-03 14:06:39.742 [http-nio-8080-exec-2] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:06:46.421 [http-nio-8080-exec-10] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 14:06:46.422 [http-nio-8080-exec-10] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 14:06:46.423 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:06:46.423 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 14:06:46.424 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:06:46.424 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:06:46.424 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 14:06:46.425 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@37aa0c6c]]
+2025-07-03 14:06:46.425 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 2ms
+2025-07-03 14:06:46.426 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"realName":"测试学生","role":"STUDENT","id":12,"avatar":null,"email":"20234042@stu.neu.edu.cn","username":"stu01"},"timestamp":[2025,7,3,14,6,46,425243600],"error":false,"success":true}
+2025-07-03 14:06:46.426 [http-nio-8080-exec-10] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:06:46.435 [http-nio-8080-exec-1] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 14:06:46.437 [http-nio-8080-exec-1] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 14:06:46.439 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:06:46.440 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 14:06:46.440 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:06:46.440 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:06:46.441 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 14:06:46.441 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@6b195dfb]]
+2025-07-03 14:06:46.442 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 3ms
+2025-07-03 14:06:46.442 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":{"realName":"测试学生","role":"STUDENT","id":12,"avatar":null,"email":"20234042@stu.neu.edu.cn","username":"stu01"},"timestamp":[2025,7,3,14,6,46,442325400],"error":false,"success":true}
+2025-07-03 14:06:46.443 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:06:46.684 [http-nio-8080-exec-4] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 14:06:46.684 [http-nio-8080-exec-3] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 从Session中找到用户信息: username=stu01, role=STUDENT
+2025-07-03 14:06:46.685 [http-nio-8080-exec-4] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 14:06:46.685 [http-nio-8080-exec-3] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 用户 stu01 已通过Session认证
+2025-07-03 14:06:46.686 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:06:46.686 [http-nio-8080-exec-3] WARN  com.education.exception.GlobalExceptionHandler - 参数类型不匹配: Failed to convert value of type 'java.lang.String' to required type 'java.lang.Long'; For input string: "enrolled"
+2025-07-03 14:06:46.686 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/api/student/assignments
+2025-07-03 14:06:46.687 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:06:46.687 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:06:46.687 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.student.StudentAssignmentController.getAssignmentList
+2025-07-03 14:06:46.687 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求参数: [null, null, null, null]
+2025-07-03 14:06:46.688 [http-nio-8080-exec-4] INFO  c.e.controller.student.StudentAssignmentController - 获取学生任务列表，状态: null, 课程ID: null, 类型: null, 关键词: null
+2025-07-03 14:06:46.696 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 10ms
+2025-07-03 14:06:46.696 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":200,"message":"操作成功","data":[],"timestamp":[2025,7,3,14,6,46,696831900],"error":false,"success":true}
+2025-07-03 14:06:46.696 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:07:05.298 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-Education - Shutdown initiated...
+2025-07-03 14:07:05.319 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-Education - Shutdown completed.
+2025-07-03 14:09:17.059 [main] INFO  com.education.EducationApplication - Starting EducationApplication using Java 21.0.6 with PID 18676 (D:\my_git_code\SmartClass\backend\target\classes started by 28255 in D:\my_git_code\SmartClass\backend)
+2025-07-03 14:09:17.060 [main] DEBUG com.education.EducationApplication - Running with Spring Boot v3.1.8, Spring v6.0.16
+2025-07-03 14:09:17.061 [main] INFO  com.education.EducationApplication - The following 1 profile is active: "dev"
+2025-07-03 14:09:17.657 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-07-03 14:09:17.657 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-07-03 14:09:17.690 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 16 ms. Found 0 Redis repository interfaces.
+2025-07-03 14:09:18.447 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+2025-07-03 14:09:18.447 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-07-03 14:09:18.447 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2025-07-03 14:09:18.498 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-07-03 14:09:18.498 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1412 ms
+2025-07-03 14:09:18.607 [main] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - Filter 'securityConfig.SessionAuthenticationFilter' configured for use
+2025-07-03 14:09:20.607 [main] INFO  com.education.config.SecurityConfig - 配置UserDetailsService - 基于Session认证
+2025-07-03 14:09:20.799 [main] INFO  com.education.config.WebConfig - 配置静态资源映射: /files/** -> file:./uploads/
+2025-07-03 14:09:20.804 [main] INFO  com.education.config.WebConfig - 配置实际文件目录映射: /resource/file/** -> file:D:/my_git_code/SmartClass/resource/file/
+2025-07-03 14:09:20.804 [main] INFO  com.education.config.WebConfig - 静态资源映射配置完成
+2025-07-03 14:09:21.501 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
+2025-07-03 14:09:21.522 [main] INFO  com.education.config.SecurityConfig - 配置Spring Security过滤链 - 基于Session认证
+2025-07-03 14:09:21.526 [main] INFO  com.education.config.SecurityConfig - 配置CORS
+2025-07-03 14:09:21.526 [main] INFO  com.education.config.SecurityConfig - CORS配置完成
+2025-07-03 14:09:21.535 [main] INFO  com.education.config.SecurityConfig - Spring Security配置完成 - 使用Session认证
+2025-07-03 14:09:21.582 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@5c3e7128, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5ce03a9d, org.springframework.security.web.context.SecurityContextHolderFilter@299cddbf, org.springframework.security.web.header.HeaderWriterFilter@6956081d, org.springframework.web.filter.CorsFilter@10c67c1c, org.springframework.security.web.authentication.logout.LogoutFilter@554a2f3, com.education.config.SecurityConfig$SessionAuthenticationFilter@7b3c2ae0, org.springframework.security.web.session.ConcurrentSessionFilter@20040c6e, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@13da6bc9, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@4509414e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@1067192a, org.springframework.security.web.session.SessionManagementFilter@7f69c4c0, org.springframework.security.web.access.ExceptionTranslationFilter@3fae357f, org.springframework.security.web.access.intercept.AuthorizationFilter@73d7e7aa]
+2025-07-03 14:09:22.208 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path ''
+2025-07-03 14:09:22.218 [scheduling-1] WARN  com.education.monitor.DataSourceMonitor - 连接池监控跳过: HikariCP连接池尚未完全初始化
+2025-07-03 14:09:22.219 [main] INFO  com.education.EducationApplication - Started EducationApplication in 5.395 seconds (process running for 5.629)
+2025-07-03 14:09:27.215 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-03 14:09:27.215 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-07-03 14:09:27.217 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-07-03 14:09:27.264 [http-nio-8080-exec-1] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 没有找到Session，路径: /auth/user-info
+2025-07-03 14:09:27.281 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:09:27.282 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 14:09:27.282 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:09:27.283 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:09:27.284 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 14:09:27.284 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@125193b1]]
+2025-07-03 14:09:27.286 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 5ms
+2025-07-03 14:09:27.333 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"用户未登录","timestamp":[2025,7,3,14,9,27,286394900],"error":true,"success":false}
+2025-07-03 14:09:27.334 [http-nio-8080-exec-1] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===
+2025-07-03 14:09:27.506 [http-nio-8080-exec-2] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 没有找到Session，路径: /api/student/courses/enrolled
+2025-07-03 14:09:27.506 [http-nio-8080-exec-8] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 没有找到Session，路径: /api/student/assignments
+2025-07-03 14:09:27.506 [http-nio-8080-exec-4] DEBUG c.e.c.SecurityConfig$SessionAuthenticationFilter - 没有找到Session，路径: /auth/user-info
+2025-07-03 14:09:27.507 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求开始 ===
+2025-07-03 14:09:27.508 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求URL: http://localhost:8080/auth/user-info
+2025-07-03 14:09:27.508 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求方法: GET
+2025-07-03 14:09:27.508 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求IP: 0:0:0:0:0:0:0:1
+2025-07-03 14:09:27.509 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 调用方法: com.education.controller.auth.AuthController.getCurrentUserInfo
+2025-07-03 14:09:27.509 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 请求参数: [SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@225f15d3]]
+2025-07-03 14:09:27.510 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 方法执行时间: 3ms
+2025-07-03 14:09:27.510 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - 返回结果: {"code":500,"message":"用户未登录","timestamp":[2025,7,3,14,9,27,510355700],"error":true,"success":false}
+2025-07-03 14:09:27.511 [http-nio-8080-exec-4] INFO  com.education.aspect.LoggingAspect - === 请求结束 ===

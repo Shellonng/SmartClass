@@ -138,6 +138,13 @@
           <span>课程管理</span>
         </a-menu-item>
         
+        <a-menu-item key="students">
+          <template #icon>
+            <UserOutlined />
+          </template>
+          <span>学生管理</span>
+        </a-menu-item>
+        
         <a-sub-menu key="tasks">
           <template #icon>
             <FileTextOutlined />
@@ -147,14 +154,12 @@
           <a-menu-item key="assignments">作业管理</a-menu-item>
         </a-sub-menu>
         
-        <a-sub-menu key="students">
+        <a-menu-item key="grades">
           <template #icon>
-            <UserOutlined />
+            <BarChartOutlined />
           </template>
-          <template #title>学生管理</template>
-          <a-menu-item key="students-list">学生列表</a-menu-item>
-          <a-menu-item key="students-grades">成绩管理</a-menu-item>
-        </a-sub-menu>
+          <span>成绩管理</span>
+        </a-menu-item>
         
         <a-sub-menu key="resources">
           <template #icon>
@@ -162,7 +167,6 @@
           </template>
           <template #title>教学资源</template>
           <a-menu-item key="resources-list">资源库</a-menu-item>
-          <a-menu-item key="resources-upload">上传资源</a-menu-item>
           <a-menu-item key="question-bank">题库管理</a-menu-item>
         </a-sub-menu>
         
@@ -502,37 +506,44 @@ function updateSelectedKeys() {
   }
 }
 
-// 菜单点击处理
+// 处理菜单点击事件
 function handleMenuClick({ key }: { key: string }) {
-  const routeMap: Record<string, string> = {
-    'dashboard': '/teacher',
-    'classes': '/teacher/classes',
-    'classes-list': '/teacher/classes',
-    'classes-create': '/teacher/classes/create',
-    'courses': '/teacher/courses',
-    'assignments': '/teacher/assignments',
-    'assignments-create': '/teacher/assignments/create',
-    'assignments-review': '/teacher/assignments/review',
-    'exams': '/teacher/exams',
-    'students-list': '/teacher/students',
-    'students-grades': '/teacher/students/grades',
-    'resources-list': '/teacher/resources',
-    'resources-upload': '/teacher/resources/upload',
-    'question-bank': '/teacher/question-bank',
-    'analytics': '/teacher/analytics',
-    'ai-assistant': '/teacher/ai-assistant'
-  }
-  
-  const targetRoute = routeMap[key]
-  if (targetRoute && targetRoute !== route.path) {
-    router.push(targetRoute)
-    return
-  }
-
-  // 任务管理 - 其他特殊情况处理
-  if (key === 'exams') {
+  switch (key) {
+    case 'dashboard':
+      router.push('/teacher/dashboard')
+      break
+    case 'classes':
+      router.push('/teacher/classes')
+      break
+    case 'courses':
+      router.push('/teacher/courses')
+      break
+    case 'students':
+      router.push('/teacher/students')
+      break
+    case 'exams':
     router.push('/teacher/exams')
-    return
+      break
+    case 'assignments':
+      router.push('/teacher/assignments')
+      break
+    case 'grades':
+      router.push('/teacher/grades')
+      break
+    case 'resources-list':
+      router.push('/teacher/resources')
+      break
+    case 'question-bank':
+      router.push('/teacher/question-bank')
+      break
+    case 'analytics':
+      router.push('/teacher/analytics')
+      break
+    case 'ai-assistant':
+      router.push('/teacher/ai-tools')
+      break
+    default:
+      break
   }
 }
 

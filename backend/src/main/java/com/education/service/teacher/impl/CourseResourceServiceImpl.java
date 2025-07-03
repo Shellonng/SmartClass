@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.education.dto.CourseResourceDTO;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
+import com.education.dto.common.Result;
 import com.education.entity.Course;
 import com.education.entity.CourseResource;
 import com.education.exception.BusinessException;
@@ -23,6 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -204,6 +207,40 @@ public class CourseResourceServiceImpl implements CourseResourceService {
         int result = courseResourceMapper.updateById(resource);
         
         return result > 0;
+    }
+    
+    @Override
+    public Result getAllResources(PageRequest pageRequest) {
+        // 创建分页对象
+        Page<CourseResource> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
+        
+        // 查询条件：按创建时间降序排序
+        QueryWrapper<CourseResource> queryWrapper = new QueryWrapper<>();
+        queryWrapper.orderByDesc("create_time");
+        
+        // 执行查询
+        IPage<CourseResource> resultPage = courseResourceMapper.selectPage(page, queryWrapper);
+        
+        // 获取所有涉及的课程ID
+        List<Long> courseIds = resultPage.getRecords().stream()
+                .map(CourseResource::getCourseId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        // 批量查询课程信息
+        Map<Long, String> courseNameMap = courseMapper.selectBatchIds(courseIds).stream()
+                .collect(Collectors.toMap(Course::getId, Course::getTitle, (v1, v2) -> v1));
+        
+        // 设置课程名称
+        for (CourseResource resource : resultPage.getRecords()) {
+            if (resource.getCourseId() != null) {
+                String courseName = courseNameMap.get(resource.getCourseId());
+                resource.setCourseName(courseName);
+            }
+        }
+        
+        return Result.success(resultPage);
     }
     
     /**

@@ -4,6 +4,9 @@ import com.education.dto.ExamDTO;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
 import com.education.dto.common.Result;
+import com.education.entity.Course;
+import com.education.mapper.CourseMapper;
+import com.education.security.SecurityUtil;
 import com.education.service.ExamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +23,28 @@ import java.util.Map;
 public class AssignmentController {
     
     private final ExamService examService;
+    private final CourseMapper courseMapper;
+    private final SecurityUtil securityUtil;
+    
+    /**
+     * 获取当前教师的课程列表
+     * @return 课程列表
+     */
+    @GetMapping("/courses")
+    public Result<List<Course>> getTeacherCourses() {
+        Long userId = securityUtil.getCurrentUserId();
+        if (userId == null) {
+            return Result.error("未登录");
+        }
+        
+        List<Course> courses = courseMapper.selectByTeacherId(userId);
+        return Result.success(courses);
+    }
     
     /**
      * 分页查询作业列表
      * @param pageRequest 分页请求
      * @param courseId 课程ID
-     * @param userId 用户ID
      * @param keyword 关键词
      * @param status 状态
      * @return 分页结果
@@ -33,10 +52,15 @@ public class AssignmentController {
     @GetMapping
     public Result<PageResponse<ExamDTO>> pageAssignments(PageRequest pageRequest,
                                                   @RequestParam(required = false) Long courseId,
-                                                  @RequestParam(required = false) Long userId,
                                                   @RequestParam(required = false) String keyword,
                                                   @RequestParam(required = false) Integer status) {
-        // 指定type为homework
+        // 获取当前登录用户ID
+        Long userId = securityUtil.getCurrentUserId();
+        if (userId == null) {
+            return Result.error("未登录");
+        }
+        
+        // 指定type为homework，并使用当前用户ID进行筛选
         PageResponse<ExamDTO> pageResponse = examService.pageExamsByType(pageRequest, courseId, userId, keyword, status, "homework");
         return Result.success(pageResponse);
     }
@@ -70,8 +94,16 @@ public class AssignmentController {
      */
     @PostMapping
     public Result<Long> createAssignment(@RequestBody ExamDTO examDTO) {
-        // 设置type为homework
+        // 获取当前登录用户ID
+        Long userId = securityUtil.getCurrentUserId();
+        if (userId == null) {
+            return Result.error("未登录");
+        }
+        
+        // 设置type为homework和userId
         examDTO.setType("homework");
+        examDTO.setUserId(userId);
+        
         Long id = examService.createExam(examDTO);
         return Result.success(id);
     }

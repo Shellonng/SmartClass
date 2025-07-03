@@ -3,7 +3,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { SearchOutlined, FilterOutlined, UserOutlined, StarOutlined, BookOutlined, TeamOutlined, AppstoreOutlined, BarsOutlined } from '@ant-design/icons-vue'
-import { getPublicCourseList, getCourseCategories, enrollCourse as apiEnrollCourse, getEnrolledCourses, type Course, type CourseCategory, type CourseListParams, getCourseInstructor } from '@/api/course'
+import { getPublicCourseList, getCourseCategories, enrollCourse as apiEnrollCourse, getEnrolledCourses, getStudentEnrolledCourseIds, type Course, type CourseCategory, type CourseListParams, getCourseInstructor } from '@/api/course'
 import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
 
@@ -270,12 +270,21 @@ const fetchEnrolledCourses = async () => {
   if (!authStore.isAuthenticated) return
   
   try {
-    const response = await getEnrolledCourses()
-    enrolledCourses.value = response.map(course => course.id)
-    console.log('获取已加入课程成功:', enrolledCourses.value)
+    if (authStore.user?.role === 'STUDENT') {
+      // 如果是学生用户，获取学生ID
+      const studentId = authStore.user.id;
+      // 获取该学生已加入的所有课程ID
+      const enrolledIds = await getStudentEnrolledCourseIds(studentId);
+      enrolledCourses.value = enrolledIds;
+    } else {
+      // 非学生用户使用原有方法
+      const response = await getEnrolledCourses();
+      enrolledCourses.value = response.map(course => course.id);
+    }
+    console.log('获取已加入课程成功:', enrolledCourses.value);
   } catch (error) {
-    console.error('获取已加入课程失败:', error)
-    enrolledCourses.value = []
+    console.error('获取已加入课程失败:', error);
+    enrolledCourses.value = [];
   }
 }
 
@@ -325,9 +334,16 @@ const enrollCourse = async (courseId: number) => {
     return
 }
 
-  // 模拟加入课程
-  message.success('成功加入课程')
-  enrolledCourses.value.push(courseId)
+  try {
+    // 调用加入课程API
+    await apiEnrollCourse(courseId);
+    message.success('成功加入课程');
+    // 更新已加入课程列表
+    enrolledCourses.value.push(courseId);
+  } catch (error) {
+    console.error('加入课程失败:', error);
+    message.error('加入课程失败，请稍后重试');
+  }
 }
 
 // 文本截断
@@ -438,6 +454,11 @@ const getTeacherName = (instructorId: number, fallbackName: string): string => {
   return teacherNames.value[instructorId] || fallbackName
 }
 
+// 获取课程按钮文本
+const getCourseButtonText = (courseId: number) => {
+  return isEnrolled(courseId) ? '进入学习' : '加入学习';
+}
+
 // 生命周期钩子
 onMounted(() => {
   fetchCourses()
@@ -530,7 +551,7 @@ onMounted(() => {
                 {{ getCourseStatus(course) }}
               </span>
               <a-button type="primary" size="small" @click.stop="enrollCourse(course.id)">
-                {{ isEnrolled(course.id) ? '继续学习' : '加入学习' }}
+                {{ getCourseButtonText(course.id) }}
               </a-button>
             </div>
           </a-card>
@@ -601,7 +622,7 @@ onMounted(() => {
               <span class="course-price" v-if="course.price > 0">¥{{ course.price }}</span>
               <span class="course-free" v-else>免费</span>
               <a-button type="primary" @click.stop="enrollCourse(course.id)">
-                {{ isEnrolled(course.id) ? '继续学习' : '加入学习' }}
+                {{ getCourseButtonText(course.id) }}
               </a-button>
             </div>
           </a-list-item>

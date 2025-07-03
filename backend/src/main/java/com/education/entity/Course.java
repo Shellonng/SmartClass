@@ -74,6 +74,10 @@ public class Course implements Serializable {
     @TableField("teacher_id")
     private Long teacherId;
 
+    @Schema(description = "教师姓名")
+    @TableField(exist = false)
+    private String teacherName;
+
     @Schema(description = "课程状态", example = "未开始")
     @TableField("status")
     private String status;
