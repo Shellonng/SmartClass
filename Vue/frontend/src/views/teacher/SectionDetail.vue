@@ -9,7 +9,7 @@
         </div>
           <a-button type="text" @click="goBack" class="back-btn">
             <ArrowLeftOutlined />
-            返回课程
+            {{ isViewOnly ? '返回课程' : '返回课程' }}
           </a-button>
         </div>
       <div class="nav-right">
@@ -63,7 +63,7 @@
                   >
                     <div class="section-title">{{ section.title }}</div>
                     <div class="section-duration">{{ section.duration }}分钟</div>
-                    <div class="section-actions">
+                    <div class="section-actions" v-if="!isViewOnly">
                       <EditOutlined @click.stop="handleEdit(section)" />
                       <DeleteOutlined class="delete" @click.stop="handleDelete(section)" />
                     </div>
@@ -80,11 +80,11 @@
         <a-spin :spinning="loading">
           <div class="content-header">
             <h1>{{ section?.title || '加载中...' }}</h1>
-            <a-button type="primary" @click="editSection">
-                <EditOutlined />
-                编辑
-              </a-button>
-            </div>
+            <a-button v-if="!isViewOnly" type="primary" @click="editSection">
+              <EditOutlined />
+              编辑
+            </a-button>
+          </div>
             
           <div class="content-body">
             <!-- 视频区域 -->
@@ -104,6 +104,7 @@
                 <PlayCircleOutlined class="empty-icon" />
                 <p>暂无视频内容</p>
                 <a-upload
+                  v-if="!isViewOnly"
                   accept="video/*"
                   :show-upload-list="false"
                   :before-upload="handleBeforeUpload"
@@ -338,6 +339,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message, Modal } from 'ant-design-vue'
 import { useAuthStore } from '@/stores/auth'
+import { emitter, APP_EVENTS } from '@/App.vue'
 import {
   ArrowLeftOutlined,
   EditOutlined,
@@ -441,6 +443,9 @@ watch(() => getVideoUrl.value, (newUrl) => {
 
 // 初始化数据
 const initializeData = async () => {
+  // 添加内容前，触发侧边栏收起事件
+  emitter.emit(APP_EVENTS.COLLAPSE_SIDEBAR)
+  
   const sectionId = Number(route.params.sectionId)
   const courseId = Number(route.params.courseId)
   
@@ -533,7 +538,16 @@ onBeforeUnmount(() => {
 
 // 返回课程详情页
 const goBack = () => {
-  router.push(`/teacher/courses/${courseId.value}`)
+  // 获取当前课程ID
+  const courseId = route.params.courseId || '0'
+  
+  if (isViewOnly.value) {
+    // 学生端：返回到学生课程详情页
+    router.push(`/student/courses/${courseId}`)
+  } else {
+    // 教师端：返回到教师课程详情页
+    router.push(`/teacher/courses/${courseId}`)
+  }
 }
 
 // 跳转到指定小节
@@ -689,18 +703,19 @@ const removeVideo = async () => {
 
 // 处理小节点击
 const handleSectionClick = (section: any) => {
-  // 如果已经在当前小节，不需要跳转
-  if (currentSectionId.value === section.id) {
-    return
-  }
+  if (!section || !section.id) return
   
-  // 使用路由跳转到新的小节
-  router.push({
-    path: `/teacher/courses/${courseId.value}/sections/${section.id}`
-  }).catch((err) => {
-    console.error('路由跳转失败:', err)
-    message.error('页面跳转失败')
-  })
+  // 获取当前课程ID
+  const courseId = route.params.courseId || '0'
+  
+  // 根据角色跳转到不同路径
+  if (isViewOnly.value) {
+    // 学生端
+    router.push(`/student/courses/${courseId}/sections/${section.id}`)
+  } else {
+    // 教师端
+    router.push(`/teacher/courses/${courseId}/sections/${section.id}`)
+  }
 }
 
 const handleEdit = (section: Section) => {
@@ -1075,6 +1090,17 @@ const toggleReplies = async (comment: any) => {
 const handleSizeChange = (pageSize: number) => {
   pagination.value.pageSize = pageSize
   fetchComments()
+}
+
+// 添加一个计算属性来判断是否为只读模式
+const isViewOnly = computed(() => route.meta.viewOnly === true)
+
+// 添加侧边栏收起的逻辑
+const isCollapsed = ref(true) // 默认收起状态
+
+// 学生端/教师端根据角色不同展示导航栏
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
 }
 </script>
 

@@ -646,11 +646,16 @@ const startLearning = () => {
 
 // 查看小节
 const viewSection = (chapter: any, section: any) => {
+  console.log('查看小节:', chapter.title, section.title)
+  
+  // 根据小节类型选择不同的处理方式
   if (section.type === 'video') {
+    console.log('跳转到视频学习页面')
     router.push(`/student/courses/${courseId.value}/video/${section.id}`)
   } else {
-    message.info(`正在查看: ${chapter.title} - ${section.title}`)
-    // 这里可以跳转到文本内容页面或者打开一个模态框显示内容
+    console.log('跳转到小节详情页面')
+    // 跳转到小节详情页，复用教师端组件但仅查看模式
+    router.push(`/student/courses/${courseId.value}/sections/${section.id}`)
   }
 }
 

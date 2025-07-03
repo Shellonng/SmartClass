@@ -43,7 +43,7 @@ CREATE TABLE `assignment` (
 
 /*Data for the table `assignment` */
 
-insert  into `assignment`(`id`,`title`,`course_id`,`user_id`,`type`,`description`,`start_time`,`end_time`,`create_time`,`status`,`update_time`,`mode`,`time_limit`) values (9,'测试1',9,6,'exam','测试1的说明','2025-07-01 14:00:00','2025-07-10 16:00:00','2025-07-01 14:53:32',1,'2025-07-03 01:46:44','question',NULL),(15,'12',9,3,'exam','132','2025-07-01 00:00:00','2025-07-01 01:00:00','2025-07-01 18:19:09',0,'2025-07-01 18:19:09','question',NULL),(17,'作业2',9,3,'homework','','2025-07-01 00:00:00','2025-07-01 01:00:00','2025-07-01 18:41:05',0,'2025-07-02 19:35:30','file',NULL),(20,'测试2',9,6,'exam','','2025-07-01 01:00:00','2025-07-01 02:00:00','2025-07-01 19:05:51',0,'2025-07-01 19:05:59','question',NULL),(23,'3232',9,6,'homework','','2025-07-02 23:56:06','2025-07-03 23:07:00','2025-07-01 23:55:16',1,'2025-07-03 01:48:05','question',NULL),(24,'1',9,6,'homework','','2025-07-02 20:07:35','2025-07-02 21:00:00','2025-07-02 20:07:41',1,'2025-07-02 20:07:41','file',NULL),(25,'2',9,6,'homework','','2025-07-03 20:12:48','2025-07-05 20:12:55','2025-07-02 20:12:58',0,'2025-07-02 20:12:58','file',NULL);
+insert  into `assignment`(`id`,`title`,`course_id`,`user_id`,`type`,`description`,`start_time`,`end_time`,`create_time`,`status`,`update_time`,`mode`,`time_limit`) values (9,'测试1',9,6,'homework','测试1的说明','2025-07-01 14:00:00','2025-07-10 16:00:00','2025-07-01 14:53:32',1,'2025-07-03 01:46:44','question',NULL),(15,'12',9,3,'exam','132','2025-07-01 00:00:00','2025-07-01 01:00:00','2025-07-01 18:19:09',1,'2025-07-01 18:19:09','question',NULL),(17,'作业2',9,3,'homework','','2025-07-01 00:00:00','2025-07-01 01:00:00','2025-07-01 18:41:05',1,'2025-07-02 19:35:30','file',NULL),(20,'测试2',9,6,'exam','','2025-07-01 01:00:00','2025-07-01 02:00:00','2025-07-01 19:05:51',1,'2025-07-01 19:05:59','question',NULL),(24,'1',9,6,'homework','','2025-07-02 20:07:35','2025-07-12 21:00:00','2025-07-02 20:07:41',1,'2025-07-02 20:07:41','file',NULL),(25,'2',9,6,'homework','','2025-07-03 20:12:48','2025-07-05 20:12:55','2025-07-02 20:12:58',1,'2025-07-02 20:12:58','question',NULL);
 
 /*Table structure for table `assignment_question` */
 
@@ -64,7 +64,7 @@ CREATE TABLE `assignment_question` (
 
 /*Data for the table `assignment_question` */
 
-insert  into `assignment_question`(`id`,`assignment_id`,`question_id`,`score`,`sequence`) values (18,9,13,5,1),(19,9,17,5,2),(20,9,12,5,3),(21,9,12,0,4),(28,17,13,5,1),(29,17,12,5,2),(30,23,13,5,1);
+insert  into `assignment_question`(`id`,`assignment_id`,`question_id`,`score`,`sequence`) values (18,9,13,5,1),(19,9,17,5,2),(20,9,12,5,3),(21,9,12,0,4),(28,17,13,5,1),(29,17,12,5,2);
 
 /*Table structure for table `assignment_submission` */
 
@@ -83,17 +83,19 @@ CREATE TABLE `assignment_submission` (
   `content` text COMMENT '提交内容',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `file_name` varchar(255) DEFAULT NULL COMMENT '文件名称',
+  `file_path` varchar(255) DEFAULT NULL COMMENT '文件路径',
   PRIMARY KEY (`id`),
   KEY `idx_assignment_id` (`assignment_id`),
   KEY `idx_student_id` (`student_id`),
   KEY `idx_status` (`status`),
   CONSTRAINT `fk_submission_assignment` FOREIGN KEY (`assignment_id`) REFERENCES `assignment` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_submission_student` FOREIGN KEY (`student_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='作业提交记录表';
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='作业提交记录表';
 
 /*Data for the table `assignment_submission` */
 
-insert  into `assignment_submission`(`id`,`assignment_id`,`student_id`,`status`,`score`,`feedback`,`submit_time`,`grade_time`,`graded_by`,`content`,`create_time`,`update_time`) values (4,23,12,1,NULL,NULL,'2025-07-02 00:21:05',NULL,NULL,'这是学生提交的作业内容','2025-07-02 00:21:05','2025-07-02 00:21:05'),(5,23,12,2,85,'做得不错，但有些地方需要改进','2025-07-01 23:21:05','2025-07-02 00:21:05',3,'这是另一个学生提交的作业内容','2025-07-02 00:21:05','2025-07-02 00:21:05'),(12,9,12,0,NULL,NULL,NULL,NULL,NULL,NULL,'2025-07-03 02:53:30','2025-07-03 02:53:29');
+insert  into `assignment_submission`(`id`,`assignment_id`,`student_id`,`status`,`score`,`feedback`,`submit_time`,`grade_time`,`graded_by`,`content`,`create_time`,`update_time`,`file_name`,`file_path`) values (12,9,12,1,10,NULL,'2025-07-03 03:46:22',NULL,NULL,NULL,'2025-07-03 02:53:30','2025-07-03 03:46:22',NULL,NULL),(32,24,12,0,NULL,NULL,NULL,NULL,NULL,NULL,'2025-07-03 14:32:32','2025-07-03 14:32:32',NULL,NULL),(33,25,12,0,NULL,NULL,NULL,NULL,NULL,NULL,'2025-07-03 15:18:00','2025-07-03 15:17:59',NULL,NULL),(34,20,12,0,NULL,NULL,NULL,NULL,NULL,NULL,'2025-07-03 15:19:09','2025-07-03 15:19:09',NULL,NULL),(35,15,12,0,NULL,NULL,NULL,NULL,NULL,NULL,'2025-07-03 15:27:45','2025-07-03 15:27:45',NULL,NULL),(36,17,12,0,NULL,NULL,NULL,NULL,NULL,NULL,'2025-07-03 15:27:50','2025-07-03 15:27:49',NULL,NULL);
 
 /*Table structure for table `assignment_submission_answer` */
 
@@ -114,31 +116,11 @@ CREATE TABLE `assignment_submission_answer` (
   KEY `question_id` (`question_id`),
   CONSTRAINT `fk_submission_answer_question` FOREIGN KEY (`question_id`) REFERENCES `question` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_submission_answer_submission` FOREIGN KEY (`submission_id`) REFERENCES `assignment_submission` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学生答题记录表';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学生答题记录表';
 
 /*Data for the table `assignment_submission_answer` */
 
-/*Table structure for table `assignment_submission_file` */
-
-DROP TABLE IF EXISTS `assignment_submission_file`;
-
-CREATE TABLE `assignment_submission_file` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `student_id` bigint(20) NOT NULL COMMENT '学生ID',
-  `assignment_id` bigint(20) NOT NULL COMMENT '作业ID',
-  `file_url` varchar(255) NOT NULL COMMENT '上传文件路径',
-  `file_type` varchar(50) DEFAULT NULL COMMENT '文件类型（docx/pdf/ppt/mp4/jpg/png等）',
-  `upload_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间',
-  `comment` text COMMENT '教师评语',
-  `score` int(11) DEFAULT '0' COMMENT '评分',
-  PRIMARY KEY (`id`),
-  KEY `student_id` (`student_id`),
-  KEY `assignment_id` (`assignment_id`),
-  CONSTRAINT `assignment_submission_file_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `assignment_submission_file_ibfk_2` FOREIGN KEY (`assignment_id`) REFERENCES `assignment` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学生作业上传文件表';
-
-/*Data for the table `assignment_submission_file` */
+insert  into `assignment_submission_answer`(`id`,`submission_id`,`question_id`,`student_answer`,`is_correct`,`score`,`comment`,`create_time`,`update_time`) values (1,12,13,'B',1,5,NULL,'2025-07-03 03:27:11','2025-07-03 03:46:22'),(2,12,17,'T',1,5,NULL,'2025-07-03 03:46:22','2025-07-03 03:46:22');
 
 /*Table structure for table `chapter` */
 
@@ -280,7 +262,7 @@ CREATE TABLE `course_resource` (
 
 /*Data for the table `course_resource` */
 
-insert  into `course_resource`(`id`,`course_id`,`name`,`file_type`,`file_size`,`file_url`,`description`,`download_count`,`upload_user_id`,`create_time`,`update_time`) values (1,9,'1','pdf',325858,'/files/resources/9/202506/7acbf820bec64795bedaca556c235c4a.pdf','1',4,6,'2025-06-30 16:18:14','2025-06-30 16:18:14'),(5,9,'测试','png',48173,'/files/resources/9/202507/a54ec5a02dba4fc9882aaa1f23caf063.png','1',1,6,'2025-07-02 20:39:01','2025-07-02 20:39:01');
+insert  into `course_resource`(`id`,`course_id`,`name`,`file_type`,`file_size`,`file_url`,`description`,`download_count`,`upload_user_id`,`create_time`,`update_time`) values (1,9,'1','pdf',325858,'/files/resources/9/202506/7acbf820bec64795bedaca556c235c4a.pdf','1',4,6,'2025-06-30 16:18:14','2025-06-30 16:18:14'),(5,9,'测试','png',48173,'/files/resources/9/202507/a54ec5a02dba4fc9882aaa1f23caf063.png','1',2,6,'2025-07-02 20:39:01','2025-07-02 20:39:01');
 
 /*Table structure for table `course_student` */
 
@@ -461,11 +443,11 @@ CREATE TABLE `section_comment` (
   CONSTRAINT `fk_comment_parent` FOREIGN KEY (`parent_id`) REFERENCES `section_comment` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_comment_section` FOREIGN KEY (`section_id`) REFERENCES `section` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='小节评论表(讨论区)';
+) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='小节评论表(讨论区)';
 
 /*Data for the table `section_comment` */
 
-insert  into `section_comment`(`id`,`section_id`,`user_id`,`content`,`parent_id`,`create_time`,`update_time`) values (71,14,6,'评论1',NULL,'2025-06-30 14:25:28','2025-06-30 14:25:28'),(72,14,6,'12',71,'2025-06-30 14:25:57','2025-06-30 14:25:57'),(73,14,6,'2',NULL,'2025-06-30 14:26:03','2025-06-30 14:26:03'),(74,14,6,'12',73,'2025-06-30 14:26:05','2025-06-30 14:26:05');
+insert  into `section_comment`(`id`,`section_id`,`user_id`,`content`,`parent_id`,`create_time`,`update_time`) values (71,14,6,'评论1',NULL,'2025-06-30 14:25:28','2025-06-30 14:25:28'),(72,14,6,'12',71,'2025-06-30 14:25:57','2025-06-30 14:25:57'),(73,14,6,'2',NULL,'2025-06-30 14:26:03','2025-06-30 14:26:03'),(74,14,6,'12',73,'2025-06-30 14:26:05','2025-06-30 14:26:05'),(75,14,12,'1',NULL,'2025-07-03 16:18:19','2025-07-03 16:18:19');
 
 /*Table structure for table `section_progress` */
 

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -38,8 +39,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.File;
+import java.util.UUID;
 
-@Tag(name = "学生作业接口", description = "学生作业相关接口")
+@Tag(name = "学生任务接口", description = "学生任务相关接口")
 @RestController
 @RequestMapping("/api/student/assignments")
 public class StudentAssignmentController {
@@ -74,25 +77,231 @@ public class StudentAssignmentController {
     private SecurityUtil securityUtil;
     
     /**
-     * 获取作业详情
-     * @param id 作业ID
-     * @return 作业详情
+     * 获取学生任务列表
+     * @param status 状态筛选（可选）：pending-待完成，completed-已完成，overdue-已逾期，不传则查询全部
+     * @param courseId 课程ID筛选（可选）
+     * @param type 任务类型筛选（可选）：homework-课后任务，exam-考试，project-项目任务，report-实验报告
+     * @param keyword 关键词搜索（可选）
+     * @return 任务列表
      */
-    @Operation(summary = "获取作业详情", description = "获取作业的详细信息")
-    @GetMapping("/{id}")
-    public Result getAssignmentDetail(
-            @Parameter(description = "作业ID") @PathVariable Long id) {
+    @Operation(summary = "获取学生任务列表", description = "获取学生的任务列表，支持多种筛选条件")
+    @GetMapping
+    public Result getAssignmentList(
+            @Parameter(description = "状态筛选") @RequestParam(required = false) String status,
+            @Parameter(description = "课程ID筛选") @RequestParam(required = false) Long courseId,
+            @Parameter(description = "任务类型筛选") @RequestParam(required = false) String type,
+            @Parameter(description = "关键词搜索") @RequestParam(required = false) String keyword) {
         
-        logger.info("获取学生作业详情，作业ID: {}", id);
+        logger.info("获取学生任务列表，状态: {}, 课程ID: {}, 类型: {}, 关键词: {}", status, courseId, type, keyword);
         
         try {
-            // 查询作业信息
+            // 获取当前登录用户ID
+            Long currentUserId = securityUtil.getCurrentUserId();
+            if (currentUserId == null) {
+                return Result.error("未登录或登录已过期");
+            }
+            
+            // 查询学生信息 - 仅用于验证学生身份
+            Student student = null;
+            try {
+                student = studentMapper.selectOne(
+                    new LambdaQueryWrapper<Student>()
+                        .eq(Student::getUserId, currentUserId)
+                        .last("LIMIT 1") // 限制只返回一条记录
+                );
+                
+                if (student == null) {
+                    logger.error("学生信息不存在，用户ID: {}", currentUserId);
+                    return Result.error("学生信息不存在");
+                }
+                
+                logger.info("查询到学生信息: {}", student);
+            } catch (Exception e) {
+                logger.error("查询学生信息异常: {}", e.getMessage(), e);
+                
+                // 如果是因为找到多条记录导致的错误，则查询列表并使用第一条
+                if (e.getMessage() != null && e.getMessage().contains("Expected one result")) {
+                    List<Student> students = studentMapper.selectList(
+                        new LambdaQueryWrapper<Student>()
+                            .eq(Student::getUserId, currentUserId)
+                    );
+                    
+                    if (students != null && !students.isEmpty()) {
+                        student = students.get(0);
+                        logger.warn("发现多条学生记录，使用第一条: {}", student);
+                    } else {
+                        return Result.error("学生信息不存在");
+                    }
+                } else {
+                    return Result.error("查询学生信息失败: " + e.getMessage());
+                }
+            }
+            
+            // 查询学生可见的所有任务（已发布的）
+            String sql = "SELECT a.*, c.title AS course_name, u.username AS teacher_name, " +
+                         "s.status AS submission_status, s.score, s.submit_time " +
+                         "FROM assignment a " +
+                         "JOIN course c ON a.course_id = c.id " +
+                         "JOIN user u ON a.user_id = u.id " +
+                         "JOIN course_student cs ON c.id = cs.course_id " +
+                         "LEFT JOIN assignment_submission s ON a.id = s.assignment_id AND s.student_id = ? " +
+                         "WHERE a.status = 1 AND cs.student_id = ? ";
+            
+            // 根据筛选条件添加WHERE子句
+            List<Object> params = new ArrayList<>();
+            params.add(student.getId());
+            params.add(student.getId());
+            
+            if (courseId != null) {
+                sql += "AND a.course_id = ? ";
+                params.add(courseId);
+            }
+            
+            if (type != null && !type.isEmpty()) {
+                sql += "AND a.type = ? ";
+                params.add(type);
+            }
+            
+            if (keyword != null && !keyword.isEmpty()) {
+                sql += "AND (a.title LIKE ? OR a.description LIKE ? OR c.title LIKE ?) ";
+                String likeKeyword = "%" + keyword + "%";
+                params.add(likeKeyword);
+                params.add(likeKeyword);
+                params.add(likeKeyword);
+            }
+            
+            // 根据状态筛选
+            if (status != null && !status.isEmpty()) {
+                Date now = new Date();
+                
+                if ("pending".equals(status)) {
+                    // 待完成：未提交且未过期
+                    sql += "AND (s.status IS NULL OR s.status = 0) AND (a.end_time IS NULL OR a.end_time > ?) ";
+                    params.add(now);
+                } else if ("completed".equals(status)) {
+                    // 已完成：已提交
+                    sql += "AND s.status = 1 ";
+                } else if ("overdue".equals(status)) {
+                    // 已逾期：未提交且已过期
+                    sql += "AND (s.status IS NULL OR s.status = 0) AND a.end_time < ? ";
+                    params.add(now);
+                }
+            }
+            
+            // 按截止时间升序排序
+            sql += "ORDER BY a.end_time ASC";
+            
+            List<Map<String, Object>> assignments = new ArrayList<>();
+            
+            try (Connection conn = dataSource.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                
+                // 设置参数
+                for (int i = 0; i < params.size(); i++) {
+                    stmt.setObject(i + 1, params.get(i));
+                }
+                
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Map<String, Object> assignment = new HashMap<>();
+                        
+                        // 基本信息
+                        assignment.put("id", rs.getLong("id"));
+                        assignment.put("title", rs.getString("title"));
+                        assignment.put("description", rs.getString("description"));
+                        assignment.put("type", rs.getString("type"));
+                        assignment.put("courseId", rs.getLong("course_id"));
+                        assignment.put("courseName", rs.getString("course_name"));
+                        assignment.put("teacherName", rs.getString("teacher_name"));
+                        assignment.put("createTime", rs.getTimestamp("create_time"));
+                        assignment.put("deadline", rs.getTimestamp("end_time"));
+                        assignment.put("startTime", rs.getTimestamp("start_time"));
+                        
+                        // 计算优先级
+                        Date deadline = rs.getTimestamp("end_time");
+                        Date now = new Date();
+                        String priority = "low";
+                        
+                        if (deadline != null) {
+                            long diff = deadline.getTime() - now.getTime();
+                            long diffHours = diff / (60 * 60 * 1000);
+                            
+                            if (diff < 0) {
+                                priority = "overdue";
+                            } else if (diffHours <= 24) {
+                                priority = "high";
+                            } else if (diffHours <= 72) {
+                                priority = "medium";
+                            }
+                        }
+                        
+                        assignment.put("priority", priority);
+                        
+                        // 提交状态
+                        int submissionStatus = rs.getInt("submission_status");
+                        Date endTime = rs.getTimestamp("end_time");
+                        
+                        String statusValue;
+                        if (submissionStatus == 1) {
+                            statusValue = "completed";
+                            assignment.put("submissionTime", rs.getTimestamp("submit_time"));
+                            assignment.put("score", rs.getObject("score"));
+                        } else if (endTime != null && now.after(endTime)) {
+                            statusValue = "overdue";
+                        } else {
+                            statusValue = "pending";
+                        }
+                        
+                        assignment.put("status", statusValue);
+                        
+                        // 总分
+                        String scoreSql = "SELECT SUM(score) FROM assignment_question WHERE assignment_id = ?";
+                        try (PreparedStatement scoreStmt = conn.prepareStatement(scoreSql)) {
+                            scoreStmt.setLong(1, rs.getLong("id"));
+                            try (ResultSet scoreRs = scoreStmt.executeQuery()) {
+                                if (scoreRs.next()) {
+                                    assignment.put("totalScore", scoreRs.getInt(1));
+                                } else {
+                                    assignment.put("totalScore", 100);
+                                }
+                            }
+                        }
+                        
+                        assignments.add(assignment);
+                    }
+                }
+            }
+            
+            return Result.success(assignments);
+            
+        } catch (Exception e) {
+            logger.error("获取学生任务列表失败: {}", e.getMessage(), e);
+            return Result.error("获取任务列表失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取任务详情
+     * @param id 任务ID
+     * @return 任务详情
+     */
+    @Operation(summary = "获取任务详情", description = "获取任务的详细信息")
+    @GetMapping("/{id}")
+    public Result getAssignmentDetail(
+            @Parameter(description = "任务ID") @PathVariable Long id) {
+        
+        logger.info("获取学生任务详情，任务ID: {}", id);
+        
+        try {
+            // 查询任务信息
             Assignment assignment = assignmentMapper.selectById(id);
             
             if (assignment == null) {
-                logger.error("作业不存在，作业ID: {}", id);
-                return Result.error("作业不存在");
+                logger.error("任务不存在，任务ID: {}", id);
+                return Result.error("任务不存在");
             }
+            
+            logger.info("成功查询到任务信息: {}", assignment);
             
             // 获取当前登录用户ID
             Long currentUserId = securityUtil.getCurrentUserId();
@@ -100,15 +309,58 @@ public class StudentAssignmentController {
                 return Result.error("未登录或登录已过期");
             }
             
-            // 查询学生ID
-            Student student = studentMapper.selectOne(
+            // 查询学生信息 - 仅用于验证学生身份
+            Student student = null;
+            try {
+                student = studentMapper.selectOne(
                 new LambdaQueryWrapper<Student>()
                     .eq(Student::getUserId, currentUserId)
+                        .last("LIMIT 1") // 限制只返回一条记录
             );
             
             if (student == null) {
                 logger.error("学生信息不存在，用户ID: {}", currentUserId);
                 return Result.error("学生信息不存在");
+                }
+                
+                logger.info("查询到学生信息: {}", student);
+            } catch (Exception e) {
+                logger.error("查询学生信息异常: {}", e.getMessage(), e);
+                
+                // 如果是因为找到多条记录导致的错误，则查询列表并使用第一条
+                if (e.getMessage() != null && e.getMessage().contains("Expected one result")) {
+                    List<Student> students = studentMapper.selectList(
+                        new LambdaQueryWrapper<Student>()
+                            .eq(Student::getUserId, currentUserId)
+                    );
+                    
+                    if (students != null && !students.isEmpty()) {
+                        student = students.get(0);
+                        logger.warn("发现多条学生记录，使用第一条: {}", student);
+                    } else {
+                        return Result.error("学生信息不存在");
+                    }
+                } else {
+                    return Result.error("查询学生信息失败: " + e.getMessage());
+                }
+            }
+            
+            // 获取课程和教师信息
+            String sql = "SELECT c.title AS course_name, u.username AS teacher_name " +
+                         "FROM course c " +
+                         "JOIN user u ON c.teacher_id = u.id " +
+                         "WHERE c.id = ?";
+            
+            try (Connection conn = dataSource.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setLong(1, assignment.getCourseId());
+                
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        assignment.setCourseName(rs.getString("course_name"));
+                        assignment.setTeacherName(rs.getString("teacher_name"));
+                    }
+                }
             }
             
             // 检查是否已经有提交记录，如果没有则创建一个状态为未提交的记录
@@ -121,66 +373,66 @@ public class StudentAssignmentController {
             if (submission == null) {
                 submission = new AssignmentSubmission();
                 submission.setAssignmentId(id);
-                submission.setStudentId(student.getId());
+                submission.setStudentId(currentUserId);
                 submission.setStatus(0); // 未提交
                 submission.setCreateTime(new Date());
                 assignmentSubmissionMapper.insert(submission);
                 
-                logger.info("为学生创建作业提交记录，学生ID: {}, 作业ID: {}", student.getId(), id);
+                logger.info("为学生创建任务提交记录，学生ID: {}, 任务ID: {}", currentUserId, id);
             }
             
-            // 返回作业详情和提交状态
-            Map<String, Object> result = new HashMap<>();
+            // 返回任务详情和提交状态
+            Map<String, Object> result = new HashMap<String, Object>();
             result.put("assignment", assignment);
             result.put("submission", submission);
             
             return Result.success(result);
             
         } catch (Exception e) {
-            logger.error("获取作业详情失败: {}", e.getMessage(), e);
-            return Result.error("获取作业详情失败: " + e.getMessage());
+            logger.error("获取任务详情失败: {}", e.getMessage(), e);
+            return Result.error("获取任务详情失败: " + e.getMessage());
         }
     }
     
     /**
-     * 获取作业题目
-     * @param id 作业ID
-     * @return 作业题目列表
+     * 获取任务题目
+     * @param id 任务ID
+     * @return 任务题目列表
      */
-    @Operation(summary = "获取作业题目", description = "获取作业的题目列表")
+    @Operation(summary = "获取任务题目", description = "获取任务的题目列表")
     @GetMapping("/{id}/questions")
     public Result getAssignmentQuestions(
-            @Parameter(description = "作业ID") @PathVariable Long id) {
+            @Parameter(description = "任务ID") @PathVariable Long id) {
         
-        logger.info("获取学生作业题目，作业ID: {}", id);
+        logger.info("获取学生任务题目，任务ID: {}", id);
         
         try {
-            // 查询作业信息
+            // 查询任务信息
             Assignment assignment = assignmentMapper.selectById(id);
             
             if (assignment == null) {
-                logger.error("作业不存在，作业ID: {}", id);
-                return Result.error("作业不存在");
+                logger.error("任务不存在，任务ID: {}", id);
+                return Result.error("任务不存在");
             }
             
-            // 检查作业是否已发布
+            // 检查任务是否已发布
             if (assignment.getStatus() != 1) {
-                logger.error("作业未发布，不能查看题目，作业ID: {}", id);
-                return Result.error("作业未发布，不能查看题目");
+                logger.error("任务未发布，不能查看题目，任务ID: {}", id);
+                return Result.error("任务未发布，不能查看题目");
             }
             
             // 检查是否是考试类型，且考试未开始
             if ("exam".equals(assignment.getType()) && 
                 assignment.getStartTime() != null && 
                 new Date().before(assignment.getStartTime())) {
-                logger.error("考试未开始，不能查看题目，作业ID: {}", id);
+                logger.error("考试未开始，不能查看题目，任务ID: {}", id);
                 return Result.error("考试未开始，不能查看题目");
             }
             
-            // 查询作业题目
+            // 查询任务题目
             List<Map<String, Object>> questions = new ArrayList<>();
             
-            // 1. 查询作业-题目关联表
+            // 1. 查询任务-题目关联表
             String sql = "SELECT aq.question_id, aq.score, aq.sequence, " +
                          "q.title, q.question_type, q.difficulty, q.correct_answer, q.explanation, q.knowledge_point " +
                          "FROM assignment_question aq " +
@@ -261,8 +513,8 @@ public class StudentAssignmentController {
             return Result.success(result);
             
         } catch (Exception e) {
-            logger.error("获取作业题目失败: {}", e.getMessage(), e);
-            return Result.error("获取作业题目失败: " + e.getMessage());
+            logger.error("获取任务题目失败: {}", e.getMessage(), e);
+            return Result.error("获取任务题目失败: " + e.getMessage());
         }
     }
     
@@ -297,7 +549,7 @@ public class StudentAssignmentController {
     
     /**
      * 保存单题答案
-     * @param id 作业ID
+     * @param id 任务ID
      * @param questionId 题目ID
      * @param request 答案数据
      * @return 保存结果
@@ -306,11 +558,11 @@ public class StudentAssignmentController {
     @PostMapping("/{id}/questions/{questionId}/save")
     @Transactional
     public Result saveQuestionAnswer(
-            @Parameter(description = "作业ID") @PathVariable Long id,
+            @Parameter(description = "任务ID") @PathVariable Long id,
             @Parameter(description = "题目ID") @PathVariable Long questionId,
             @RequestBody Map<String, Object> request) {
         
-        logger.info("保存单题答案，作业ID: {}, 题目ID: {}", id, questionId);
+        logger.info("保存单题答案，任务ID: {}, 题目ID: {}", id, questionId);
         
         try {
             // 获取当前登录用户ID
@@ -330,27 +582,27 @@ public class StudentAssignmentController {
                 return Result.error("学生信息不存在");
             }
             
-            // 查询作业信息
+            // 查询任务信息
             Assignment assignment = assignmentMapper.selectById(id);
             
             if (assignment == null) {
-                logger.error("作业不存在，作业ID: {}", id);
-                return Result.error("作业不存在");
+                logger.error("任务不存在，任务ID: {}", id);
+                return Result.error("任务不存在");
             }
             
-            // 检查作业是否已发布
+            // 检查任务是否已发布
             if (assignment.getStatus() != 1) {
-                logger.error("作业未发布，不能保存答案，作业ID: {}", id);
-                return Result.error("作业未发布，不能保存答案");
+                logger.error("任务未发布，不能保存答案，任务ID: {}", id);
+                return Result.error("任务未发布，不能保存答案");
             }
             
             // 检查是否已过截止时间
             if (assignment.getEndTime() != null && new Date().after(assignment.getEndTime())) {
-                logger.error("作业已截止，不能保存答案，作业ID: {}", id);
-                return Result.error("作业已截止，不能保存答案");
+                logger.error("任务已截止，不能保存答案，任务ID: {}", id);
+                return Result.error("任务已截止，不能保存答案");
             }
             
-            // 检查题目是否属于该作业
+            // 检查题目是否属于该任务
             AssignmentQuestion assignmentQuestion = assignmentQuestionMapper.selectOne(
                 new LambdaQueryWrapper<AssignmentQuestion>()
                     .eq(AssignmentQuestion::getAssignmentId, id)
@@ -358,8 +610,8 @@ public class StudentAssignmentController {
             );
             
             if (assignmentQuestion == null) {
-                logger.error("题目不属于该作业，作业ID: {}, 题目ID: {}", id, questionId);
-                return Result.error("题目不属于该作业");
+                logger.error("题目不属于该任务，任务ID: {}, 题目ID: {}", id, questionId);
+                return Result.error("题目不属于该任务");
             }
             
             // 查询提交记录
@@ -378,11 +630,11 @@ public class StudentAssignmentController {
                 submission.setCreateTime(new Date());
                 assignmentSubmissionMapper.insert(submission);
                 
-                logger.info("为学生创建作业提交记录，学生ID: {}, 作业ID: {}", currentUserId, id);
+                logger.info("为学生创建任务提交记录，学生ID: {}, 任务ID: {}", currentUserId, id);
             } else if (submission.getStatus() == 1) {
                 // 如果已提交，不能再保存答案
-                logger.error("作业已提交，不能再保存答案，作业ID: {}", id);
-                return Result.error("作业已提交，不能再保存答案");
+                logger.error("任务已提交，不能再保存答案，任务ID: {}", id);
+                return Result.error("任务已提交，不能再保存答案");
             }
             
             // 获取答案内容
@@ -459,17 +711,17 @@ public class StudentAssignmentController {
     }
     
     /**
-     * 提交作业/考试答案
-     * @param id 作业/考试ID
+     * 提交任务/考试答案
+     * @param id 任务/考试ID
      * @return 提交结果
      */
-    @Operation(summary = "提交作业/考试答案", description = "提交作业/考试的答案")
+    @Operation(summary = "提交任务/考试答案", description = "提交任务/考试的答案")
     @PostMapping("/{id}/submit")
     @Transactional
     public Result submitAssignment(
-            @Parameter(description = "作业ID") @PathVariable Long id) {
+            @Parameter(description = "任务ID") @PathVariable Long id) {
         
-        logger.info("提交作业/考试答案，作业ID: {}", id);
+        logger.info("提交任务/考试答案，任务ID: {}", id);
         
         try {
             // 获取当前登录用户ID
@@ -489,24 +741,24 @@ public class StudentAssignmentController {
                 return Result.error("学生信息不存在");
             }
             
-            // 查询作业信息
+            // 查询任务信息
             Assignment assignment = assignmentMapper.selectById(id);
             
             if (assignment == null) {
-                logger.error("作业不存在，作业ID: {}", id);
-                return Result.error("作业不存在");
+                logger.error("任务不存在，任务ID: {}", id);
+                return Result.error("任务不存在");
             }
             
-            // 检查作业是否已发布
+            // 检查任务是否已发布
             if (assignment.getStatus() != 1) {
-                logger.error("作业未发布，不能提交，作业ID: {}", id);
-                return Result.error("作业未发布，不能提交");
+                logger.error("任务未发布，不能提交，任务ID: {}", id);
+                return Result.error("任务未发布，不能提交");
             }
             
             // 检查是否已过截止时间
             if (assignment.getEndTime() != null && new Date().after(assignment.getEndTime())) {
-                logger.error("作业已截止，不能提交，作业ID: {}", id);
-                return Result.error("作业已截止，不能提交");
+                logger.error("任务已截止，不能提交，任务ID: {}", id);
+                return Result.error("任务已截止，不能提交");
             }
             
             // 查询提交记录
@@ -517,13 +769,13 @@ public class StudentAssignmentController {
             );
             
             if (submission == null) {
-                logger.error("未找到提交记录，作业ID: {}, 学生ID: {}", id, currentUserId);
+                logger.error("未找到提交记录，任务ID: {}, 学生ID: {}", id, currentUserId);
                 return Result.error("未找到提交记录");
             }
             
             // 检查是否已经提交过
             if (submission.getStatus() == 1) {
-                logger.error("已经提交过，不能重复提交，作业ID: {}", id);
+                logger.error("已经提交过，不能重复提交，任务ID: {}", id);
                 return Result.error("已经提交过，不能重复提交");
             }
             
@@ -550,29 +802,29 @@ public class StudentAssignmentController {
             submission.setScore(totalScore);
             assignmentSubmissionMapper.updateById(submission);
             
-            logger.info("提交作业成功，作业ID: {}, 学生ID: {}, 得分: {}", id, currentUserId, totalScore);
+            logger.info("提交任务成功，任务ID: {}, 学生ID: {}, 得分: {}", id, currentUserId, totalScore);
             
             return Result.success("提交成功");
             
         } catch (Exception e) {
-            logger.error("提交作业答案失败: {}", e.getMessage(), e);
-            return Result.error("提交作业答案失败: " + e.getMessage());
+            logger.error("提交任务答案失败: {}", e.getMessage(), e);
+            return Result.error("提交任务答案失败: " + e.getMessage());
         }
     }
     
     /**
      * 获取已保存的答案
-     * @param id 作业ID
+     * @param id 任务ID
      * @param questionId 题目ID
      * @return 已保存的答案
      */
     @Operation(summary = "获取已保存答案", description = "获取学生已保存的答案")
     @GetMapping("/{id}/questions/{questionId}/answer")
     public Result getSavedAnswer(
-            @Parameter(description = "作业ID") @PathVariable Long id,
+            @Parameter(description = "任务ID") @PathVariable Long id,
             @Parameter(description = "题目ID") @PathVariable Long questionId) {
         
-        logger.info("获取已保存答案，作业ID: {}, 题目ID: {}", id, questionId);
+        logger.info("获取已保存答案，任务ID: {}, 题目ID: {}", id, questionId);
         
         try {
             // 获取当前登录用户ID
@@ -589,7 +841,7 @@ public class StudentAssignmentController {
             );
             
             if (submission == null) {
-                logger.info("未找到提交记录，作业ID: {}, 学生ID: {}", id, currentUserId);
+                logger.info("未找到提交记录，任务ID: {}, 学生ID: {}", id, currentUserId);
                 return Result.success(null); // 返回空答案
             }
             
@@ -616,6 +868,149 @@ public class StudentAssignmentController {
         } catch (Exception e) {
             logger.error("获取已保存答案失败: {}", e.getMessage(), e);
             return Result.error("获取已保存答案失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 提交文件作业
+     * @param id 任务ID
+     * @param file 上传的文件
+     * @return 提交结果
+     */
+    @Operation(summary = "提交文件作业", description = "提交文件类型的作业")
+    @PostMapping("/{id}/submit-file")
+    @Transactional
+    public Result submitAssignmentFile(
+            @Parameter(description = "任务ID") @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        
+        logger.info("提交文件作业，任务ID: {}, 文件名: {}", id, file.getOriginalFilename());
+        
+        try {
+            // 获取当前登录用户ID
+            Long currentUserId = securityUtil.getCurrentUserId();
+            if (currentUserId == null) {
+                return Result.error("未登录或登录已过期");
+            }
+            
+            logger.info("当前用户ID: {}", currentUserId);
+            
+            // 查询学生信息 - 仅用于验证学生身份
+            Student student = null;
+            try {
+                student = studentMapper.selectOne(
+                    new LambdaQueryWrapper<Student>()
+                        .eq(Student::getUserId, currentUserId)
+                        .last("LIMIT 1") // 限制只返回一条记录
+                );
+                
+                if (student == null) {
+                    logger.error("学生信息不存在，用户ID: {}", currentUserId);
+                    return Result.error("学生信息不存在");
+                }
+                
+                logger.info("查询到学生信息: {}", student);
+            } catch (Exception e) {
+                logger.error("查询学生信息异常: {}", e.getMessage(), e);
+                
+                // 如果是因为找到多条记录导致的错误，则查询列表并使用第一条
+                if (e.getMessage() != null && e.getMessage().contains("Expected one result")) {
+                    List<Student> students = studentMapper.selectList(
+                        new LambdaQueryWrapper<Student>()
+                            .eq(Student::getUserId, currentUserId)
+                    );
+                    
+                    if (students != null && !students.isEmpty()) {
+                        student = students.get(0);
+                        logger.warn("发现多条学生记录，使用第一条: {}", student);
+                    } else {
+                        return Result.error("学生信息不存在");
+                    }
+                } else {
+                    return Result.error("查询学生信息失败: " + e.getMessage());
+                }
+            }
+            
+            // 查询任务信息
+            Assignment assignment = assignmentMapper.selectById(id);
+            
+            if (assignment == null) {
+                logger.error("任务不存在，任务ID: {}", id);
+                return Result.error("任务不存在");
+            }
+            
+            // 检查任务是否为文件提交类型
+            if (!"file".equals(assignment.getMode())) {
+                logger.error("任务不是文件提交类型，任务ID: {}, 类型: {}", id, assignment.getMode());
+                return Result.error("该任务不是文件提交类型");
+            }
+            
+            // 检查任务是否已发布
+            if (assignment.getStatus() != 1) {
+                logger.error("任务未发布，不能提交，任务ID: {}", id);
+                return Result.error("任务未发布，不能提交");
+            }
+            
+            // 检查截止时间
+            if (assignment.getEndTime() != null && new Date().after(assignment.getEndTime())) {
+                logger.error("任务已截止，不能提交，任务ID: {}", id);
+                return Result.error("任务已截止，不能提交");
+            }
+            
+            // 保存文件
+            String originalFilename = file.getOriginalFilename();
+            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String newFilename = UUID.randomUUID().toString() + fileExtension;
+
+            // 修改文件保存路径为项目根目录下的resource/file
+            String uploadDir = "D:/my_git_code/SmartClass/resource/file/assignments/" + id + "/" + currentUserId + "/";
+            File dir = new File(uploadDir);
+            if (!dir.exists()) {
+                boolean created = dir.mkdirs();
+                if (!created) {
+                    logger.error("创建目录失败: {}", uploadDir);
+                    return Result.error("创建上传目录失败，请联系管理员");
+                }
+                logger.info("成功创建目录: {}", uploadDir);
+            }
+
+            File destFile = new File(dir, newFilename);
+            logger.info("保存文件路径: {}", destFile.getAbsolutePath());
+            file.transferTo(destFile);
+            
+            // 更新提交记录
+            AssignmentSubmission submission = assignmentSubmissionMapper.selectOne(
+                new LambdaQueryWrapper<AssignmentSubmission>()
+                    .eq(AssignmentSubmission::getAssignmentId, id)
+                    .eq(AssignmentSubmission::getStudentId, currentUserId)
+            );
+            
+            if (submission == null) {
+                submission = new AssignmentSubmission();
+                submission.setAssignmentId(id);
+                submission.setStudentId(currentUserId);
+                submission.setCreateTime(new Date());
+            }
+            
+            submission.setStatus(1); // 已提交
+            submission.setSubmitTime(new Date());
+            submission.setFileName(originalFilename);
+            submission.setFilePath(uploadDir + newFilename);
+            
+            if (submission.getId() == null) {
+                assignmentSubmissionMapper.insert(submission);
+                logger.info("新增文件作业提交记录，任务ID: {}, 学生ID: {}", id, currentUserId);
+            } else {
+                assignmentSubmissionMapper.updateById(submission);
+                logger.info("更新文件作业提交记录，提交ID: {}, 任务ID: {}, 学生ID: {}", submission.getId(), id, currentUserId);
+            }
+            
+            logger.info("文件作业提交成功，任务ID: {}, 学生ID: {}, 文件名: {}", id, currentUserId, originalFilename);
+            return Result.success("作业提交成功");
+            
+        } catch (Exception e) {
+            logger.error("提交文件作业失败: {}", e.getMessage(), e);
+            return Result.error("提交作业失败: " + e.getMessage());
         }
     }
 } 

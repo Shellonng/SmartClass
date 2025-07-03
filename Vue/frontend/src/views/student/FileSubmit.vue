@@ -18,10 +18,10 @@
 
         <div class="assignment-info">
           <div class="info-item">
-            <clock-circle-outlined /> 开始时间：{{ formatDateTime(assignment.startTime) }}
+            <calendar-outlined /> 开始时间: {{ formatDateTime(assignment.startTime) || '未设置' }}
           </div>
           <div class="info-item">
-            <calendar-outlined /> 截止时间：{{ formatDateTime(assignment.endTime) }}
+            <clock-circle-outlined /> 截止时间: {{ formatDateTime(assignment.endTime) || '未设置' }}
           </div>
         </div>
 
@@ -30,7 +30,7 @@
           <div class="description-content">{{ assignment.description || '暂无说明' }}</div>
         </div>
 
-        <div class="file-upload-section">
+        <div class="file-upload-section" v-if="!isSubmitted">
           <div class="section-title">文件上传</div>
           <div class="upload-area">
             <a-upload-dragger
@@ -49,34 +49,21 @@
               </p>
             </a-upload-dragger>
           </div>
-          
-          <div class="upload-tips">
-            <ul>
-              <li>支持的文件格式：.doc, .docx, .pdf, .zip, .rar, .7z</li>
-              <li>文件大小不超过50MB</li>
-              <li>文件名请勿包含特殊字符</li>
-            </ul>
-          </div>
         </div>
 
-        <div class="submission-section" v-if="previousSubmission">
-          <div class="section-title">历史提交记录</div>
+        <div class="submission-section" v-if="isSubmitted">
+          <div class="section-title">已提交</div>
           <div class="submission-record">
             <div class="record-item">
               <div class="record-info">
                 <div class="record-filename">{{ previousSubmission.fileName }}</div>
                 <div class="record-time">提交时间：{{ formatDateTime(previousSubmission.submitTime) }}</div>
               </div>
-              <div class="record-actions">
-                <a-button type="link" @click="downloadFile(previousSubmission.fileUrl)">
-                  <download-outlined /> 下载
-                </a-button>
-              </div>
             </div>
           </div>
         </div>
 
-        <div class="action-area">
+        <div class="action-area" v-if="!isSubmitted">
           <a-button 
             type="primary" 
             size="large" 
@@ -105,8 +92,7 @@ import {
   ArrowLeftOutlined, 
   ClockCircleOutlined, 
   CalendarOutlined, 
-  InboxOutlined,
-  DownloadOutlined
+  InboxOutlined
 } from '@ant-design/icons-vue'
 import assignmentApi from '@/api/assignment'
 import dayjs from 'dayjs'
@@ -121,9 +107,14 @@ const assignmentId = ref<number>(Number(route.params.id) || 0)
 const fileList = ref<any[]>([])
 const previousSubmission = ref<any>(null)
 
+// 判断是否已提交
+const isSubmitted = computed(() => {
+  return previousSubmission.value && previousSubmission.value.status === 1
+})
+
 // 判断是否可以提交
 const canSubmit = computed(() => {
-  return fileList.value.length > 0
+  return fileList.value.length > 0 && !isSubmitted.value
 })
 
 // 加载作业详情
@@ -131,30 +122,33 @@ const loadAssignmentDetail = async () => {
   try {
     loading.value = true
     const response = await assignmentApi.getStudentAssignmentDetail(assignmentId.value)
-    assignment.value = response
     
-    // 根据当前时间和截止时间判断状态
-    const now = new Date()
-    if (assignment.value.endTime && now > new Date(assignment.value.endTime)) {
-      assignment.value.status = 'completed' // 已截止
-    } else if (assignment.value.startTime && now < new Date(assignment.value.startTime)) {
-      assignment.value.status = 'pending' // 未开始
-    } else {
-      assignment.value.status = 'in_progress' // 进行中
-    }
-    
-    // 获取历史提交记录
-    try {
-      const submissionResponse = await assignmentApi.getStudentSubmission(assignmentId.value)
-      if (submissionResponse) {
-        previousSubmission.value = submissionResponse
+    if (response && response.code === 200 && response.data) {
+      // 确保正确获取作业信息
+      assignment.value = response.data.assignment
+      console.log('作业信息:', assignment.value)
+      
+      // 如果有提交记录，设置previousSubmission
+      if (response.data.submission) {
+        previousSubmission.value = response.data.submission
+        console.log('提交记录:', previousSubmission.value)
       }
-    } catch (error) {
-      console.error('获取历史提交记录失败:', error)
+      
+      // 根据当前时间和截止时间判断状态
+      const now = new Date()
+      if (assignment.value.endTime && now > new Date(assignment.value.endTime)) {
+        assignment.value.status = 'completed' // 已截止
+      } else if (assignment.value.startTime && now < new Date(assignment.value.startTime)) {
+        assignment.value.status = 'pending' // 未开始
+      } else {
+        assignment.value.status = 'in_progress' // 进行中
+      }
+    } else {
+      message.error('获取作业详情失败: ' + (response?.message || '未知错误'))
     }
   } catch (error) {
     console.error('获取作业详情失败:', error)
-    message.error('获取作业详情失败')
+    message.error('获取作业详情失败: ' + (error instanceof Error ? error.message : '未知错误'))
   } finally {
     loading.value = false
   }
@@ -163,41 +157,26 @@ const loadAssignmentDetail = async () => {
 // 上传前验证
 const beforeUpload: UploadProps['beforeUpload'] = (file) => {
   // 检查文件类型
-  const validTypes = [
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/pdf',
-    'application/zip',
-    'application/x-rar-compressed',
-    'application/x-7z-compressed'
-  ]
-  const isValidType = validTypes.includes(file.type)
-  if (!isValidType) {
-    message.error('只支持 .doc, .docx, .pdf, .zip, .rar, .7z 格式的文件!')
+  const isAcceptedType = /\.(jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx|ppt|pptx|zip|rar|txt)$/i.test(file.name);
+  if (!isAcceptedType) {
+    message.error('只支持常见文档、图片和压缩文件格式!');
+    return Upload.LIST_IGNORE;
   }
   
   // 检查文件大小
-  const isLt50M = file.size / 1024 / 1024 < 50
+  const isLt50M = file.size / 1024 / 1024 < 50;
   if (!isLt50M) {
-    message.error('文件大小不能超过50MB!')
+    message.error('文件大小不能超过50MB!');
+    return Upload.LIST_IGNORE;
   }
   
-  return isValidType && isLt50M ? true : Upload.LIST_IGNORE
+  console.log('文件通过验证:', file.name, file.type, file.size);
+  return isAcceptedType && isLt50M ? true : Upload.LIST_IGNORE;
 }
 
 // 处理上传状态变化
 const handleChange = (info: any) => {
   fileList.value = info.fileList.slice(-1)
-}
-
-// 下载文件
-const downloadFile = (url: string) => {
-  if (!url) {
-    message.error('文件链接无效')
-    return
-  }
-  
-  window.open(url, '_blank')
 }
 
 // 提交作业
@@ -215,21 +194,53 @@ const submitAssignment = async () => {
   try {
     submitting.value = true
     
+    // 确保文件有效
+    if (!fileList.value[0] || !fileList.value[0].originFileObj) {
+      message.error('无效的文件，请重新上传')
+      submitting.value = false
+      return
+    }
+    
     // 创建FormData
     const formData = new FormData()
     formData.append('file', fileList.value[0].originFileObj)
-    formData.append('assignmentId', assignmentId.value.toString())
+    
+    const fileName = fileList.value[0].name
+    console.log('开始提交文件:', assignmentId.value, fileName)
     
     // 调用API提交文件
-    await assignmentApi.submitAssignmentFile(assignmentId.value, formData)
+    const response = await assignmentApi.submitAssignmentFile(assignmentId.value, formData)
     
-    message.success('作业提交成功')
-    
-    // 刷新页面或重新加载数据
-    loadAssignmentDetail()
+    if (response && response.code === 200) {
+      message.success('作业提交成功')
+      
+      // 创建本地提交记录对象（如果不存在）
+      if (!previousSubmission.value) {
+        previousSubmission.value = {
+          assignmentId: assignmentId.value,
+          status: 1,  // 设置为已提交状态
+          submitTime: new Date(),
+          fileName: fileName
+        }
+      } else {
+        // 更新现有提交记录
+        previousSubmission.value.status = 1
+        previousSubmission.value.submitTime = new Date()
+        previousSubmission.value.fileName = fileName
+      }
+      
+      // 清空文件列表
+      fileList.value = []
+      
+      // 重新加载作业详情
+      await loadAssignmentDetail()
+    } else {
+      console.error('提交失败响应:', response)
+      message.error('提交失败: ' + (response?.message || '未知错误'))
+    }
   } catch (error) {
     console.error('提交作业失败:', error)
-    message.error('提交作业失败，请重试')
+    message.error('提交作业失败: ' + (error instanceof Error ? error.message : '未知错误'))
   } finally {
     submitting.value = false
   }
@@ -267,14 +278,24 @@ const getStatusColor = (status: string) => {
 }
 
 onMounted(() => {
-  loadAssignmentDetail()
+  console.log('FileSubmit组件加载，任务ID:', route.params.id)
+  assignmentId.value = Number(route.params.id) || 0
+  console.log('设置作业ID:', assignmentId.value)
+  
+  // 确保加载作业详情
+  if (assignmentId.value > 0) {
+    loadAssignmentDetail()
+  } else {
+    message.error('无效的作业ID')
+    console.error('无效的作业ID:', route.params)
+  }
 })
 </script>
 
 <style scoped>
 .file-submit-page {
   padding: 24px;
-  max-width: 1000px;
+  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -346,21 +367,12 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-.upload-tips {
-  color: #666;
-  font-size: 14px;
-}
-
-.upload-tips ul {
-  padding-left: 20px;
-  margin: 0;
-}
-
 .submission-section {
   margin-bottom: 32px;
   border: 1px solid #f0f0f0;
   border-radius: 4px;
   padding: 16px;
+  background-color: #f6ffed;
 }
 
 .record-item {

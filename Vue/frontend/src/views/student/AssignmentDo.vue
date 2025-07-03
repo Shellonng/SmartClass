@@ -340,7 +340,7 @@ const formatDateTime = (date: string | Date) => {
   return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
 
-// 获取题目类型文本
+// 获取题目类型的文本
 const getQuestionTypeText = (type: string) => {
   const typeMap: Record<string, string> = {
     'single': '单选题',
@@ -349,36 +349,61 @@ const getQuestionTypeText = (type: string) => {
     'fill': '填空题',
     'short': '简答题'
   }
-  return typeMap[type] || '其他题型'
+  return typeMap[type] || '未知题型'
 }
 
-// 获取题目类型颜色
+// 获取题目类型的颜色
 const getQuestionTypeColor = (type: string) => {
   const colorMap: Record<string, string> = {
     'single': 'blue',
     'multiple': 'purple',
     'judge': 'green',
     'fill': 'orange',
-    'short': 'cyan'
+    'short': 'red'
   }
   return colorMap[type] || 'default'
 }
 
-// 页面离开前确认
-const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-  e.preventDefault()
-  e.returnValue = '离开页面将丢失未保存的答案，确定要离开吗？'
-}
+// 保存答题进度的计时器
+let saveTimer: number | null = null
 
+// 页面加载时初始化数据
 onMounted(() => {
-  loadAssignmentData()
-  // 添加页面离开确认
-  window.addEventListener('beforeunload', handleBeforeUnload)
+  console.log('答题页面已加载，作业ID:', assignmentId.value)
+  
+  if (!assignmentId.value) {
+    console.error('未找到作业ID')
+    message.error('加载失败：未找到作业ID')
+    setTimeout(() => {
+      router.push('/student/assignments')
+    }, 2000)
+    return
+  }
+  
+  // 初次加载数据
+  loadAssignmentData().catch(error => {
+    console.error('初始化加载失败:', error)
+    message.error('加载作业数据失败，请返回重试')
+  })
+  
+  // 设置定时保存
+  saveTimer = window.setInterval(() => {
+    if (Object.keys(answers.value).length > 0) {
+      saveAnswersToLocal()
+      console.log('自动保存答案成功:', new Date().toLocaleTimeString())
+    }
+  }, 30000) // 每30秒自动保存一次
 })
 
+// 组件销毁前清理定时器
 onBeforeUnmount(() => {
-  // 移除页面离开确认
-  window.removeEventListener('beforeunload', handleBeforeUnload)
+  if (saveTimer) {
+    clearInterval(saveTimer)
+    saveTimer = null
+  }
+  
+  // 保存当前进度
+  saveAnswersToLocal()
 })
 </script>
 

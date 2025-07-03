@@ -51,15 +51,12 @@
           <span>我的课程</span>
         </a-menu-item>
         
-        <a-sub-menu key="assignments">
+        <a-menu-item key="assignments">
           <template #icon>
             <FileTextOutlined />
           </template>
-          <template #title>作业中心</template>
-          <a-menu-item key="assignments-todo">待完成</a-menu-item>
-          <a-menu-item key="assignments-completed">已完成</a-menu-item>
-          <a-menu-item key="assignments-all">全部作业</a-menu-item>
-        </a-sub-menu>
+          <span>任务中心</span>
+        </a-menu-item>
         
         <a-menu-item key="grades">
           <template #icon>
@@ -83,7 +80,6 @@
           </template>
           <template #title>学习资源</template>
           <a-menu-item key="resources-library">资源库</a-menu-item>
-          <a-menu-item key="resources-favorites">我的收藏</a-menu-item>
         </a-sub-menu>
         
         <a-menu-item key="schedule">
@@ -118,18 +114,6 @@
         </div>
         
         <div class="header-right">
-          <!-- 学习进度 -->
-          <div class="progress-info">
-            <span class="progress-label">今日学习进度</span>
-            <a-progress
-              :percent="todayProgress"
-              :size="[100, 6]"
-              :show-info="false"
-              stroke-color="#52c41a"
-            />
-            <span class="progress-text">{{ todayProgress }}%</span>
-          </div>
-          
           <!-- 通知 -->
           <a-badge :count="notificationCount" class="notification-badge">
             <a-button type="text" shape="circle" @click="showNotifications">
@@ -270,6 +254,7 @@ import {
   ReadOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
+import { emitter, APP_EVENTS } from '@/App.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -373,14 +358,11 @@ function handleMenuClick({ key }: { key: string }) {
   const routeMap: Record<string, string> = {
     'dashboard': '/student',
     'courses': '/student/courses',
-    'assignments-todo': '/student/assignments/todo',
-    'assignments-completed': '/student/assignments/completed',
-    'assignments-all': '/student/assignments',
+    'assignments': '/student/assignments',
     'grades': '/student/grades',
     'classes-info': '/student/classes/info',
     'classes-members': '/student/classes/members',
     'resources-library': '/student/resources',
-    'resources-favorites': '/student/resources/favorites',
     'schedule': '/student/schedule',
     'ai-tutor': '/student/ai-tutor'
   }
@@ -462,12 +444,19 @@ onMounted(() => {
   setTimeout(() => {
     showAITooltipTemporarily()
   }, 5000)
+
+  // 监听侧边栏收起事件
+  emitter.on(APP_EVENTS.COLLAPSE_SIDEBAR, () => {
+    collapsed.value = true
+  })
 })
 
 onUnmounted(() => {
   if (studyTimer) {
     clearInterval(studyTimer)
   }
+  
+  // 移除事件监听
 })
 </script>
 
@@ -617,29 +606,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 16px;
-}
-
-.progress-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: #f6ffed;
-  border-radius: 8px;
-  border: 1px solid #b7eb8f;
-}
-
-.progress-label {
-  font-size: 12px;
-  color: #52c41a;
-  white-space: nowrap;
-}
-
-.progress-text {
-  font-size: 12px;
-  color: #52c41a;
-  font-weight: 500;
-  min-width: 30px;
 }
 
 .notification-badge {

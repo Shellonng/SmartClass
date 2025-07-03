@@ -358,4 +358,72 @@ public class StudentCourseController {
             return Result.error("获取课程任务失败: " + e.getMessage());
         }
     }
+
+    /**
+     * 获取学生所有已选课程的资源列表
+     * @return 资源列表
+     */
+    @GetMapping("/resources")
+    public Result getAllStudentResources() {
+        logger.info("获取学生所有课程资源");
+        
+        try {
+            // 获取当前登录用户
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+            
+            // 获取用户ID
+            User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+            if (user == null) {
+                return Result.error("用户不存在");
+            }
+            
+            // 获取学生ID
+            Student student = studentMapper.selectOne(new LambdaQueryWrapper<Student>().eq(Student::getUserId, user.getId()));
+            if (student == null) {
+                return Result.error("学生信息不存在");
+            }
+            
+            // 从course_student表中查询该学生已选课程的课程ID
+            LambdaQueryWrapper<CourseStudent> csQueryWrapper = new LambdaQueryWrapper<>();
+            csQueryWrapper.eq(CourseStudent::getStudentId, student.getId());
+            List<CourseStudent> courseStudents = courseStudentMapper.selectList(csQueryWrapper);
+            
+            // 如果学生没有选课
+            if (courseStudents.isEmpty()) {
+                return Result.success(Collections.emptyList());
+            }
+            
+            // 提取课程ID列表
+            List<Long> courseIds = courseStudents.stream()
+                .map(CourseStudent::getCourseId)
+                .collect(Collectors.toList());
+            
+            logger.info("查询到学生选课ID: {}", courseIds);
+            
+            // 存储所有课程的资源
+            List<CourseResourceDTO> allResources = new ArrayList<>();
+            
+            // 依次获取每个课程的资源
+            for (Long courseId : courseIds) {
+                List<CourseResourceDTO> resources = courseResourceService.listResources(courseId);
+                if (resources != null && !resources.isEmpty()) {
+                    // 设置课程名称
+                    Course course = courseMapper.selectById(courseId);
+                    if (course != null) {
+                        for (CourseResourceDTO resource : resources) {
+                            // 确保课程ID和课程名称被正确设置
+                            resource.setCourseId(courseId);
+                        }
+                    }
+                    allResources.addAll(resources);
+                }
+            }
+            
+            return Result.success(allResources);
+        } catch (Exception e) {
+            logger.error("获取学生所有课程资源失败: {}", e.getMessage(), e);
+            return Result.error("获取学生所有课程资源失败: " + e.getMessage());
+        }
+    }
 } 

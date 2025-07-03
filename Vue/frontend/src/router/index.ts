@@ -120,7 +120,9 @@ const CompletedAssignments = () => import('@/views/student/assignments/Completed
 const ClassInfo = () => import('@/views/student/classes/ClassInfo.vue')
 const ClassMembers = () => import('@/views/student/classes/ClassMembers.vue')
 const ResourceLibrary = () => import('@/views/student/resources/ResourceLibrary.vue')
-const Favorites = () => import('@/views/student/resources/Favorites.vue')
+
+// 添加路由引用
+const StudentSectionDetail = () => import('@/views/teacher/SectionDetail.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -268,21 +270,21 @@ const router = createRouter({
       ]
     },
 
-    // 考试详情页面(学生端) - 使用独立布局
+    // 文件提交型作业(学生端) - 使用独立布局
     {
-      path: '/student/exams/:id',
-      name: 'StudentExamDetail',
+      path: '/student/assignments/file/:id',
+      name: 'StudentFileAssignmentDetail',
       component: CourseLayout,
       meta: { requiresAuth: true, role: 'STUDENT' },
       children: [
         {
           path: '',
-          component: StudentExamDetail,
-          props: route => ({ id: Number(route.params.id) })
+          component: StudentAssignmentDetail,
+          props: route => ({ id: Number(route.params.id), isFileMode: true })
         },
         {
-          path: 'do',
-          component: () => import('@/views/student/ExamDo.vue'),
+          path: 'submit',
+          component: () => import('@/views/student/FileSubmit.vue'),
           props: route => ({ id: Number(route.params.id) })
         }
       ]
@@ -308,21 +310,21 @@ const router = createRouter({
       ]
     },
 
-    // 文件提交型作业(学生端) - 使用独立布局
+    // 考试详情页面(学生端) - 使用独立布局
     {
-      path: '/student/assignments/file/:id',
-      name: 'StudentFileAssignmentDetail',
+      path: '/student/exams/:id',
+      name: 'StudentExamDetail',
       component: CourseLayout,
       meta: { requiresAuth: true, role: 'STUDENT' },
       children: [
         {
           path: '',
-          component: StudentAssignmentDetail,
-          props: route => ({ id: Number(route.params.id), isFileMode: true })
+          component: StudentExamDetail,
+          props: route => ({ id: Number(route.params.id) })
         },
         {
-          path: 'submit',
-          component: () => import('@/views/student/FileSubmit.vue'),
+          path: 'do',
+          component: () => import('@/views/student/ExamDo.vue'),
           props: route => ({ id: Number(route.params.id) })
         }
       ]
@@ -500,6 +502,13 @@ const router = createRouter({
           props: true
         },
         {
+          path: 'courses/:courseId/sections/:sectionId',
+          name: 'StudentSectionDetail',
+          component: StudentSectionDetail,
+          props: true,
+          meta: { requiresAuth: true, role: 'STUDENT', viewOnly: true }
+        },
+        {
           path: 'courses/:id/video/:videoId',
           name: 'StudentVideoLearning',
           component: StudentVideoLearning,
@@ -547,12 +556,33 @@ const router = createRouter({
           component: StudentAssignmentDetail,
           props: true
         },
+        // 作业答题页面重定向到考试路径，统一使用/student/exams/:id/do
+        {
+          path: 'assignments/:id/do',
+          redirect: to => `/student/exams/${to.params.id}/do`
+        },
+        {
+          path: 'assignments/file/:id/submit',
+          name: 'StudentFileSubmit',
+          component: () => import('@/views/student/FileSubmit.vue'),
+          props: true,
+          meta: { requiresAuth: true, role: 'STUDENT' }
+        },
         
         // 考试列表
         {
           path: 'exams',
           name: 'StudentExams',
           component: StudentDashboard,  // 临时使用Dashboard作为占位符
+        },
+        
+        // 添加考试答题页面路由，使用相同的AssignmentDo组件
+        {
+          path: 'exams/:id/do',
+          name: 'StudentExamDo',
+          component: () => import('@/views/student/AssignmentDo.vue'),
+          props: true,
+          meta: { requiresAuth: true, role: 'STUDENT' }
         },
         
         // 错题集
@@ -591,11 +621,6 @@ const router = createRouter({
               path: 'library',
               name: 'ResourceLibrary',
               component: ResourceLibrary
-            },
-            {
-              path: 'favorites',
-              name: 'Favorites',
-              component: Favorites
             }
           ]
         },
@@ -674,7 +699,19 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
-      redirect: '/home'
+      redirect: (to) => {
+        console.error('路由未找到:', to.path)
+        console.log('未匹配路由的完整信息:', to)
+        // 如果URL中包含student或teacher，则重定向到相应的首页
+        if (to.path.includes('/student')) {
+          return '/student/dashboard'
+        } else if (to.path.includes('/teacher')) {
+          return '/teacher/dashboard'
+        } else {
+          // 否则重定向到通用首页
+          return '/home'
+        }
+      }
     }
   ]
 })

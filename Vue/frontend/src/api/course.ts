@@ -874,3 +874,19 @@ export async function getStudentCourseTasks(courseId: number): Promise<any[]> {
     throw error
   }
 }
+
+// 获取学生所有课程的资源列表
+export async function getAllStudentResources(): Promise<CourseResource[]> {
+  console.log('调用API: getAllStudentResources')
+  try {
+    const response = await axios.get('/api/student/courses/resources')
+    if (response.data && response.data.code === 200) {
+      return response.data.data
+    } else {
+      throw new Error(response.data?.message || '获取所有课程资源失败')
+    }
+  } catch (error) {
+    console.error('获取学生所有课程资源API错误:', error)
+    throw error
+  }
+}
