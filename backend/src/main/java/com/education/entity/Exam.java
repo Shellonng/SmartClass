@@ -84,4 +84,9 @@ public class Exam {
      * 更新时间
      */
     private LocalDateTime updateTime;
+    
+    /**
+     * 参考答案（用于智能批改）
+     */
+    private String referenceAnswer;
 } 

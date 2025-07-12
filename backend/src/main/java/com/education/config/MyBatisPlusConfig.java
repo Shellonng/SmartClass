@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
+import cn.hutool.core.net.NetUtil;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
@@ -47,11 +48,11 @@ public class MyBatisPlusConfig {
     
     /**
      * 自定义ID生成器
-     * 使用数据库自增ID而不是雪花算法
+     * 使用雪花算法生成分布式唯一ID
      */
     @Bean
     public IdentifierGenerator identifierGenerator() {
-        return new DefaultIdentifierGenerator();
+        return new DefaultIdentifierGenerator(NetUtil.getLocalhost());
     }
     
     /**

@@ -107,11 +107,8 @@ export default {
    */
   unpublishAssignment(id: number): Promise<ApiResponse> {
     return request({
-      url: `/api/teacher/assignments/${id}`,
-      method: 'put',
-      data: {
-        status: 0 // 将状态设置为0，表示未发布
-      }
+      url: `/api/teacher/assignments/${id}/unpublish`,
+      method: 'put'
     })
   },
 

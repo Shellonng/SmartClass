@@ -406,7 +406,7 @@ const courseId = computed(() => {
 // 处理视频URL
 const getVideoUrl = computed(() => {
   if (!section.value?.videoUrl) return ''
-  return `http://localhost:8080/resource/video/${section.value.videoUrl}`
+  return `/resource/video/${section.value.videoUrl}`
 })
 
 let player: any = null
@@ -645,10 +645,10 @@ const handleBeforeUpload = async (file: File) => {
       return false;
     }
     
-    // 检查文件大小（限制为500MB）
-    const maxSize = 500 * 1024 * 1024;
+    // 检查文件大小（限制为2GB）
+    const maxSize = 2 * 1024 * 1024 * 1024; // 2GB
     if (file.size > maxSize) {
-      message.error('视频文件大小不能超过500MB！');
+      message.error('视频文件大小不能超过2GB！');
       return false;
     }
 
@@ -657,13 +657,13 @@ const handleBeforeUpload = async (file: File) => {
     
     try {
       const response = await uploadSectionVideo(Number(currentSectionId.value), file);
-    if (response.data.code === 200) {
+      if (response.data.code === 200) {
         message.success('视频上传成功');
         // 重新加载小节数据
         initializeData();
-    } else {
+      } else {
         message.error(response.data.message || '视频上传失败');
-    }
+      }
     } finally {
       hide();
     }
@@ -685,7 +685,7 @@ const removeVideo = async () => {
     const updatedSection = {
       ...sectionForm.value,
       chapterId: section.value.chapterId,
-      videoUrl: undefined
+      videoUrl: ''  // 使用空字符串
     } as Section;
     const response = await updateSection(currentSectionId.value, updatedSection);
     if (response.data.code === 200) {
@@ -708,8 +708,12 @@ const handleSectionClick = (section: any) => {
   // 获取当前课程ID
   const courseId = route.params.courseId || '0'
   
-  // 根据角色跳转到不同路径
-  if (isViewOnly.value) {
+  // 当前角色和路径信息
+  const currentPath = route.path
+  const isStudentPath = currentPath.includes('/student/')
+  
+  // 根据当前路径判断跳转
+  if (isStudentPath || isViewOnly.value) {
     // 学生端
     router.push(`/student/courses/${courseId}/sections/${section.id}`)
   } else {

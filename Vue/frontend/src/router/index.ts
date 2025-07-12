@@ -1,7 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw, type NavigationGuardNext, type RouteLocationNormalized } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import '@/types/router.d.ts'
 
-// 为路由元数据添加类型声明
+// 确保类型声明被正确应用
 declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean
@@ -27,6 +28,9 @@ const CourseList = () => import('@/views/CourseList.vue')
 
 // 教师端页面
 const TeacherDashboard = () => import('@/views/teacher/Dashboard.vue')
+
+// 教师端 - 个人资料
+const TeacherProfile = () => import('../views/teacher/Profile.vue')
 
 // 教师端 - 班级管理
 const TeacherClasses = () => import('@/views/teacher/Classes.vue')
@@ -62,13 +66,20 @@ const TeacherResourceDetail = () => import('@/views/teacher/ResourceDetail.vue')
 
 // 教师端 - 知识图谱
 const TeacherKnowledgeGraph = () => import('@/views/teacher/KnowledgeGraph.vue')
+const TeacherKnowledgeGraphGenerator = () => import('@/views/teacher/KnowledgeGraphGenerator.vue')
+
+// 教师端 - 智能组卷
+const TeacherSmartPaperGeneration = () => import('@/views/teacher/SmartPaperGeneration.vue')
+
+// 教师端 - 智能批改
+const TeacherSmartGrading = () => import('@/views/teacher/SmartGrading.vue')
 
 // 教师端 - 题库管理
 const TeacherQuestionBank = () => import('@/views/teacher/QuestionBank.vue')
 const TeacherQuestionDetail = () => import('@/views/teacher/QuestionDetail.vue')
 
-// 教师端 - AI工具
-const TeacherAITools = () => import('@/views/teacher/AITools.vue')
+// 教师端 - 数据分析
+const TeacherDataAnalysis = () => import('@/views/teacher/DataAnalysis.vue')
 
 // 学生端页面
 const StudentDashboard = () => import('@/views/student/Dashboard.vue')
@@ -81,6 +92,7 @@ const StudentVideoLearning = () => import('@/views/student/VideoLearning.vue')
 // 学生端 - 作业管理
 const StudentAssignments = () => import('@/views/student/Assignments.vue')
 const StudentAssignmentDetail = () => import('@/views/student/AssignmentDetail.vue')
+const StudentFileSubmission = () => import('@/views/student/FileSubmission.vue')
 
 // 学生端 - 错题集
 const StudentWrongQuestions = () => import('@/views/student/WrongQuestions.vue')
@@ -90,6 +102,7 @@ const StudentLearningRecords = () => import('@/views/student/LearningRecords.vue
 
 // 学生端 - 考试管理
 const StudentExamDetail = () => import('@/views/student/ExamDetail.vue')
+const StudentExamDo = () => import('@/views/student/ExamDo.vue')
 
 // 学生端 - 成绩查看
 const StudentGrades = () => import('@/views/student/Grades.vue')
@@ -100,14 +113,21 @@ const StudentResourceDetail = () => import('@/views/student/ResourceDetail.vue')
 
 // 学生端 - 知识图谱
 const StudentKnowledgeGraph = () => import('@/views/student/KnowledgeGraph.vue')
+const StudentKnowledgeGraphViewer = () => import('@/views/student/KnowledgeGraphViewer.vue')
 
 // 学生端 - 能力图谱
 const StudentAbilityGraph = () => import('@/views/student/AbilityGraph.vue')
 
+// 学生端 - 个性化练习
+const StudentPersonalizedPractice = () => import('@/views/student/PersonalizedPractice.vue')
+
+// 学生端 - 个性化学习路径
+const StudentLearningPathway = () => import('@/views/student/LearningPathway.vue')
+
 // 学生端 - AI学习助手
 const StudentAITutor = () => import('@/views/student/AITutor.vue')
 
-// 学生端 - 其他页面
+// 学生端 - 班级管理
 const StudentClasses = () => import('@/views/student/Classes.vue')
 const StudentProfile = () => import('@/views/student/Profile.vue')
 const StudentSettings = () => import('@/views/student/Settings.vue')
@@ -115,6 +135,7 @@ const StudentSchedule = () => import('@/views/student/Schedule.vue')
 
 // 子页面组件
 const AllAssignments = () => import('@/views/student/assignments/AllAssignments.vue')
+const TeacherAllAssignments = () => import('../views/teacher/assignments/AllAssignments.vue')
 const TodoAssignments = () => import('@/views/student/assignments/TodoAssignments.vue')
 const CompletedAssignments = () => import('@/views/student/assignments/CompletedAssignments.vue')
 const ClassInfo = () => import('@/views/student/classes/ClassInfo.vue')
@@ -124,661 +145,594 @@ const ResourceLibrary = () => import('@/views/student/resources/ResourceLibrary.
 // 添加路由引用
 const StudentSectionDetail = () => import('@/views/teacher/SectionDetail.vue')
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      redirect: '/home'
-    },
-    {
-      path: '/home',
-      name: 'Home',
-      component: HomePage,
-      meta: { requiresAuth: false }
-    },
-    
-    // 公共课程列表
-    {
-      path: '/courses',
-      name: 'CourseList',
-      component: CourseList,
-      meta: { requiresAuth: false }
-    },
-    
-    // 课程详情页面
-    {
-      path: '/courses/:id',
-      name: 'CourseDetail',
-      component: CourseLayout,
-      meta: { requiresAuth: false },
-      children: [
-        {
-          path: '',
-          component: StudentCourseDetail,
-          props: true
-        }
-      ]
-    },
-    
-    // 认证相关路由
-    {
-          path: '/login',
-          name: 'Login',
-          component: Login,
-      meta: { requiresAuth: false, mode: 'login' }
-        },
-        {
-          path: '/register',
-          name: 'Register',
-      component: Login,
-      meta: { requiresAuth: false, mode: 'register' }
-    },
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    redirect: '/home'
+  },
+  {
+    path: '/home',
+    name: 'Home',
+    component: HomePage,
+    meta: { requiresAuth: false }
+  },
+  
+  // 公共课程列表
+  {
+    path: '/courses',
+    name: 'CourseList',
+    component: CourseList,
+    meta: { requiresAuth: false }
+  },
+  
+  // 课程详情页面
+  {
+    path: '/courses/:id',
+    name: 'CourseDetail',
+    component: CourseLayout,
+    meta: { requiresAuth: false },
+    children: [
+      {
+        path: '',
+        component: StudentCourseDetail,
+        props: true
+      }
+    ]
+  },
+  
+  // 认证相关路由
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login,
+    meta: { requiresAuth: false, mode: 'login' }
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: Login,
+    meta: { requiresAuth: false, mode: 'register' }
+  },
 
-    // 课程章节页面 - 使用独立布局
-    {
-      path: '/teacher/courses/:courseId/sections/:sectionId',
-      name: 'TeacherSectionDetail',
-      component: CourseLayout,
-      meta: { requiresAuth: true, role: 'TEACHER' },
-      children: [
-        {
-          path: '',
-          component: TeacherSectionDetail,
-          props: true
-        }
-      ]
-    },
-    
-    // 课程题库页面 - 使用独立布局
-    {
-      path: '/teacher/courses/:courseId/question-bank',
-      name: 'TeacherCourseQuestionBank',
-      component: CourseLayout,
-      meta: { requiresAuth: true, role: 'TEACHER' },
-      children: [
-        {
-          path: '',
-          component: TeacherQuestionBank,
-          props: route => ({ courseId: Number(route.params.courseId) })
-        }
-      ]
-    },
-    
-    // 课程题目详情页面
-    {
-      path: '/teacher/courses/:courseId/question-bank/:id',
-      name: 'TeacherCourseQuestionDetail',
-      component: CourseLayout,
-      meta: { requiresAuth: true, role: 'TEACHER' },
-      children: [
-        {
-          path: '',
-          component: TeacherQuestionDetail,
-          props: route => ({ 
-            id: Number(route.params.id),
-            courseId: Number(route.params.courseId)
-          })
-        }
-      ]
-    },
+  // 课程章节页面 - 使用独立布局
+  {
+    path: '/teacher/courses/:courseId/sections/:sectionId',
+    name: 'TeacherSectionDetail',
+    component: CourseLayout,
+    meta: { requiresAuth: true, role: 'TEACHER' },
+    children: [
+      {
+        path: '',
+        component: TeacherSectionDetail,
+        props: true
+      }
+    ]
+  },
 
-    // 教师考试详情页面 - 使用独立布局
-    {
-      path: '/teacher/exams/:id',
-      name: 'TeacherExamDetail',
-      component: CourseLayout,
-      meta: { requiresAuth: true, role: 'TEACHER' },
-      children: [
-        {
-          path: '',
-          component: TeacherExamDetail,
-          props: route => ({ id: Number(route.params.id) })
-        }
-      ]
-    },
+  // 学生章节页面
+  {
+    path: '/student/courses/:courseId/sections/:sectionId',
+    name: 'StudentSectionDetail',
+    component: CourseLayout,
+    meta: { requiresAuth: true, role: 'STUDENT', viewOnly: true },
+    children: [
+      {
+        path: '',
+        component: StudentSectionDetail,
+        props: true
+      }
+    ]
+  },
 
-    // 教师作业详情页面 - 使用独立布局
-    {
-      path: '/teacher/assignments/:id',
-      name: 'TeacherAssignmentDetail',
-      component: CourseLayout,
-      meta: { requiresAuth: true, role: 'TEACHER' },
-      children: [
-        {
-          path: '',
-          component: TeacherAssignmentDetail,
-          props: route => ({ id: Number(route.params.id) })
-        },
-        {
-          path: 'edit',
-          component: TeacherExamDetail, // 复用考试编辑组件
-          props: route => ({ 
-            id: Number(route.params.id),
-            isAssignment: true // 标记为作业模式
-          })
-        },
-        {
-          path: 'detail',
-          component: TeacherExamDetail, // 复用考试详情组件
-          props: route => ({ 
-            id: Number(route.params.id),
-            isAssignment: true, // 标记为作业模式
-            viewOnly: true // 标记为查看模式
-          })
-        }
-      ]
-    },
-
-    // 文件提交型作业(学生端) - 使用独立布局
-    {
-      path: '/student/assignments/file/:id',
-      name: 'StudentFileAssignmentDetail',
-      component: CourseLayout,
-      meta: { requiresAuth: true, role: 'STUDENT' },
-      children: [
-        {
-          path: '',
-          component: StudentAssignmentDetail,
-          props: route => ({ id: Number(route.params.id), isFileMode: true })
-        },
-        {
-          path: 'submit',
-          component: () => import('@/views/student/FileSubmit.vue'),
-          props: route => ({ id: Number(route.params.id) })
-        }
-      ]
-    },
-
-    // 作业详情页面(学生端) - 使用独立布局
-    {
-      path: '/student/assignments/:id',
-      name: 'StudentAssignmentDetail',
-      component: CourseLayout,
-      meta: { requiresAuth: true, role: 'STUDENT' },
-      children: [
-        {
-          path: '',
-          component: StudentAssignmentDetail,
-          props: route => ({ id: Number(route.params.id) })
-        },
-        {
-          path: 'do',
-          component: () => import('@/views/student/AssignmentDo.vue'),
-          props: route => ({ id: Number(route.params.id) })
-        }
-      ]
-    },
-
-    // 考试详情页面(学生端) - 使用独立布局
-    {
-      path: '/student/exams/:id',
-      name: 'StudentExamDetail',
-      component: CourseLayout,
-      meta: { requiresAuth: true, role: 'STUDENT' },
-      children: [
-        {
-          path: '',
-          component: StudentExamDetail,
-          props: route => ({ id: Number(route.params.id) })
-        },
-        {
-          path: 'do',
-          component: () => import('@/views/student/ExamDo.vue'),
-          props: route => ({ id: Number(route.params.id) })
-        }
-      ]
-    },
-
-    // 教师端路由
-    {
-      path: '/teacher',
-      component: TeacherLayout,
-      meta: { requiresAuth: true, role: 'TEACHER' },
-      children: [
-        {
-          path: '',
-          redirect: '/teacher/dashboard'
-        },
-        {
-          path: 'dashboard',
-          name: 'TeacherDashboard',
-          component: TeacherDashboard
-        },
-        
-        // 班级管理
-        {
-          path: 'classes',
-          name: 'TeacherClasses',
-          component: TeacherClasses
-        },
-        {
-          path: 'classes/:id',
-          name: 'TeacherClassDetail',
-          component: TeacherClassDetail,
-          props: true
-        },
-        
-        // 学生管理
-        {
-          path: 'students',
-          name: 'TeacherStudents',
-          component: TeacherStudents
-        },
-        {
-          path: 'students/:id',
-          name: 'TeacherStudentDetail',
-          component: TeacherStudentDetail,
-          props: true
-        },
-        
-        // 课程管理
-        {
-          path: 'courses',
-          name: 'TeacherCourses',
-          component: TeacherCourses
-        },
-        {
-          path: 'courses/create',
-          name: 'TeacherCourseCreate',
-          component: TeacherCourseDetail,
-          props: { mode: 'create' }
-        },
-        {
-          path: 'courses/:id',
-          name: 'TeacherCourseDetail',
-          component: TeacherCourseDetail,
-          props: true
-        },
-        {
-          path: 'courses/chapters',
-          name: 'TeacherCourseChapters',
-          component: TeacherCourses,
-          props: { mode: 'chapters' }
-        },
-        
-        // 任务管理
-        {
-          path: 'tasks',
-          name: 'TeacherTasks',
-          component: TeacherTasks
-        },
-        {
-          path: 'tasks/:id',
-          name: 'TeacherTaskDetail',
-          component: TeacherTaskDetail,
-          props: true
-        },
-        
-        // 考试管理
-        {
-          path: 'exams',
-          name: 'TeacherExams',
-          component: TeacherExams
-        },
-        
-        // 作业管理
-        {
-          path: 'assignments',
-          name: 'TeacherAssignments',
-          component: TeacherAssignments
-        },
-        
-        // 成绩管理
-        {
-          path: 'grades',
-          name: 'TeacherGrades',
-          component: TeacherGrades
-        },
-        
-        // 资源管理
-        {
-          path: 'resources',
-          name: 'TeacherResources',
-          component: TeacherResources
-        },
-        {
-          path: 'resources/:id',
-          name: 'TeacherResourceDetail',
-          component: TeacherResourceDetail,
-          props: true
-        },
-        
-        // 知识图谱
-        {
-          path: 'knowledge-graph',
-          name: 'TeacherKnowledgeGraph',
-          component: TeacherKnowledgeGraph
-        },
-        
-        // 题库管理
-        {
-          path: 'question-bank',
-          name: 'TeacherQuestionBank',
-          component: TeacherQuestionBank
-        },
-        {
-          path: 'question-bank/:id',
-          name: 'TeacherQuestionDetail',
-          component: TeacherQuestionDetail,
-          props: true
-        },
-        
-        // AI工具
-        {
-          path: 'ai-tools',
-          name: 'TeacherAITools',
-          component: TeacherAITools
-        }
-      ]
-    },
-
-    // 学生端路由
-    {
-      path: '/student',
-      component: StudentLayout,
-      meta: { requiresAuth: true, role: 'STUDENT' },
-      children: [
-        {
-          path: '',
-          redirect: '/student/dashboard'
-        },
-        {
-          path: 'dashboard',
-          name: 'StudentDashboard',
-          component: StudentDashboard
-        },
-        
-        // 课程管理
-        {
-          path: 'courses',
-          name: 'StudentCourses',
-          component: StudentCourses // 使用学生端课程组件
-        },
-        {
-          path: 'courses/:id',
-          name: 'StudentCourseDetail',
-          component: StudentCourseDetail,
-          props: true
-        },
-        {
-          path: 'courses/:courseId/sections/:sectionId',
-          name: 'StudentSectionDetail',
-          component: StudentSectionDetail,
-          props: true,
-          meta: { requiresAuth: true, role: 'STUDENT', viewOnly: true }
-        },
-        {
-          path: 'courses/:id/video/:videoId',
-          name: 'StudentVideoLearning',
-          component: StudentVideoLearning,
-          props: true
-        },
-        
-        // 任务管理
-        {
-          path: 'tasks',
-          name: 'StudentTasks',
-          component: StudentDashboard, // 临时使用Dashboard作为占位符
-        },
-        
-        // 作业管理
-        {
-          path: 'assignments',
-          name: 'StudentAssignments',
-          component: StudentAssignments,
-          children: [
-            {
-              path: '',
-              name: 'StudentAssignmentsDefault',
-              redirect: '/student/assignments/all'
-            },
-            {
-              path: 'all',
-              name: 'AllAssignments',
-              component: AllAssignments
-            },
-            {
-              path: 'todo',
-              name: 'TodoAssignments',
-              component: TodoAssignments
-            },
-            {
-              path: 'completed',
-              name: 'CompletedAssignments',
-              component: CompletedAssignments
+  // 教师端路由
+  {
+    path: '/teacher',
+    component: TeacherLayout,
+    meta: { requiresAuth: true, role: 'TEACHER' },
+    children: [
+      {
+        path: '',
+        redirect: '/teacher/dashboard'
+      },
+      {
+        path: 'dashboard',
+        name: 'TeacherDashboard',
+        component: TeacherDashboard
+      },
+      
+      // 个人资料
+      {
+        path: 'profile',
+        name: 'TeacherProfile',
+        component: TeacherProfile
+      },
+      
+      // 班级管理
+      {
+        path: 'classes',
+        name: 'TeacherClasses',
+        component: TeacherClasses
+      },
+      {
+        path: 'classes/:id',
+        name: 'TeacherClassDetail',
+        component: TeacherClassDetail,
+        props: true
+      },
+      
+      // 学生管理
+      {
+        path: 'students',
+        name: 'TeacherStudents',
+        component: TeacherStudents
+      },
+      {
+        path: 'students/:id',
+        name: 'TeacherStudentDetail',
+        component: TeacherStudentDetail,
+        props: true
+      },
+      
+      // 课程管理
+      {
+        path: 'courses',
+        name: 'TeacherCourses',
+        component: TeacherCourses
+      },
+      {
+        path: 'courses/:id',
+        name: 'TeacherCourseDetail',
+        component: TeacherCourseDetail,
+        props: true
+      },
+      
+      // 任务管理
+      {
+        path: 'tasks',
+        name: 'TeacherTasks',
+        component: TeacherTasks
+      },
+      {
+        path: 'tasks/:id',
+        name: 'TeacherTaskDetail',
+        component: TeacherTaskDetail,
+        props: true
+      },
+      
+      // 考试管理
+      {
+        path: 'exams',
+        name: 'TeacherExams',
+        component: TeacherExams
+      },
+      {
+        path: 'exams/:id',
+        name: 'TeacherExamDetail',
+        component: TeacherExamDetail,
+        props: true
+      },
+      
+      // 作业管理
+      {
+        path: 'assignments/:id(\\d+)',
+        name: 'TeacherAssignmentDetail',
+        component: TeacherAssignmentDetail,
+        props: true
+      },
+      {
+        path: 'assignments',
+        name: 'TeacherAssignments',
+        component: TeacherAssignments,
+        children: [
+          {
+            path: '',
+            name: 'TeacherAssignmentsDefault',
+            component: TeacherAllAssignments
+          },
+          {
+            path: 'all',
+            name: 'AllAssignments',
+            component: TeacherAllAssignments
+          },
+          {
+            path: 'todo',
+            name: 'TodoAssignments',
+            component: TodoAssignments
+          },
+          {
+            path: 'completed',
+            name: 'CompletedAssignments',
+            component: CompletedAssignments
+          },
+          {
+            path: 'create',
+            name: 'CreateAssignment',
+            component: () => import('@/views/teacher/CreateAssignment.vue'),
+            meta: {
+              title: '创建作业',
+              requiresAuth: true,
+              roles: ['TEACHER']
             }
-          ]
-        },
-        {
-          path: 'assignments/:id',
-          name: 'StudentAssignmentDetail',
-          component: StudentAssignmentDetail,
-          props: true
-        },
-        // 作业答题页面重定向到考试路径，统一使用/student/exams/:id/do
-        {
-          path: 'assignments/:id/do',
-          redirect: to => `/student/exams/${to.params.id}/do`
-        },
-        {
-          path: 'assignments/file/:id/submit',
-          name: 'StudentFileSubmit',
-          component: () => import('@/views/student/FileSubmit.vue'),
-          props: true,
-          meta: { requiresAuth: true, role: 'STUDENT' }
-        },
-        
-        // 考试列表
-        {
-          path: 'exams',
-          name: 'StudentExams',
-          component: StudentDashboard,  // 临时使用Dashboard作为占位符
-        },
-        
-        // 添加考试答题页面路由，使用相同的AssignmentDo组件
-        {
-          path: 'exams/:id/do',
-          name: 'StudentExamDo',
-          component: () => import('@/views/student/AssignmentDo.vue'),
-          props: true,
-          meta: { requiresAuth: true, role: 'STUDENT' }
-        },
-        
-        // 错题集
-        {
-          path: 'wrong-questions',
-          name: 'StudentWrongQuestions',
-          component: StudentDashboard,  // 临时使用Dashboard作为占位符
-        },
-        
-        // 学习记录
-        {
-          path: 'learning-records',
-          name: 'StudentLearningRecords',
-          component: StudentDashboard,  // 临时使用Dashboard作为占位符
-        },
-        
-        // 成绩查看
-        {
-          path: 'grades',
-          name: 'StudentGrades',
-          component: StudentGrades
-        },
-        
-        // 资源管理
-        {
-          path: 'resources',
-          name: 'StudentResources',
-          component: StudentResources,
-          children: [
-            {
-              path: '',
-              name: 'StudentResourcesDefault',
-              redirect: '/student/resources/library'
-            },
-            {
-              path: 'library',
-              name: 'ResourceLibrary',
-              component: ResourceLibrary
+          },
+          {
+            path: ':id/edit',
+            name: 'EditAssignment',
+            component: () => import('@/views/teacher/CreateAssignment.vue'),
+            meta: {
+              title: '编辑作业',
+              requiresAuth: true,
+              roles: ['TEACHER']
             }
-          ]
-        },
-        {
-          path: 'resources/:id',
-          name: 'StudentResourceDetail',
-          component: StudentResourceDetail,
-          props: true
-        },
-        
-        // 知识图谱
-        {
-          path: 'knowledge-graph',
-          name: 'StudentKnowledgeGraph',
-          component: StudentKnowledgeGraph
-        },
-        
-        // 能力图谱
-        {
-          path: 'ability-graph',
-          name: 'StudentAbilityGraph',
-          component: StudentAbilityGraph
-        },
-        
-        // AI学习助手
-        {
-          path: 'ai-tutor',
-          name: 'StudentAITutor',
-          component: StudentAITutor
-        },
-        
-        // 班级管理
-        {
-          path: 'classes',
-          name: 'StudentClasses',
-          component: StudentClasses,
-          children: [
-            {
-              path: '',
-              name: 'StudentClassesDefault',
-              redirect: '/student/classes/info'
-            },
-            {
-              path: 'info',
-              name: 'ClassInfo',
-              component: ClassInfo
-            },
-            {
-              path: 'members',
-              name: 'ClassMembers',
-              component: ClassMembers
-            }
-          ]
-        },
-        
-        // 其他功能
-        {
-          path: 'schedule',
-          name: 'StudentSchedule',
-          component: StudentSchedule
-        },
-        {
-          path: 'profile',
-          name: 'StudentProfile',
-          component: StudentProfile
-        },
-        {
-          path: 'settings',
-          name: 'StudentSettings',
-          component: StudentSettings
-        }
-      ]
-    },
+          }
+        ]
+      },
+      
+      // 成绩管理
+      {
+        path: 'grades',
+        name: 'TeacherGrades',
+        component: TeacherGrades
+      },
+      
+      // 资源管理
+      {
+        path: 'resources',
+        name: 'TeacherResources',
+        component: TeacherResources
+      },
+      {
+        path: 'resources/:id',
+        name: 'TeacherResourceDetail',
+        component: TeacherResourceDetail,
+        props: true
+      },
+      
+      // 知识图谱
+      {
+        path: 'knowledge-graph',
+        name: 'TeacherKnowledgeGraph',
+        component: TeacherKnowledgeGraph
+      },
+      {
+        path: 'knowledge-graph/generator',
+        name: 'TeacherKnowledgeGraphGenerator',
+        component: TeacherKnowledgeGraphGenerator
+      },
+      
+      // 智能组卷
+      {
+        path: 'smart-paper-generation',
+        name: 'TeacherSmartPaperGeneration',
+        component: TeacherSmartPaperGeneration
+      },
+      
+      // 智能批改
+      {
+        path: 'smart-grading',
+        name: 'TeacherSmartGrading',
+        component: TeacherSmartGrading
+      },
+      
+      // 题库管理
+      {
+        path: 'question-bank',
+        name: 'TeacherQuestionBank',
+        component: TeacherQuestionBank
+      },
+      {
+        path: 'question-bank/:id',
+        name: 'TeacherQuestionDetail',
+        component: TeacherQuestionDetail,
+        props: true
+      },
+      
+      // 数据分析
+      {
+        path: 'data-analysis',
+        name: 'TeacherDataAnalysis',
+        component: TeacherDataAnalysis
+      }
+    ]
+  },
 
-    // 404页面
-    {
-      path: '/:pathMatch(.*)*',
-      name: 'NotFound',
-      redirect: (to) => {
-        console.error('路由未找到:', to.path)
-        console.log('未匹配路由的完整信息:', to)
-        // 如果URL中包含student或teacher，则重定向到相应的首页
-        if (to.path.includes('/student')) {
-          return '/student/dashboard'
-        } else if (to.path.includes('/teacher')) {
-          return '/teacher/dashboard'
-        } else {
-          // 否则重定向到通用首页
-          return '/home'
-        }
+  // 学生端路由
+  {
+    path: '/student',
+    component: StudentLayout,
+    meta: { requiresAuth: true, role: 'STUDENT' },
+    children: [
+      {
+        path: '',
+        redirect: '/student/dashboard'
+      },
+      {
+        path: 'dashboard',
+        name: 'StudentDashboard',
+        component: StudentDashboard
+      },
+      
+      // 课程相关
+      {
+        path: 'courses',
+        name: 'StudentCourses',
+        component: StudentCourses
+      },
+      {
+        path: 'courses/:id',
+        name: 'StudentCourseDetail',
+        component: StudentCourseDetail,
+        props: true
+      },
+      {
+        path: 'courses/:courseId/videos/:videoId',
+        name: 'StudentVideoLearning',
+        component: StudentVideoLearning,
+        props: true
+      },
+      
+      // 作业管理
+      {
+        path: 'assignments/:id(\\d+)',
+        name: 'StudentAssignmentDetail',
+        component: StudentAssignmentDetail,
+        props: true
+      },
+      {
+        path: 'assignments',
+        name: 'StudentAssignments',
+        component: StudentAssignments,
+        children: [
+          {
+            path: '',
+            name: 'StudentAssignmentsDefault',
+            redirect: '/student/assignments/all'
+          },
+          {
+            path: 'all',
+            name: 'AllAssignments',
+            component: AllAssignments
+          },
+          {
+            path: 'todo',
+            name: 'TodoAssignments',
+            component: TodoAssignments
+          },
+          {
+            path: 'completed',
+            name: 'CompletedAssignments',
+            component: CompletedAssignments
+          }
+        ]
+      },
+      
+      // 文件提交作业
+      {
+        path: 'assignments/file/:id/submit',
+        name: 'StudentFileSubmission',
+        component: StudentFileSubmission,
+        props: true,
+        alias: '/student/assignments/file/:id/submit'
+      },
+      
+      // 错题集
+      {
+        path: 'wrong-questions',
+        name: 'StudentWrongQuestions',
+        component: StudentWrongQuestions
+      },
+      
+      // 考试
+      {
+        path: 'exams/:id',
+        name: 'StudentExamDetail',
+        component: StudentExamDetail,
+        props: true
+      },
+      {
+        path: 'exams/:id/do',
+        name: 'StudentExamDo',
+        component: StudentExamDo,
+        props: true
+      },
+      
+      // 学习记录
+      {
+        path: 'learning-records',
+        name: 'StudentLearningRecords',
+        component: StudentDashboard,  // 临时使用Dashboard作为占位符
+      },
+      
+      // 成绩查看
+      {
+        path: 'grades',
+        name: 'StudentGrades',
+        component: StudentGrades
+      },
+      
+      // 资源管理
+      {
+        path: 'resources',
+        name: 'StudentResources',
+        component: StudentResources,
+        children: [
+          {
+            path: '',
+            name: 'StudentResourcesDefault',
+            redirect: '/student/resources/library'
+          },
+          {
+            path: 'library',
+            name: 'ResourceLibrary',
+            component: ResourceLibrary
+          }
+        ]
+      },
+      {
+        path: 'resources/:id',
+        name: 'StudentResourceDetail',
+        component: StudentResourceDetail,
+        props: true
+      },
+      
+      // 知识图谱
+      {
+        path: 'knowledge-graph',
+        name: 'StudentKnowledgeGraph',
+        component: StudentKnowledgeGraph
+      },
+      {
+        path: 'knowledge-graph/viewer',
+        name: 'StudentKnowledgeGraphViewer',
+        component: StudentKnowledgeGraphViewer
+      },
+      
+      // 能力图谱
+      {
+        path: 'ability-graph',
+        name: 'StudentAbilityGraph',
+        component: StudentAbilityGraph
+      },
+      
+      // AI学习助手
+      {
+        path: 'ai-tutor',
+        name: 'StudentAITutor',
+        component: StudentAITutor
+      },
+      
+      // 个性化练习
+      {
+        path: 'personalized-practice',
+        name: 'StudentPersonalizedPractice',
+        component: StudentPersonalizedPractice
+      },
+      
+      // 个性化学习路径
+      {
+        path: 'learning-pathway',
+        name: 'StudentLearningPathway',
+        component: StudentLearningPathway
+      },
+      
+      // 班级管理
+      {
+        path: 'classes',
+        name: 'StudentClasses',
+        component: StudentClasses,
+        children: [
+          {
+            path: '',
+            name: 'StudentClassesDefault',
+            redirect: '/student/classes/info'
+          },
+          {
+            path: 'info',
+            name: 'ClassInfo',
+            component: ClassInfo
+          },
+          {
+            path: 'members',
+            name: 'ClassMembers',
+            component: ClassMembers
+          }
+        ]
+      },
+      
+      // 其他功能
+      {
+        path: 'schedule',
+        name: 'StudentSchedule',
+        component: StudentSchedule
+      },
+      {
+        path: 'profile',
+        name: 'StudentProfile',
+        component: StudentProfile
+      },
+      {
+        path: 'settings',
+        name: 'StudentSettings',
+        component: StudentSettings
+      }
+    ]
+  },
+
+  // 404页面
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    redirect: (to) => {
+      console.error('路由未找到:', to.path)
+      console.log('未匹配路由的完整信息:', to)
+      // 如果URL中包含student或teacher，则重定向到相应的首页
+      if (to.path.includes('/student')) {
+        return '/student/dashboard'
+      } else if (to.path.includes('/teacher')) {
+        return '/teacher/dashboard'
+      } else {
+        // 否则重定向到通用首页
+        return '/home'
       }
     }
-  ]
+  },
+  
+  // 直接路径映射 - 文件提交页面
+  {
+    path: '/student/assignments/file/:id/submit',
+    component: StudentFileSubmission,
+    props: true,
+    meta: { requiresAuth: true, role: 'STUDENT' }
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes
 })
 
-// 路由守卫
+// 路由守卫 - 优化版本，减少不必要的API调用
 router.beforeEach(async (to, from, next) => {
+  console.log('🚦 路由守卫触发:', to)
+  
   const authStore = useAuthStore()
+  console.log('🔐 认证状态:', authStore.user)
   
-  console.log('路由守卫:', { 
-    to: to.path, 
-    from: from.path, 
-    requiresAuth: to.meta.requiresAuth,
-    role: to.meta.role,
-    userRole: authStore.user?.role,
-    isAuthenticated: authStore.isAuthenticated
-  })
+  // 如果目标路由不需要认证，直接放行
+  if (!to.meta.requiresAuth) {
+    console.log('✅ 路由不需要认证，直接放行')
+    return next()
+  }
   
-  // 如果有token或sessionId但没有用户信息，尝试获取用户信息
-  if ((localStorage.getItem('token') || localStorage.getItem('sessionId')) && !authStore.user) {
-    try {
-      console.log('尝试获取用户信息...')
-      await authStore.fetchUserInfo()
-      console.log('获取用户信息成功，用户角色:', authStore.user?.role)
-    } catch (error) {
-      console.error('路由守卫中获取用户信息失败:', error)
+  // 检查认证状态
+  if (authStore.isAuthenticated) {
+    // 已登录状态，检查角色权限
+    if (to.meta.role && authStore.user?.role.toUpperCase() !== to.meta.role) {
+      console.log('⛔ 用户角色不匹配，无权访问')
+      return next('/login')
     }
-  }
-  
-  // 如果已登录用户访问登录页，重定向到对应首页
-  if ((to.path === '/login' || to.path === '/register') && authStore.isAuthenticated) {
-    const userRole = authStore.user?.role?.toUpperCase() || '';
-    const redirectPath = userRole === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'
-    console.log('已登录用户访问登录页，重定向到:', redirectPath, '用户角色:', userRole)
-    next(redirectPath)
-    return
-  }
-  
-  // 检查是否需要认证
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    console.log('需要认证但未登录，重定向到登录页')
-    next('/login')
-    return
-  }
-  
-  // 检查角色权限 - 不区分大小写比较角色
-  if (to.meta.role && authStore.user?.role) {
-    const metaRole = String(to.meta.role).toUpperCase();
-    const userRole = authStore.user.role.toUpperCase();
-    
-    console.log('角色检查:', {
-      路径: to.path,
-      需要角色: metaRole,
-      用户角色: userRole,
-      匹配结果: metaRole === userRole
-    });
-    
-    if (metaRole !== userRole) {
-    // 如果角色不匹配，重定向到对应角色的首页
-      const redirectPath = userRole === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'
-      console.log('角色不匹配，重定向到:', redirectPath, '用户角色:', userRole, '路由要求角色:', metaRole)
-    next(redirectPath)
-    return
+    console.log('✅ 路由守卫放行')
+    return next()
+  } else if (authStore.hasStoredAuth()) {
+    // 如果本地有认证信息但状态未同步，恢复状态并放行
+    await authStore.init()
+    // 二次检查认证状态
+    if (authStore.isAuthenticated) {
+      // 已恢复登录状态，检查角色权限
+      if (to.meta.role && authStore.user?.role.toUpperCase() !== to.meta.role) {
+        console.log('⛔ 用户角色不匹配，无权访问')
+        return next('/login')
+      }
+      console.log('✅ 路由守卫放行')
+      return next()
+    } else {
+      console.log('⛔ 认证信息无效，重定向到登录页')
+      return next('/login')
     }
+  } else {
+    // 未登录状态，重定向到登录页
+    console.log('⛔ 用户未登录，重定向到登录页')
+    return next('/login')
   }
-  
-  console.log('路由守卫通过，继续导航到:', to.path)
-  next()
 })
 
 export default router

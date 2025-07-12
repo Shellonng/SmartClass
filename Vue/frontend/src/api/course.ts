@@ -890,3 +890,29 @@ export async function getAllStudentResources(): Promise<CourseResource[]> {
     throw error
   }
 }
+
+// 课程API对象
+export const courseAPI = {
+  // 教师端API
+  getTeacherCourses,
+  getCourses,
+  createCourse,
+  updateCourse,
+  deleteCourse,
+  getCourseChapters,
+  getCourseDetail: (courseId: number) => axios.get(`/api/teacher/courses/${courseId}`),
+  
+  // 学生端API
+  getStudentCourses: getStudentEnrolledCourses,
+  getStudentCourseDetail,
+  getStudentCourseResources,
+  getStudentCourseTasks,
+  getAllStudentResources,
+  enrollCourse: (courseId: number) => axios.post(`/api/student/courses/${courseId}/enroll`),
+  unenrollCourse: (courseId: number) => axios.delete(`/api/student/courses/${courseId}/enroll`),
+  
+  // 通用API
+  searchCourses,
+  getPopularCourses,
+  getRelatedCourses
+}

@@ -93,6 +93,36 @@ public class Assignment {
     private Integer timeLimit;
 
     /**
+     * 总分
+     */
+    @TableField("total_score")
+    private Integer totalScore;
+
+    /**
+     * 考试时长（分钟）
+     */
+    @TableField("duration")
+    private Integer duration;
+
+    /**
+     * 允许的文件类型（JSON格式）
+     */
+    @TableField("allowed_file_types")
+    private String allowedFileTypes;
+
+    /**
+     * 最大文件大小（MB）
+     */
+    @TableField("max_file_size")
+    private Integer maxFileSize;
+
+    /**
+     * 参考答案（用于智能批改）
+     */
+    @TableField("reference_answer")
+    private String referenceAnswer;
+
+    /**
      * 课程名称（非数据库字段）
      */
     @TableField(exist = false)
@@ -103,4 +133,4 @@ public class Assignment {
      */
     @TableField(exist = false)
     private String teacherName;
-} 
+}

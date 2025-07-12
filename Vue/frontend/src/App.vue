@@ -7,11 +7,23 @@ export const emitter = mitt()
 export const APP_EVENTS = {
   COLLAPSE_SIDEBAR: 'collapse-sidebar'
 }
+
+// 扩展Window接口，添加difyChatbotConfig属性
+declare global {
+  interface Window {
+    difyChatbotConfig?: {
+      token: string;
+      baseUrl: string;
+      systemVariables?: Record<string, any>;
+      userVariables?: Record<string, any>;
+    }
+  }
+}
 </script>
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from './stores/auth'
 
 const authStore = useAuthStore()
@@ -19,7 +31,66 @@ const authStore = useAuthStore()
 onMounted(() => {
   // 初始化认证状态
   authStore.init()
+  
+  // 加载Dify聊天机器人
+  loadDifyChatbot()
 })
+
+onUnmounted(() => {
+  // 清理聊天机器人
+  cleanupDifyChatbot()
+})
+
+// 加载聊天机器人
+function loadDifyChatbot() {
+  // 设置聊天机器人配置
+  window.difyChatbotConfig = {
+    token: 'SKiyotVrMpqPW2Sp',
+    baseUrl: 'http://219.216.65.108',
+    systemVariables: {
+      user_id: authStore.user?.id?.toString() || '',
+      user_role: authStore.user?.role || 'user'
+    },
+    userVariables: {
+      avatar_url: authStore.user?.avatar || '',
+      name: authStore.user?.realName || authStore.user?.username || '用户'
+    }
+  }
+  
+  // 添加样式
+  const style = document.createElement('style')
+  style.textContent = `
+    #dify-chatbot-bubble-button {
+      background-color: #1C64F2 !important;
+      z-index: 10000 !important;
+    }
+    #dify-chatbot-bubble-window {
+      width: 24rem !important;
+      height: 40rem !important;
+      z-index: 10000 !important;
+    }
+  `
+  document.head.appendChild(style)
+  
+  // 加载脚本
+  const script = document.createElement('script')
+  script.src = 'http://219.216.65.108/embed.min.js'
+  script.id = 'SKiyotVrMpqPW2Sp'
+  script.defer = true
+  document.body.appendChild(script)
+}
+
+// 清理聊天机器人
+function cleanupDifyChatbot() {
+  // 移除脚本
+  const script = document.getElementById('SKiyotVrMpqPW2Sp')
+  if (script) script.remove()
+  
+  // 移除配置
+  if (window.difyChatbotConfig) {
+    delete window.difyChatbotConfig
+  }
+}
 </script>
 
 <template>
@@ -106,5 +177,42 @@ body {
   top: 80px;
 }
 
+/* Dify聊天机器人全局样式 */
+#dify-chatbot-bubble-button {
+  z-index: 10000 !important;
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 56px !important;
+  height: 56px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
 
+#dify-chatbot-bubble-window {
+  z-index: 10000 !important;
+  position: fixed !important;
+  bottom: 90px !important;
+  right: 20px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 400px !important;
+  height: 600px !important;
+  box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16) !important;
+  border-radius: 8px !important;
+}
+
+/* 聊天机器人挂载点 */
+.chatbot-mount-point {
+  position: fixed;
+  z-index: 9999;
+  bottom: 0;
+  right: 0;
+  width: 1px;
+  height: 1px;
+}
 </style>

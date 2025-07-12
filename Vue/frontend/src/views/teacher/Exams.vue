@@ -2,10 +2,15 @@
   <div class="exam-management">
     <div class="page-header">
       <h2>考试管理</h2>
-      <a-button type="primary" @click="showAddExamModal">
-        <PlusOutlined />
-        添加考试
-      </a-button>
+      <div class="header-actions">
+        <a-button type="primary" @click="showAddExamModal">
+          <PlusOutlined />
+          添加考试
+        </a-button>
+        <a-button type="default" @click="toggleChatbot" :icon="showChatbot ? 'EyeInvisibleOutlined' : 'RobotOutlined'">
+          {{ showChatbot ? '隐藏' : '显示' }}智能助手
+        </a-button>
+      </div>
     </div>
 
     <div class="filter-section">
@@ -216,6 +221,15 @@
         </div>
       </div>
     </a-modal>
+    
+    <!-- 智能体聊天机器人 -->
+    <DifyChatbot 
+      v-if="showChatbot"
+      :token="chatbotConfig.token"
+      :baseUrl="chatbotConfig.baseUrl"
+      :systemVariables="chatbotConfig.systemVariables"
+      :userVariables="chatbotConfig.userVariables"
+    />
   </div>
 </template>
 
@@ -226,7 +240,9 @@ import {
   PlusOutlined,
   EyeOutlined,
   EditOutlined,
-  DeleteOutlined
+  DeleteOutlined,
+  EyeInvisibleOutlined,
+  RobotOutlined
 } from '@ant-design/icons-vue'
 import { formatDate } from '@/utils/date'
 import axios from 'axios'
@@ -234,6 +250,7 @@ import type { Dayjs } from 'dayjs'
 import request from '@/utils/request'
 import type { ApiResponse } from '@/utils/request'
 import { getTeacherCourses, type Course } from '@/api/teacher'
+import DifyChatbot from '@/components/DifyChatbot.vue'
 
 // 定义考试接口
 interface Exam {
@@ -338,6 +355,20 @@ const examForm = ref({
 // 查看考试相关状态
 const viewModalVisible = ref(false)
 const currentExam = ref<any | null>(null)
+
+// 智能体聊天机器人配置
+const showChatbot = ref(true)
+const chatbotConfig = ref({
+  token: 'SKiyotVrMpqPW2Sp',
+  baseUrl: 'http://219.216.65.108',
+  systemVariables: {
+    context: 'exam_management',
+    user_role: 'teacher'
+  },
+  userVariables: {
+    page: 'exams'
+  }
+})
 
 // 生命周期钩子
 onMounted(() => {
@@ -444,7 +475,7 @@ const fetchCourses = async () => {
     
     if (response && response.data) {
       // 处理API返回的数据
-      let coursesData = [];
+      let coursesData: any[] = [];
       
       // 根据返回数据结构处理
       if (Array.isArray(response.data)) {
@@ -652,6 +683,11 @@ const getStatusColor = (status: string): string => {
   }
   return colorMap[status] || 'default'
 }
+
+// 切换聊天机器人显示状态
+const toggleChatbot = () => {
+  showChatbot.value = !showChatbot.value
+}
 </script>
 
 <style scoped>
@@ -671,6 +707,11 @@ const getStatusColor = (status: string): string => {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
 }
 
 .filter-section {

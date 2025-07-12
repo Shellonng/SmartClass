@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dify AI 功能测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1C64F2 0%, #1E56D6 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .test-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: #f9fafb;
+            transition: all 0.3s ease;
+        }
+
+        .test-section:hover {
+            border-color: #1C64F2;
+            box-shadow: 0 5px 15px rgba(28, 100, 242, 0.1);
+        }
+
+        .test-section h3 {
+            color: #1C64F2;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .test-form {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1C64F2;
+        }
+
+        .btn {
+            background: #1C64F2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            background: #1E56D6;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(28, 100, 242, 0.3);
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+        }
+
+        .result.error {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+        }
+
+        .config-info {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .config-info h3 {
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+
+        .config-item {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .config-item strong {
+            color: #374151;
+        }
+
+        .config-item span {
+            color: #6b7280;
+            font-family: monospace;
+            background: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #1C64F2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online {
+            background: #10b981;
+        }
+
+        .status-offline {
+            background: #ef4444;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .test-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Dify AI 功能测试</h1>
+            <p>SmartClass 教育平台 AI 助手功能验证</p>
+        </div>
+
+        <div class="content">
+            <!-- 配置信息 -->
+            <div class="config-info">
+                <h3>🔧 当前配置信息</h3>
+                <div class="config-item">
+                    <strong>服务器地址:</strong>
+                    <span>http://219.216.65.108</span>
+                </div>
+                <div class="config-item">
+                    <strong>API密钥:</strong>
+                    <span>app-D5isfWHTIwVk8t82S507Rkfs</span>
+                </div>
+                <div class="config-item">
+                    <strong>聊天Token:</strong>
+                    <span>SKiyotVrMpqPW2Sp</span>
+                </div>
+                <div class="config-item">
+                    <strong>连接状态:</strong>
+                    <span id="connectionStatus">
+                        <span class="status-indicator status-online"></span>已连接
+                    </span>
+                </div>
+            </div>
+
+            <!-- 快速测试 -->
+            <div class="test-section">
+                <h3>🚀 快速测试所有功能</h3>
+                <p>一键测试所有已配置的Dify功能</p>
+                <button class="btn btn-success" onclick="quickTest()">
+                    开始快速测试
+                    <span id="quickTestLoading" class="loading" style="display: none;"></span>
+                </button>
+                <div id="quickTestResult" class="result"></div>
+            </div>
+
+            <!-- 聊天机器人测试 -->
+            <div class="test-section">
+                <h3>💬 聊天机器人测试</h3>
+                <div class="test-form">
+                    <div class="form-group">
+                        <label for="chatMessage">消息内容:</label>
+                        <textarea id="chatMessage" placeholder="输入要发送给AI的消息..." rows="3">你好，我想了解Java编程的基础知识</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="chatUserId">用户ID:</label>
+                        <input type="text" id="chatUserId" value="test-user-123" placeholder="用户标识">
+                    </div>
+                </div>
+                <button class="btn" onclick="testChat()">
+                    测试聊天功能
+                    <span id="chatLoading" class="loading" style="display: none;"></span>
+                </button>
+                <div id="chatResult" class="result"></div>
+            </div>
+
+            <!-- 知识图谱生成测试 -->
+            <div class="test-section">
+                <h3>🧠 知识图谱生成测试</h3>
+                <div class="test-form">
+                    <div class="form-group">
+                        <label for="courseId">课程ID:</label>
+                        <input type="number" id="courseId" value="1" placeholder="课程ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="graphType">图谱类型:</label>
+                        <select id="graphType">
+                            <option value="concept">概念图</option>
+                            <option value="skill">技能图</option>
+                            <option value="comprehensive">综合图</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="graphDepth">深度级别:</label>
+                        <select id="graphDepth">
+                            <option value="1">1级</option>
+                            <option value="2">2级</option>
+                            <option value="3" selected>3级</option>
+                            <option value="4">4级</option>
+                            <option value="5">5级</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn" onclick="testKnowledgeGraph()">
+                    生成知识图谱
+                    <span id="kgLoading" class="loading" style="display: none;"></span>
+                </button>
+                <div id="kgResult" class="result"></div>
+            </div>
+
+            <!-- 健康检查 -->
+            <div class="test-section">
+                <h3>🏥 系统健康检查</h3>
+                <p>检查Dify服务的连接状态和配置信息</p>
+                <button class="btn" onclick="healthCheck()">
+                    执行健康检查
+                    <span id="healthLoading" class="loading" style="display: none;"></span>
+                </button>
+                <div id="healthResult" class="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dify聊天机器人集成 -->
+    <script>
+        // 配置Dify聊天机器人
+        window.difyChatbotConfig = {
+            token: 'SKiyotVrMpqPW2Sp',
+            baseUrl: 'http://219.216.65.108',
+            systemVariables: {
+                user_id: 'test-user-' + Date.now(),
+            },
+            userVariables: {
+                name: '测试用户',
+            },
+        }
+    </script>
+    <script src="http://219.216.65.108/embed.min.js" id="SKiyotVrMpqPW2Sp" defer></script>
+
+    <!-- 测试功能脚本 -->
+    <script>
+        // API基础地址
+        const API_BASE = 'http://localhost:8080/api/test/dify';
+
+        // 显示结果
+        function showResult(elementId, success, message, data = null) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result ${success ? 'success' : 'error'}`;
+            
+            let content = `<strong>${success ? '✅ 成功' : '❌ 失败'}:</strong> ${message}`;
+            if (data) {
+                content += `<br><br><strong>详细信息:</strong><br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            element.innerHTML = content;
+        }
+
+        // 显示加载状态
+        function showLoading(loadingId, show) {
+            const element = document.getElementById(loadingId);
+            element.style.display = show ? 'inline-block' : 'none';
+        }
+
+        // 快速测试所有功能
+        async function quickTest() {
+            showLoading('quickTestLoading', true);
+            
+            try {
+                const response = await fetch(`${API_BASE}/quick-test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult('quickTestResult', true, '快速测试完成', result.data);
+                } else {
+                    showResult('quickTestResult', false, result.message);
+                }
+            } catch (error) {
+                showResult('quickTestResult', false, `网络错误: ${error.message}`);
+            } finally {
+                showLoading('quickTestLoading', false);
+            }
+        }
+
+        // 测试聊天功能
+        async function testChat() {
+            showLoading('chatLoading', true);
+            
+            const message = document.getElementById('chatMessage').value;
+            const userId = document.getElementById('chatUserId').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        userId: userId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult('chatResult', true, '聊天测试成功', result.data);
+                } else {
+                    showResult('chatResult', false, result.message);
+                }
+            } catch (error) {
+                showResult('chatResult', false, `网络错误: ${error.message}`);
+            } finally {
+                showLoading('chatLoading', false);
+            }
+        }
+
+        // 测试知识图谱生成
+        async function testKnowledgeGraph() {
+            showLoading('kgLoading', true);
+            
+            const courseId = document.getElementById('courseId').value;
+            const graphType = document.getElementById('graphType').value;
+            const depth = document.getElementById('graphDepth').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/knowledge-graph`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        courseId: parseInt(courseId),
+                        graphType: graphType,
+                        depth: parseInt(depth),
+                        requirements: '测试知识图谱生成功能'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult('kgResult', true, '知识图谱生成测试成功', result.data);
+                } else {
+                    showResult('kgResult', false, result.message);
+                }
+            } catch (error) {
+                showResult('kgResult', false, `网络错误: ${error.message}`);
+            } finally {
+                showLoading('kgLoading', false);
+            }
+        }
+
+        // 健康检查
+        async function healthCheck() {
+            showLoading('healthLoading', true);
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult('healthResult', true, '健康检查通过', result.data);
+                } else {
+                    showResult('healthResult', false, result.message);
+                }
+            } catch (error) {
+                showResult('healthResult', false, `网络错误: ${error.message}`);
+                // 更新连接状态
+                document.getElementById('connectionStatus').innerHTML = 
+                    '<span class="status-indicator status-offline"></span>连接失败';
+            } finally {
+                showLoading('healthLoading', false);
+            }
+        }
+
+        // 页面加载时执行健康检查
+        window.onload = function() {
+            healthCheck();
+        };
+    </script>
+
+    <!-- 自定义聊天机器人样式 -->
+    <style>
+        #dify-chatbot-bubble-button {
+            background-color: #1C64F2 !important;
+            box-shadow: 0 4px 12px rgba(28, 100, 242, 0.3) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        #dify-chatbot-bubble-button:hover {
+            background-color: #1E56D6 !important;
+            transform: scale(1.05) !important;
+        }
+        
+        #dify-chatbot-bubble-window {
+            width: 24rem !important;
+            height: 40rem !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+            border: 1px solid #e5e7eb !important;
+        }
+        
+        @media (max-width: 768px) {
+            #dify-chatbot-bubble-window {
+                width: 90vw !important;
+                height: 80vh !important;
+                max-width: 350px !important;
+            }
+        }
+    </style>
+</body>
+</html> 

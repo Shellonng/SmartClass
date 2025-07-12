@@ -39,7 +39,7 @@ public class ResourceController {
      * @return 资源列表
      */
     @GetMapping("/user")
-    public Result getUserResources(PageRequest pageRequest) {
+    public Result<Page<CourseResource>> getUserResources(PageRequest pageRequest) {
         // 获取当前登录用户ID
         Long userId = securityUtil.getCurrentUserId();
         if (userId == null) {
@@ -84,7 +84,7 @@ public class ResourceController {
      * @return 资源列表
      */
     @GetMapping
-    public Result getAllResources(PageRequest pageRequest) {
+    public Result<Page<CourseResource>> getAllResources(PageRequest pageRequest) {
         return courseResourceService.getAllResources(pageRequest);
     }
 } 

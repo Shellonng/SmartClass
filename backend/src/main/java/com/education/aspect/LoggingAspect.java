@@ -7,6 +7,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -70,7 +72,14 @@ public class LoggingAspect {
             long endTime = System.currentTimeMillis();
             
             logger.info("方法执行时间: {}ms", endTime - startTime);
-            logger.info("返回结果: {}", objectMapper.writeValueAsString(result));
+            
+            // 检查结果类型，如果是Resource或包含Resource的ResponseEntity，则跳过记录返回结果
+            if (shouldSkipResultLogging(result)) {
+                logger.info("返回结果类型为资源流，跳过详细内容记录");
+            } else {
+                logger.info("返回结果: {}", objectMapper.writeValueAsString(result));
+            }
+            
             logger.info("=== 请求结束 ===");
             
             return result;
@@ -81,6 +90,30 @@ public class LoggingAspect {
             logger.info("=== 请求异常结束 ===");
             throw e;
         }
+    }
+
+    /**
+     * 检查是否应该跳过结果日志记录
+     * @param result 方法返回结果
+     * @return 是否跳过
+     */
+    private boolean shouldSkipResultLogging(Object result) {
+        if (result == null) {
+            return false;
+        }
+        
+        // 如果是资源类型
+        if (result instanceof Resource) {
+            return true;
+        }
+        
+        // 如果是包含资源的ResponseEntity
+        if (result instanceof ResponseEntity<?>) {
+            Object body = ((ResponseEntity<?>) result).getBody();
+            return body instanceof Resource;
+        }
+        
+        return false;
     }
 
     /**

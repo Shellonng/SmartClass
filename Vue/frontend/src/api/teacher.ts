@@ -342,7 +342,38 @@ export const deleteCourse = (courseId: number | string) => {
 }
 
 export const getCourseDetail = (courseId: number) => {
-  return axios.get(`/teacher/courses/${courseId}`)
+  console.log('调用getCourseDetail, courseId:', courseId)
+  
+  // 获取token和用户ID
+  const token = localStorage.getItem('user-token') || localStorage.getItem('token')
+  const userInfo = localStorage.getItem('user-info')
+  let userId = ''
+  
+  if (userInfo) {
+    try {
+      const userObj = JSON.parse(userInfo)
+      userId = userObj.id || ''
+    } catch (e) {
+      console.error('解析用户信息失败:', e)
+    }
+  }
+  
+  // 使用简化的token格式
+  const authToken = userId ? `Bearer token-${userId}` : (token ? `Bearer ${token}` : '')
+  
+  return axios.get(`/api/teacher/courses/${courseId}`, { 
+    headers: {
+      'Authorization': authToken
+    }
+  })
+    .then(response => {
+      console.log('获取课程详情响应:', response)
+      return response;
+    })
+    .catch(error => {
+      console.error('获取课程详情错误:', error)
+      throw error
+    })
 }
 
 export const publishCourse = (courseId: number) => {
@@ -599,47 +630,47 @@ export interface Section {
 
 // Chapter API functions
 export const getChaptersByCourseId = (courseId: number) => {
-  return axios.get(`/teacher/chapters/course/${courseId}`);
+  return axios.get(`/api/teacher/chapters/course/${courseId}`);
 }
 
 export const createChapter = (chapter: Chapter) => {
-  return axios.post('/teacher/chapters', chapter);
+  return axios.post('/api/teacher/chapters', chapter);
 }
 
 export const updateChapter = (id: number, chapter: Chapter) => {
-  return axios.put(`/teacher/chapters/${id}`, chapter);
+  return axios.put(`/api/teacher/chapters/${id}`, chapter);
 }
 
 export const deleteChapter = (id: number) => {
-  return axios.delete(`/teacher/chapters/${id}`);
+  return axios.delete(`/api/teacher/chapters/${id}`);
 }
 
 // Section API functions
 export const getSectionsByChapterId = (chapterId: number) => {
-  return axios.get(`/teacher/sections/chapter/${chapterId}`)
+  return axios.get(`/api/teacher/sections/chapter/${chapterId}`)
 }
 
 export const getSectionById = (sectionId: number) => {
-  return axios.get(`/teacher/sections/${sectionId}`)
+  return axios.get(`/api/teacher/sections/${sectionId}`)
 }
 
 export const createSection = (section: Section) => {
-  return axios.post('/teacher/sections', section)
+  return axios.post('/api/teacher/sections', section)
 }
 
 export const updateSection = (id: number, section: Section) => {
-  return axios.put(`/teacher/sections/${id}`, section)
+  return axios.put(`/api/teacher/sections/${id}`, section)
 }
 
 export const deleteSection = (id: number) => {
-  return axios.delete(`/teacher/sections/${id}`)
+  return axios.delete(`/api/teacher/sections/${id}`)
 }
 
 // 上传小节视频
 export const uploadSectionVideo = (sectionId: number, file: File) => {
   const formData = new FormData();
   formData.append('file', file);
-  return axios.post(`/teacher/sections/${sectionId}/upload-video`, formData, {
+  return axios.post(`/api/teacher/sections/${sectionId}/upload-video`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }

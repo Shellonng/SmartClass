@@ -93,9 +93,10 @@
                       type="checkbox" 
                       :id="`q${question.id}_${option.optionKey}`" 
                       :value="option.optionKey" 
-                      v-model="answers[question.id]"
+                      :checked="isOptionChecked(question.id, option.optionKey)"
                       class="custom-checkbox"
                       :disabled="submissionStatus > 0"
+                      @change="toggleMultipleChoice(question.id, option.optionKey, $event)"
                     >
                     <label :for="`q${question.id}_${option.optionKey}`" class="option-label">
                       {{ option.optionKey }}. {{ option.content }}
@@ -355,6 +356,39 @@ const saveAnswer = async (questionId: number) => {
   }
 };
 
+// 检查多选题选项是否已选中
+const isOptionChecked = (questionId: number, optionKey: string) => {
+  if (!answers.value[questionId]) {
+    answers.value[questionId] = [];
+  }
+  return Array.isArray(answers.value[questionId]) && answers.value[questionId].includes(optionKey);
+};
+
+// 切换多选题选项
+const toggleMultipleChoice = (questionId: number, optionKey: string, event: Event) => {
+  const isChecked = (event.target as HTMLInputElement).checked;
+  
+  // 确保是数组
+  if (!Array.isArray(answers.value[questionId])) {
+    answers.value[questionId] = [];
+  }
+  
+  if (isChecked) {
+    // 添加选项
+    if (!answers.value[questionId].includes(optionKey)) {
+      answers.value[questionId].push(optionKey);
+      // 对选项进行排序，确保按ABCD顺序
+      answers.value[questionId].sort();
+    }
+  } else {
+    // 移除选项
+    const index = answers.value[questionId].indexOf(optionKey);
+    if (index !== -1) {
+      answers.value[questionId].splice(index, 1);
+    }
+  }
+};
+
 // 自动保存答案
 const autoSaveAnswers = () => {
   // 如果已提交，不再自动保存
@@ -370,7 +404,28 @@ const loadSavedAnswers = () => {
   const savedAnswers = localStorage.getItem(storageKey)
   if (savedAnswers) {
     try {
-      answers.value = JSON.parse(savedAnswers)
+      const parsedAnswers = JSON.parse(savedAnswers);
+      // 确保多选题的答案类型为数组
+      questionGroups.value.forEach(group => {
+        if (group.type === 'multiple') {
+          group.questions.forEach(question => {
+            const savedAnswer = parsedAnswers[question.id];
+            if (savedAnswer && !Array.isArray(savedAnswer)) {
+              // 如果保存的不是数组，则转换为数组
+              if (typeof savedAnswer === 'string') {
+                parsedAnswers[question.id] = [savedAnswer];
+              } else {
+                // 如果是其他类型，则初始化为空数组
+                parsedAnswers[question.id] = [];
+              }
+            } else if (!savedAnswer) {
+              // 如果没有保存的答案，初始化为空数组
+              parsedAnswers[question.id] = [];
+            }
+          });
+        }
+      });
+      answers.value = parsedAnswers;
     } catch (e) {
       console.error('Failed to parse saved answers', e)
     }
@@ -420,18 +475,34 @@ const submitExam = async () => {
       return;
     }
     
-    // 自动保存一次所有答案
-    for (const questionId in answers.value) {
-      if (answers.value[questionId] !== undefined && answers.value[questionId] !== null && answers.value[questionId] !== '') {
-        try {
-          await assignmentApi.saveQuestionAnswer(examId.value, parseInt(questionId), {
+    ElMessage.info('正在保存所有答案并提交，请稍候...');
+    
+    // 自动保存所有题目的答案，即使用户没有手动点击保存
+    const savePromises: Promise<any>[] = [];
+    
+    // 遍历所有题目组
+    questionGroups.value.forEach(group => {
+      group.questions.forEach(question => {
+        // 获取题目ID
+        const questionId = question.id;
+        
+        // 检查是否有该题的答案（即使是空数组也保存，因为多选题可能故意不选）
+        if (questionId in answers.value) {
+          const savePromise = assignmentApi.saveQuestionAnswer(examId.value, questionId, {
             answer: answers.value[questionId]
+          }).catch(e => {
+            console.error(`保存题目 ${questionId} 答案失败`, e);
+            // 即使保存失败也继续处理其他题目
+            return null;
           });
-        } catch (e) {
-          console.error(`保存题目 ${questionId} 答案失败`, e);
+          
+          savePromises.push(savePromise);
         }
-      }
-    }
+      });
+    });
+    
+    // 等待所有保存操作完成
+    await Promise.all(savePromises);
     
     // 提交到服务器
     const response = await assignmentApi.submitAssignment(examId.value, {});
@@ -488,6 +559,17 @@ const loadExamQuestions = async () => {
       if (route.query.timeLimit) {
         remainingTime.value = parseInt(route.query.timeLimit.toString()) * 60 // 转换为秒
       }
+      
+      // 初始化多选题的答案为空数组
+      questionGroups.value.forEach(group => {
+        if (group.type === 'multiple') {
+          group.questions.forEach(question => {
+            if (!answers.value[question.id] || !Array.isArray(answers.value[question.id])) {
+              answers.value[question.id] = [];
+            }
+          });
+        }
+      });
       
       // 加载保存的答案
       loadSavedAnswers()

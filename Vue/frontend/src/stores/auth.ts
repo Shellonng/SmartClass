@@ -89,7 +89,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await loginApi(credentials)
       
       if (response.data.success) {
-        const { userInfo, sessionId: newSessionId, token: newToken } = response.data.data
+        const { userInfo, sessionId: newSessionId } = response.data.data
         
         // 保存用户信息
         setUser(userInfo)
@@ -97,15 +97,17 @@ export const useAuthStore = defineStore('auth', () => {
         // 保存sessionId
         if (newSessionId) {
           setSessionId(newSessionId)
-        }
-        
-        // 保存token并设置到axios头部
-        if (newToken) {
-          setToken(newToken)
-          // 额外确认token已正确设置
-          console.log('登录成功，token已保存:', newToken.substring(0, 10) + '...')
+          
+          // 生成一个临时token，确保API调用能正常工作
+          // 在基于Session的认证系统中，我们使用这个token作为客户端标识
+          // 修改为同时包含用户ID和用户名，以便后端可以正确识别
+          const userId = userInfo.id
+          const username = userInfo.username
+          const generatedToken = `token-${userId}-${username}`
+          setToken(generatedToken)
+          console.log('登录成功，已生成临时token，用户ID:', userId, '用户名:', username)
         } else {
-          console.warn('登录响应中没有token')
+          console.warn('登录响应中没有sessionId')
         }
         
         return { success: true, data: response.data.data }
@@ -142,14 +144,19 @@ export const useAuthStore = defineStore('auth', () => {
         setUser(response.data.data)
         return true
       } else {
-        clearAuth()
+        // 只在确认无效的情况下清除认证数据
         return false
       }
     } catch (error) {
       console.error('获取用户信息失败:', error)
-      clearAuth()
+      // 网络错误不应该导致清除认证状态
       return false
     }
+  }
+  
+  // 检查是否有存储的认证数据
+  const hasStoredAuth = () => {
+    return !!(localStorage.getItem('token') && localStorage.getItem('userInfo'))
   }
 
   // 初始化 - 先验证session，再决定是否恢复用户信息
@@ -168,15 +175,14 @@ export const useAuthStore = defineStore('auth', () => {
         const userInfo = JSON.parse(savedUserInfo)
         setUser(userInfo)
         
-        // 然后验证session是否仍然有效
-        const isValid = await fetchUserInfo()
-        if (!isValid) {
-          // 如果session无效，清除所有数据
-          clearAuth()
-        }
+        // 尝试验证session是否仍然有效，但保留现有状态
+        try {
+          await fetchUserInfo()
         } catch (error) {
+          console.warn('验证session失败，但保留本地状态:', error)
+        }
+      } catch (error) {
         console.error('初始化用户信息失败:', error)
-        clearAuth()
       }
     } else {
       // 如果没有保存的用户信息，尝试从session获取
@@ -205,6 +211,7 @@ export const useAuthStore = defineStore('auth', () => {
     init,
     setUser,
     setToken,
-    clearAuth
+    clearAuth,
+    hasStoredAuth
   }
 })
