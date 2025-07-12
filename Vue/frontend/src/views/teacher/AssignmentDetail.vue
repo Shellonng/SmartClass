@@ -155,9 +155,14 @@
                           <CheckOutlined />
                         </a-button>
                       </a-tooltip>
-                      <a-tooltip v-if="record.status === 2" title="查看">
+                      <a-tooltip v-if="record.status >= 1" title="查看">
                         <a-button type="link" size="small" @click="handleViewSubmission(record)">
                           <EyeOutlined />
+                        </a-button>
+                      </a-tooltip>
+                      <a-tooltip v-if="record.status >= 1 && assignment.mode === 'file'" title="下载文件">
+                        <a-button type="link" size="small" @click="handleDownloadSubmission(record)">
+                          <DownloadOutlined />
                         </a-button>
                       </a-tooltip>
                       <a-tooltip title="删除">
@@ -258,7 +263,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
-import { LeftOutlined, DeleteOutlined, ReloadOutlined, CheckOutlined, EyeOutlined } from '@ant-design/icons-vue'
+import { LeftOutlined, DeleteOutlined, ReloadOutlined, CheckOutlined, EyeOutlined, DownloadOutlined } from '@ant-design/icons-vue'
 import assignmentApi from '@/api/assignment'
 
 const props = defineProps({
@@ -325,7 +330,8 @@ const submissionColumns = [
     title: '操作',
     dataIndex: 'action',
     key: 'action',
-    width: '20%'
+    width: '25%',
+    align: 'left'
   }
 ]
 
@@ -448,8 +454,55 @@ const handleGradeSubmission = (record: any) => {
 
 // 查看已批改作业
 const handleViewSubmission = (record: any) => {
-  // 可以实现查看已批改作业的功能
+  if (!record || !record.id) {
+    message.warning('无法查看提交，提交记录ID不存在')
+    return
+  }
+  
+  // 如果是文件类型的作业，则打开文件预览
+  if (assignment.value && assignment.value.mode === 'file') {
+    try {
+      // 构建预览URL
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+      const previewUrl = `${baseUrl}/api/teacher/assignments/submissions/${record.id}/preview`
+      
+      // 在新标签页中打开预览
+      window.open(previewUrl, '_blank')
+    } catch (error) {
+      console.error('预览文件出错:', error)
+      message.error('文件预览失败，请检查网络连接或文件类型是否支持预览')
+    }
+  } else {
+    // 如果是答题类型的作业，则跳转到提交详情页面
   router.push(`/teacher/submissions/${record.id}`)
+  }
+}
+
+// 下载提交文件
+const handleDownloadSubmission = (record: any) => {
+  if (!record || !record.id) {
+    message.warning('无法下载文件，提交记录ID不存在')
+    return
+  }
+  
+  try {
+    // 构建下载URL
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+    const downloadUrl = `${baseUrl}/api/teacher/assignments/submissions/${record.id}/download`
+    
+    // 创建一个临时链接并模拟点击下载
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.target = '_blank' // 在新标签页中打开，避免页面刷新
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    message.success('文件下载中...')
+  } catch (error) {
+    console.error('下载文件出错:', error)
+    message.error('文件下载失败，请检查网络连接')
+  }
 }
 
 // 提交批改
@@ -727,28 +780,18 @@ watch(() => route.query.tab, (newTab) => {
 
 /* 操作按钮样式 */
 .action-buttons {
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
-}
-
-/* 表格中的操作按钮样式 */
-.submissions-section .action-buttons {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 8px;
-  margin-top: 0;
-  padding-top: 0;
-  border-top: none;
+  white-space: nowrap;
+  padding-left: 0;
+  margin-left: -10px;  /* Adjust negative margin to move buttons left */
 }
 
-.submissions-section .action-buttons .ant-btn-link {
-  padding: 4px 8px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Override ant-design table cell padding for action column */
+:deep(.ant-table-tbody > tr > td:last-child) {
+  padding-left: 8px;
 }
 
 /* 提交记录相关样式 */

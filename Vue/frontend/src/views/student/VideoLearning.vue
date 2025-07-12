@@ -92,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { 
@@ -105,6 +105,7 @@ import {
   LeftOutlined,
   RightOutlined
 } from '@ant-design/icons-vue'
+import { startLearningRecord, endLearningRecord } from '@/api/learningRecord'
 
 const route = useRoute()
 const router = useRouter()
@@ -125,6 +126,11 @@ const avgWatchTime = ref<string>('')
 const notes = ref<string>('')
 const videoUrl = ref<string>('')
 const videoRef = ref<HTMLVideoElement | null>(null)
+
+// 学习记录相关
+const learningRecordId = ref<number | null>(null)
+const lastProgressUpdate = ref<number>(0)
+const progressUpdateInterval = 15 // 每15秒更新一次进度
 
 // 导航数据
 const prevVideoId = ref<number | null>(null)
@@ -155,6 +161,9 @@ const loadVideoData = async () => {
     prevVideoId.value = videoId.value > 101 ? videoId.value - 1 : null
     nextVideoId.value = videoId.value < 304 ? videoId.value + 1 : null
     
+    // 创建学习记录
+    await createLearningRecord()
+    
   } catch (error) {
     console.error('加载视频数据失败:', error)
     message.error('加载视频数据失败')
@@ -163,8 +172,58 @@ const loadVideoData = async () => {
   }
 }
 
+// 创建学习记录
+const createLearningRecord = async () => {
+  try {
+    const response = await startLearningRecord({
+      courseId: courseId.value,
+      sectionId: videoId.value,
+      resourceType: 'video'
+    })
+    
+    if (response?.data?.success) {
+      learningRecordId.value = response.data.recordId
+      console.log('创建学习记录成功, ID:', learningRecordId.value)
+    }
+  } catch (error) {
+    console.error('创建学习记录失败:', error)
+  }
+}
+
+// 更新学习记录
+const updateLearningRecord = async (isCompleted: boolean = false) => {
+  if (!learningRecordId.value) return
+  
+  try {
+    await endLearningRecord(
+      learningRecordId.value,
+      progress.value,
+      isCompleted
+    )
+    console.log('更新学习记录成功')
+  } catch (error) {
+    console.error('更新学习记录失败:', error)
+  }
+}
+
+// 定期更新学习进度
+const updateProgress = () => {
+  if (!videoRef.value) return
+  
+  const currentProgress = Math.floor((videoRef.value.currentTime / videoRef.value.duration) * 100)
+  
+  // 如果进度变化超过5%或者距离上次更新时间超过一定间隔，则更新记录
+  if (Math.abs(currentProgress - lastProgressUpdate.value) >= 5) {
+    progress.value = currentProgress
+    lastProgressUpdate.value = currentProgress
+    updateLearningRecord(false)
+  }
+}
+
 // 返回课程详情
-const goBack = () => {
+const goBack = async () => {
+  // 在离开页面前更新学习记录
+  await updateLearningRecord()
   router.push(`/student/courses/${courseId.value}`)
 }
 
@@ -179,13 +238,18 @@ const handleTimeUpdate = () => {
   // 如果进度超过90%，标记为已完成
   if (currentProgress > 90 && completionRate.value === 0) {
     completionRate.value = 100
+    updateLearningRecord(true)
     message.success('恭喜您完成本节学习！')
   }
+  
+  // 定期更新学习记录
+  updateProgress()
 }
 
 // 处理视频播放结束
 const handleVideoEnded = () => {
   completionRate.value = 100
+  updateLearningRecord(true)
   message.success('恭喜您完成本节学习！')
   
   // 自动跳转到下一节（如果有）
@@ -204,7 +268,9 @@ const saveNotes = () => {
 }
 
 // 导航到其他视频
-const navigateToVideo = (id: number) => {
+const navigateToVideo = async (id: number) => {
+  // 在切换视频前更新当前视频的学习记录
+  await updateLearningRecord()
   router.push(`/student/courses/${courseId.value}/video/${id}`)
 }
 
@@ -226,6 +292,11 @@ watch(
     }
   }
 )
+
+// 在组件卸载前更新学习记录
+onUnmounted(async () => {
+  await updateLearningRecord()
+})
 
 onMounted(() => {
   loadVideoData()

@@ -28,10 +28,30 @@ public class SubmissionController {
             @PathVariable Long submissionId,
             @RequestBody Map<String, Object> requestBody) {
         
-        Double scoreObj = (Double) requestBody.get("score");
+        // 修复类型转换问题，处理多种可能的数字类型
+        Object scoreObj = requestBody.get("score");
         String feedback = (String) requestBody.get("feedback");
         
-        int score = scoreObj != null ? scoreObj.intValue() : 0;
+        int score = 0;
+        if (scoreObj != null) {
+            if (scoreObj instanceof Integer) {
+                score = (Integer) scoreObj;
+            } else if (scoreObj instanceof Double) {
+                score = ((Double) scoreObj).intValue();
+            } else if (scoreObj instanceof String) {
+                try {
+                    score = Integer.parseInt((String) scoreObj);
+                } catch (NumberFormatException e) {
+                    try {
+                        score = (int) Double.parseDouble((String) scoreObj);
+                    } catch (NumberFormatException ex) {
+                        // 如果无法解析，使用默认值0
+                    }
+                }
+            } else if (scoreObj instanceof Number) {
+                score = ((Number) scoreObj).intValue();
+            }
+        }
         
         boolean success = examService.gradeAssignmentSubmission(submissionId, score, feedback);
         return Result.success(success);

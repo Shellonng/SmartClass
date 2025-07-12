@@ -71,8 +71,13 @@ export const logout = () => {
 
 // 获取用户信息 - 移除token，完全基于Session
 export const getUserInfo = () => {
+  console.log('获取用户信息，当前cookies:', document.cookie)
   return axios.get('/auth/user-info', { 
-    withCredentials: true  // 只依赖Session cookie
+    withCredentials: true,  // 只依赖Session cookie
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache'
+    }
   })
 }
 

@@ -35,6 +35,8 @@ public class AuthController {
             System.out.println("🔐 收到登录请求:");
             System.out.println("  - 用户名: " + request.getUsername());
             System.out.println("  - 请求路径: " + httpRequest.getRequestURI());
+            System.out.println("  - 请求头: " + httpRequest.getHeader("Cookie"));
+            System.out.println("  - User-Agent: " + httpRequest.getHeader("User-Agent"));
             
             // 调用简化的登录服务
             AuthDTO.SimpleLoginResponse authResponse = authService.simpleLogin(request);
@@ -75,6 +77,10 @@ public class AuthController {
             
             System.out.println("✅ 登录成功，用户存储到Session中");
             System.out.println("✅ 返回用户信息: " + userInfo);
+            
+            // 输出响应头信息
+            System.out.println("✅ 响应头将包含Set-Cookie: JSESSIONID=" + session.getId());
+            
             return Result.success(data);
         } catch (Exception e) {
             System.out.println("❌ 登录失败: " + e.getMessage());
@@ -128,10 +134,19 @@ public class AuthController {
     @GetMapping("/user-info")
     public Result<Object> getCurrentUserInfo(HttpServletRequest request) {
         try {
+            System.out.println("📋 获取用户信息请求:");
+            System.out.println("  - 请求路径: " + request.getRequestURI());
+            System.out.println("  - 请求方法: " + request.getMethod());
+            System.out.println("  - 请求头Cookie: " + request.getHeader("Cookie"));
+            System.out.println("  - User-Agent: " + request.getHeader("User-Agent"));
+            
             HttpSession session = request.getSession(false);
             if (session == null) {
+                System.out.println("❌ 未找到有效会话");
                 return Result.error("用户未登录");
             }
+            
+            System.out.println("✅ 找到会话: " + session.getId());
             
             // 从Session中获取用户信息
             Long userId = (Long) session.getAttribute("userId");
@@ -140,7 +155,15 @@ public class AuthController {
             String realName = (String) session.getAttribute("realName");
             String email = (String) session.getAttribute("email");
             
+            System.out.println("  - 会话属性:");
+            System.out.println("    - userId: " + userId);
+            System.out.println("    - username: " + username);
+            System.out.println("    - role: " + role);
+            System.out.println("    - realName: " + realName);
+            System.out.println("    - email: " + email);
+            
             if (userId == null) {
+                System.out.println("❌ 会话中没有userId属性");
                 return Result.error("用户未登录");
             }
             
@@ -152,8 +175,11 @@ public class AuthController {
             userInfo.put("role", role);
             userInfo.put("avatar", null);
             
+            System.out.println("✅ 成功返回用户信息: " + userInfo);
             return Result.success(userInfo);
         } catch (Exception e) {
+            System.out.println("❌ 获取用户信息失败: " + e.getMessage());
+            e.printStackTrace();
             return Result.error("获取用户信息失败: " + e.getMessage());
         }
     }

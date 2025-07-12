@@ -796,7 +796,6 @@ import {
 import { useAuthStore } from '@/stores/auth'
 import { getCourses, createCourse } from '@/api/teacher'
 import { useRouter } from 'vue-router'
-import assignment from '@/api/assignment'
 import axios from 'axios'
 
 const authStore = useAuthStore()
@@ -837,12 +836,13 @@ const loadCourses = async () => {
     const authStore = useAuthStore();
     
     // 确保已经有token
-    if (!authStore.token && !localStorage.getItem('token')) {
-      console.warn('加载课程列表: 未找到token，尝试从authStore获取')
-      if (authStore.isAuthenticated) {
-        console.log('用户已认证，但token未设置，尝试重新设置token')
-        // 如果用户已认证但token未设置，可能需要重新获取token
-        await authStore.fetchUserInfo()
+    let token = authStore.token;
+    if (!token) {
+      console.warn('加载课程列表: 未找到token，尝试从localStorage获取')
+      token = localStorage.getItem('token') || localStorage.getItem('user-token')
+      if (token && authStore.setToken) {
+        authStore.setToken(token)
+        console.log('用户已认证，但token未设置，已重新设置token')
       } else {
         console.error('用户未认证，无法加载课程列表')
         return
@@ -855,7 +855,12 @@ const loadCourses = async () => {
     }
     
     console.log('开始请求课程列表API')
-    const response = await getCourses(params)
+    const response = await axios.get('/api/teacher/courses', {
+      params,
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
     console.log('课程列表API响应:', response.status)
     
     if (response.data && response.data.code === 200) {
@@ -893,22 +898,23 @@ const loadAssignments = async () => {
     const authStore = useAuthStore();
     
     // 确保已经有token
-    if (!authStore.token && !localStorage.getItem('token')) {
-      console.warn('加载作业列表: 未找到token，尝试从authStore获取')
-      if (authStore.isAuthenticated) {
-        console.log('用户已认证，但token未设置，尝试重新设置token')
-        // 如果用户已认证但token未设置，可能需要重新获取token
-        await authStore.fetchUserInfo()
+    let token = authStore.token;
+    if (!token) {
+      console.warn('加载作业列表: 未找到token，尝试从localStorage获取')
+      token = localStorage.getItem('token') || localStorage.getItem('user-token')
+      if (token && authStore.setToken) {
+        authStore.setToken(token)
+        console.log('用户已认证，但token未设置，已重新设置token')
       } else {
         console.error('用户未认证，无法加载作业列表')
         return
       }
     }
     
-    const params: any = {
-      current: 1,
-      pageSize: 3, // 只显示3条最新作业
-      sort: 'createTime,desc' // 按创建时间降序排序
+    const params: Record<string, any> = {
+      page: 1,
+      size: 10,
+      sort: 'createTime,desc'
     }
     
     // 根据筛选条件过滤
@@ -921,15 +927,19 @@ const loadAssignments = async () => {
     }
     
     console.log('开始请求作业列表API')
-    const response = await assignment.getAssignmentList(params)
-    console.log('作业列表API响应:', response)
+    const response = await axios.get('/api/teacher/assignments', { 
+      params,
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
     
-    if (response && response.code === 200) {
-      assignments.value = response.data.records || []
+    if (response && response.data && response.data.code === 200) {
+      assignments.value = response.data.data.records || []
       
       // 更新统计数据
       if (assignments.value.length > 0) {
-        stats.assignmentCount = response.data.total || assignments.value.length
+        stats.assignmentCount = response.data.data.total || assignments.value.length
         stats.pendingCount = assignments.value.filter(a => 
           (a.submittedCount || 0) > (a.gradedCount || 0)
         ).length
@@ -940,12 +950,12 @@ const loadAssignments = async () => {
       console.warn('获取作业列表返回异常:', response)
       // 不在初始加载时显示错误提示
       if (!loading.value) {
-        message.error(response?.message || '获取作业列表失败')
+        message.error(response?.data?.message || '获取作业列表失败')
       }
     }
   } catch (error) {
     console.error('获取作业列表失败:', error)
-    // 不在初始加载时显示错误提示
+    // 不再清除认证数据，只显示错误
     if (!loading.value) {
       message.error('获取作业列表失败，请检查网络连接')
     }

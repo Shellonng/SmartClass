@@ -210,7 +210,7 @@ public class CourseResourceServiceImpl implements CourseResourceService {
     }
     
     @Override
-    public Result getAllResources(PageRequest pageRequest) {
+    public Result<Page<CourseResource>> getAllResources(PageRequest pageRequest) {
         // 创建分页对象
         Page<CourseResource> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
         
@@ -219,7 +219,7 @@ public class CourseResourceServiceImpl implements CourseResourceService {
         queryWrapper.orderByDesc("create_time");
         
         // 执行查询
-        IPage<CourseResource> resultPage = courseResourceMapper.selectPage(page, queryWrapper);
+        Page<CourseResource> resultPage = courseResourceMapper.selectPage(page, queryWrapper);
         
         // 获取所有涉及的课程ID
         List<Long> courseIds = resultPage.getRecords().stream()

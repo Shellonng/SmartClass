@@ -232,6 +232,10 @@
                     得分：{{ assignment.score }}/{{ assignment.totalScore }}
                   </span>
                 </div>
+                <div v-if="assignment.isGraded" class="graded-info">
+                  <a-tag color="green">已批改</a-tag>
+                  <span class="graded-note">教师已批改，不能再次提交</span>
+                </div>
               </div>
             </div>
 
@@ -269,9 +273,9 @@
                         设置提醒
                       </a-menu-item>
                       <a-menu-divider />
-                      <a-menu-item key="feedback" @click="viewFeedback(assignment.id)">
+                      <a-menu-item key="feedback" v-if="assignment.isGraded" @click="viewFeedback(assignment.id)">
                         <MessageOutlined />
-                        查看反馈
+                        查看评语
                       </a-menu-item>
                     </a-menu>
                   </template>
@@ -407,6 +411,7 @@ interface Assignment {
   attachments?: string[]
   requirements?: string[]
   isRead?: boolean
+  isGraded?: boolean // 新增：是否已批改
 }
 
 interface Course {
@@ -461,7 +466,9 @@ const urgentAssignments = computed(() => {
 const filteredAssignments = computed(() => {
   let filtered = assignments.value
 
+  // 注释掉重复的状态筛选逻辑，因为后端已经根据activeTab筛选过了
   // 按标签筛选
+  /*
   if (activeTab.value !== 'all') {
     switch (activeTab.value) {
       case 'todo':
@@ -475,6 +482,7 @@ const filteredAssignments = computed(() => {
         break
     }
   }
+  */
 
   // 搜索筛选
   if (searchKeyword.value) {
@@ -524,10 +532,11 @@ const canBatchSubmit = computed(() => {
 
 // 方法
 const handleTabChange = (key: string) => {
+  console.log('标签切换为:', key)
   activeTab.value = key
   currentPage.value = 1
   selectedRowKeys.value = []
-  refreshData()
+  refreshData() // 切换标签时重新加载数据
 }
 
 const handleSearch = () => {
@@ -596,7 +605,7 @@ const fetchAssignments = async () => {
   loading.value = true
   try {
     // 根据当前标签页状态获取不同状态的任务
-    let status = null
+    let status: string | null = null
     if (activeTab.value === 'todo') {
       status = 'pending'
     } else if (activeTab.value === 'completed') {
@@ -605,6 +614,8 @@ const fetchAssignments = async () => {
       status = 'overdue'
     }
     
+    console.log('获取任务列表，状态:', status)
+    
     const params = {
       status: status,
       courseId: courseFilter.value || null,
@@ -612,9 +623,14 @@ const fetchAssignments = async () => {
       keyword: searchKeyword.value || null
     }
     
+    console.log('请求参数:', params)
+    
     const response = await assignmentApi.getAssignmentListStudent(params)
+    console.log('API响应:', response)
+    
     if (response.code === 200 && response.data) {
       assignments.value = response.data
+      console.log('加载到的任务数量:', assignments.value.length)
       message.success('数据加载成功')
     } else {
       message.error(response.message || '获取任务列表失败')
@@ -668,6 +684,13 @@ const startAssignment = (id: number) => {
   // 如果任务未发布，则提示
   if (assignment.status === 'not_published') {
     message.info('该任务尚未发布，请等待教师发布后再查看')
+    return
+  }
+  
+  // 如果已经批改，提示查看批改结果
+  if (assignment.isGraded) {
+    message.info('该任务已批改，将查看批改结果')
+    viewFeedback(id)
     return
   }
   
@@ -795,6 +818,15 @@ const getEmptyDescription = () => {
 onMounted(() => {
   console.log('任务中心页面初始化完成')
   fetchCourses()
+  
+  // 根据URL参数设置初始标签
+  const urlParams = new URLSearchParams(window.location.search)
+  const tab = urlParams.get('tab')
+  if (tab && ['all', 'todo', 'completed', 'overdue'].includes(tab)) {
+    activeTab.value = tab
+    console.log('从URL参数设置初始标签:', tab)
+  }
+  
   refreshData()
 })
 </script>
@@ -1256,5 +1288,17 @@ onMounted(() => {
     flex-direction: column;
     gap: 8px;
   }
+}
+
+.graded-info {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.graded-note {
+  font-size: 13px;
+  color: #52c41a;
 }
 </style> 

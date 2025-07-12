@@ -257,13 +257,31 @@
         <div v-if="currentView === 'knowledge-map'" class="management-content">
           <div class="content-header">
             <h2 class="section-title">知识图谱管理</h2>
-            <a-button type="primary">
+            <a-button type="primary" @click="generateKnowledgeGraphFromChapters" :loading="graphLoading">
               <PlusOutlined />
-              添加知识点
+              一键生成知识图谱
             </a-button>
           </div>
           <div class="content-body">
-            <a-empty description="暂无知识图谱内容" />
+            <a-spin :spinning="graphLoading" tip="加载知识图谱中...">
+              <div v-if="!currentGraphData" class="empty-graph">
+                <a-empty description="暂无知识图谱内容">
+                  <template #description>
+                    <span>点击"一键生成知识图谱"按钮，系统将自动根据课程章节内容生成知识图谱</span>
+                  </template>
+                </a-empty>
+              </div>
+              <div v-else class="knowledge-graphs">
+                <div class="graph-info">
+                  <h3>{{ courseName }}知识图谱</h3>
+                  <p>根据课程章节结构自动生成，展示课程知识点之间的层级关系</p>
+                </div>
+                
+                <div class="graph-container" style="height: 600px">
+                  <div id="graphChart" ref="graphContainer" style="width: 100%; height: 100%;"></div>
+                </div>
+              </div>
+            </a-spin>
           </div>
         </div>
         
@@ -309,7 +327,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message, Empty } from 'ant-design-vue'
 import {
@@ -332,7 +350,8 @@ import {
   FormOutlined,
   FileOutlined,
   DownOutlined,
-  UpOutlined
+  UpOutlined,
+  EyeOutlined
 } from '@ant-design/icons-vue'
 import { 
   getChaptersByCourseId, 
@@ -353,6 +372,8 @@ import dayjs from 'dayjs'
 import QuestionBank from './QuestionBank.vue'
 import CourseExams from './CourseExams.vue'
 import CourseAssignments from './CourseAssignments.vue'
+import * as echarts from 'echarts'
+import * as d3 from 'd3'
 
 const route = useRoute()
 const router = useRouter()
@@ -396,6 +417,11 @@ const commentPagination = ref({
 // 展开评论相关
 const expandedComments = ref(new Set<number>())
 
+// 知识图谱相关
+const graphLoading = ref(false)
+const currentGraphData = ref<any>(null)
+const graphContainer = ref<HTMLElement | null>(null)
+
 // 计算属性
 const courseId = computed(() => {
   // 先尝试从路由参数中获取id
@@ -417,6 +443,9 @@ const courseId = computed(() => {
   return isNaN(id) ? -1 : id;
 })
 
+// 课程名称
+const courseName = ref("");
+
 // 监听路由变化，更新当前视图
 watch(() => route.query.view, (newView) => {
   if (newView) {
@@ -432,43 +461,24 @@ watch(() => route.query.view, (newView) => {
   }
 }, { immediate: true })
 
-// 加载章节列表
-const loadChapters = async () => {
-  try {
-    console.log('开始加载章节列表，课程ID:', courseId.value);
-    
-    // 使用API函数获取章节列表
-    const response = await getChaptersByCourseId(courseId.value);
-    console.log('章节列表响应:', response);
-    
-    if (response.data.code === 200) {
-      chapters.value = response.data.data || [];
-      console.log('成功加载章节:', chapters.value);
-      
-      // 如果没有章节，显示空状态
-      if (chapters.value.length === 0) {
-        console.log('没有找到章节数据');
-      }
-    } else {
-      message.error(response.data.message || '获取章节列表失败');
-      console.error('获取章节列表失败:', response.data);
-    }
-  } catch (error: any) {
-    console.error('获取章节列表异常:', error);
-    if (error.response) {
-      console.error('错误响应:', error.response.data);
-      console.error('状态码:', error.response.status);
-      console.error('响应头:', error.response.headers);
-      message.error(`获取章节列表失败: ${error.response.status} - ${error.response.data?.message || '未知错误'}`);
-    } else if (error.request) {
-      console.error('请求未收到响应:', error.request);
-      message.error('获取章节列表失败: 服务器未响应');
-    } else {
-      console.error('请求配置错误:', error.message);
-      message.error(`获取章节列表失败: ${error.message}`);
-    }
+// 监听courseId变化，加载对应章节数据
+watch(() => courseId.value, async (newId) => {
+  if (newId && newId > 0) {
+    await loadChapters();
   }
-}
+}, { immediate: true });
+
+// 监听currentView变化，加载相应数据
+watch(() => currentView.value, async (newView) => {
+  if (newView === 'knowledge-map' && courseId.value > 0 && chapters.value.length > 0) {
+    // 自动生成知识图谱
+    generateKnowledgeGraphFromChapters();
+  }
+  
+  if (newView === 'discussions') {
+    loadCourseComments();
+  }
+});
 
 // 返回课程列表
 const goBack = () => {
@@ -829,7 +839,8 @@ const navigateToSection = (sectionId: number) => {
 
 // 格式化日期
 const formatDate = (dateStr: string) => {
-  return dayjs(dateStr).format('YYYY-MM-DD HH:mm')
+  if (!dateStr) return '--'
+  return dayjs(dateStr).format('YYYY-MM-DD HH:mm:ss')
 }
 
 // 获取用户角色显示文本
@@ -885,6 +896,508 @@ const loadReplies = async (comment: any) => {
     console.error('获取回复失败:', error)
     message.error('获取回复失败')
     comment.replies = []
+  }
+}
+
+// 从章节数据生成知识图谱
+const generateKnowledgeGraphFromChapters = () => {
+  if (chapters.value.length === 0) {
+    message.error('未找到章节数据');
+    return;
+  }
+
+  graphLoading.value = true;
+  try {
+    // 定义节点和边的类型
+    interface GraphNode {
+      id: string;
+      name: string | any;
+      type: string;
+      level: number;
+      description: string;
+      chapterId?: number;
+      sectionId?: number;
+      style: {
+        color: string;
+        size: number;
+      };
+      hidden?: boolean;
+    }
+    
+    interface GraphEdge {
+      id: string;
+      source: string;
+      target: string;
+      type: string;
+      description: string;
+      weight: number;
+      hidden?: boolean;
+    }
+    
+    // 构建知识图谱节点和边
+    const nodes: GraphNode[] = [];
+    const edges: GraphEdge[] = [];
+    
+    // 获取课程信息
+    const course = {
+      id: courseId.value,
+      title: route.query.title || '课程'
+    };
+    
+    // 保存课程名称
+    courseName.value = course.title as string;
+    
+    // 创建课程节点
+    const courseNode: GraphNode = {
+      id: `course-${course.id}`,
+      name: course.title,
+      type: 'topic',
+      level: 3,
+      description: '课程',
+      style: {
+        color: '#FFD700', // 课程黄色 - 更鲜艳的金黄色
+        size: 50
+      }
+    };
+    nodes.push(courseNode);
+    
+    // 创建章节节点并与课程关联
+    chapters.value.forEach(chapter => {
+      const chapterNode: GraphNode = {
+        id: `chapter-${chapter.id}`,
+        name: chapter.title,
+        type: 'chapter',
+        level: 2,
+        description: chapter.description || '',
+        chapterId: chapter.id,
+        style: {
+          color: '#4169E1', // 章节蓝色 - 更鲜艳的宝蓝色
+          size: 40
+        }
+      };
+      nodes.push(chapterNode);
+      
+      // 创建课程到章节的边
+      edges.push({
+        id: `edge-course-${chapter.id}`,
+        source: courseNode.id,
+        target: chapterNode.id,
+        type: 'contains',
+        description: `包含`,
+        weight: 1.0
+      } as GraphEdge);
+      
+      // 创建小节节点并与章节关联
+      if (chapter.sections && chapter.sections.length > 0) {
+        chapter.sections.forEach(section => {
+          const sectionNode: GraphNode = {
+            id: `section-${section.id}`,
+            name: section.title,
+            type: 'concept',
+            level: 1,
+            description: section.description || '',
+            chapterId: chapter.id,
+            sectionId: section.id,
+            style: {
+              color: '#32CD32', // 小节绿色 - 更鲜艳的绿色
+              size: 35
+            },
+            hidden: true // 初始时隐藏小节节点
+          };
+          nodes.push(sectionNode);
+          
+          // 创建章节到小节的边
+          edges.push({
+            id: `edge-chapter-${section.id}`,
+            source: chapterNode.id,
+            target: sectionNode.id,
+            type: 'contains',
+            description: `包含`,
+            weight: 1.0,
+            hidden: true // 初始时隐藏小节边
+          } as GraphEdge);
+        });
+      }
+    });
+    
+    // 保存图谱数据
+    currentGraphData.value = {
+      title: `${courseName.value}知识图谱`,
+      description: '课程结构知识图谱',
+      nodes,
+      edges,
+      metadata: {
+        nodeCount: nodes.length,
+        edgeCount: edges.length,
+        generatedAt: new Date().toISOString()
+      }
+    };
+    
+    // 渲染图谱
+    nextTick(() => {
+      renderGraph();
+    });
+    
+    message.success('知识图谱生成成功');
+  } catch (error) {
+    console.error('生成知识图谱失败:', error);
+    message.error('生成知识图谱失败');
+  } finally {
+    graphLoading.value = false;
+  }
+};
+
+// 渲染图谱
+const renderGraph = () => {
+  if (!graphContainer.value || !currentGraphData.value) {
+    console.error('图谱容器或数据不存在')
+    return
+  }
+
+  // 确保容器渲染完成
+  nextTick(() => {
+    // 先销毁已存在的实例
+    const element = graphContainer.value as HTMLElement;
+    let chart = echarts.getInstanceByDom(element);
+    if (chart) {
+      chart.dispose();
+    }
+    
+    // 创建新的图表实例
+    chart = echarts.init(element);
+    
+    // 过滤隐藏的节点和边
+    const visibleNodes = currentGraphData.value.nodes.filter((node: any) => !node.hidden);
+    const visibleEdges = currentGraphData.value.edges.filter((edge: any) => !edge.hidden);
+    
+    // 处理节点数据
+    const nodes = visibleNodes.map(node => ({
+      id: node.id,
+      name: node.name,
+      symbolSize: node.style?.size || 40,
+      category: node.type === 'chapter' ? 0 : node.type === 'concept' ? 1 : 2,
+      value: node.level || 1,
+      itemStyle: {
+        color: node.style?.color || getNodeColor(node.type)
+      },
+      originalData: node,
+      // 添加拖拽相关属性
+      x: node.x,
+      y: node.y,
+      fixed: node.fixed || false,
+      draggable: true
+    }));
+    
+    // 处理边数据
+    const links = visibleEdges.map(edge => ({
+      source: edge.source,
+      target: edge.target,
+      value: edge.weight || 1,
+      label: {
+        show: true,
+        formatter: '包含'
+      },
+      originalData: edge
+    }));
+
+    const options = {
+      title: {
+        text: currentGraphData.value.title || '知识图谱',
+        top: 10,
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: function(params: any) {
+          if (params.dataType === 'node' && params.data) {
+            const node = params.data.originalData;
+            return `<div>
+              <strong>${node?.name || ''}</strong>
+              <br/>
+              ${node?.description || '无描述'}
+            </div>`;
+          } else {
+            return params.name;
+          }
+        }
+      },
+      legend: {
+        data: ['章节', '小节', '课程'],
+        top: 40,
+        left: 'center',
+        selectedMode: true,
+        textStyle: {
+          fontSize: 14
+        },
+        icon: 'circle',
+        itemWidth: 15,
+        itemHeight: 15,
+        itemGap: 25
+      },
+      series: [
+        {
+          type: 'graph',
+          layout: 'force',
+          roam: true,
+          edgeSymbol: ['circle', 'arrow'],
+          edgeSymbolSize: [4, 10],
+          lineStyle: {
+            color: '#999',
+            curveness: 0.3
+          },
+          label: {
+            show: true,
+            position: 'right',
+            formatter: '{b}'
+          },
+          force: {
+            repulsion: 1000,
+            edgeLength: [80, 120],
+            layoutAnimation: true,
+            friction: 0.6,
+            gravity: 0.1
+          },
+          data: nodes,
+          links: links,
+          categories: [
+            {
+              name: '章节',
+              itemStyle: {
+                color: '#4169E1'
+              }
+            },
+            {
+              name: '小节',
+              itemStyle: {
+                color: '#32CD32'
+              }
+            },
+            {
+              name: '课程',
+              itemStyle: {
+                color: '#FFD700'
+              }
+            }
+          ]
+        }
+      ]
+    };
+
+    chart.setOption(options);
+    
+    // 绑定图表点击事件
+    chart.on('click', function(params: any) {
+      if (params.dataType === 'node' && params.data && typeof params.data === 'object' && 'originalData' in params.data) {
+        const node = params.data.originalData;
+        
+        // 如果点击的是章节节点，则切换其下所有小节的显示状态
+        if (node.type === 'chapter' && node.chapterId) {
+          // 找出所有与此章节相关的小节节点和边
+          const relatedSections = currentGraphData.value.nodes.filter((n: any) => 
+            n.type === 'concept' && n.chapterId === node.chapterId
+          );
+          
+          const relatedEdges = currentGraphData.value.edges.filter((e: any) => 
+            relatedSections.some((s: any) => e.target === s.id)
+          );
+          
+          // 切换显示状态
+          const isAnyVisible = relatedSections.some((s: any) => !s.hidden);
+          
+          // 更新所有相关节点和边的显示状态
+          relatedSections.forEach((s: any) => {
+            s.hidden = isAnyVisible;
+          });
+          
+          relatedEdges.forEach((e: any) => {
+            e.hidden = isAnyVisible;
+          });
+          
+          // 重新渲染图表
+          renderGraph();
+          
+          message.info(`${isAnyVisible ? '隐藏' : '显示'}章节 "${node.name}" 的所有小节`);
+        }
+      }
+    });
+
+    // 添加双击事件处理
+    chart.on('dblclick', function(params: any) {
+      if (params.dataType === 'node' && params.data && typeof params.data === 'object' && 'originalData' in params.data) {
+        const node = params.data.originalData;
+        
+        // 如果双击的是小节节点，则跳转到小节详情页
+        if (node.type === 'concept' && node.sectionId) {
+          router.push(`/teacher/courses/${courseId.value}/sections/${node.sectionId}`);
+        }
+      }
+    });
+
+    // 拖拽结束后保存节点位置
+    chart.on('graphroam', function() {
+      // 更新节点位置信息
+      const options = chart.getOption();
+      if (options && options.series && options.series[0] && options.series[0].data) {
+        const chartNodes = options.series[0].data;
+        if (chartNodes && chartNodes.length > 0) {
+          chartNodes.forEach((node: any, index: number) => {
+            if (node.originalData && node.x !== undefined && node.y !== undefined) {
+              const originalNode = currentGraphData.value.nodes.find((n: any) => n.id === node.id);
+              if (originalNode) {
+                originalNode.x = node.x;
+                originalNode.y = node.y;
+              }
+            }
+          });
+        }
+      }
+    });
+    
+    // 实现D3力矢量拖拽
+    setupD3DragForce(chart, nodes, links);
+    
+    // 监听窗口大小变化，自动调整图表大小
+    window.addEventListener('resize', () => {
+      chart.resize();
+    });
+  });
+};
+
+// 设置D3力矢量拖拽
+const setupD3DragForce = (chart: any, nodes: any[], links: any[]) => {
+  // 创建D3力矢量模拟
+  const simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id((d: any) => d.id).distance(100))
+    .force('charge', d3.forceManyBody().strength(-300))
+    .force('center', d3.forceCenter(graphContainer.value!.clientWidth / 2, graphContainer.value!.clientHeight / 2))
+    .force('collision', d3.forceCollide().radius((d: any) => d.symbolSize + 5));
+  
+  // 获取ECharts的zrender实例
+  const zr = chart.getZr();
+  
+  // 处理拖拽开始
+  zr.on('mousedown', function(e: any) {
+    const pointInPixel = [e.offsetX, e.offsetY];
+    const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
+    
+    // 检查是否点击在节点上
+    const dataIndex = chart.getModel().getSeries()[0].getData().indexOfName(e.target?.name);
+    if (dataIndex >= 0) {
+      // 找到对应的节点
+      const node = nodes[dataIndex];
+      if (node) {
+        // 标记为固定位置
+        node.fixed = true;
+        
+        // 更新原始数据
+        if (node.originalData) {
+          node.originalData.fixed = true;
+        }
+        
+        // 暂停力矢量模拟
+        simulation.alphaTarget(0).stop();
+      }
+    }
+  });
+  
+  // 处理拖拽过程
+  zr.on('mousemove', function(e: any) {
+    if (e.target && e.target.dragging) {
+      const node = nodes.find(n => n.id === e.target.name);
+      if (node && node.fixed) {
+        // 更新节点位置
+        node.x = e.offsetX;
+        node.y = e.offsetY;
+        
+        // 更新图表
+        chart.setOption({
+          series: [{
+            data: nodes,
+            links: links
+          }]
+        });
+      }
+    }
+  });
+  
+  // 处理拖拽结束
+  zr.on('mouseup', function(e: any) {
+    const node = nodes.find(n => n.id === e.target?.name);
+    if (node && node.fixed) {
+      // 解除固定位置
+      node.fixed = false;
+      
+      // 更新原始数据
+      if (node.originalData) {
+        node.originalData.fixed = false;
+      }
+      
+      // 重启力矢量模拟
+      simulation.alphaTarget(0.3).restart();
+      
+      // 更新节点位置
+      simulation.on('tick', function() {
+        chart.setOption({
+          series: [{
+            data: nodes,
+            links: links
+          }]
+        });
+      });
+    }
+  });
+  
+  // 启动模拟
+  simulation.alpha(0.3).restart();
+};
+
+// 获取节点颜色
+const getNodeColor = (type: string) => {
+  switch (type) {
+    case 'chapter': return '#4169E1' // 章节蓝色 - 更鲜艳的宝蓝色
+    case 'section': return '#32CD32' // 小节绿色 - 更鲜艳的绿色
+    case 'concept': return '#32CD32' // 小节绿色 - 更鲜艳的绿色
+    case 'topic': return '#FFD700' // 课程黄色 - 更鲜艳的金黄色
+    case 'skill': return '#FF4500' // 更鲜艳的红橙色
+    default: return '#95a5a6'
+  }
+}
+
+// 加载章节列表
+const loadChapters = async () => {
+  try {
+    console.log('开始加载章节列表，课程ID:', courseId.value);
+    
+    // 使用API函数获取章节列表
+    const response = await axios.get(`/api/teacher/chapters/course/${courseId.value}`);
+    console.log('章节列表响应:', response);
+    
+    if (response.data.code === 200) {
+      chapters.value = response.data.data || [];
+      console.log('成功加载章节:', chapters.value);
+      
+      // 如果没有章节，显示空状态
+      if (chapters.value.length === 0) {
+        console.log('没有找到章节数据');
+      }
+    } else {
+      message.error(response.data.message || '获取章节列表失败');
+      console.error('获取章节列表失败:', response.data);
+    }
+  } catch (error: any) {
+    console.error('获取章节列表异常:', error);
+    if (error.response) {
+      console.error('错误响应:', error.response.data);
+      console.error('状态码:', error.response.status);
+      console.error('响应头:', error.response.headers);
+      message.error(`获取章节列表失败: ${error.response.status} - ${error.response.data?.message || '未知错误'}`);
+    } else if (error.request) {
+      console.error('请求未收到响应:', error.request);
+      message.error('获取章节列表失败: 服务器未响应');
+    } else {
+      console.error('请求配置错误:', error.message);
+      message.error(`获取章节列表失败: ${error.message}`);
+    }
   }
 }
 </script>
@@ -1258,5 +1771,60 @@ const loadReplies = async (comment: any) => {
 .delete-link {
   cursor: pointer;
   color: #1890ff;
+}
+
+.graph-info {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.graph-info h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.graph-info p {
+  margin-bottom: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.graph-container {
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.echarts-container {
+  width: 100%;
+  height: 100%;
+}
+
+.graph-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.graph-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.info-label {
+  font-weight: bold;
+  color: #555;
+}
+
+.ml-20 {
+  margin-left: 20px;
 }
 </style>

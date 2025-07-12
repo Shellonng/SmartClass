@@ -1,9 +1,11 @@
 package com.education.service.teacher;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.education.dto.CourseResourceDTO;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
 import com.education.dto.common.Result;
+import com.education.entity.CourseResource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -73,5 +75,5 @@ public interface CourseResourceService {
      * @param pageRequest 分页请求
      * @return 资源列表
      */
-    Result getAllResources(PageRequest pageRequest);
+    Result<Page<CourseResource>> getAllResources(PageRequest pageRequest);
 } 

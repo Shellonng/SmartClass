@@ -89,12 +89,17 @@
           <span>学习计划</span>
         </a-menu-item>
         
-        <a-menu-item key="ai-tutor">
+        <a-sub-menu key="ai-learning">
           <template #icon>
             <RobotOutlined />
           </template>
-          <span>AI学习助手</span>
-        </a-menu-item>
+          <template #title>AI学习</template>
+          <a-menu-item key="personalized-practice">个性化练习</a-menu-item>
+          <a-menu-item key="learning-pathway">学习路径</a-menu-item>
+          <a-menu-item key="knowledge-graph">知识图谱</a-menu-item>
+          <a-menu-item key="ability-graph">能力图谱</a-menu-item>
+          <a-menu-item key="ai-tutor">AI助手</a-menu-item>
+        </a-sub-menu>
       </a-menu>
     </a-layout-sider>
     
@@ -324,8 +329,8 @@ const showAITooltip = ref(false)
 
 // 学习提醒
 const studyReminderVisible = ref(false)
-const studyDuration = ref(45)
-let studyTimer: number | null = null
+const studyDuration = ref(0)
+let studyTimer: NodeJS.Timeout | null = null
 
 // 监听路由变化更新选中菜单
 watch(
@@ -364,6 +369,10 @@ function handleMenuClick({ key }: { key: string }) {
     'classes-members': '/student/classes/members',
     'resources-library': '/student/resources',
     'schedule': '/student/schedule',
+    'personalized-practice': '/student/personalized-practice',
+    'learning-pathway': '/student/learning-pathway',
+    'knowledge-graph': '/student/knowledge-graph',
+    'ability-graph': '/student/ability-graph',
     'ai-tutor': '/student/ai-tutor'
   }
   
@@ -402,8 +411,13 @@ function showNotifications() {
 
 // 切换AI学习助手
 function toggleAITutor() {
-  // TODO: 实现AI学习助手功能
-  message.info('AI学习助手功能开发中...')
+  // 查找并模拟点击Dify聊天按钮
+  const chatButton = document.getElementById('dify-chatbot-bubble-button')
+  if (chatButton && chatButton instanceof HTMLElement) {
+    chatButton.click()
+  } else {
+    message.info('正在初始化AI助手，请稍后再试...')
+  }
 }
 
 // 休息提醒
