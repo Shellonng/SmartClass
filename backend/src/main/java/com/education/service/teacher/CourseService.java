@@ -4,6 +4,7 @@ import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
 import com.education.entity.Course;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -89,4 +90,12 @@ public interface CourseService {
      * @return 统计信息
      */
     Map<String, Object> getCourseStatistics(String username, Long courseId);
+    
+    /**
+     * 获取教师的所有课程列表（不分页）
+     * 
+     * @param username 用户名
+     * @return 课程列表
+     */
+    List<Course> getAllTeacherCourses(String username);
 } 

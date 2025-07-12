@@ -1,13 +1,16 @@
 package com.education.controller.teacher;
 
 import com.education.dto.ExamDTO;
+import com.education.dto.GradingResultDTO;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
 import com.education.dto.common.Result;
 import com.education.service.ExamService;
+import com.education.service.DifyGradingService;
 import com.education.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -22,6 +25,7 @@ public class ExamController {
     
     private final ExamService examService;
     private final SecurityUtil securityUtil;
+    private final DifyGradingService difyGradingService;
     
     /**
      * 分页查询考试列表
@@ -232,5 +236,100 @@ public class ExamController {
         Map<String, List<Map<String, Object>>> questions = examService.getQuestionsByType(
                 courseId, questionType, difficulty, knowledgePoint, createdBy, keyword);
         return Result.success(questions);
+    }
+    
+    /**
+     * 智能批改单个考试提交
+     * @param submissionId 提交记录ID
+     * @param referenceAnswer 参考答案
+     * @param submittedFile 提交的文件
+     * @return 批改结果
+     */
+    @PostMapping("/submissions/{submissionId}/ai-grade")
+    public Result<GradingResultDTO> aiGradeSubmission(
+            @PathVariable Long submissionId,
+            @RequestParam String referenceAnswer,
+            @RequestParam MultipartFile submittedFile) {
+        
+        try {
+            GradingResultDTO result = difyGradingService.gradeExamSubmission(submissionId, referenceAnswer, submittedFile);
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error("智能批改失败：" + e.getMessage());
+        }
+    }
+    
+    /**
+     * 上传文件到 Dify 平台
+     * @param file 要上传的文件
+     * @return 上传结果
+     */
+    @PostMapping("/upload-file")
+    public Result<Map<String, Object>> uploadFile(@RequestParam MultipartFile file) {
+        Long userId = securityUtil.getCurrentUserId();
+        if (userId == null) {
+            return Result.error("未登录");
+        }
+        
+        try {
+            Map<String, Object> result = difyGradingService.uploadFile(file, "teacher-" + userId);
+            if (result != null) {
+                return Result.success(result);
+            } else {
+                return Result.error("文件上传失败");
+            }
+        } catch (Exception e) {
+            return Result.error("文件上传失败：" + e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取批改工作流状态
+     * @param workflowRunId 工作流运行ID
+     * @return 工作流状态
+     */
+    @GetMapping("/grading-status/{workflowRunId}")
+    public Result<Map<String, Object>> getGradingStatus(@PathVariable String workflowRunId) {
+        try {
+            Map<String, Object> result = difyGradingService.getWorkflowStatus(workflowRunId);
+            if (result != null) {
+                return Result.success(result);
+            } else {
+                return Result.error("获取状态失败");
+            }
+        } catch (Exception e) {
+            return Result.error("获取状态失败：" + e.getMessage());
+        }
+    }
+    
+    /**
+     * 设置考试参考答案
+     * @param examId 考试ID
+     * @param requestBody 包含参考答案的请求体
+     * @return 是否成功
+     */
+    @PutMapping("/{examId}/reference-answer")
+    public Result<Boolean> setReferenceAnswer(
+            @PathVariable Long examId,
+            @RequestBody Map<String, Object> requestBody) {
+        
+        try {
+            String referenceAnswer = (String) requestBody.get("referenceAnswer");
+            if (referenceAnswer == null || referenceAnswer.trim().isEmpty()) {
+                return Result.error("参考答案不能为空");
+            }
+            
+            // 获取考试详情并更新参考答案
+            ExamDTO examDTO = examService.getExamDetail(examId);
+            if (examDTO == null) {
+                return Result.error("考试不存在");
+            }
+            
+            examDTO.setReferenceAnswer(referenceAnswer);
+            boolean success = examService.updateExam(examDTO);
+            return Result.success(success);
+        } catch (Exception e) {
+            return Result.error("设置参考答案失败：" + e.getMessage());
+        }
     }
 } 

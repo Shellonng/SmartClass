@@ -18,7 +18,7 @@ import java.util.List;
  * 章节管理控制器
  */
 @RestController
-@RequestMapping("/teacher/chapters")
+@RequestMapping("/api/teacher/chapters")
 @Tag(name = "教师章节管理", description = "教师章节管理相关接口")
 public class ChapterController {
 

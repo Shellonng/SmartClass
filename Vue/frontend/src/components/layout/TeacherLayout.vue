@@ -177,12 +177,15 @@
           <span>数据分析</span>
         </a-menu-item>
         
-        <a-menu-item key="ai-assistant">
+        <a-sub-menu key="ai-features">
           <template #icon>
             <RobotOutlined />
           </template>
-          <span>AI助手</span>
-        </a-menu-item>
+          <template #title>智能教学</template>
+          <a-menu-item key="smart-paper">智能组卷</a-menu-item>
+          <a-menu-item key="smart-grading">智能批改</a-menu-item>
+          <a-menu-item key="knowledge-graph">知识图谱</a-menu-item>
+        </a-sub-menu>
       </a-menu>
     </a-layout-sider>
     
@@ -198,12 +201,7 @@
               <div class="nav-separator">/</div>
               <router-link to="/courses" class="nav-link">全部课程</router-link>
             </div>
-            <a-breadcrumb class="breadcrumb">
-              <a-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path">
-                <router-link v-if="item.path" :to="item.path">{{ item.title }}</router-link>
-                <span v-else>{{ item.title }}</span>
-              </a-breadcrumb-item>
-            </a-breadcrumb>
+            <!-- 删除重复的面包屑导航 -->
           </div>
         </div>
         
@@ -433,17 +431,7 @@ watch(() => route.query.view, (newView) => {
   }
 }, { immediate: true });
 
-// 面包屑导航
-const breadcrumbItems = computed(() => {
-  const items = [{ title: '首页', path: '/teacher' }]
-  
-  if (route.meta?.breadcrumb) {
-    items.push(...route.meta.breadcrumb as any[])
-  }
-  
-  return items
-})
-
+// 删除不再需要的面包屑导航数据
 // 通知相关
 const notificationCount = ref(5)
 const notificationDrawerVisible = ref(false)
@@ -522,7 +510,7 @@ function handleMenuClick({ key }: { key: string }) {
       router.push('/teacher/students')
       break
     case 'exams':
-    router.push('/teacher/exams')
+      router.push('/teacher/exams')
       break
     case 'assignments':
       router.push('/teacher/assignments')
@@ -537,10 +525,16 @@ function handleMenuClick({ key }: { key: string }) {
       router.push('/teacher/question-bank')
       break
     case 'analytics':
-      router.push('/teacher/analytics')
+      router.push('/teacher/data-analysis')
       break
-    case 'ai-assistant':
-      router.push('/teacher/ai-tools')
+    case 'smart-paper':
+      router.push('/teacher/smart-paper-generation')
+      break
+    case 'smart-grading':
+      router.push('/teacher/smart-grading')
+      break
+    case 'knowledge-graph':
+      router.push('/teacher/knowledge-graph')
       break
     default:
       break
@@ -581,8 +575,13 @@ function showNotifications() {
 
 // 切换AI助手
 function toggleAIAssistant() {
-  // TODO: 实现AI助手功能
-  message.info('AI助手功能开发中...')
+  // 查找并模拟点击Dify聊天按钮
+  const chatButton = document.getElementById('dify-chatbot-bubble-button')
+  if (chatButton && chatButton instanceof HTMLElement) {
+    chatButton.click()
+  } else {
+    message.info('正在初始化AI助手，请稍后再试...')
+  }
 }
 
 // 课程详情页菜单点击处理

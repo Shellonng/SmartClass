@@ -78,7 +78,7 @@
 
         <!-- 课程内容 -->
         <div class="course-content-section">
-          <a-tabs v-model:activeKey="activeTab">
+          <a-tabs v-model:activeKey="activeTab" @change="handleTabChange">
             <a-tab-pane key="chapters" tab="课程章节">
               <div class="chapter-list">
                 <!-- 有章节数据时显示 -->
@@ -365,13 +365,26 @@
                   </a-space>
                 </div>
                 
-                <div class="graph-container">
-                  <a-empty description="知识图谱加载中" />
+                <div class="content-body">
+                  <a-spin :spinning="graphLoading" tip="加载知识图谱中...">
+                    <div v-if="!currentGraphData" class="empty-graph">
+                      <a-empty description="暂无知识图谱内容">
+                        <template #description>
+                          <span>该课程暂无知识图谱内容</span>
+                        </template>
+                      </a-empty>
+                    </div>
+                    <div v-else class="knowledge-graphs">
+                      <div class="graph-info">
+                        <h3>{{ course.title }}知识图谱</h3>
+                        <p>展示课程知识点之间的层级关系</p>
                 </div>
                 
-                <div class="knowledge-details">
-                  <h3>知识点详情</h3>
-                  <p class="empty-tip">点击图谱中的节点查看详情</p>
+                      <div class="graph-container">
+                        <div id="knowledgeGraphChart" ref="graphContainer" style="width: 100%; height: 600px;"></div>
+                      </div>
+                    </div>
+                  </a-spin>
                 </div>
               </div>
             </a-tab-pane>
@@ -383,7 +396,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message, Empty } from 'ant-design-vue'
 import { 
@@ -424,6 +437,8 @@ import {
   getStudentCourseTasks
 } from '@/api/course'
 import axios from 'axios'
+import * as echarts from 'echarts'
+import * as d3 from 'd3'
 
 const route = useRoute()
 const router = useRouter()
@@ -464,6 +479,9 @@ const learningActivities = ref<any[]>([])
 
 // 知识图谱数据
 const graphViewMode = ref<string>('tree')
+const graphLoading = ref<boolean>(false)
+const currentGraphData = ref<any>(null)
+const graphContainer = ref<HTMLElement | null>(null)
 
 // 加载课程详情
 const loadCourseDetail = async () => {
@@ -598,10 +616,13 @@ const loadCourseDetail = async () => {
       }
     ]
     
-    console.log('课程详情加载完成')
+    // 如果当前标签是知识图谱，则加载知识图谱数据
+    if (activeTab.value === 'knowledge-graph') {
+    loadKnowledgeGraph()
+    }
   } catch (error) {
     console.error('加载课程详情失败:', error)
-    message.error('加载课程详情失败')
+    message.error('加载课程详情失败: ' + ((error as Error).message || '未知错误'))
   } finally {
     loading.value = false
   }
@@ -835,8 +856,584 @@ const formatDate = (date: string): string => {
   return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
 
+// 添加加载知识图谱的函数
+const loadKnowledgeGraph = async () => {
+  try {
+    graphLoading.value = true
+    console.log('开始加载知识图谱，课程ID:', courseId.value)
+    console.log('章节数据:', chapters.value)
+    
+    // 从章节数据生成知识图谱而不是调用API
+    if (!chapters.value || chapters.value.length === 0) {
+      console.error('未找到章节数据，尝试重新加载课程详情')
+      await loadCourseDetail()
+      
+      if (!chapters.value || chapters.value.length === 0) {
+        console.error('仍未找到章节数据，无法生成知识图谱')
+        message.error('未找到课程章节数据，无法生成知识图谱')
+        return
+      }
+    }
+    
+    // 定义节点和边
+    const nodes: any[] = []
+    const edges: any[] = []
+    
+    // 创建课程节点
+    const courseNode: any = {
+      id: `course-${courseId.value}`,
+      name: course.value?.title || '课程',
+      type: 'topic',
+      level: 3,
+      description: '课程主题',
+      style: {
+        color: '#FFD700', // 课程黄色
+        size: 50
+      }
+    }
+    nodes.push(courseNode)
+    
+    // 创建章节节点并与课程关联
+    console.log(`处理${chapters.value.length}个章节数据`)
+    chapters.value.forEach((chapter, index) => {
+      console.log(`处理第${index+1}个章节:`, chapter)
+      
+      // 确保章节有ID和标题
+      if (!chapter || !chapter.id) {
+        console.warn('章节数据不完整:', chapter)
+        return
+      }
+      
+      const chapterNode: any = {
+        id: `chapter-${chapter.id}`,
+        name: chapter.title || `章节${index+1}`,
+        type: 'chapter',
+        level: 2,
+        description: chapter.description || '',
+        chapterId: chapter.id,
+        style: {
+          color: '#4169E1', // 章节蓝色
+          size: 40
+        }
+      }
+      nodes.push(chapterNode)
+      
+      // 创建课程到章节的边
+      edges.push({
+        id: `edge-course-${chapter.id}`,
+        source: courseNode.id,
+        target: chapterNode.id,
+        type: 'contains',
+        description: '包含',
+        weight: 1.0
+      } as any)
+      
+      // 创建小节节点并与章节关联
+      if (chapter.sections && chapter.sections.length > 0) {
+        console.log(`章节${chapter.id}有${chapter.sections.length}个小节`)
+        chapter.sections.forEach((section, sIdx) => {
+          // 确保小节有ID和标题
+          if (!section || !section.id) {
+            console.warn('小节数据不完整:', section)
+            return
+          }
+          
+          const sectionNode: any = {
+            id: `section-${section.id}`,
+            name: section.title || `小节${sIdx+1}`,
+            type: 'concept',
+            level: 1,
+            description: section.description || '',
+            chapterId: chapter.id,
+            sectionId: section.id,
+            style: {
+              color: '#32CD32', // 小节绿色
+              size: 35
+            },
+            hidden: true // 初始时隐藏小节节点
+          }
+          nodes.push(sectionNode)
+          
+          // 创建章节到小节的边
+          edges.push({
+            id: `edge-chapter-${section.id}`,
+            source: chapterNode.id,
+            target: sectionNode.id,
+            type: 'contains',
+            description: '包含',
+            weight: 1.0,
+            hidden: true // 初始时隐藏小节边
+          } as any)
+        })
+    } else {
+        console.warn(`章节${chapter.id}没有小节数据`)
+      }
+    })
+    
+    // 输出构建结果
+    console.log(`构建了${nodes.length}个节点和${edges.length}条边`)
+    
+    // 创建知识图谱数据
+    currentGraphData.value = {
+      title: `${course.value?.title || '课程'}知识图谱`,
+      description: '课程结构知识图谱',
+      nodes,
+      edges,
+      metadata: {
+        nodeCount: nodes.length,
+        edgeCount: edges.length,
+        generatedAt: new Date().toISOString()
+      }
+    }
+    
+    console.log('成功生成知识图谱数据:', currentGraphData.value)
+    
+    // 渲染图谱
+    nextTick(() => {
+      console.log('开始渲染知识图谱')
+      renderGraph()
+    })
+    
+  } catch (error) {
+    console.error('加载知识图谱失败:', error)
+    message.error('加载知识图谱失败: ' + ((error as any).message || '未知错误'))
+  } finally {
+    graphLoading.value = false
+  }
+}
+
+// 添加渲染图谱的函数
+const renderGraph = () => {
+  console.log('开始渲染图谱...')
+
+  // 首先尝试用ID获取元素，可能会更可靠
+  const graphElementById = document.getElementById('knowledgeGraphChart')
+  if (graphElementById) {
+    console.log('通过ID找到图谱容器')
+    graphContainer.value = graphElementById as HTMLElement
+  }
+
+  if (!graphContainer.value) {
+    console.error('图谱容器不存在')
+    return
+  }
+
+  if (!currentGraphData.value || !currentGraphData.value.nodes || !currentGraphData.value.edges) {
+    console.error('图谱数据不存在或格式不正确', currentGraphData.value)
+    return
+  }
+
+  console.log('图谱容器和数据已就绪，准备渲染')
+  console.log('容器尺寸:', graphContainer.value.offsetWidth, 'x', graphContainer.value.offsetHeight)
+  console.log('节点数量:', currentGraphData.value.nodes.length)
+  console.log('边数量:', currentGraphData.value.edges.length)
+  
+  // 设置容器样式，确保有足够的尺寸
+  const element = graphContainer.value as HTMLElement
+  if (element) {
+    if (element.offsetWidth < 100 || element.offsetHeight < 100) {
+      console.warn('图谱容器尺寸过小，强制设置尺寸')
+      element.style.width = '100%'
+      element.style.height = '600px'
+      element.style.minHeight = '600px'
+    }
+  }
+  
+  // 使用setTimeout确保DOM已经完全渲染
+  setTimeout(() => {
+    try {
+      // 先确认容器是否有尺寸
+      if (!element || element.offsetWidth === 0 || element.offsetHeight === 0) {
+        console.error('图谱容器尺寸为0，无法渲染', element)
+        // 强制设置尺寸
+        if (element) {
+          element.style.width = '100%'
+          element.style.height = '600px'
+          element.style.minHeight = '600px'
+        }
+      }
+      
+      // 先销毁已存在的实例
+      let chart = echarts.getInstanceByDom(element)
+      if (chart) {
+        console.log('销毁已存在的图表实例')
+        chart.dispose()
+      }
+      
+      console.log('创建新的图表实例')
+      // 创建新的图表实例
+      try {
+      chart = echarts.init(element)
+      } catch (initError) {
+        console.error('初始化图表实例失败:', initError)
+        // 使用备用的渲染方法
+        renderFallbackGraph()
+        return
+      }
+      
+      // 过滤隐藏的节点和边
+      const visibleNodes = currentGraphData.value.nodes.filter((node: any) => !node.hidden)
+      const visibleEdges = currentGraphData.value.edges.filter((edge: any) => !edge.hidden)
+      
+      console.log('可见节点数量:', visibleNodes.length)
+      console.log('可见边数量:', visibleEdges.length)
+      
+      // 处理节点数据
+      const nodes = visibleNodes.map((node: any) => ({
+        id: node.id,
+        name: node.name,
+        symbolSize: node.style?.size || 40,
+        category: node.type === 'chapter' ? 0 : node.type === 'concept' ? 1 : 2,
+        value: node.level || 1,
+        itemStyle: {
+          color: node.style?.color || getNodeColor(node.type)
+        },
+        originalData: node,
+        // 添加拖拽相关属性
+        x: node.x,
+        y: node.y,
+        fixed: node.fixed || false,
+        draggable: true
+      }))
+      
+      // 处理边数据
+      const links = visibleEdges.map((edge: any) => ({
+        source: edge.source,
+        target: edge.target,
+        value: edge.weight || 1,
+        label: {
+          show: Boolean(edge.description),
+          formatter: edge.description || ''
+        },
+        lineStyle: {
+          width: edge.weight ? Math.max(1, Math.min(5, edge.weight)) : 2,
+          curveness: 0.1
+        },
+        originalData: edge
+      }))
+      
+      console.log('设置图表配置')
+      // 设置图表配置
+      const option = {
+        title: {
+          text: currentGraphData.value.title || '课程知识图谱',
+          subtext: currentGraphData.value.description || '',
+          top: 'top',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: (params: any) => {
+            if (params.dataType === 'node') {
+              const node = params.data.originalData
+              return `<div style="font-weight:bold">${node.name}</div>
+                      <div>类型: ${getNodeTypeText(node.type)}</div>
+                      <div>描述: ${node.description || '无'}</div>`
+            } else {
+              return `${params.data.source} → ${params.data.target}`
+            }
+          }
+        },
+        legend: {
+          data: ['章节', '小节', '课程'],
+          orient: 'horizontal',
+          left: 'right',
+          top: 'top'
+        },
+        animationDuration: 1500,
+        animationEasingUpdate: 'quinticInOut' as const,
+        series: [{
+          name: '知识图谱',
+          type: 'graph',
+          layout: 'force',
+          data: nodes,
+          links: links,
+          categories: [
+            { name: '章节', itemStyle: { color: '#4169E1' } },
+            { name: '小节', itemStyle: { color: '#32CD32' } },
+            { name: '课程', itemStyle: { color: '#FFD700' } }
+          ],
+          roam: true,
+          label: {
+            show: true,
+            position: 'right',
+            formatter: '{b}'
+          },
+          force: {
+            repulsion: 200,
+            gravity: 0.1,
+            edgeLength: 120,
+            layoutAnimation: true
+          },
+          lineStyle: {
+            color: 'source',
+            curveness: 0.1
+          },
+          emphasis: {
+            focus: 'adjacency',
+            lineStyle: {
+              width: 5
+            }
+          }
+        }]
+      }
+      
+      console.log('应用图表配置')
+      
+      try {
+      chart.setOption(option)
+      } catch (setOptionError) {
+        console.error('设置图表配置失败:', setOptionError)
+        renderFallbackGraph()
+        return
+      }
+      
+      // 添加点击事件处理
+      chart.on('click', function(params: any) {
+        if (params.dataType === 'node' && params.data && params.data.originalData) {
+          const node = params.data.originalData;
+          
+          // 如果点击的是章节节点，则切换其下所有小节的显示状态
+          if (node.type === 'chapter' && node.chapterId) {
+            // 找出所有与此章节相关的小节节点和边
+            const relatedSections = currentGraphData.value.nodes.filter((n: any) => 
+              n.type === 'concept' && n.chapterId === node.chapterId
+            );
+            
+            const relatedEdges = currentGraphData.value.edges.filter((e: any) => 
+              relatedSections.some((s: any) => e.target === s.id)
+            );
+            
+            // 切换显示状态
+            const isAnyVisible = relatedSections.some((s: any) => !s.hidden);
+            
+            // 更新所有相关节点和边的显示状态
+            relatedSections.forEach((s: any) => {
+              s.hidden = isAnyVisible;
+            });
+            
+            relatedEdges.forEach((e: any) => {
+              e.hidden = isAnyVisible;
+            });
+            
+            // 重新渲染图表
+            renderGraph();
+            
+            message.info(`${isAnyVisible ? '隐藏' : '显示'}章节 "${node.name}" 的所有小节`);
+          }
+          
+          console.log('点击节点:', node)
+        }
+      })
+      
+      // 添加双击事件处理
+      chart.on('dblclick', function(params: any) {
+        if (params.dataType === 'node' && params.data && params.data.originalData) {
+          const node = params.data.originalData
+          
+          // 如果双击的是小节节点，则跳转到小节详情页
+          if (node.type === 'concept' && node.sectionId) {
+            router.push(`/student/courses/${courseId.value}/sections/${node.sectionId}`);
+          }
+        }
+      });
+      
+      // 添加窗口调整大小处理
+      window.addEventListener('resize', () => {
+        chart.resize()
+      })
+      
+      console.log('图谱渲染完成')
+    } catch (error: any) {
+      console.error('渲染图谱时出错:', error)
+      message.error('渲染知识图谱失败: ' + (error.message || '未知错误'))
+      renderFallbackGraph()
+    }
+  }, 300) // 增加延迟，确保DOM已渲染
+}
+
+// 备用的渲染方法，使用HTML直接渲染简化版知识图谱
+const renderFallbackGraph = () => {
+  if (!graphContainer.value || !currentGraphData.value) return
+  
+  console.log('使用备用方法渲染知识图谱')
+  
+  const element = graphContainer.value
+  element.innerHTML = ''
+  element.style.padding = '20px'
+  element.style.overflow = 'auto'
+  
+  // 创建一个简单的HTML表示
+  const graphHTML = document.createElement('div')
+  graphHTML.className = 'fallback-graph'
+  graphHTML.style.position = 'relative'
+  graphHTML.style.width = '100%'
+  graphHTML.style.height = '100%'
+  
+  // 创建标题
+  const title = document.createElement('h3')
+  title.textContent = currentGraphData.value.title || '课程知识图谱'
+  title.style.textAlign = 'center'
+  title.style.marginBottom = '20px'
+  graphHTML.appendChild(title)
+  
+  // 创建树形结构
+  const treeContainer = document.createElement('div')
+  treeContainer.style.padding = '20px'
+  
+  // 获取课程节点和章节节点
+  const courseNode = currentGraphData.value.nodes.find((n: any) => n.type === 'topic')
+  const chapterNodes = currentGraphData.value.nodes.filter((n: any) => n.type === 'chapter')
+  
+  // 创建课程元素
+  const courseElement = document.createElement('div')
+  courseElement.className = 'course-node'
+  courseElement.textContent = courseNode?.name || '课程'
+  courseElement.style.backgroundColor = '#FFD700'
+  courseElement.style.color = '#333'
+  courseElement.style.padding = '10px'
+  courseElement.style.borderRadius = '5px'
+  courseElement.style.marginBottom = '15px'
+  courseElement.style.fontWeight = 'bold'
+  courseElement.style.textAlign = 'center'
+  treeContainer.appendChild(courseElement)
+  
+  // 创建章节列表
+  const chapterList = document.createElement('ul')
+  chapterList.style.listStyle = 'none'
+  chapterList.style.padding = '0'
+  
+  chapterNodes.forEach((chapter: any) => {
+    const chapterItem = document.createElement('li')
+    chapterItem.style.marginBottom = '10px'
+    
+    const chapterElement = document.createElement('div')
+    chapterElement.className = 'chapter-node'
+    chapterElement.textContent = chapter.name
+    chapterElement.style.backgroundColor = '#4169E1'
+    chapterElement.style.color = 'white'
+    chapterElement.style.padding = '8px'
+    chapterElement.style.borderRadius = '5px'
+    chapterElement.style.marginBottom = '5px'
+    chapterItem.appendChild(chapterElement)
+    
+    // 找出该章节的所有小节
+    const sectionNodes = currentGraphData.value.nodes.filter(
+      (n: any) => n.type === 'concept' && n.chapterId === chapter.chapterId
+    )
+    
+    if (sectionNodes.length > 0) {
+      const sectionsList = document.createElement('ul')
+      sectionsList.style.listStyle = 'none'
+      sectionsList.style.paddingLeft = '20px'
+      
+      sectionNodes.forEach((section: any) => {
+        const sectionItem = document.createElement('li')
+        const sectionElement = document.createElement('div')
+        sectionElement.className = 'section-node'
+        sectionElement.textContent = section.name
+        sectionElement.style.backgroundColor = '#32CD32'
+        sectionElement.style.color = 'white'
+        sectionElement.style.padding = '5px'
+        sectionElement.style.borderRadius = '3px'
+        sectionElement.style.marginBottom = '5px'
+        
+        sectionItem.appendChild(sectionElement)
+        sectionsList.appendChild(sectionItem)
+      })
+      
+      chapterItem.appendChild(sectionsList)
+    }
+    
+    chapterList.appendChild(chapterItem)
+  })
+  
+  treeContainer.appendChild(chapterList)
+  graphHTML.appendChild(treeContainer)
+  element.appendChild(graphHTML)
+}
+
+// 获取节点类型文本
+const getNodeTypeText = (type: string) => {
+  const typeMap: Record<string, string> = {
+    'chapter': '章节',
+    'concept': '小节',
+    'topic': '课程',
+    'skill': '技能'
+  }
+  return typeMap[type] || type
+}
+
+// 获取节点颜色
+const getNodeColor = (type: string) => {
+  const colorMap: Record<string, string> = {
+    'chapter': '#4169E1', // 章节蓝色
+    'concept': '#32CD32', // 小节绿色
+    'topic': '#FFD700', // 课程黄色
+    'skill': '#FF6347'  // 技能红色
+  }
+  return colorMap[type] || '#1890ff'
+}
+
+// 监听标签页切换
+const handleTabChange = (key: string) => {
+  console.log('标签页切换:', { 
+    from: activeTab.value, 
+    to: key, 
+    hasGraphData: Boolean(currentGraphData.value),
+    chaptersCount: chapters.value.length
+  })
+  
+  activeTab.value = key
+  
+  // 如果切换到知识图谱标签，尝试渲染图谱
+  if (key === 'knowledge-graph') {
+    console.log('切换到知识图谱标签')
+    // 如果没有加载过知识图谱数据，则先加载数据
+    if (!currentGraphData.value) {
+      console.log('尚未加载知识图谱数据，开始加载...')
+      loadKnowledgeGraph()
+    } else {
+      // 如果已经有数据，只需要重新渲染
+      console.log('已有知识图谱数据，准备重新渲染...')
+      nextTick(() => {
+      renderGraph()
+      })
+    }
+  }
+}
+
 onMounted(() => {
   loadCourseDetail()
+  
+  // 预加载知识图谱数据
+  if (route.query.tab === 'knowledge-graph') {
+    activeTab.value = 'knowledge-graph'
+    
+    // 添加DOM监听，确保在知识图谱容器准备好后渲染
+    nextTick(() => {
+      const observer = new MutationObserver((mutations) => {
+        const graphElement = document.getElementById('knowledgeGraphChart')
+        if (graphElement) {
+          console.log('知识图谱容器DOM已经准备好，开始加载知识图谱')
+          observer.disconnect()
+          loadKnowledgeGraph()
+        }
+      })
+      
+      observer.observe(document.body, { 
+        childList: true, 
+        subtree: true 
+      })
+      
+      // 设置超时，避免无限等待
+      setTimeout(() => {
+        observer.disconnect()
+        console.log('超时检查知识图谱容器')
+        loadKnowledgeGraph()
+      }, 2000)
+    })
+  }
 })
 </script>
 
@@ -1308,36 +1905,58 @@ onMounted(() => {
 
 /* 知识图谱样式 */
 .knowledge-graph-section {
-  padding: 16px 0;
+  padding: 20px;
 }
 
 .graph-controls {
-  margin-bottom: 16px;
-  padding: 12px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
 }
 
 .graph-container {
-  height: 500px;
-  margin-bottom: 24px;
-  border: 1px solid #f0f0f0;
+  background: #fff;
   border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
+  width: 100%;
+  height: 600px;
+}
+
+#graphChart {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 600px;
+}
+
+.graph-info {
+  margin-bottom: 16px;
+}
+
+.graph-info h3 {
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.graph-info p {
+  color: #666;
 }
 
 .knowledge-details {
+  background: #f9f9f9;
   padding: 16px;
-  background-color: #fff;
-  border: 1px solid #f0f0f0;
   border-radius: 8px;
 }
 
 .empty-tip {
   color: #999;
+  font-style: italic;
+}
+
+.empty-graph {
+  padding: 60px 0;
   text-align: center;
-  padding: 32px 0;
 }
 </style> 

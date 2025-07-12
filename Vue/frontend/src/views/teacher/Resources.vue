@@ -267,7 +267,7 @@ const fetchCourses = async () => {
     
     if (response && response.data) {
       // 处理API返回的数据
-      let coursesData = []
+      let coursesData: any[] = []
       
       // 根据返回数据结构处理
       if (Array.isArray(response.data)) {
@@ -394,21 +394,19 @@ const deleteResource = async (id: number) => {
 // 下载资源
 const downloadResource = async (resource: CourseResource) => {
   try {
+    console.log('开始下载资源:', resource.name)
     message.loading({ content: '正在下载文件...', key: 'download' })
-    const response = await downloadResourceDirectly(resource.id)
     
-    const blob = new Blob([response.data], { 
-      type: response.headers['content-type'] || 'application/octet-stream' 
-    })
+    // 构建下载URL
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+    const downloadUrl = `${baseUrl}/api/teacher/resources/${resource.id}/download`
     
-    const url = window.URL.createObjectURL(blob)
+    // 创建一个临时链接并模拟点击下载
     const link = document.createElement('a')
-    link.href = url
-    link.download = `${resource.name}.${resource.fileType}`
+    link.href = downloadUrl
+    link.setAttribute('download', `${resource.name}.${resource.fileType}`)
     document.body.appendChild(link)
     link.click()
-    
-    window.URL.revokeObjectURL(url)
     document.body.removeChild(link)
     
     message.success({ content: '下载成功', key: 'download' })
@@ -420,19 +418,52 @@ const downloadResource = async (resource: CourseResource) => {
 
 // 预览资源
 const previewResource = (resource: CourseResource) => {
-  // 构建完整的预览URL
-  const baseUrl = 'http://localhost:8080'
-  const previewUrl = `${baseUrl}${getResourcePreviewUrl(resource.id)}`
-  
-  console.log('预览资源:', {
-    resourceId: resource.id,
-    resourceName: resource.name,
-    resourceType: resource.fileType,
-    previewUrl: previewUrl
-  })
-  
-  // 直接在新窗口打开预览
-  window.open(previewUrl, '_blank');
+  try {
+    console.log('预览资源:', resource.name)
+    
+    // 构建完整的预览URL
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+    const previewUrl = `${baseUrl}/api/teacher/resources/${resource.id}/preview`
+    
+    console.log('预览URL:', previewUrl)
+    
+    // 根据文件类型选择预览方式
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(resource.fileType.toLowerCase())) {
+      // 图片预览
+      // TODO: 使用图片预览组件
+      window.open(previewUrl, '_blank')
+    } else if (resource.fileType.toLowerCase() === 'pdf') {
+      // PDF预览
+      window.open(previewUrl, '_blank')
+    } else if (['mp4', 'webm'].includes(resource.fileType.toLowerCase())) {
+      // 视频预览
+      // TODO: 使用视频预览组件
+      window.open(previewUrl, '_blank')
+    } else if (['mp3', 'wav', 'ogg'].includes(resource.fileType.toLowerCase())) {
+      // 音频预览
+      // TODO: 使用音频预览组件
+      window.open(previewUrl, '_blank')
+    } else if (['doc', 'docx'].includes(resource.fileType.toLowerCase())) {
+      // Word文档 - 使用Google Docs Viewer
+      const encodedUrl = encodeURIComponent(previewUrl)
+      window.open(`https://docs.google.com/viewer?url=${encodedUrl}&embedded=true`, '_blank')
+    } else if (['ppt', 'pptx'].includes(resource.fileType.toLowerCase())) {
+      // PowerPoint - 使用Google Docs Viewer
+      const encodedUrl = encodeURIComponent(previewUrl)
+      window.open(`https://docs.google.com/viewer?url=${encodedUrl}&embedded=true`, '_blank')
+    } else if (['xls', 'xlsx'].includes(resource.fileType.toLowerCase())) {
+      // Excel - 使用Google Docs Viewer
+      const encodedUrl = encodeURIComponent(previewUrl)
+      window.open(`https://docs.google.com/viewer?url=${encodedUrl}&embedded=true`, '_blank')
+    } else {
+      // 其他类型 - 直接下载
+      message.info('此文件类型不支持在线预览，将为您下载')
+      downloadResource(resource)
+    }
+  } catch (error) {
+    console.error('预览资源失败:', error)
+    message.error('预览失败，请稍后重试')
+  }
 }
 
 // 检查是否可以预览

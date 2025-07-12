@@ -21,7 +21,6 @@ import com.education.mapper.ChapterMapper;
 import com.education.mapper.SectionMapper;
 import com.education.mapper.TeacherMapper;
 import com.education.mapper.AssignmentMapper;
-import com.education.security.SecurityUtil;
 import com.education.service.teacher.CourseResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -151,46 +150,18 @@ public class StudentCourseController {
             
             // 查询数据并检查结果
             Page<Course> result = courseMapper.selectPage(coursePage, courseQueryWrapper);
-            
-            if (result == null) {
-                logger.error("课程查询结果为null");
-                return Result.error("课程查询失败");
-            }
-            
             List<Course> records = result.getRecords();
-            logger.info("课程查询结果: result.getRecords() = {}", records != null ? records.size() : "null");
             
-            if (records != null && !records.isEmpty()) {
-                for (Course course : records) {
-                    logger.info("课程信息: id={}, 标题={}, 教师ID={}", course.getId(), course.getTitle(), course.getTeacherId());
-                }
-            } else {
-                // 从数据库直接查询课程
-                logger.info("分页查询结果为空，尝试直接查询课程信息");
-                List<Course> courses = courseMapper.selectBatchIds(courseIds);
-                logger.info("直接查询课程结果: {}", courses != null ? courses.size() : "null");
-                if (courses != null && !courses.isEmpty()) {
-                    records = courses;
-                    result.setRecords(courses);
-                } else {
-                    logger.error("直接查询课程结果仍为空");
-                }
-            }
-            
-            // 构建分页响应
+            // 构建响应对象
             PageResponse<Course> response = new PageResponse<>();
             response.setRecords(records);
             response.setTotal(total);
             response.setCurrent(page);
             response.setPageSize(size);
             response.setPages((int) Math.ceil((double) total / size));
-            
-            // 同时设置content属性
-            response.setContent(records);
-            response.setTotalElements((long) total);
-            response.setNumber(page);
-            response.setSize(size);
-            response.setTotalPages((int) Math.ceil((double) total / size));
+            // 移除不存在的方法
+            // response.setHasNext(page < Math.ceil((double) total / size) - 1);
+            // response.setHasPrevious(page > 0);
             response.setFirst(page == 0);
             response.setLast(page >= Math.ceil((double) total / size) - 1);
             response.setEmpty(records == null || records.isEmpty());
@@ -205,12 +176,69 @@ public class StudentCourseController {
     }
 
     /**
+     * 获取学生已选课程列表（不分页，用于下拉选择）
+     * @return 课程列表
+     */
+    @Operation(summary = "获取学生已选课程列表", description = "获取当前登录学生已选的所有课程列表，不分页")
+    @GetMapping("/enrolled")
+    public Result<List<Course>> getEnrolledCourses() {
+        logger.info("获取学生已选课程列表");
+        
+        try {
+            // 获取当前登录用户ID
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+            
+            // 获取用户ID
+            User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+            if (user == null) {
+                return Result.error("用户不存在");
+            }
+            
+            // 获取学生ID
+            Student student = studentMapper.selectOne(new LambdaQueryWrapper<Student>().eq(Student::getUserId, user.getId()));
+            if (student == null) {
+                return Result.error("学生信息不存在");
+            }
+            
+            // 从course_student表中查询该学生已选课程的课程ID
+            LambdaQueryWrapper<CourseStudent> csQueryWrapper = new LambdaQueryWrapper<>();
+            csQueryWrapper.eq(CourseStudent::getStudentId, student.getId());
+            List<CourseStudent> courseStudents = courseStudentMapper.selectList(csQueryWrapper);
+            
+            // 如果学生没有选课
+            if (courseStudents.isEmpty()) {
+                return Result.success(Collections.emptyList());
+            }
+            
+            // 提取课程ID列表
+            List<Long> courseIds = courseStudents.stream()
+                .map(CourseStudent::getCourseId)
+                .collect(Collectors.toList());
+            
+            // 查询课程信息
+            LambdaQueryWrapper<Course> courseQueryWrapper = new LambdaQueryWrapper<>();
+            courseQueryWrapper.in(Course::getId, courseIds);
+            courseQueryWrapper.orderByDesc(Course::getCreateTime);
+            
+            List<Course> courses = courseMapper.selectList(courseQueryWrapper);
+            
+            logger.info("查询到学生已选课程数: {}", courses.size());
+            
+            return Result.success(courses);
+        } catch (Exception e) {
+            logger.error("获取学生已选课程列表异常", e);
+            return Result.error("获取已选课程列表失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * 获取课程详情，包括章节和小节信息
      * @param courseId 课程ID
      * @return 课程详情
      */
     @GetMapping("/{courseId}")
-    public Result getCourseDetail(@PathVariable Long courseId) {
+    public Result<Map<String, Object>> getCourseDetail(@PathVariable Long courseId) {
         logger.info("获取学生课程详情，课程ID: {}", courseId);
         
         try {
@@ -289,7 +317,7 @@ public class StudentCourseController {
      * @return 课程资源列表
      */
     @GetMapping("/{courseId}/resources")
-    public Result getCourseResources(@PathVariable Long courseId) {
+    public Result<List<CourseResourceDTO>> getCourseResources(@PathVariable Long courseId) {
         logger.info("获取学生课程资源，课程ID: {}", courseId);
         
         try {
@@ -307,7 +335,7 @@ public class StudentCourseController {
      * @return 课程任务列表
      */
     @GetMapping("/{courseId}/assignments")
-    public Result getCourseTasks(@PathVariable Long courseId) {
+    public Result<List<Map<String, Object>>> getCourseTasks(@PathVariable Long courseId) {
         logger.info("获取学生课程任务，课程ID: {}", courseId);
         
         try {
@@ -364,7 +392,7 @@ public class StudentCourseController {
      * @return 资源列表
      */
     @GetMapping("/resources")
-    public Result getAllStudentResources() {
+    public Result<List<CourseResourceDTO>> getAllStudentResources() {
         logger.info("获取学生所有课程资源");
         
         try {

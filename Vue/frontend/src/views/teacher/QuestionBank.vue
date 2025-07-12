@@ -329,8 +329,9 @@ import {
   addQuestion,
   updateQuestion,
   deleteQuestion,
-  getQuestionPage,
+  getQuestionDetail,
   getQuestionsByCourse,
+  getQuestionsByChapter,
   type Question,
   type QuestionOption,
   type PageResponse,
@@ -546,10 +547,13 @@ const fetchQuestions = async () => {
 const fetchChapters = async () => {
   try {
     if (currentCourseId.value > 0) {
+      console.log('开始获取课程章节列表，课程ID:', currentCourseId.value);
       // 从API获取课程下的章节
-      const res = await axios.get(`/teacher/chapters/course/${currentCourseId.value}`);
-      if (res.data && res.data.code === 200 && Array.isArray(res.data.data)) {
-        chapters.value = res.data.data;
+      const res = await axios.get(`/api/teacher/chapters/course/${currentCourseId.value}`);
+      console.log('章节列表响应:', res);
+      
+      if (res.data && res.data.code === 200) {
+        chapters.value = res.data.data || [];
         console.log('获取到章节列表:', chapters.value);
         
         // 如果有章节，默认选择第一个
@@ -557,10 +561,12 @@ const fetchChapters = async () => {
           questionForm.value.chapterId = chapters.value[0].id;
         } else {
           // 如果没有章节，显示提示
+          console.log('当前课程没有章节');
           message.warning('当前课程没有章节，请先添加章节再添加题目');
         }
       } else {
         chapters.value = [];
+        console.error('获取章节列表失败:', res.data);
         message.warning('获取章节列表失败，请确保课程已添加章节');
       }
     }
@@ -665,7 +671,14 @@ const showAddQuestionModal = () => {
 const viewQuestion = async (question: Question) => {
   try {
     console.log('查看题目ID:', question.id)
-    const res = await getQuestionDetail(question.id!)
+    if (!question.id) {
+      message.error('题目ID不存在');
+      return;
+    }
+    
+    const res = await axios.get(`/api/teacher/questions/${question.id}`);
+    console.log('获取题目详情响应:', res);
+    
     if (res.data && res.data.code === 200 && res.data.data) {
       currentQuestion.value = res.data.data
       console.log('获取到题目详情:', currentQuestion.value)
@@ -688,7 +701,13 @@ const viewQuestion = async (question: Question) => {
 const editQuestion = async (question: Question) => {
   try {
     console.log('编辑题目ID:', question.id)
-    const res = await getQuestionDetail(question.id!)
+    if (!question.id) {
+      message.error('题目ID不存在');
+      return;
+    }
+    
+    const res = await axios.get(`/api/teacher/questions/${question.id}`);
+    console.log('获取题目详情用于编辑响应:', res);
     
     // 设置编辑状态
     isEditing.value = true
@@ -698,11 +717,11 @@ const editQuestion = async (question: Question) => {
       const detailData = res.data.data
       console.log('获取到题目详情用于编辑:', detailData)
       
-    questionForm.value = {
-      ...detailData,
+      questionForm.value = {
+        ...detailData,
         options: detailData.options || [],
         images: detailData.images || []
-    }
+      }
       
       // 处理多选题答案
       if (detailData.questionType === QuestionType.MULTIPLE && detailData.correctAnswer) {

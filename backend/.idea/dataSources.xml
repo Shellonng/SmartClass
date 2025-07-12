@@ -34,7 +34,7 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="education_platform@localhost" uuid="c72a7010-1bff-46fb-b543-328784b174cd">
+    <data-source source="LOCAL" name="education_platform@localhost" uuid="7744d502-8eaf-4e42-85ce-828c3d723860">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>

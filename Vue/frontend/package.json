@@ -16,10 +16,14 @@
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
+    "@types/d3": "^7.4.3",
     "ant-design-vue": "^4.2.6",
     "axios": "^1.10.0",
+    "d3": "^7.9.0",
+    "docx": "^8.5.0",
     "echarts": "^5.6.0",
     "element-plus": "^2.10.2",
+    "file-saver": "^2.0.5",
     "pinia": "^3.0.3",
     "video.js": "^8.23.3",
     "vue": "^3.5.13",
@@ -29,6 +33,7 @@
   "devDependencies": {
     "@playwright/test": "^1.51.1",
     "@tsconfig/node22": "^22.0.1",
+    "@types/file-saver": "^2.0.7",
     "@types/jsdom": "^21.1.7",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-vue": "^5.2.3",

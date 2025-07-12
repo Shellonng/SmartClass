@@ -1,10 +1,5 @@
 package com.education.config;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,21 +17,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.education.mapper.UserMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -138,63 +126,5 @@ public class SecurityConfig {
                 }
             }
         };
-    }
-
-    /**
-     * 自定义Session认证过滤器
-     */
-    @Component
-    public static class SessionAuthenticationFilter extends OncePerRequestFilter {
-
-        private static final Logger logger = LoggerFactory.getLogger(SessionAuthenticationFilter.class);
-
-        // 不需要认证的路径
-        private static final List<String> AUTH_WHITELIST = Arrays.asList(
-            "/auth/login", "/auth/register", "/auth/logout",
-            "/api/auth/login", "/api/auth/register", "/api/auth/logout",
-            "/swagger-ui", "/v3/api-docs", "/debug", "/files", "/api/common/files",
-            "/api/courses/public", "/api/courses/categories"
-        );
-
-        @Override
-        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, 
-                FilterChain filterChain) throws ServletException, IOException {
-            
-            String requestPath = request.getServletPath();
-            
-            // 检查是否是白名单路径
-            boolean isWhitelisted = AUTH_WHITELIST.stream()
-                    .anyMatch(path -> requestPath.startsWith(path));
-            
-            if (!isWhitelisted) {
-                // 检查Session中是否有用户信息
-                HttpSession session = request.getSession(false);
-                if (session != null) {
-                    Long userId = (Long) session.getAttribute("userId");
-                    String username = (String) session.getAttribute("username");
-                    String role = (String) session.getAttribute("role");
-                    
-                    if (userId != null && username != null && role != null) {
-                        logger.debug("从Session中找到用户信息: username={}, role={}", username, role);
-                        
-                        // 创建认证对象
-                        UsernamePasswordAuthenticationToken authentication = 
-                            new UsernamePasswordAuthenticationToken(username, null, 
-                                Arrays.asList(() -> "ROLE_" + role.toUpperCase()));
-                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        
-                        // 设置认证信息到SecurityContext
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                        logger.debug("用户 {} 已通过Session认证", username);
-                    } else {
-                        logger.debug("Session中没有完整的用户信息，路径: {}", requestPath);
-                    }
-                } else {
-                    logger.debug("没有找到Session，路径: {}", requestPath);
-                }
-            }
-            
-            filterChain.doFilter(request, response);
-        }
     }
 } 

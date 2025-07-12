@@ -105,6 +105,11 @@ public class ExamDTO {
     private List<ExamQuestionDTO> questions;
     
     /**
+     * 参考答案（用于智能批改）
+     */
+    private String referenceAnswer;
+    
+    /**
      * 考试组卷配置
      */
     @Data

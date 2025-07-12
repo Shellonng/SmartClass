@@ -22,7 +22,7 @@ import java.util.UUID;
  * 小节管理控制器
  */
 @RestController
-@RequestMapping("/teacher/sections")
+@RequestMapping("/api/teacher/sections")
 @Tag(name = "教师小节管理", description = "教师小节管理相关接口")
 public class SectionController {
 
@@ -121,9 +121,17 @@ public class SectionController {
             // 生成文件保存路径
             String yearMonth = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
             String savePath = uploadPath + File.separator + yearMonth;
+            
+            // 确保目录存在
             File saveDir = new File(savePath);
-            if (!saveDir.exists() && !saveDir.mkdirs()) {
-                return Result.error("创建目录失败");
+            if (!saveDir.exists()) {
+                // 创建多级目录
+                boolean created = saveDir.mkdirs();
+                if (!created) {
+                    logger.error("无法创建目录: {}", savePath);
+                    return Result.error("创建目录失败，请检查系统权限");
+                }
+                logger.info("成功创建目录: {}", savePath);
             }
 
             // 生成唯一文件名
@@ -135,15 +143,29 @@ public class SectionController {
             String newFilename = UUID.randomUUID().toString() + extension;
             String fullPath = savePath + File.separator + newFilename;
 
+            logger.info("保存视频文件到路径: {}", fullPath);
+            
             // 保存文件
-            file.transferTo(new File(fullPath));
+            File destFile = new File(fullPath);
+            file.transferTo(destFile);
+            
+            // 验证文件是否成功保存
+            if (!destFile.exists() || destFile.length() == 0) {
+                logger.error("文件保存失败或文件大小为0: {}", fullPath);
+                return Result.error("文件保存失败，请重试");
+            }
+            
+            logger.info("视频文件保存成功，大小: {} bytes", destFile.length());
 
             // 更新数据库中的视频URL
             String videoUrl = yearMonth + "/" + newFilename;
             section.setVideoUrl(videoUrl);
             if (!sectionService.updateById(section)) {
                 // 如果更新失败，删除已上传的文件
-                new File(fullPath).delete();
+                boolean deleted = destFile.delete();
+                if (!deleted) {
+                    logger.warn("无法删除文件: {}", fullPath);
+                }
                 return Result.error("更新数据库失败");
             }
 

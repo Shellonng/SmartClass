@@ -14,8 +14,12 @@ import { useAuthStore } from './stores/auth'
 
 // 配置axios
 axios.defaults.baseURL = 'http://localhost:8080'
-axios.defaults.timeout = 10000
+axios.defaults.timeout = 480000 // 增加超时时间到480秒(8分钟)，以匹配后端设置
 axios.defaults.withCredentials = true // 允许跨域请求携带凭证（cookies）
+
+// 设置请求头
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest' // 标记为AJAX请求
+console.log('axios基础配置完成，确保使用withCredentials进行会话认证')
 
 // 请求拦截器
 axios.interceptors.request.use(
@@ -26,6 +30,7 @@ axios.interceptors.request.use(
       baseURL: config.baseURL,
       fullURL: (config.baseURL || '') + (config.url || ''),
       headers: config.headers,
+      withCredentials: config.withCredentials,
       data: config.data
     })
     
@@ -36,7 +41,7 @@ axios.interceptors.request.use(
     const token = localStorage.getItem('token')
     if (token && !config.headers['Authorization']) {
       config.headers['Authorization'] = `Bearer ${token}`
-      console.log('请求自动添加token')
+      console.log('请求自动添加token:', token)
     }
     
     return config
@@ -55,6 +60,7 @@ axios.interceptors.response.use(
       statusText: response.statusText,
       url: response.config.url,
       headers: response.headers,
+      cookies: document.cookie,
       data: response.data
     })
     

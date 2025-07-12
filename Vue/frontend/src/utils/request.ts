@@ -13,13 +13,16 @@ export interface ApiResponse<T = any> {
 // 创建axios实例
 const service = axios.create({
   baseURL: 'http://localhost:8080', // API基础URL
-  timeout: 15000, // 请求超时时间
+  timeout: 480000, // 请求超时时间，增加到8分钟，与后端一致
   withCredentials: true // 跨域请求时发送cookies
 })
 
 // 请求拦截器
 service.interceptors.request.use(
   config => {
+    // 确保请求包含凭证（cookies）用于Session认证
+    config.withCredentials = true
+    
     // 从localStorage获取token
     const token = localStorage.getItem('token')
     
@@ -28,8 +31,6 @@ service.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${token}`
       console.log(`请求 ${config.url} 添加token成功`)
     } else {
-      console.warn(`请求 ${config.url} 未找到token`)
-      
       // 尝试从其他可能的位置获取token
       const userToken = localStorage.getItem('user-token')
       if (userToken) {
@@ -41,6 +42,8 @@ service.interceptors.request.use(
         if (globalToken) {
           config.headers['Authorization'] = globalToken
           console.log(`请求 ${config.url} 使用全局token`)
+        } else {
+          console.log(`请求 ${config.url} 将依赖Session认证`)
         }
       }
     }
@@ -67,9 +70,9 @@ service.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           message = '未授权，请重新登录'
-          // 清除token并跳转到登录页
-          localStorage.removeItem('token')
-          router.push('/login')
+          // 不要自动清除token，而是通知用户需要重新登录
+          // localStorage.removeItem('token')
+          // router.push('/login')
           break
         case 403:
           message = '拒绝访问'

@@ -8,16 +8,13 @@ import com.education.entity.AssignmentSubmission;
 import com.education.entity.AssignmentSubmissionAnswer;
 import com.education.entity.Question;
 import com.education.entity.Student;
-import com.education.entity.StudentAnswer;
 import com.education.mapper.AssignmentMapper;
 import com.education.mapper.AssignmentQuestionMapper;
 import com.education.mapper.AssignmentSubmissionAnswerMapper;
 import com.education.mapper.AssignmentSubmissionMapper;
 import com.education.mapper.QuestionMapper;
-import com.education.mapper.StudentAnswerMapper;
 import com.education.mapper.StudentMapper;
 import com.education.security.SecurityUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -65,9 +62,6 @@ public class StudentAssignmentController {
     private QuestionMapper questionMapper;
     
     @Autowired
-    private StudentAnswerMapper studentAnswerMapper;
-    
-    @Autowired
     private StudentMapper studentMapper;
     
     @Autowired
@@ -86,7 +80,7 @@ public class StudentAssignmentController {
      */
     @Operation(summary = "获取学生任务列表", description = "获取学生的任务列表，支持多种筛选条件")
     @GetMapping
-    public Result getAssignmentList(
+    public Result<List<Map<String, Object>>> getAssignmentList(
             @Parameter(description = "状态筛选") @RequestParam(required = false) String status,
             @Parameter(description = "课程ID筛选") @RequestParam(required = false) Long courseId,
             @Parameter(description = "任务类型筛选") @RequestParam(required = false) String type,
@@ -175,15 +169,15 @@ public class StudentAssignmentController {
                 Date now = new Date();
                 
                 if ("pending".equals(status)) {
-                    // 待完成：未提交且未过期
-                    sql += "AND (s.status IS NULL OR s.status = 0) AND (a.end_time IS NULL OR a.end_time > ?) ";
+                    // 待完成：submission状态为0且未过期
+                    sql += "AND (s.status = 0 OR s.status IS NULL) AND (a.end_time IS NULL OR a.end_time > ?) ";
                     params.add(now);
                 } else if ("completed".equals(status)) {
-                    // 已完成：已提交
-                    sql += "AND s.status = 1 ";
+                    // 已完成：submission状态为1（已提交未批改）或2（已批改）
+                    sql += "AND (s.status = 1 OR s.status = 2) ";
                 } else if ("overdue".equals(status)) {
-                    // 已逾期：未提交且已过期
-                    sql += "AND (s.status IS NULL OR s.status = 0) AND a.end_time < ? ";
+                    // 已逾期：submission状态为0且已过期
+                    sql += "AND (s.status = 0 OR s.status IS NULL) AND a.end_time < ? ";
                     params.add(now);
                 }
             }
@@ -238,17 +232,25 @@ public class StudentAssignmentController {
                         assignment.put("priority", priority);
                         
                         // 提交状态
-                        int submissionStatus = rs.getInt("submission_status");
+                        Integer submissionStatus = rs.getObject("submission_status") != null ? rs.getInt("submission_status") : null;
                         Date endTime = rs.getTimestamp("end_time");
                         
                         String statusValue;
-                        if (submissionStatus == 1) {
+                        if (submissionStatus != null && (submissionStatus == 1 || submissionStatus == 2)) {
+                            // 状态为1（已提交未批改）或2（已批改）时，显示为已完成
                             statusValue = "completed";
                             assignment.put("submissionTime", rs.getTimestamp("submit_time"));
                             assignment.put("score", rs.getObject("score"));
+                            
+                            // 如果是已批改状态，添加标记
+                            if (submissionStatus == 2) {
+                                assignment.put("isGraded", true);
+                            }
                         } else if (endTime != null && now.after(endTime)) {
+                            // 未提交且已过期
                             statusValue = "overdue";
                         } else {
+                            // 未提交且未过期
                             statusValue = "pending";
                         }
                         
@@ -287,7 +289,7 @@ public class StudentAssignmentController {
      */
     @Operation(summary = "获取任务详情", description = "获取任务的详细信息")
     @GetMapping("/{id}")
-    public Result getAssignmentDetail(
+    public Result<Map<String, Object>> getAssignmentDetail(
             @Parameter(description = "任务ID") @PathVariable Long id) {
         
         logger.info("获取学生任务详情，任务ID: {}", id);
@@ -401,7 +403,7 @@ public class StudentAssignmentController {
      */
     @Operation(summary = "获取任务题目", description = "获取任务的题目列表")
     @GetMapping("/{id}/questions")
-    public Result getAssignmentQuestions(
+    public Result<List<Map<String, Object>>> getAssignmentQuestions(
             @Parameter(description = "任务ID") @PathVariable Long id) {
         
         logger.info("获取学生任务题目，任务ID: {}", id);
@@ -557,7 +559,7 @@ public class StudentAssignmentController {
     @Operation(summary = "保存单题答案", description = "保存单个题目的答案")
     @PostMapping("/{id}/questions/{questionId}/save")
     @Transactional
-    public Result saveQuestionAnswer(
+    public Result<Map<String, Object>> saveQuestionAnswer(
             @Parameter(description = "任务ID") @PathVariable Long id,
             @Parameter(description = "题目ID") @PathVariable Long questionId,
             @RequestBody Map<String, Object> request) {
@@ -644,7 +646,10 @@ public class StudentAssignmentController {
             // 处理不同类型的答案
             if (answerObj instanceof List) {
                 // 多选题答案是数组，转为逗号分隔的字符串
-                answerContent = String.join(",", (List<String>) answerObj);
+                // Add SuppressWarnings annotation to fix the unchecked cast warning
+                @SuppressWarnings("unchecked")
+                List<String> answerList = (List<String>) answerObj;
+                answerContent = String.join(",", answerList);
             } else {
                 answerContent = String.valueOf(answerObj);
             }
@@ -718,7 +723,7 @@ public class StudentAssignmentController {
     @Operation(summary = "提交任务/考试答案", description = "提交任务/考试的答案")
     @PostMapping("/{id}/submit")
     @Transactional
-    public Result submitAssignment(
+    public Result<Map<String, Object>> submitAssignment(
             @Parameter(description = "任务ID") @PathVariable Long id) {
         
         logger.info("提交任务/考试答案，任务ID: {}", id);
@@ -779,32 +784,101 @@ public class StudentAssignmentController {
                 return Result.error("已经提交过，不能重复提交");
             }
             
-            // 更新提交状态
-            submission.setStatus(1); // 已提交未批改
-            submission.setSubmitTime(new Date());
-            submission.setUpdateTime(new Date());
-            assignmentSubmissionMapper.updateById(submission);
+            // 获取该作业的所有题目
+            List<AssignmentQuestion> assignmentQuestions = assignmentQuestionMapper.selectList(
+                new LambdaQueryWrapper<AssignmentQuestion>()
+                    .eq(AssignmentQuestion::getAssignmentId, id)
+            );
             
-            // 计算总分
+            // 获取该提交的所有答案
             List<AssignmentSubmissionAnswer> answers = assignmentSubmissionAnswerMapper.selectList(
                 new LambdaQueryWrapper<AssignmentSubmissionAnswer>()
                     .eq(AssignmentSubmissionAnswer::getSubmissionId, submission.getId())
             );
             
+            // 为选择题、判断题和填空题进行自动评分
             int totalScore = 0;
+            
             for (AssignmentSubmissionAnswer answer : answers) {
-                if (answer.getScore() != null) {
-                    totalScore += answer.getScore();
+                // 获取题目信息
+                Question question = questionMapper.selectById(answer.getQuestionId());
+                
+                if (question != null) {
+                    // 找到该题在assignmentQuestions中的配置
+                    AssignmentQuestion assignmentQuestion = null;
+                    for (AssignmentQuestion aq : assignmentQuestions) {
+                        if (aq.getQuestionId().equals(question.getId())) {
+                            assignmentQuestion = aq;
+                            break;
+                        }
+                    }
+                    
+                    if (assignmentQuestion == null) {
+                        logger.warn("题目不属于该任务，跳过评分，题目ID: {}", question.getId());
+                        continue;
+                    }
+                    
+                    // 获取该题在当前作业中的分值
+                    Integer questionScore = assignmentQuestion.getScore();
+                    
+                    // 对选择题、判断题和填空题自动评分
+                    String questionType = question.getQuestionType();
+                    if ("single".equals(questionType) || "true_false".equals(questionType) || "blank".equals(questionType) || "multiple".equals(questionType)) {
+                        String correctAnswer = question.getCorrectAnswer();
+                        String studentAnswer = answer.getStudentAnswer();
+                        
+                        boolean isCorrect = false;
+                        
+                        if (correctAnswer != null && studentAnswer != null) {
+                            if ("multiple".equals(questionType)) {
+                                // 多选题答案可能顺序不同，需要特殊处理
+                                String[] correctOptions = correctAnswer.split(",");
+                                String[] studentOptions = studentAnswer.split(",");
+                                
+                                // 排序后比较
+                                Arrays.sort(correctOptions);
+                                Arrays.sort(studentOptions);
+                                
+                                isCorrect = Arrays.equals(correctOptions, studentOptions);
+                            } else {
+                                // 其他题型直接比较
+                                isCorrect = correctAnswer.equalsIgnoreCase(studentAnswer);
+                            }
+                        }
+                        
+                        // 更新答案的正确性和得分
+                        answer.setIsCorrect(isCorrect);
+                        answer.setScore(isCorrect ? questionScore : 0);
+                        assignmentSubmissionAnswerMapper.updateById(answer);
+                        
+                        // 累计总分
+                        if (isCorrect && questionScore != null) {
+                            totalScore += questionScore;
+                        }
+                        
+                        logger.info("自动评分 - 题目ID: {}, 类型: {}, 正确答案: {}, 学生答案: {}, 是否正确: {}, 得分: {}",
+                                question.getId(), questionType, correctAnswer, studentAnswer, isCorrect, 
+                                isCorrect ? questionScore : 0);
+                    }
                 }
             }
             
-            // 更新总分
-            submission.setScore(totalScore);
+            // 更新提交状态
+            submission.setStatus(1); // 已提交未批改
+            submission.setSubmitTime(new Date());
+            submission.setUpdateTime(new Date());
+            submission.setScore(totalScore); // 更新自动评分的分数
             assignmentSubmissionMapper.updateById(submission);
             
-            logger.info("提交任务成功，任务ID: {}, 学生ID: {}, 得分: {}", id, currentUserId, totalScore);
+            logger.info("提交任务成功，任务ID: {}, 学生ID: {}, 自动评分得分: {}", id, currentUserId, totalScore);
             
-            return Result.success("提交成功");
+            Map<String, Object> result = new HashMap<>();
+            result.put("assignmentId", id);
+            result.put("studentId", currentUserId);
+            result.put("score", totalScore);
+            result.put("submitTime", submission.getSubmitTime());
+            
+            return Result.success(result);
             
         } catch (Exception e) {
             logger.error("提交任务答案失败: {}", e.getMessage(), e);
@@ -820,7 +894,7 @@ public class StudentAssignmentController {
      */
     @Operation(summary = "获取已保存答案", description = "获取学生已保存的答案")
     @GetMapping("/{id}/questions/{questionId}/answer")
-    public Result getSavedAnswer(
+    public Result<Map<String, Object>> getSavedAnswer(
             @Parameter(description = "任务ID") @PathVariable Long id,
             @Parameter(description = "题目ID") @PathVariable Long questionId) {
         
@@ -880,7 +954,7 @@ public class StudentAssignmentController {
     @Operation(summary = "提交文件作业", description = "提交文件类型的作业")
     @PostMapping("/{id}/submit-file")
     @Transactional
-    public Result submitAssignmentFile(
+    public Result<Map<String, Object>> submitAssignmentFile(
             @Parameter(description = "任务ID") @PathVariable Long id,
             @RequestParam("file") MultipartFile file) {
         
@@ -1006,11 +1080,334 @@ public class StudentAssignmentController {
             }
             
             logger.info("文件作业提交成功，任务ID: {}, 学生ID: {}, 文件名: {}", id, currentUserId, originalFilename);
-            return Result.success("作业提交成功");
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("assignmentId", id);
+            result.put("studentId", currentUserId);
+            result.put("fileName", originalFilename);
+            result.put("filePath", uploadDir + newFilename);
+            result.put("submitTime", submission.getSubmitTime());
+            
+            return Result.success(result);
             
         } catch (Exception e) {
             logger.error("提交文件作业失败: {}", e.getMessage(), e);
             return Result.error("提交作业失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取作业批改结果
+     * @param id 作业提交ID
+     * @return 批改结果详情
+     */
+    @Operation(summary = "获取作业批改结果", description = "获取学生作业的批改结果和教师反馈")
+    @GetMapping("/submissions/{submissionId}/results")
+    public Result<Map<String, Object>> getAssignmentResults(
+            @Parameter(description = "作业提交ID") @PathVariable Long submissionId) {
+        
+        logger.info("获取作业批改结果，提交ID: {}", submissionId);
+        
+        try {
+            // 获取当前登录用户ID
+            Long currentUserId = securityUtil.getCurrentUserId();
+            if (currentUserId == null) {
+                return Result.error("未登录或登录已过期");
+            }
+            
+            // 查询提交记录
+            AssignmentSubmission submission = assignmentSubmissionMapper.selectById(submissionId);
+            if (submission == null) {
+                return Result.error(404, "未找到提交记录");
+            }
+            
+            // 查询学生ID
+            Student student = studentMapper.selectOne(
+                new LambdaQueryWrapper<Student>()
+                    .eq(Student::getUserId, currentUserId)
+                    .last("LIMIT 1")
+            );
+            
+            if (student == null) {
+                return Result.error(401, "无权访问");
+            }
+            
+            // 验证提交记录是否属于当前学生
+            if (!submission.getStudentId().equals(student.getId())) {
+                return Result.error(403, "无权查看该提交记录");
+            }
+            
+            // 查询作业详情
+            Assignment assignment = assignmentMapper.selectById(submission.getAssignmentId());
+            if (assignment == null) {
+                return Result.error(404, "未找到作业信息");
+            }
+            
+            // 查询答案详情
+            List<AssignmentSubmissionAnswer> answers = assignmentSubmissionAnswerMapper.selectList(
+                new LambdaQueryWrapper<AssignmentSubmissionAnswer>()
+                    .eq(AssignmentSubmissionAnswer::getSubmissionId, submission.getId())
+            );
+            
+            // 查询题目信息
+            List<Long> questionIds = new ArrayList<>();
+            for (AssignmentSubmissionAnswer answer : answers) {
+                questionIds.add(answer.getQuestionId());
+            }
+            
+            Map<Long, Question> questionMap = new HashMap<>();
+            if (!questionIds.isEmpty()) {
+                List<Question> questions = questionMapper.selectBatchIds(questionIds);
+                for (Question question : questions) {
+                    questionMap.put(question.getId(), question);
+                }
+            }
+            
+            // 构建返回结果
+            Map<String, Object> result = new HashMap<>();
+            result.put("submissionId", submission.getId());
+            result.put("assignmentId", submission.getAssignmentId());
+            result.put("assignmentTitle", assignment.getTitle());
+            result.put("status", submission.getStatus());
+            result.put("score", submission.getScore());
+            result.put("totalScore", assignment.getTotalScore());
+            result.put("feedback", submission.getFeedback());
+            result.put("submitTime", submission.getSubmitTime());
+            result.put("gradeTime", submission.getGradeTime());
+            
+            // 答案详情
+            List<Map<String, Object>> answerDetails = new ArrayList<>();
+            for (AssignmentSubmissionAnswer answer : answers) {
+                Map<String, Object> answerDetail = new HashMap<>();
+                answerDetail.put("questionId", answer.getQuestionId());
+                
+                Question question = questionMap.get(answer.getQuestionId());
+                if (question != null) {
+                    answerDetail.put("questionTitle", question.getTitle());
+                    answerDetail.put("questionType", question.getQuestionType());
+                    answerDetail.put("correctAnswer", question.getCorrectAnswer());
+                    answerDetail.put("explanation", question.getExplanation());
+                }
+                
+                answerDetail.put("studentAnswer", answer.getStudentAnswer());
+                answerDetail.put("isCorrect", answer.getIsCorrect());
+                answerDetail.put("score", answer.getScore());
+                answerDetail.put("comment", answer.getComment());
+                
+                answerDetails.add(answerDetail);
+            }
+            
+            result.put("answers", answerDetails);
+            
+            // 计算正确率
+            int correctCount = 0;
+            for (AssignmentSubmissionAnswer answer : answers) {
+                if (answer.getIsCorrect() != null && answer.getIsCorrect()) {
+                    correctCount++;
+                }
+            }
+            
+            double correctRate = answers.isEmpty() ? 0 : (double) correctCount / answers.size() * 100;
+            result.put("correctRate", Math.round(correctRate * 100) / 100.0); // 保留两位小数
+            
+            // 返回结果
+            return Result.success("获取批改结果成功", result);
+            
+        } catch (Exception e) {
+            logger.error("获取作业批改结果异常: {}", e.getMessage(), e);
+            return Result.error(500, "获取作业批改结果失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取学生的所有已批改作业
+     */
+    @Operation(summary = "获取已批改作业列表", description = "获取当前学生的所有已批改作业列表")
+    @GetMapping("/graded")
+    public Result<List<Map<String, Object>>> getGradedAssignments() {
+        
+        logger.info("获取学生已批改作业列表");
+        
+        try {
+            // 获取当前登录用户ID
+            Long currentUserId = securityUtil.getCurrentUserId();
+            if (currentUserId == null) {
+                return Result.error("未登录或登录已过期");
+            }
+            
+            // 查询学生信息
+            Student student = studentMapper.selectOne(
+                new LambdaQueryWrapper<Student>()
+                    .eq(Student::getUserId, currentUserId)
+                    .last("LIMIT 1")
+            );
+            
+            if (student == null) {
+                return Result.error("学生信息不存在");
+            }
+            
+            // 查询已批改的提交
+            List<AssignmentSubmission> submissions = assignmentSubmissionMapper.selectList(
+                new LambdaQueryWrapper<AssignmentSubmission>()
+                    .eq(AssignmentSubmission::getStudentId, student.getId())
+                    .eq(AssignmentSubmission::getStatus, 2) // 已批改
+            );
+            
+            // 获取作业ID列表
+            List<Long> assignmentIds = new ArrayList<>();
+            for (AssignmentSubmission submission : submissions) {
+                assignmentIds.add(submission.getAssignmentId());
+            }
+            
+            // 查询作业信息
+            Map<Long, Assignment> assignmentMap = new HashMap<>();
+            if (!assignmentIds.isEmpty()) {
+                List<Assignment> assignments = assignmentMapper.selectBatchIds(assignmentIds);
+                for (Assignment assignment : assignments) {
+                    assignmentMap.put(assignment.getId(), assignment);
+                }
+            }
+            
+            // 构建返回结果
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (AssignmentSubmission submission : submissions) {
+                Map<String, Object> item = new HashMap<>();
+                
+                Assignment assignment = assignmentMap.get(submission.getAssignmentId());
+                if (assignment != null) {
+                    item.put("submissionId", submission.getId());
+                    item.put("assignmentId", submission.getAssignmentId());
+                    item.put("title", assignment.getTitle());
+                    item.put("courseId", assignment.getCourseId());
+                    item.put("type", assignment.getType());
+                    item.put("score", submission.getScore());
+                    item.put("totalScore", assignment.getTotalScore());
+                    item.put("submitTime", submission.getSubmitTime());
+                    item.put("gradeTime", submission.getGradeTime());
+                    
+                    // 计算得分率
+                    double scoreRate = 0;
+                    if (assignment.getTotalScore() != null && assignment.getTotalScore() > 0) {
+                        scoreRate = (double) submission.getScore() / assignment.getTotalScore() * 100;
+                    }
+                    item.put("scoreRate", Math.round(scoreRate * 100) / 100.0); // 保留两位小数
+                    
+                    result.add(item);
+                }
+            }
+            
+            return Result.success("获取已批改作业成功", result);
+            
+        } catch (Exception e) {
+            logger.error("获取已批改作业列表异常: {}", e.getMessage(), e);
+            return Result.error(500, "获取已批改作业列表失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取作业批改统计
+     */
+    @Operation(summary = "获取作业批改统计", description = "获取当前学生的作业批改统计信息")
+    @GetMapping("/statistics")
+    public Result<Map<String, Object>> getAssignmentStatistics() {
+        
+        logger.info("获取学生作业批改统计");
+        
+        try {
+            // 获取当前登录用户ID
+            Long currentUserId = securityUtil.getCurrentUserId();
+            if (currentUserId == null) {
+                return Result.error("未登录或登录已过期");
+            }
+            
+            // 查询学生信息
+            Student student = studentMapper.selectOne(
+                new LambdaQueryWrapper<Student>()
+                    .eq(Student::getUserId, currentUserId)
+                    .last("LIMIT 1")
+            );
+            
+            if (student == null) {
+                return Result.error("学生信息不存在");
+            }
+            
+            // 查询所有提交记录
+            List<AssignmentSubmission> submissions = assignmentSubmissionMapper.selectList(
+                new LambdaQueryWrapper<AssignmentSubmission>()
+                    .eq(AssignmentSubmission::getStudentId, student.getId())
+            );
+            
+            // 统计数据
+            int totalCount = submissions.size();
+            int gradedCount = 0;
+            int pendingCount = 0;
+            int overdueCount = 0;
+            int excellentCount = 0; // 优秀（90分以上）
+            int goodCount = 0;      // 良好（80-89分）
+            int passCount = 0;      // 及格（60-79分）
+            int failCount = 0;      // 不及格（60分以下）
+            
+            double totalScore = 0;
+            int scoreCount = 0;
+            
+            Date now = new Date();
+            
+            for (AssignmentSubmission submission : submissions) {
+                if (submission.getStatus() != null) {
+                    if (submission.getStatus() == 2) { // 已批改
+                        gradedCount++;
+                        
+                        // 统计分数段
+                        if (submission.getScore() != null) {
+                            totalScore += submission.getScore();
+                            scoreCount++;
+                            
+                            if (submission.getScore() >= 90) {
+                                excellentCount++;
+                            } else if (submission.getScore() >= 80) {
+                                goodCount++;
+                            } else if (submission.getScore() >= 60) {
+                                passCount++;
+                            } else {
+                                failCount++;
+                            }
+                        }
+                    } else if (submission.getStatus() == 1) { // 已提交未批改
+                        pendingCount++;
+                    } else if (submission.getStatus() == 0) { // 未提交
+                        // 检查是否已过期
+                        Assignment assignment = assignmentMapper.selectById(submission.getAssignmentId());
+                        if (assignment != null && assignment.getEndTime() != null && now.after(assignment.getEndTime())) {
+                            overdueCount++;
+                        }
+                    }
+                }
+            }
+            
+            // 计算平均分
+            double averageScore = scoreCount > 0 ? totalScore / scoreCount : 0;
+            
+            // 构建返回结果
+            Map<String, Object> result = new HashMap<>();
+            result.put("totalCount", totalCount);
+            result.put("gradedCount", gradedCount);
+            result.put("pendingCount", pendingCount);
+            result.put("overdueCount", overdueCount);
+            result.put("averageScore", Math.round(averageScore * 100) / 100.0);
+            
+            // 分数分布
+            Map<String, Integer> scoreDistribution = new HashMap<>();
+            scoreDistribution.put("excellent", excellentCount);
+            scoreDistribution.put("good", goodCount);
+            scoreDistribution.put("pass", passCount);
+            scoreDistribution.put("fail", failCount);
+            result.put("scoreDistribution", scoreDistribution);
+            
+            return Result.success("获取批改统计成功", result);
+            
+        } catch (Exception e) {
+            logger.error("获取作业批改统计异常: {}", e.getMessage(), e);
+            return Result.error(500, "获取作业批改统计失败: " + e.getMessage());
         }
     }
 } 
