@@ -1,13 +1,20 @@
 package com.education.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
+import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
+import cn.hutool.core.net.NetUtil;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import java.time.LocalDateTime;
 
 /**
  * MyBatis-Plus配置类
@@ -37,5 +44,36 @@ public class MyBatisPlusConfig {
         interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
         
         return interceptor;
+    }
+    
+    /**
+     * 自定义ID生成器
+     * 使用雪花算法生成分布式唯一ID
+     */
+    @Bean
+    public IdentifierGenerator identifierGenerator() {
+        return new DefaultIdentifierGenerator(NetUtil.getLocalhost());
+    }
+    
+    /**
+     * 自动填充处理器
+     * 用于自动填充创建时间和更新时间
+     */
+    @Bean
+    public MetaObjectHandler metaObjectHandler() {
+        return new MetaObjectHandler() {
+            @Override
+            public void insertFill(MetaObject metaObject) {
+                // 创建时间和更新时间自动填充
+                this.strictInsertFill(metaObject, "createTime", LocalDateTime.class, LocalDateTime.now());
+                this.strictInsertFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
+            }
+
+            @Override
+            public void updateFill(MetaObject metaObject) {
+                // 更新时间自动填充
+                this.strictUpdateFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
+            }
+        };
     }
 }

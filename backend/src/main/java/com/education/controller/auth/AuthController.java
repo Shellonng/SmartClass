@@ -3,10 +3,10 @@ package com.education.controller.auth;
 import com.education.dto.common.Result;
 import com.education.dto.AuthDTO;
 import com.education.service.auth.AuthService;
-import com.education.utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,22 +14,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 认证控制器
+ * 认证控制器 - 简化版（基于Session）
  * 
  * @author Education Platform Team
- * @version 1.0.0
+ * @version 1.0.0-simplified
  * @since 2024
  */
-@Tag(name = "认证管理", description = "用户登录、注册、密码管理等认证相关接口")
+@Tag(name = "认证管理", description = "用户登录、注册等基本认证接口")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
     private AuthService authService;
-
-    @Autowired
-    private JwtUtils jwtUtils;
 
     @Operation(summary = "用户登录", description = "支持学生和教师登录")
     @PostMapping("/login")
@@ -38,15 +35,34 @@ public class AuthController {
             System.out.println("🔐 收到登录请求:");
             System.out.println("  - 用户名: " + request.getUsername());
             System.out.println("  - 请求路径: " + httpRequest.getRequestURI());
-            System.out.println("  - 请求方法: " + httpRequest.getMethod());
-            System.out.println("  - Origin: " + httpRequest.getHeader("Origin"));
-            System.out.println("  - Content-Type: " + httpRequest.getContentType());
+            System.out.println("  - 请求头: " + httpRequest.getHeader("Cookie"));
+            System.out.println("  - User-Agent: " + httpRequest.getHeader("User-Agent"));
             
-            AuthDTO.LoginResponse authResponse = authService.login(request);
+            // 调用简化的登录服务
+            AuthDTO.SimpleLoginResponse authResponse = authService.simpleLogin(request);
+            
+            // 将用户信息存储到Session中
+            HttpSession session = httpRequest.getSession(true); // 确保创建新会话
+            session.setAttribute("userId", authResponse.getUserId());
+            session.setAttribute("username", authResponse.getUsername());
+            session.setAttribute("role", authResponse.getUserType());
+            session.setAttribute("realName", authResponse.getRealName());
+            session.setAttribute("email", authResponse.getEmail());
+            
+            // 设置会话超时时间为24小时
+            session.setMaxInactiveInterval(86400);
+            
+            System.out.println("✅ 会话ID: " + session.getId());
+            System.out.println("✅ 会话属性设置:");
+            System.out.println("  - userId: " + session.getAttribute("userId"));
+            System.out.println("  - username: " + session.getAttribute("username"));
+            System.out.println("  - role: " + session.getAttribute("role"));
+            System.out.println("  - realName: " + session.getAttribute("realName"));
+            System.out.println("  - email: " + session.getAttribute("email"));
+            System.out.println("  - 会话超时时间: " + session.getMaxInactiveInterval() + "秒");
             
             // 构建前端期望的响应结构
             Map<String, Object> data = new HashMap<>();
-            data.put("token", authResponse.getToken());
             
             Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("id", authResponse.getUserId());
@@ -54,141 +70,138 @@ public class AuthController {
             userInfo.put("realName", authResponse.getRealName());
             userInfo.put("email", authResponse.getEmail());
             userInfo.put("role", authResponse.getUserType());
-            userInfo.put("avatar", null); // 如果没有头像字段，设为null
+            userInfo.put("avatar", null);
             
             data.put("userInfo", userInfo);
+            data.put("sessionId", session.getId()); // 返回sessionId作为身份标识
             
-            System.out.println("✅ 登录成功，返回响应");
+            System.out.println("✅ 登录成功，用户存储到Session中");
+            System.out.println("✅ 返回用户信息: " + userInfo);
+            
+            // 输出响应头信息
+            System.out.println("✅ 响应头将包含Set-Cookie: JSESSIONID=" + session.getId());
+            
             return Result.success(data);
         } catch (Exception e) {
             System.out.println("❌ 登录失败: " + e.getMessage());
-            throw e; // 让全局异常处理器处理
+            return Result.error("登录失败: " + e.getMessage());
         }
     }
 
     @Operation(summary = "用户登出", description = "清除用户登录状态")
     @PostMapping("/logout")
-    public Result<Void> logout(@RequestHeader("Authorization") String token) {
+    public Result<Void> logout(HttpServletRequest request) {
         try {
-            // 移除Bearer前缀
-            if (token.startsWith("Bearer ")) {
-                token = token.substring(7);
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate(); // 清除Session
+                System.out.println("✅ 用户登出成功，Session已清除");
             }
-            authService.logout(token);
             return Result.success();
         } catch (Exception e) {
             return Result.error("登出失败: " + e.getMessage());
         }
     }
 
-    @Operation(summary = "刷新Token", description = "使用刷新Token获取新的访问Token")
-    @PostMapping("/refresh")
-    public Result<AuthDTO.LoginResponse> refreshToken(@Valid @RequestBody AuthDTO.RefreshTokenRequest request) {
+    @Operation(summary = "用户注册", description = "新用户注册，注册成功后自动登录")
+    @PostMapping("/register")
+    public Result<AuthDTO.SimpleLoginResponse> register(
+            @Valid @RequestBody AuthDTO.RegisterRequest request,
+            HttpServletRequest httpRequest) {
         try {
-            AuthDTO.LoginResponse response = authService.refreshToken(request);
+            authService.simpleRegister(request);
+            
+            // 注册成功后自动登录
+            AuthDTO.LoginRequest loginRequest = new AuthDTO.LoginRequest();
+            loginRequest.setUsername(request.getUsername());
+            loginRequest.setPassword(request.getPassword());
+            
+            AuthDTO.SimpleLoginResponse response = authService.simpleLogin(loginRequest);
+            
+            // 设置Session
+            HttpSession session = httpRequest.getSession();
+            session.setAttribute("userId", response.getUserId());
+            session.setAttribute("username", response.getUsername());
+            session.setAttribute("userType", response.getUserType());
+            
             return Result.success(response);
         } catch (Exception e) {
-            return Result.error("Token刷新失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "修改密码", description = "用户修改登录密码")
-    @PostMapping("/change-password")
-    public Result<Void> changePassword(@Valid @RequestBody AuthDTO.ChangePasswordRequest request, @RequestHeader("Authorization") String token) {
-        try {
-            // 移除Bearer前缀
-            if (token.startsWith("Bearer ")) {
-                token = token.substring(7);
-            }
-            // 从token中获取userId
-            Long userId = jwtUtils.getUserIdFromToken(token);
-            authService.changePassword(request, userId);
-            return Result.success();
-        } catch (Exception e) {
-            return Result.error("密码修改失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "发送重置密码邮件", description = "向用户邮箱发送密码重置验证码")
-    @PostMapping("/send-reset-email")
-    public Result<Void> sendResetPasswordEmail(@RequestParam String email) {
-        try {
-            authService.sendResetPasswordEmail(email);
-            return Result.success();
-        } catch (Exception e) {
-            return Result.error("发送重置密码邮件失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "重置密码", description = "使用邮箱验证码重置密码")
-    @PostMapping("/reset-password")
-    public Result<Void> resetPassword(@Valid @RequestBody AuthDTO.ResetPasswordRequest request) {
-        try {
-            authService.resetPassword(request);
-            return Result.success();
-        } catch (Exception e) {
-            return Result.error("重置密码失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "获取验证码", description = "获取图形验证码")
-    @GetMapping("/captcha")
-    public Result<Map<String, String>> getCaptcha() {
-        try {
-            Map<String, String> captchaInfo = (Map<String, String>) authService.generateCaptcha();
-            return Result.success(captchaInfo);
-        } catch (Exception e) {
-            return Result.error("获取验证码失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "用户注册", description = "支持学生和教师注册")
-    @PostMapping("/register")
-    public Result<Object> register(@Valid @RequestBody AuthDTO.RegisterRequest request) {
-        try {
-            System.out.println("📝 收到注册请求:");
-            System.out.println("  - 用户名: " + request.getUsername());
-            System.out.println("  - 邮箱: " + request.getEmail());
-            System.out.println("  - 用户角色: " + request.getRole());
-            
-            AuthDTO.LoginResponse authResponse = authService.register(request);
-            
-            // 构建前端期望的响应结构
-            Map<String, Object> data = new HashMap<>();
-            data.put("token", authResponse.getToken());
-            
-            Map<String, Object> userInfo = new HashMap<>();
-            userInfo.put("id", authResponse.getUserId());
-            userInfo.put("username", authResponse.getUsername());
-            userInfo.put("realName", authResponse.getRealName());
-            userInfo.put("email", authResponse.getEmail());
-            userInfo.put("role", authResponse.getUserType());
-            userInfo.put("avatar", null); // 如果没有头像字段，设为null
-            
-            data.put("userInfo", userInfo);
-            
-            System.out.println("✅ 注册成功，返回响应");
-            return Result.success(data);
-        } catch (Exception e) {
-            System.out.println("❌ 注册失败: " + e.getMessage());
             return Result.error("注册失败: " + e.getMessage());
         }
     }
 
     @Operation(summary = "获取当前用户信息", description = "获取当前登录用户的基本信息")
     @GetMapping("/user-info")
-    public Result<Object> getCurrentUserInfo(@RequestHeader("Authorization") String token) {
+    public Result<Object> getCurrentUserInfo(HttpServletRequest request) {
         try {
-            // 移除Bearer前缀
-            if (token.startsWith("Bearer ")) {
-                token = token.substring(7);
+            System.out.println("📋 获取用户信息请求:");
+            System.out.println("  - 请求路径: " + request.getRequestURI());
+            System.out.println("  - 请求方法: " + request.getMethod());
+            System.out.println("  - 请求头Cookie: " + request.getHeader("Cookie"));
+            System.out.println("  - User-Agent: " + request.getHeader("User-Agent"));
+            
+            HttpSession session = request.getSession(false);
+            if (session == null) {
+                System.out.println("❌ 未找到有效会话");
+                return Result.error("用户未登录");
             }
-            // 从token中解析userId
-            Long userId = jwtUtils.getUserIdFromToken(token);
-            Object userInfo = authService.getCurrentUserInfo(userId);
+            
+            System.out.println("✅ 找到会话: " + session.getId());
+            
+            // 从Session中获取用户信息
+            Long userId = (Long) session.getAttribute("userId");
+            String username = (String) session.getAttribute("username");
+            String role = (String) session.getAttribute("role");
+            String realName = (String) session.getAttribute("realName");
+            String email = (String) session.getAttribute("email");
+            
+            System.out.println("  - 会话属性:");
+            System.out.println("    - userId: " + userId);
+            System.out.println("    - username: " + username);
+            System.out.println("    - role: " + role);
+            System.out.println("    - realName: " + realName);
+            System.out.println("    - email: " + email);
+            
+            if (userId == null) {
+                System.out.println("❌ 会话中没有userId属性");
+                return Result.error("用户未登录");
+            }
+            
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("id", userId);
+            userInfo.put("username", username);
+            userInfo.put("realName", realName);
+            userInfo.put("email", email);
+            userInfo.put("role", role);
+            userInfo.put("avatar", null);
+            
+            System.out.println("✅ 成功返回用户信息: " + userInfo);
             return Result.success(userInfo);
         } catch (Exception e) {
+            System.out.println("❌ 获取用户信息失败: " + e.getMessage());
+            e.printStackTrace();
             return Result.error("获取用户信息失败: " + e.getMessage());
         }
     }
-}
+
+    @Operation(summary = "修改密码", description = "用户修改登录密码")
+    @PostMapping("/change-password")
+    public Result<Void> changePassword(@Valid @RequestBody AuthDTO.ChangePasswordRequest request, HttpServletRequest httpRequest) {
+        try {
+            HttpSession session = httpRequest.getSession(false);
+            if (session == null) {
+                return Result.error("用户未登录");
+            }
+            
+            Long userId = (Long) session.getAttribute("userId");
+            if (userId == null) {
+                return Result.error("用户未登录");
+            }
+            
+            authService.changePassword(userId, request);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error("密码修改失败: " + e.getMessage());
+        }
+    }
+} 

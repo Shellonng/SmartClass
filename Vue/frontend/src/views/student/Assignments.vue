@@ -5,14 +5,14 @@
       <div class="header-content">
         <h1 class="page-title">
           <FileTextOutlined />
-          作业中心
+          任务中心
         </h1>
         <p class="page-description">高效管理学习任务，提升学习效率</p>
       </div>
       <div class="header-stats">
         <div class="stat-item urgent">
           <div class="stat-number">{{ urgentCount }}</div>
-          <div class="stat-label">紧急作业</div>
+          <div class="stat-label">紧急任务</div>
         </div>
         <div class="stat-item todo">
           <div class="stat-number">{{ todoCount }}</div>
@@ -48,11 +48,11 @@
     <!-- 功能导航 -->
     <div class="function-tabs">
       <a-tabs v-model:activeKey="activeTab" size="large" @change="handleTabChange">
-        <a-tab-pane key="all" tab="全部作业">
+        <a-tab-pane key="all" tab="全部任务">
           <template #tab>
             <span>
               <FileTextOutlined />
-              全部作业 ({{ totalAssignments }})
+              全部任务 ({{ totalAssignments }})
             </span>
           </template>
         </a-tab-pane>
@@ -88,7 +88,7 @@
       <div class="filter-left">
         <a-input-search
           v-model:value="searchKeyword"
-          placeholder="搜索作业标题、课程名称..."
+          placeholder="搜索任务标题、课程名称..."
           style="width: 300px"
           @search="handleSearch"
         />
@@ -106,15 +106,15 @@
         </a-select>
         <a-select
           v-model:value="typeFilter"
-          placeholder="作业类型"
+          placeholder="任务类型"
           style="width: 120px"
           allow-clear
           @change="handleFilter"
         >
           <a-select-option value="">全部类型</a-select-option>
-          <a-select-option value="homework">课后作业</a-select-option>
+          <a-select-option value="homework">课后任务</a-select-option>
           <a-select-option value="exam">课堂测验</a-select-option>
-          <a-select-option value="project">项目作业</a-select-option>
+          <a-select-option value="project">项目任务</a-select-option>
           <a-select-option value="report">实验报告</a-select-option>
         </a-select>
       </div>
@@ -134,7 +134,7 @@
     <!-- 批量操作栏 -->
     <div class="batch-actions" v-if="selectedRowKeys.length > 0">
       <div class="batch-info">
-        已选择 {{ selectedRowKeys.length }} 项作业
+        已选择 {{ selectedRowKeys.length }} 项任务
       </div>
       <div class="batch-buttons">
         <a-button @click="batchMarkAsRead">
@@ -151,7 +151,7 @@
       </div>
     </div>
 
-    <!-- 作业列表 -->
+    <!-- 任务列表 -->
     <div class="assignments-content">
       <a-spin :spinning="loading" tip="加载中...">
         <div class="assignments-list" v-if="filteredAssignments.length > 0">
@@ -171,12 +171,12 @@
             <div class="assignment-selector">
               <a-checkbox 
                 :checked="selectedRowKeys.includes(assignment.id)"
-                @change="(e) => handleSelectChange(assignment.id, e.target.checked)"
+                @change="(e: any) => handleSelectChange(assignment.id, e.target.checked)"
                 @click.stop
               />
             </div>
 
-            <!-- 作业状态标识 -->
+            <!-- 任务状态标识 -->
             <div class="assignment-status">
               <div class="status-indicator" :class="assignment.status">
                 <CheckCircleOutlined v-if="assignment.status === 'completed'" />
@@ -186,7 +186,7 @@
               </div>
             </div>
 
-            <!-- 作业信息 -->
+            <!-- 任务信息 -->
             <div class="assignment-info">
               <div class="assignment-header">
                 <h3 class="assignment-title">{{ assignment.title }}</h3>
@@ -232,24 +232,23 @@
                     得分：{{ assignment.score }}/{{ assignment.totalScore }}
                   </span>
                 </div>
+                <div v-if="assignment.isGraded" class="graded-info">
+                  <a-tag color="green">已批改</a-tag>
+                  <span class="graded-note">教师已批改，不能再次提交</span>
+                </div>
               </div>
             </div>
 
-            <!-- 作业操作 -->
+            <!-- 任务操作 -->
             <div class="assignment-actions">
               <a-button-group>
-                <a-button size="small" @click.stop="viewAssignment(assignment.id)">
-                  <EyeOutlined />
-                  查看
-                </a-button>
                 <a-button 
-                  v-if="assignment.status !== 'completed'"
                   type="primary" 
                   size="small"
                   @click.stop="startAssignment(assignment.id)"
                 >
                   <EditOutlined />
-                  {{ assignment.status === 'draft' ? '继续完成' : '开始作业' }}
+                  {{ assignment.status === 'completed' ? '查看任务' : '开始任务' }}
                 </a-button>
                 <a-button 
                   v-if="assignment.status === 'completed'"
@@ -274,9 +273,9 @@
                         设置提醒
                       </a-menu-item>
                       <a-menu-divider />
-                      <a-menu-item key="feedback" @click="viewFeedback(assignment.id)">
+                      <a-menu-item key="feedback" v-if="assignment.isGraded" @click="viewFeedback(assignment.id)">
                         <MessageOutlined />
-                        查看反馈
+                        查看评语
                       </a-menu-item>
                     </a-menu>
                   </template>
@@ -308,7 +307,7 @@
           :total="totalAssignments"
           :show-size-changer="true"
           :show-quick-jumper="true"
-          :show-total="(total, range) => `共 ${total} 项作业，当前显示 ${range[0]}-${range[1]} 项`"
+          :show-total="(total: number, range: [number, number]) => `共 ${total} 项任务，当前显示 ${range[0]}-${range[1]} 项`"
           @change="handlePageChange"
         />
       </div>
@@ -317,7 +316,7 @@
     <!-- 设置提醒弹窗 -->
     <a-modal
       v-model:open="reminderModalVisible"
-      title="设置作业提醒"
+      title="设置任务提醒"
       :width="500"
       @ok="handleSetReminder"
       @cancel="handleCancelReminder"
@@ -363,6 +362,7 @@
 </template>
 
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message, Empty } from 'ant-design-vue'
@@ -386,6 +386,8 @@ import {
   BellOutlined,
   MessageOutlined
 } from '@ant-design/icons-vue'
+import assignmentApi from '@/api/assignment'
+import * as courseApi from '@/api/course'
 
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
@@ -395,18 +397,21 @@ interface Assignment {
   title: string
   description: string
   courseName: string
+  courseId?: number
   teacherName: string
   type: 'homework' | 'exam' | 'project' | 'report'
+  mode?: 'question' | 'file' | string
   priority: 'high' | 'medium' | 'low'
-  status: 'pending' | 'draft' | 'completed' | 'overdue'
+  status: 'pending' | 'draft' | 'completed' | 'overdue' | 'not_published'
   createTime: string
   deadline: string
   submissionTime?: string
   score?: number
   totalScore: number
-  attachments: string[]
-  requirements: string[]
-  isRead: boolean
+  attachments?: string[]
+  requirements?: string[]
+  isRead?: boolean
+  isGraded?: boolean // 新增：是否已批改
 }
 
 interface Course {
@@ -437,32 +442,9 @@ const reminderForm = reactive({
   content: ''
 })
 
-// 模拟数据
-const courses = ref<Course[]>([
-  { id: 1, name: '高等数学' },
-  { id: 2, name: '大学英语' },
-  { id: 3, name: 'C++程序设计' },
-  { id: 4, name: '线性代数' }
-])
-
-const assignments = ref<Assignment[]>([
-  {
-    id: 1,
-    title: '第三章函数极限习题',
-    description: '完成教材第三章后的习题1-15，要求写出详细解题过程，注意格式规范。',
-    courseName: '高等数学',
-    teacherName: '张教授',
-    type: 'homework',
-    priority: 'high',
-    status: 'pending',
-    createTime: '2024-01-15 14:30:00',
-    deadline: '2024-01-22 23:59:59',
-    totalScore: 100,
-    attachments: ['习题详解.pdf', '参考答案.docx'],
-    requirements: ['手写解答过程', '拍照上传', '格式清晰'],
-    isRead: true
-  }
-])
+// 数据
+const courses = ref<Course[]>([])
+const assignments = ref<Assignment[]>([])
 
 // 计算属性
 const totalAssignments = computed(() => assignments.value.length)
@@ -484,7 +466,9 @@ const urgentAssignments = computed(() => {
 const filteredAssignments = computed(() => {
   let filtered = assignments.value
 
+  // 注释掉重复的状态筛选逻辑，因为后端已经根据activeTab筛选过了
   // 按标签筛选
+  /*
   if (activeTab.value !== 'all') {
     switch (activeTab.value) {
       case 'todo':
@@ -498,6 +482,7 @@ const filteredAssignments = computed(() => {
         break
     }
   }
+  */
 
   // 搜索筛选
   if (searchKeyword.value) {
@@ -511,10 +496,8 @@ const filteredAssignments = computed(() => {
 
   // 课程筛选
   if (courseFilter.value) {
-    const course = courses.value.find(c => c.id === courseFilter.value)
-    if (course) {
-      filtered = filtered.filter(a => a.courseName === course.name)
-    }
+    const courseId = Number(courseFilter.value)
+    filtered = filtered.filter(a => a.courseId === courseId)
   }
 
   // 类型筛选
@@ -529,7 +512,7 @@ const filteredAssignments = computed(() => {
         return new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
       case 'priority':
         const priorityOrder = { high: 3, medium: 2, low: 1 }
-        return priorityOrder[b.priority] - priorityOrder[a.priority]
+        return priorityOrder[b.priority as keyof typeof priorityOrder] - priorityOrder[a.priority as keyof typeof priorityOrder]
       case 'createTime':
         return new Date(b.createTime).getTime() - new Date(a.createTime).getTime()
       default:
@@ -549,24 +532,32 @@ const canBatchSubmit = computed(() => {
 
 // 方法
 const handleTabChange = (key: string) => {
+  console.log('标签切换为:', key)
   activeTab.value = key
   currentPage.value = 1
   selectedRowKeys.value = []
+  refreshData() // 切换标签时重新加载数据
 }
 
 const handleSearch = () => {
   currentPage.value = 1
+  refreshData()
 }
 
 const handleFilter = () => {
   currentPage.value = 1
+  refreshData()
 }
 
 const handleSort = () => {
   currentPage.value = 1
 }
 
-const handlePageChange = () => {
+const handlePageChange = (page: number, size?: number) => {
+  currentPage.value = page
+  if (size) {
+    pageSize.value = size
+  }
   selectedRowKeys.value = []
 }
 
@@ -594,16 +585,66 @@ const clearSelection = () => {
   selectedRowKeys.value = []
 }
 
-const refreshData = async () => {
+// 获取课程列表
+const fetchCourses = async () => {
+  try {
+    const response = await courseApi.getEnrolledCourses()
+    if (response && response.length > 0) {
+      courses.value = response.map((course: any) => ({
+        id: course.id,
+        name: course.title || course.courseName
+      }))
+    }
+  } catch (error) {
+    console.error('获取课程列表失败:', error)
+  }
+}
+
+// 获取任务列表
+const fetchAssignments = async () => {
   loading.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    message.success('数据刷新成功')
+    // 根据当前标签页状态获取不同状态的任务
+    let status: string | null = null
+    if (activeTab.value === 'todo') {
+      status = 'pending'
+    } else if (activeTab.value === 'completed') {
+      status = 'completed'
+    } else if (activeTab.value === 'overdue') {
+      status = 'overdue'
+    }
+    
+    console.log('获取任务列表，状态:', status)
+    
+    const params = {
+      status: status,
+      courseId: courseFilter.value || null,
+      type: typeFilter.value || null,
+      keyword: searchKeyword.value || null
+    }
+    
+    console.log('请求参数:', params)
+    
+    const response = await assignmentApi.getAssignmentListStudent(params)
+    console.log('API响应:', response)
+    
+    if (response.code === 200 && response.data) {
+      assignments.value = response.data
+      console.log('加载到的任务数量:', assignments.value.length)
+      message.success('数据加载成功')
+    } else {
+      message.error(response.message || '获取任务列表失败')
+    }
   } catch (error) {
-    message.error('刷新失败，请重试')
+    console.error('获取任务列表失败:', error)
+    message.error('获取任务列表失败，请重试')
   } finally {
     loading.value = false
   }
+}
+
+const refreshData = () => {
+  fetchAssignments()
 }
 
 const batchMarkAsRead = () => {
@@ -613,7 +654,7 @@ const batchMarkAsRead = () => {
       assignment.isRead = true
     }
   })
-  message.success(`已标记 ${selectedRowKeys.value.length} 项作业为已读`)
+  message.success(`已标记 ${selectedRowKeys.value.length} 项任务为已读`)
   selectedRowKeys.value = []
 }
 
@@ -624,11 +665,11 @@ const batchSubmit = () => {
   }).length
   
   if (submittableCount === 0) {
-    message.warning('选中的作业中没有可提交的项目')
+    message.warning('选中的任务中没有可提交的项目')
     return
   }
   
-  message.success(`批量提交 ${submittableCount} 项作业成功`)
+  message.success(`批量提交 ${submittableCount} 项任务成功`)
   selectedRowKeys.value = []
 }
 
@@ -636,25 +677,38 @@ const goToAssignment = (id: number) => {
   router.push(`/student/assignments/${id}`)
 }
 
-const viewAssignment = (id: number) => {
+const startAssignment = (id: number) => {
+  const assignment = assignments.value.find(a => a.id === id)
+  if (!assignment) return
+  
+  // 如果任务未发布，则提示
+  if (assignment.status === 'not_published') {
+    message.info('该任务尚未发布，请等待教师发布后再查看')
+    return
+  }
+  
+  // 如果已经批改，提示查看批改结果
+  if (assignment.isGraded) {
+    message.info('该任务已批改，将查看批改结果')
+    viewFeedback(id)
+    return
+  }
+  
+  assignment.isRead = true
+  
+  // 直接跳转到详情页，不自动跳转到do页面
+  const baseUrl = window.location.origin
+  const url = `${baseUrl}/student/assignments/${id}`
+  console.log('跳转到作业详情页:', url)
   router.push(`/student/assignments/${id}`)
 }
 
-const startAssignment = (id: number) => {
-  const assignment = assignments.value.find(a => a.id === id)
-  if (assignment) {
-    assignment.isRead = true
-    message.success(`开始作业：${assignment.title}`)
-    router.push(`/student/assignments/${id}/submit`)
-  }
-}
-
 const viewSubmission = (id: number) => {
-  router.push(`/student/assignments/${id}/submission`)
+  router.push(`/student/assignments/${id}/result`)
 }
 
 const downloadAssignment = (id: number) => {
-  message.success('下载已开始')
+  message.info('下载附件功能开发中...')
 }
 
 const setReminder = (id: number) => {
@@ -662,34 +716,21 @@ const setReminder = (id: number) => {
   reminderModalVisible.value = true
 }
 
-const viewFeedback = (id: number) => {
-  router.push(`/student/assignments/${id}/feedback`)
-}
-
 const handleSetReminder = () => {
   message.success('提醒设置成功')
   reminderModalVisible.value = false
-  Object.assign(reminderForm, {
-    type: 'before24h',
-    customTime: null,
-    methods: ['notification'],
-    content: ''
-  })
 }
 
 const handleCancelReminder = () => {
   reminderModalVisible.value = false
-  Object.assign(reminderForm, {
-    type: 'before24h',
-    customTime: null,
-    methods: ['notification'],
-    content: ''
-  })
 }
 
-// 工具方法
+const viewFeedback = (id: number) => {
+  router.push(`/student/assignments/${id}/feedback`)
+}
+
 const isUrgent = (assignment: Assignment) => {
-  if (assignment.status === 'completed' || assignment.status === 'overdue') return false
+  if (!assignment.deadline) return false
   const deadline = dayjs(assignment.deadline)
   const now = dayjs()
   const hoursLeft = deadline.diff(now, 'hour')
@@ -697,89 +738,95 @@ const isUrgent = (assignment: Assignment) => {
 }
 
 const isOverdue = (assignment: Assignment) => {
-  return assignment.status === 'overdue'
-}
-
-const getTimeRemaining = (deadline: string) => {
+  if (!assignment.deadline) return false
+  const deadline = dayjs(assignment.deadline)
   const now = dayjs()
-  const deadlineTime = dayjs(deadline)
-  
-  if (deadlineTime.isBefore(now)) {
-    return '已逾期'
-  }
-  
-  const diff = deadlineTime.diff(now)
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-  
-  if (days > 0) {
-    return `${days}天${hours}小时`
-  } else if (hours > 0) {
-    return `${hours}小时${minutes}分钟`
-  } else {
-    return `${minutes}分钟`
-  }
+  return now.isAfter(deadline) && assignment.status !== 'completed'
 }
 
-const formatDate = (date: string) => {
+const formatDate = (date: string | null) => {
+  if (!date) return '无'
   return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
 
-const getTypeText = (type: string) => {
-  const typeMap = {
-    homework: '课后作业',
-    exam: '课堂测验',
-    project: '项目作业',
-    report: '实验报告'
+const getTimeRemaining = (deadline: string | null) => {
+  if (!deadline) return '无截止时间'
+  const deadlineDate = dayjs(deadline)
+  const now = dayjs()
+  
+  if (now.isAfter(deadlineDate)) {
+    return '已截止'
   }
-  return typeMap[type as keyof typeof typeMap] || '未知类型'
+  
+  return deadlineDate.fromNow(true) + '后截止'
 }
 
 const getTypeColor = (type: string) => {
-  const colorMap = {
+  const colorMap: Record<string, string> = {
     homework: 'blue',
     exam: 'red',
-    project: 'purple',
-    report: 'green'
+    project: 'green',
+    report: 'orange'
   }
-  return colorMap[type as keyof typeof colorMap] || 'default'
+  return colorMap[type] || 'default'
 }
 
-const getPriorityText = (priority: string) => {
-  const priorityMap = {
-    high: '高优先级',
-    medium: '中优先级',
-    low: '低优先级'
+const getTypeText = (type: string) => {
+  const typeMap: Record<string, string> = {
+    homework: '课后任务',
+    exam: '课堂测验',
+    project: '项目任务',
+    report: '实验报告'
   }
-  return priorityMap[priority as keyof typeof priorityMap] || '未知优先级'
+  return typeMap[type] || type
 }
 
 const getPriorityColor = (priority: string) => {
-  const colorMap = {
+  const colorMap: Record<string, string> = {
     high: 'red',
     medium: 'orange',
-    low: 'green'
+    low: 'green',
+    overdue: 'volcano'
   }
-  return colorMap[priority as keyof typeof colorMap] || 'default'
+  return colorMap[priority] || 'default'
+}
+
+const getPriorityText = (priority: string) => {
+  const priorityMap: Record<string, string> = {
+    high: '高优先级',
+    medium: '中优先级',
+    low: '低优先级',
+    overdue: '已逾期'
+  }
+  return priorityMap[priority] || priority
 }
 
 const getEmptyDescription = () => {
   switch (activeTab.value) {
     case 'todo':
-      return '暂无待完成的作业'
+      return '暂无待完成的任务'
     case 'completed':
-      return '暂无已完成的作业'
+      return '暂无已完成的任务'
     case 'overdue':
-      return '暂无逾期的作业'
+      return '暂无逾期的任务'
     default:
-      return '暂无作业数据'
+      return '暂无任务数据'
   }
 }
 
 // 页面初始化
 onMounted(() => {
-  console.log('作业中心页面初始化完成')
+  console.log('任务中心页面初始化完成')
+  fetchCourses()
+  
+  // 根据URL参数设置初始标签
+  const urlParams = new URLSearchParams(window.location.search)
+  const tab = urlParams.get('tab')
+  if (tab && ['all', 'todo', 'completed', 'overdue'].includes(tab)) {
+    activeTab.value = tab
+    console.log('从URL参数设置初始标签:', tab)
+  }
+  
   refreshData()
 })
 </script>
@@ -973,7 +1020,7 @@ onMounted(() => {
   gap: 12px;
 }
 
-/* 作业列表 */
+/* 任务列表 */
 .assignments-content {
   background: white;
   border-radius: 16px;
@@ -1241,5 +1288,17 @@ onMounted(() => {
     flex-direction: column;
     gap: 8px;
   }
+}
+
+.graded-info {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.graded-note {
+  font-size: 13px;
+  color: #52c41a;
 }
 </style> 

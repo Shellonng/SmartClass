@@ -1,16 +1,16 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import router from '@/router'
-import { login, logout, getUserInfo, type LoginRequest } from '@/api/auth'
+import { login as loginApi, logout as logoutApi, getUserInfo } from '@/api/auth'
 import { message } from 'ant-design-vue'
 import axios from 'axios'
 
-export interface User {
+interface User {
   id: number
   username: string
   realName: string
   email: string
-  role: 'teacher' | 'student'
+  role: string
   avatar?: string
 }
 
@@ -22,76 +22,103 @@ interface LoginForm {
   role: string
 }
 
+// 扩展登录响应接口，添加sessionId
+interface LoginResponseData {
+  token?: string
+  sessionId?: string
+  userInfo: {
+    id: number
+    username: string
+    realName: string
+    email: string
+    role: string
+    avatar?: string
+  }
+}
+
 export const useAuthStore = defineStore('auth', () => {
-  // 状态
-  const token = ref<string | null>(localStorage.getItem('token'))
+  // 状态 - 移除token，只保留用户信息和sessionId
   const user = ref<User | null>(null)
   const isLoading = ref(false)
+  const sessionId = ref<string | null>(localStorage.getItem('sessionId'))
+  const token = ref<string | null>(localStorage.getItem('token'))
 
   // 计算属性
-  const isAuthenticated = computed(() => !!token.value && !!user.value)
-  const isTeacher = computed(() => user.value?.role === 'teacher')
-  const isStudent = computed(() => user.value?.role === 'student')
+  const isAuthenticated = computed(() => !!user.value)
+  const isTeacher = computed(() => user.value?.role?.toUpperCase() === 'TEACHER')
+  const isStudent = computed(() => user.value?.role?.toUpperCase() === 'STUDENT')
+
+  // 设置sessionId（用于调试目的，实际认证依赖cookie）
+  const setSessionId = (newSessionId: string) => {
+    sessionId.value = newSessionId
+    localStorage.setItem('sessionId', newSessionId)
+  }
 
   // 设置token
   const setToken = (newToken: string) => {
     token.value = newToken
     localStorage.setItem('token', newToken)
-    // 设置axios默认header
+    // 立即设置到axios默认头部
     axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
+    console.log('Token已设置到axios默认头部')
   }
 
-  // 清除token
-  const clearToken = () => {
-    token.value = null
+  // 设置用户信息
+  const setUser = (userData: User) => {
+    user.value = userData
+    localStorage.setItem('userInfo', JSON.stringify(userData))
+  }
+
+  // 清除认证信息
+  const clearAuth = () => {
     user.value = null
-    localStorage.removeItem('token')
+    sessionId.value = null
+    token.value = null
+    localStorage.removeItem('token')  // 清除旧的token
+    localStorage.removeItem('user-token')  // 清除旧的token
+    localStorage.removeItem('userInfo')
+    localStorage.removeItem('sessionId')
+    // 移除axios的Authorization头
     delete axios.defaults.headers.common['Authorization']
   }
 
   // 登录
-  const loginUser = async (loginData: LoginRequest, skipRedirect = false) => {
+  const login = async (credentials: { username: string; password: string; role?: string }) => {
     try {
       isLoading.value = true
-      const response = await login(loginData)
+      const response = await loginApi(credentials)
       
-      if (response.data.code === 200) {
-        const { token, userInfo } = response.data.data
+      if (response.data.success) {
+        const { userInfo, sessionId: newSessionId } = response.data.data
         
-        // 保存token和用户信息
-        setToken(token)
-        user.value = userInfo as User
+        // 保存用户信息
+        setUser(userInfo)
         
-        // 保存记住登录状态
-        if (loginData.remember) {
-          localStorage.setItem('remember', 'true')
+        // 保存sessionId
+        if (newSessionId) {
+          setSessionId(newSessionId)
+          
+          // 生成一个临时token，确保API调用能正常工作
+          // 在基于Session的认证系统中，我们使用这个token作为客户端标识
+          // 修改为同时包含用户ID和用户名，以便后端可以正确识别
+          const userId = userInfo.id
+          const username = userInfo.username
+          const generatedToken = `token-${userId}-${username}`
+          setToken(generatedToken)
+          console.log('登录成功，已生成临时token，用户ID:', userId, '用户名:', username)
+        } else {
+          console.warn('登录响应中没有sessionId')
         }
         
-        message.success('登录成功')
-        
-        // 根据参数决定是否跳转
-        if (!skipRedirect) {
-          if (userInfo.role === 'student') {
-            router.push('/student/dashboard')
-          } else if (userInfo.role === 'teacher') {
-            router.push('/teacher/dashboard')
-          }
-        }
-        
-        return { success: true, userInfo }
+        return { success: true, data: response.data.data }
       } else {
-        message.error(response.data.message || '登录失败')
-        return {
-          success: false,
-          message: response.data.message || '登录失败'
-        }
+        return { success: false, message: response.data.message }
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || '登录失败，请检查网络连接'
-      message.error(errorMessage)
+      console.error('登录失败:', error)
       return {
         success: false,
-        message: errorMessage
+        message: error.response?.data?.message || '登录失败，请检查网络连接' 
       }
     } finally {
       isLoading.value = false
@@ -99,115 +126,92 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // 登出
-  const logoutUser = async () => {
+  const logout = async () => {
     try {
-      await axios.post('/auth/logout')
+      await logoutApi()
     } catch (error) {
       console.error('登出请求失败:', error)
     } finally {
-      clearToken()
-      localStorage.removeItem('remember')
-      router.push('/login')
+      clearAuth()
     }
   }
 
   // 获取用户信息
   const fetchUserInfo = async () => {
     try {
-      if (!token.value) return null
-      
-      const response = await axios.get('/auth/user-info')
-      user.value = response.data.data
-      return user.value
+      const response = await getUserInfo()
+      if (response.data.success) {
+        setUser(response.data.data)
+        return true
+      } else {
+        // 只在确认无效的情况下清除认证数据
+        return false
+      }
     } catch (error) {
       console.error('获取用户信息失败:', error)
-      clearToken()
-      return null
+      // 网络错误不应该导致清除认证状态
+      return false
     }
   }
-
-  // 刷新token
-  const refreshToken = async () => {
-    try {
-      const response = await axios.post('/auth/refresh')
-      const { token: newToken } = response.data.data
-      setToken(newToken)
-      return newToken
-    } catch (error) {
-      console.error('刷新token失败:', error)
-      clearToken()
-      throw error
-    }
+  
+  // 检查是否有存储的认证数据
+  const hasStoredAuth = () => {
+    return !!(localStorage.getItem('token') && localStorage.getItem('userInfo'))
   }
 
-  // 修改密码
-  const changePassword = async (oldPassword: string, newPassword: string) => {
-    try {
-      await axios.post('/auth/change-password', {
-        oldPassword,
-        newPassword
-      })
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || '修改密码失败')
+  // 初始化 - 先验证session，再决定是否恢复用户信息
+  const init = async () => {
+    // 先检查token是否存在
+    const savedToken = localStorage.getItem('token')
+    if (savedToken) {
+      // 如果token存在，设置到axios头部
+      setToken(savedToken)
     }
-  }
-
-  // 忘记密码
-  const forgotPassword = async (username: string, email: string) => {
-    try {
-      await axios.post('/auth/send-reset-email', {
-        email
-      })
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || '发送重置邮件失败')
-    }
-  }
-
-  // 重置密码
-  const resetPassword = async (email: string, code: string, newPassword: string) => {
-    try {
-      await axios.post('/auth/reset-password', {
-        email,
-        code,
-        newPassword
-      })
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || '重置密码失败')
-    }
-  }
-
-  // 初始化认证状态
-  const initAuth = async () => {
-    if (token.value) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
-      // 如果有token但没有用户信息，尝试获取用户信息
-      if (!user.value) {
+    
+    const savedUserInfo = localStorage.getItem('userInfo')
+    if (savedUserInfo) {
+      try {
+        // 先从localStorage恢复用户信息
+        const userInfo = JSON.parse(savedUserInfo)
+        setUser(userInfo)
+        
+        // 尝试验证session是否仍然有效，但保留现有状态
+        try {
+          await fetchUserInfo()
+        } catch (error) {
+          console.warn('验证session失败，但保留本地状态:', error)
+        }
+      } catch (error) {
+        console.error('初始化用户信息失败:', error)
+      }
+    } else {
+      // 如果没有保存的用户信息，尝试从session获取
+      try {
         await fetchUserInfo()
+      } catch (error) {
+        console.error('从session获取用户信息失败:', error)
       }
     }
   }
 
   return {
     // 状态
-    token,
     user,
     isLoading,
-    
+    sessionId,
+    token,
     // 计算属性
     isAuthenticated,
     isTeacher,
     isStudent,
-    
     // 方法
-    loginUser,
-    logoutUser,
+    login,
+    logout,
     fetchUserInfo,
-    refreshToken,
-    changePassword,
-    forgotPassword,
-    resetPassword,
-    initAuth,
+    init,
+    setUser,
     setToken,
-    clearToken
+    clearAuth,
+    hasStoredAuth
   }
 })

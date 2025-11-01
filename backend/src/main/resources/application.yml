@@ -2,336 +2,57 @@
 server:
   port: 8080
   servlet:
-    context-path: /api
-    encoding:
-      charset: UTF-8
-      enabled: true
-      force: true
-  tomcat:
-    uri-encoding: UTF-8
-    max-connections: 1000
-    threads:
-      max: 200
-      min-spare: 10
+    context-path: /
+    session:
+      cookie:
+        name: JSESSIONID
+        http-only: true
+        secure: false
+        path: /
+        max-age: 86400
+      timeout: 86400s
 
 spring:
-  application:
-    name: education_platform
-  
-  profiles:
-    active: dev
-  
-  # 数据源配置 - 使用HikariCP连接池（基础配置，具体参数在各环境中配置）
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.zaxxer.hikari.HikariDataSource
-    # HikariCP连接池基础配置
-    hikari:
-      # 连接池名称
-      pool-name: HikariPool-Education
-      # 连接测试查询
-      connection-test-query: SELECT 1
-      # 是否自动提交
-      auto-commit: true
-      # 连接初始化SQL
-      connection-init-sql: SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci
-      # 验证超时时间(毫秒)
-      validation-timeout: 5000
-  
-  # Redis配置
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: 
-      database: 0
-      timeout: 10000ms
-      lettuce:
-        pool:
-          max-active: 8
-          max-wait: -1ms
-          max-idle: 8
-          min-idle: 0
-  
-  # 文件上传配置
-  servlet:
-    multipart:
-      max-file-size: 100MB
-      max-request-size: 100MB
-      enabled: true
-  
-  # 邮件配置
-  mail:
-    host: smtp.qq.com
-    port: 587
-    username: your-email@qq.com
-    password: your-email-password
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-  
-  # Jackson配置
-  jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: GMT+8
-    serialization:
-      write-dates-as-timestamps: false
-    deserialization:
-      fail-on-unknown-properties: false
-  
-  # 缓存配置
-  cache:
-    type: redis
-    redis:
-      time-to-live: 1800000  # 30分钟
-      cache-null-values: false
-
-# MyBatis-Plus配置
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-    cache-enabled: false
-    call-setters-on-nulls: true
-    jdbc-type-for-null: 'null'
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      id-type: ASSIGN_ID
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-      table-underline: true
-  mapper-locations: classpath*:/mapper/**/*.xml
-  type-aliases-package: com.education.entity
-
-# 日志配置
-logging:
-  level:
-    com.education: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.web: INFO
-    org.mybatis: DEBUG
-  pattern:
-    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
-    file: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
-  file:
-    name: logs/education-platform.log
-    max-size: 100MB
-    max-history: 30
-
-# Actuator监控配置 - 完全禁用以避免BeanCreationException
-management:
-  endpoints:
-    enabled-by-default: false
-    web:
-      exposure:
-        include: health
-  endpoint:
-    health:
-      enabled: true
-      show-details: when-authorized
-      show-components: always
-  health:
-    db:
-      enabled: true
-    mail:
-      enabled: false  # 禁用邮件健康检查
-    redis:
-      enabled: true
-  metrics:
-    enable:
-      all: false
-
-# Knife4j API文档配置
-knife4j:
-  enable: true
-  openapi:
-    title: AI赋能教育管理与学习辅助平台 API
-    description: 提供完整的教育管理和学习辅助功能的RESTful API
-    version: 1.0.0
-    concat: Education Platform Team
-    email: support@education.com
-    url: https://education.com
-    license: MIT
-    license-url: https://opensource.org/licenses/MIT
-    terms-of-service-url: https://education.com/terms
-  setting:
-    language: zh_cn
-    enable-version: true
-    enable-reload-cache-parameter: true
-    enable-after-script: true
-    enable-filter-multipart-api-method-type: POST
-    enable-filter-multipart-apis: false
-    enable-request-cache: true
-    enable-host: false
-
-# 自定义配置
-education:
-  # JWT配置
-  jwt:
-    secret: education-platform-jwt-secret-key-2024-for-hs512-algorithm-minimum-512-bits-required-security-compliance
-    expiration: 7200000  # 2小时
-    refresh-expiration: 604800000  # 7天
-    header: Authorization
-    prefix: Bearer 
-  
-  # 文件存储配置
-  file:
-    upload-path: /data/education/uploads/
-    max-size: 104857600  # 100MB
-    allowed-types: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar
-  
-  # MinIO配置
-  minio:
-    endpoint: http://localhost:9000
-    access-key: minioadmin
-    secret-key: minioadmin
-    bucket-name: education-platform
-  
-
-  
-  # 安全配置
-  security:
-    # 密码加密强度
-    password-strength: 10
-    # 登录失败最大次数
-    max-login-attempts: 5
-    # 账户锁定时间(分钟)
-    account-lock-time: 30
-    # 验证码有效期(分钟)
-    captcha-expire-time: 5
-  
-  # 业务配置
-  business:
-    # 默认分页大小
-    default-page-size: 20
-    # 最大分页大小
-    max-page-size: 100
-    # 成绩保留小数位数
-    grade-decimal-places: 2
-    # 任务提交最大次数
-    max-submission-attempts: 3
-  
-  # 缓存配置
-  cache:
-    # 用户信息缓存时间(秒)
-    user-info-ttl: 1800
-    # 课程列表缓存时间(秒)
-    course-list-ttl: 600
-    # 成绩统计缓存时间(秒)
-    grade-stats-ttl: 300
-    # 验证码缓存时间(秒)
-    captcha-ttl: 300
-
----
-# 开发环境配置
-spring:
-  config:
-    activate:
-      on-profile: dev
   datasource:
     url: jdbc:mysql://localhost:3306/education_platform?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
-    username: rootsc
+    username: root
     password: 641641773
-    hikari:
-      # 开发环境连接池配置
-      minimum-idle: 3
-      maximum-pool-size: 10
-      connection-timeout: 20000
-      idle-timeout: 300000
-      max-lifetime: 900000
-      leak-detection-threshold: 60000
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: 
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  main:
+    allow-circular-references: true
+  # 配置文件上传大小限制
+  servlet:
+    multipart:
+      max-file-size: 2GB
+      max-request-size: 2GB
+      enabled: true
 
-logging:
-  level:
-    com.education: DEBUG
-    root: INFO
-
-management:
-  health:
-    mail:
-      enabled: false  # 开发环境禁用邮件健康检查
-
+# Dify AI平台配置
 education:
-  ai:
-    enabled: false  # 开发环境关闭AI功能
+  dify:
+    # Dify服务器地址
+    api-url: http://219.216.65.108/v1
+    # API密钥配置
+    api-keys:
+      # 组卷工作流API密钥 - 需要替换为真实的API密钥
+      paper-generation: app-D5isfWHTIwVk8t82S507Rkfs
+      # 自动批改工作流API密钥 - 需要替换为真实的API密钥 
+      auto-grading: app-D5isfWHTIwVk8t82S507Rkfs
+      # 知识图谱生成API密钥 - 需要替换为真实的API密钥
+      knowledge-graph: app-D5isfWHTIwVk8t82S507Rkfs
+    # 请求配置
+    timeout: 30000000  # 请求超时时间(毫秒)，增加到5分钟
+    retry-count: 3  # 重试次数
+# 文件上传配置
+file:
+  upload:
+    path: ./uploads
+  access:
+    url:
+      prefix: /files
 
----
-# 测试环境配置
-spring:
-  config:
-    activate:
-      on-profile: test
-  datasource:
-    url: jdbc:mysql://test-db:3306/education_platform_test?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8
-    username: test_user
-    password: test_password
-    hikari:
-      # 测试环境连接池配置
-      minimum-idle: 2
-      maximum-pool-size: 8
-      connection-timeout: 15000
-      idle-timeout: 300000
-      max-lifetime: 600000
-  data:
-    redis:
-      host: test-redis
-      port: 6379
-
-logging:
-  level:
-    com.education: INFO
-    root: WARN
-
----
-# 生产环境配置
-spring:
-  config:
-    activate:
-      on-profile: prod
-  datasource:
-    url: jdbc:mysql://prod-db:3306/education_platform?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-    username: ${DB_USERNAME:prod_user}
-    password: ${DB_PASSWORD:prod_password}
-    hikari:
-      # 生产环境连接池配置
-      minimum-idle: 10
-      maximum-pool-size: 50
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-      leak-detection-threshold: 60000
-      # 生产环境启用连接池监控
-      register-mbeans: true
-  data:
-    redis:
-      host: ${REDIS_HOST:prod-redis}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-
-logging:
-  level:
-    com.education: INFO
-    root: WARN
-    org.springframework.security: WARN
-  file:
-    name: /var/log/education-platform/application.log
-
-education:
-  jwt:
-    secret: ${JWT_SECRET:your-production-jwt-secret-key}
-  minio:
-    endpoint: ${MINIO_ENDPOINT:http://minio:9000}
-    access-key: ${MINIO_ACCESS_KEY:minioadmin}
-    secret-key: ${MINIO_SECRET_KEY:minioadmin}
-  ai:
-    api-key: ${OPENAI_API_KEY:your-production-openai-api-key}
+# 视频上传路径配置
+video:
+  upload:
+    path: D:/my_git_code/SmartClass/resource/video
+    max-size: 2GB

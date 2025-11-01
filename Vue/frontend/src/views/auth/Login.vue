@@ -265,8 +265,7 @@ import {
   MailOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/stores/auth'
-import type { LoginRequest } from '@/api/auth'
-import { register } from '@/api/auth'
+import { register, login } from '@/api/auth'
 
 const router = useRouter()
 const route = useRoute()
@@ -357,19 +356,47 @@ const handleLogin = async () => {
     loading.value = true
     
     // 准备登录数据
-    const loginData: LoginRequest = {
+    const loginData = {
       username: loginForm.username,
       password: loginForm.password,
-
+      role: selectedRole.value.toUpperCase()
     }
     
-    // 调用登录接口
-    const result = await authStore.loginUser(loginData)
+    console.log('🚀 提交登录数据:', loginData)
     
-
+    // 调用auth store的登录方法
+    const result = await authStore.login(loginData)
+    
+    if (result.success) {
+      message.success('登录成功')
+      
+      // 根据用户角色跳转到对应页面
+      const userRole = result.data.userInfo.role
+      console.log('登录成功，用户角色:', userRole)
+      
+      // 强制转为大写进行比较，确保角色匹配不区分大小写
+      if (userRole.toUpperCase() === 'TEACHER') {
+        console.log('跳转到教师端...')
+        await router.push('/teacher/dashboard')
+      } else if (userRole.toUpperCase() === 'STUDENT') {
+        console.log('跳转到学生端...')  
+        // 使用 replace 而不是 push，避免历史记录问题
+        await router.replace('/student/dashboard')
+      } else {
+        console.log('跳转到首页...')
+        await router.push('/')
+      }
+    } else {
+      message.error(result.message || '登录失败')
+    }
     
   } catch (error: any) {
-    message.error(error.message || '登录失败，请检查用户名和密码')
+    console.error('❌ 登录失败:', error)
+    if (error.response?.data?.message) {
+      message.error(error.response.data.message)
+    } else {
+      message.error(error.message || '登录失败，请检查用户名和密码')
+    }
   } finally {
     loading.value = false
   }
@@ -385,7 +412,7 @@ const handleRegister = async () => {
   try {
     loading.value = true
     
-    // 调用注册API
+    // 准备注册数据
     const registerData = {
       username: registerForm.username,
       password: registerForm.password,
@@ -395,21 +422,38 @@ const handleRegister = async () => {
       role: registerForm.role
     }
     
+    // 调用注册API
     const response = await register(registerData)
     
-    if (response.data.code === 200) {
-      message.success('注册成功！已自动登录')
+    if (response.data.success) {
+      message.success('注册成功！正在登录...')
       
-      // 保存token和用户信息
-      const { token, userInfo } = response.data.data
-      authStore.setToken(token)
-      authStore.user = userInfo
+      // 注册成功后自动登录
+      const loginData = {
+        username: registerForm.username,
+        password: registerForm.password,
+        role: registerForm.role
+      }
       
-      // 根据用户角色跳转到对应页面
-      if (userInfo.role === 'student') {
-        router.push('/student/dashboard')
-      } else if (userInfo.role === 'teacher') {
-        router.push('/teacher/dashboard')
+      // 使用authStore登录
+      const loginResult = await authStore.login(loginData)
+      
+      if (loginResult.success) {
+        message.success('登录成功')
+        
+        // 根据用户角色跳转到对应页面
+        const userRole = loginResult.data.userInfo.role
+        // 强制转为大写进行比较，确保角色匹配不区分大小写
+        if (userRole.toUpperCase() === 'TEACHER') {
+          router.replace('/teacher/dashboard')
+        } else if (userRole.toUpperCase() === 'STUDENT') {
+          router.replace('/student/dashboard')
+      } else {
+          router.push('/')
+        }
+      } else {
+        message.error('自动登录失败，请手动登录')
+        router.push('/login') // 跳转回登录页面
       }
     } else {
       message.error(response.data.message || '注册失败')
@@ -564,7 +608,11 @@ const goToRegister = () => {
 
 .form-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 450px; /* 增加表单容器的最大宽度 */
+  padding: 30px; /* 添加内边距 */
+  background: #ffffff; /* 添加背景色 */
+  border-radius: 16px; /* 添加圆角 */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* 添加阴影效果 */
 }
 
 .form-header {
@@ -686,21 +734,76 @@ const goToRegister = () => {
 
 /* 表单样式增强 */
 .login-form :deep(.ant-input) {
-  height: 48px;
+  height: 52px; /* 增加输入框高度 */
   border-radius: 12px;
-  border: 1px solid #d9d9d9;
+  border: 1px solid #e0e0e0; /* 调整边框颜色 */
   font-size: 16px;
   transition: all 0.3s ease;
+  padding: 4px 15px; /* 调整内边距 */
+  margin-bottom: 5px; /* 增加底部间距 */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03); /* 添加轻微阴影 */
+  background-color: #ffffff !important; /* 确保背景为白色 */
 }
 
 .login-form :deep(.ant-input:focus) {
   border-color: #1890ff;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  background-color: #ffffff !important; /* 确保聚焦时背景为白色 */
 }
 
 .login-form :deep(.ant-input-password) {
-  height: 48px;
+  height: 52px; /* 增加密码输入框高度 */
   border-radius: 12px;
+  background-color: #ffffff !important; /* 确保背景为白色 */
+}
+
+/* 修复用户图标与输入框对齐问题 */
+.login-form :deep(.ant-input-affix-wrapper) {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+  padding: 0 15px;
+  transition: all 0.3s ease;
+  background-color: #ffffff !important; /* 确保背景为白色 */
+}
+
+.login-form :deep(.ant-input-affix-wrapper:focus),
+.login-form :deep(.ant-input-affix-wrapper-focused) {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  background-color: #ffffff !important; /* 确保聚焦时背景为白色 */
+}
+
+.login-form :deep(.ant-input-affix-wrapper > input.ant-input) {
+  background: transparent !important;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  height: 100%;
+  margin: 0;
+  background-color: transparent !important; /* 确保输入框背景透明 */
+}
+
+.login-form :deep(.ant-input-prefix) {
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.login-form :deep(.ant-form-item) {
+  margin-bottom: 24px; /* 增加表单项之间的间距 */
+}
+
+.login-form :deep(.ant-form-item-label) {
+  padding-bottom: 8px; /* 增加标签和输入框之间的间距 */
+}
+
+.login-form :deep(.ant-form-item-label > label) {
+  font-weight: 500; /* 加粗标签文字 */
+  color: #333; /* 调整标签颜色 */
 }
 
 .login-form :deep(.ant-checkbox-wrapper) {
@@ -712,15 +815,23 @@ const goToRegister = () => {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
   transition: all 0.3s ease;
+  height: 52px; /* 增加按钮高度 */
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  margin-top: 10px; /* 增加按钮上方间距 */
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); /* 添加阴影效果 */
 }
 
 .login-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  opacity: 0.95; /* 添加悬停效果 */
 }
 
 .login-btn:active {
   transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3); /* 添加按下效果 */
 }
 
 .forgot-link {
@@ -1008,5 +1119,27 @@ const goToRegister = () => {
   }
 }
 
+/* 覆盖所有可能的蓝色背景 */
+.login-form :deep(.ant-input),
+.login-form :deep(.ant-input-affix-wrapper),
+.login-form :deep(.ant-input-affix-wrapper-focused),
+.login-form :deep(.ant-input-affix-wrapper > input),
+.login-form :deep(.ant-input-password) {
+  background-color: #ffffff !important;
+}
+
+/* 覆盖所有可能的浅蓝色背景 */
+.login-form :deep(.ant-input-affix-wrapper-status-error),
+.login-form :deep(.ant-input-affix-wrapper-status-warning),
+.login-form :deep(.ant-input-affix-wrapper-status-success),
+.login-form :deep(.ant-input-affix-wrapper:hover) {
+  background-color: #ffffff !important;
+}
+
+/* 覆盖Ant Design可能添加的其他背景色 */
+.login-form :deep([class*="-background"]),
+.login-form :deep([class*="background-"]) {
+  background-color: #ffffff !important;
+}
 
 </style>

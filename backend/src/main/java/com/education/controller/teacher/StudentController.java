@@ -1,220 +1,189 @@
 package com.education.controller.teacher;
 
-import com.education.dto.common.Result;
 import com.education.dto.common.PageRequest;
-import com.education.dto.StudentDTO;
-import com.education.dto.StudentDTOExtension;
-import com.education.service.teacher.StudentService;
-import com.education.utils.JwtUtils;
+import com.education.dto.common.PageResponse;
+import com.education.dto.common.Result;
+import com.education.entity.ClassStudent;
+import com.education.entity.CourseClass;
+import com.education.entity.Student;
+import com.education.entity.User;
+import com.education.security.SecurityUtil;
+import com.education.service.teacher.StudentManagementService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 /**
- * 教师端学生管理控制器
- * 
- * @author Education Platform Team
- * @version 1.0.0
- * @since 2024
+ * 学生管理控制器
  */
-@Tag(name = "教师端-学生管理", description = "教师查看和管理学生信息相关接口")
 @RestController
 @RequestMapping("/api/teacher/students")
+@Tag(name = "学生管理", description = "教师学生管理相关接口")
+@RequiredArgsConstructor
+@Slf4j
 public class StudentController {
 
-    @Autowired
-    private StudentService studentService;
-    
-    @Autowired
-    private JwtUtils jwtUtils;
-    
-    @Autowired
-    private HttpServletRequest request;
+    private final StudentManagementService studentManagementService;
+    private final SecurityUtil securityUtil;
 
-    @Operation(summary = "获取学生列表", description = "获取教师所有班级的学生列表")
     @GetMapping
-    public Result<Object> getStudents(
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Long classId) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            PageRequest pageRequest = buildPageRequest(page, size, classId, keyword);
-            Object students = studentService.getStudentList(teacherId, pageRequest);
-            return Result.success(students);
-        } catch (Exception e) {
-            return Result.error("获取学生列表失败: " + e.getMessage());
-        }
+    @Operation(summary = "获取学生列表", description = "分页获取学生列表，可按班级、课程筛选")
+    public Result<PageResponse<Student>> getStudents(
+            @Parameter(description = "分页参数") PageRequest pageRequest,
+            @Parameter(description = "搜索关键词(学生姓名或学号)") @RequestParam(required = false) String keyword,
+            @Parameter(description = "班级ID") @RequestParam(required = false) Long classId,
+            @Parameter(description = "课程ID") @RequestParam(required = false) Long courseId) {
+        
+        PageResponse<Student> response = studentManagementService.getStudents(
+                pageRequest.getCurrent() - 1, // 前端是1-based索引
+                pageRequest.getPageSize(),
+                keyword,
+                classId,
+                courseId
+        );
+        
+        return Result.success(response);
     }
-
-    @Operation(summary = "获取学生详情", description = "获取指定学生的详细信息")
-    @GetMapping("/{studentId}")
-    public Result<Object> getStudentDetail(@PathVariable Long studentId) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            Object student = studentService.getStudentDetail(studentId, teacherId);
-            return Result.success(student);
-        } catch (Exception e) {
-            return Result.error("获取学生详情失败: " + e.getMessage());
-        }
+    
+    @GetMapping("/{id}")
+    @Operation(summary = "获取学生详情", description = "根据ID获取学生详细信息")
+    public Result<Student> getStudentDetail(
+            @Parameter(description = "学生ID") @PathVariable Long id) {
+        
+        Student student = studentManagementService.getStudentById(id);
+        return Result.success(student);
     }
-
-    @Operation(summary = "获取学生学习进度", description = "获取学生在各课程中的学习进度")
-    @GetMapping("/{studentId}/progress")
-    public Result<Object> getStudentProgress(@PathVariable Long studentId) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            Object progress = studentService.getStudentProgress(studentId, teacherId, null);
-            return Result.success(progress);
-        } catch (Exception e) {
-            return Result.error("获取学生学习进度失败: " + e.getMessage());
-        }
+    
+    @GetMapping("/classes")
+    @Operation(summary = "获取班级列表", description = "获取当前教师的班级列表，用于学生管理")
+    public Result<List<CourseClass>> getTeacherClasses() {
+        Long teacherId = securityUtil.getCurrentUserId();
+        List<CourseClass> classes = studentManagementService.getClassesByTeacherId(teacherId);
+        return Result.success(classes);
     }
-
-    @Operation(summary = "获取学生成绩统计", description = "获取学生的成绩统计信息")
-    @GetMapping("/{studentId}/grades")
-    public Result<Object> getStudentGrades(
-            @PathVariable Long studentId,
-            @RequestParam(required = false) Long courseId,
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            Object grades = studentService.getStudentGradeStatistics(studentId, teacherId);
-            return Result.success(grades);
-        } catch (Exception e) {
-            return Result.error("获取学生成绩失败: " + e.getMessage());
-        }
+    
+    @GetMapping("/search")
+    @Operation(summary = "搜索学生", description = "模糊搜索学生，用于添加学生到课程或班级")
+    public Result<List<Map<String, Object>>> searchStudents(
+            @Parameter(description = "搜索关键词(学生姓名或学号)") @RequestParam(required = false) String keyword) {
+        
+        List<Map<String, Object>> students = studentManagementService.searchStudents(keyword);
+        return Result.success(students);
     }
-
-    @Operation(summary = "获取学生任务提交记录", description = "获取学生的任务提交历史")
-    @GetMapping("/{studentId}/submissions")
-    public Result<Object> getStudentSubmissions(
-            @PathVariable Long studentId,
-            @RequestParam(required = false) Long taskId,
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            PageRequest pageRequest = buildSubmissionPageRequest(page, size, taskId);
-            Object submissions = studentService.getStudentSubmissions(studentId, teacherId, pageRequest);
-            return Result.success(submissions);
-        } catch (Exception e) {
-            return Result.error("获取学生提交记录失败: " + e.getMessage());
-        }
+    
+    @PostMapping("/add-to-class")
+    @Operation(summary = "添加学生到班级", description = "添加学生到指定班级")
+    public Result<Void> addStudentToClass(
+            @Parameter(description = "学生班级关联信息") @RequestBody ClassStudent classStudent) {
+        
+        studentManagementService.addStudentToClass(classStudent.getStudentId(), classStudent.getClassId());
+        return Result.success();
     }
-
-    @Operation(summary = "获取学生学习分析", description = "获取学生的学习行为分析数据")
-    @GetMapping("/{studentId}/analytics")
-    public Result<Object> getStudentAnalytics(
-            @PathVariable Long studentId,
-            @RequestParam(required = false) String timeRange) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            Object analytics = studentService.getStudentAnalysis(studentId, teacherId, timeRange);
-            return Result.success(analytics);
-        } catch (Exception e) {
-            return Result.error("获取学生学习分析失败: " + e.getMessage());
-        }
+    
+    @DeleteMapping("/remove-from-class")
+    @Operation(summary = "从班级移除学生", description = "从指定班级移除学生")
+    public Result<Void> removeStudentFromClass(
+            @Parameter(description = "学生班级关联信息") @RequestBody ClassStudent classStudent) {
+        
+        studentManagementService.removeStudentFromClass(classStudent.getStudentId(), classStudent.getClassId());
+        return Result.success();
     }
-
-    @Operation(summary = "批量导入学生", description = "通过Excel批量导入学生信息")
-    @PostMapping("/import")
-    public Result<Object> importStudents(@RequestParam Long classId, @RequestParam String fileUrl) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            StudentDTO.StudentImportRequest importRequest = buildImportRequest(classId, fileUrl);
-            Object importResult = studentService.importStudents(importRequest, teacherId);
-            return Result.success(importResult);
-        } catch (Exception e) {
-            return Result.error("批量导入学生失败: " + e.getMessage());
-        }
+    
+    @PostMapping("/add-to-course")
+    @Operation(summary = "添加学生到课程", description = "添加学生到指定课程")
+    public Result<Void> addStudentToCourse(
+            @Parameter(description = "学生课程关联信息") @RequestBody Map<String, Object> params) {
+        
+        Long studentId = Long.valueOf(params.get("studentId").toString());
+        Long courseId = Long.valueOf(params.get("courseId").toString());
+        
+        studentManagementService.addStudentToCourse(studentId, courseId);
+        return Result.success();
     }
-
-    @Operation(summary = "导出学生信息", description = "导出学生信息到Excel")
-    @GetMapping("/export")
-    public Result<Object> exportStudents(
-            @RequestParam(required = false) Long classId,
-            @RequestParam(required = false) String keyword) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            StudentDTOExtension.StudentExportRequest exportRequest = buildExportRequest(classId, keyword);
-            Object exportResult = studentService.exportStudents(exportRequest, teacherId);
-            return Result.success(exportResult);
-        } catch (Exception e) {
-            return Result.error("导出学生信息失败: " + e.getMessage());
-        }
+    
+    @DeleteMapping("/remove-from-course")
+    @Operation(summary = "从课程移除学生", description = "从指定课程移除学生")
+    public Result<Void> removeStudentFromCourse(
+            @Parameter(description = "学生课程关联信息") @RequestBody Map<String, Object> params) {
+        
+        Long studentId = Long.valueOf(params.get("studentId").toString());
+        Long courseId = Long.valueOf(params.get("courseId").toString());
+        
+        studentManagementService.removeStudentFromCourse(studentId, courseId);
+        return Result.success();
     }
-
-    @Operation(summary = "重置学生密码", description = "重置指定学生的登录密码")
-    @PostMapping("/{studentId}/reset-password")
-    public Result<Object> resetStudentPassword(@PathVariable Long studentId) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            Object resetResult = studentService.resetStudentPassword(studentId, teacherId);
-            return Result.success(resetResult);
-        } catch (Exception e) {
-            return Result.error("重置学生密码失败: " + e.getMessage());
-        }
+    
+    @PostMapping("/process-enrollment-request")
+    @Operation(summary = "处理选课申请", description = "通过或拒绝学生的选课申请")
+    public Result<Void> processEnrollmentRequest(
+            @Parameter(description = "申请处理信息") @RequestBody Map<String, Object> params) {
+        
+        Long requestId = Long.valueOf(params.get("requestId").toString());
+        Boolean approved = (Boolean) params.get("approved");
+        String comment = (String) params.get("comment");
+        
+        studentManagementService.processEnrollmentRequest(requestId, approved, comment);
+        return Result.success();
     }
-
-    @Operation(summary = "获取学生排行榜", description = "获取班级或课程的学生排行榜")
-    @GetMapping("/ranking")
-    public Result<Object> getStudentRanking(
-            @RequestParam(required = false) Long classId,
-            @RequestParam(required = false) Long courseId,
-            @RequestParam(defaultValue = "score") String rankBy,
-            @RequestParam(defaultValue = "10") Integer limit) {
-        try {
-            Long teacherId = getCurrentTeacherId();
-            Object ranking = studentService.getStudentRanking(teacherId, rankBy, classId, limit);
-            return Result.success(ranking);
-        } catch (Exception e) {
-            return Result.error("获取学生排行榜失败: " + e.getMessage());
-        }
+    
+    @GetMapping("/enrollment-requests")
+    @Operation(summary = "获取选课申请列表", description = "获取待处理的选课申请")
+    public Result<PageResponse<Map<String, Object>>> getEnrollmentRequests(
+            @Parameter(description = "分页参数") PageRequest pageRequest,
+            @Parameter(description = "课程ID") @RequestParam(required = false) Long courseId) {
+        
+        PageResponse<Map<String, Object>> response = studentManagementService.getEnrollmentRequests(
+                pageRequest.getCurrent() - 1,
+                pageRequest.getPageSize(),
+                courseId
+        );
+        
+        return Result.success(response);
     }
-
-    // 辅助方法
-    private Long getCurrentTeacherId() {
-        try {
-            String token = JwtUtils.getTokenFromRequest(request);
-            return jwtUtils.getUserIdFromToken(token);
-        } catch (Exception e) {
-            throw new RuntimeException("获取当前教师ID失败: " + e.getMessage());
-        }
+    
+    @PostMapping("/create")
+    @Operation(summary = "创建学生账户", description = "创建新的学生账户")
+    public Result<User> createStudent(
+            @Parameter(description = "学生信息") @RequestBody User user) {
+        
+        User createdUser = studentManagementService.createStudent(user);
+        return Result.success(createdUser);
     }
-
-    private PageRequest buildPageRequest(Integer page, Integer size, Long classId, String keyword) {
-        PageRequest pageRequest = new PageRequest();
-        pageRequest.setPageNum(page);
-        pageRequest.setPageSize(size);
-        // 可以根据需要添加其他查询条件
-        return pageRequest;
+    
+    @PutMapping("/{id}")
+    @Operation(summary = "更新学生信息", description = "更新学生基本信息")
+    public Result<Student> updateStudent(
+            @Parameter(description = "学生ID") @PathVariable Long id,
+            @Parameter(description = "学生信息") @RequestBody Student student) {
+        
+        student.setId(id);
+        Student updatedStudent = studentManagementService.updateStudent(student);
+        return Result.success(updatedStudent);
     }
-
-    private PageRequest buildSubmissionPageRequest(Integer page, Integer size, Long taskId) {
-        PageRequest pageRequest = new PageRequest();
-        pageRequest.setPageNum(page);
-        pageRequest.setPageSize(size);
-        // 可以根据需要添加taskId等查询条件
-        return pageRequest;
+    
+    @GetMapping("/{id}/classes")
+    @Operation(summary = "获取学生所属班级", description = "获取指定学生所属的班级列表")
+    public Result<List<Map<String, Object>>> getStudentClasses(
+            @Parameter(description = "学生ID") @PathVariable Long id) {
+        
+        log.info("获取学生班级信息, 学生ID: {}", id);
+        List<Map<String, Object>> classes = studentManagementService.getStudentClasses(id);
+        return Result.success(classes);
     }
-
-    private StudentDTO.StudentImportRequest buildImportRequest(Long classId, String fileUrl) {
-        StudentDTO.StudentImportRequest importRequest = new StudentDTO.StudentImportRequest();
-        importRequest.setImportType("EXCEL");
-        importRequest.setFileUrl(fileUrl);
-        return importRequest;
+    
+    @GetMapping("/{id}/courses")
+    @Operation(summary = "获取学生所属课程", description = "获取指定学生所属的课程列表")
+    public Result<List<Map<String, Object>>> getStudentCourses(
+            @Parameter(description = "学生ID") @PathVariable Long id) {
+        
+        log.info("获取学生课程信息, 学生ID: {}", id);
+        List<Map<String, Object>> courses = studentManagementService.getStudentCourses(id);
+        return Result.success(courses);
     }
-
-    private StudentDTOExtension.StudentExportRequest buildExportRequest(Long classId, String keyword) {
-        StudentDTOExtension.StudentExportRequest exportRequest = new StudentDTOExtension.StudentExportRequest();
-        exportRequest.setExportType("EXCEL");
-        exportRequest.setIncludeGrades(true);
-        exportRequest.setIncludeProgress(true);
-        return exportRequest;
-    }
-}
+} 

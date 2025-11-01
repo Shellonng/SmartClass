@@ -4,6 +4,8 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/reset.css'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 import axios from 'axios'
 
 import App from './App.vue'
@@ -11,8 +13,13 @@ import router from './router'
 import { useAuthStore } from './stores/auth'
 
 // 配置axios
-axios.defaults.baseURL = 'http://localhost:8080/api'
-axios.defaults.timeout = 10000
+axios.defaults.baseURL = 'http://localhost:8080'
+axios.defaults.timeout = 480000 // 增加超时时间到480秒(8分钟)，以匹配后端设置
+axios.defaults.withCredentials = true // 允许跨域请求携带凭证（cookies）
+
+// 设置请求头
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest' // 标记为AJAX请求
+console.log('axios基础配置完成，确保使用withCredentials进行会话认证')
 
 // 请求拦截器
 axios.interceptors.request.use(
@@ -23,13 +30,20 @@ axios.interceptors.request.use(
       baseURL: config.baseURL,
       fullURL: (config.baseURL || '') + (config.url || ''),
       headers: config.headers,
+      withCredentials: config.withCredentials,
       data: config.data
     })
     
+    // 确保请求包含cookie（用于Session认证）
+    config.withCredentials = true
+    
+    // 从localStorage获取token并添加到请求头
     const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    if (token && !config.headers['Authorization']) {
+      config.headers['Authorization'] = `Bearer ${token}`
+      console.log('请求自动添加token:', token)
     }
+    
     return config
   },
   (error) => {
@@ -46,8 +60,16 @@ axios.interceptors.response.use(
       statusText: response.statusText,
       url: response.config.url,
       headers: response.headers,
+      cookies: document.cookie,
       data: response.data
     })
+    
+    // 检查并保存会话ID（如果存在）
+    const setCookieHeader = response.headers['set-cookie']
+    if (setCookieHeader) {
+      console.log('服务器设置了Cookie:', setCookieHeader)
+    }
+    
     return response
   },
   (error) => {
@@ -67,10 +89,16 @@ axios.interceptors.response.use(
       }
     })
     
-    if (error.response?.status === 401) {
-      const authStore = useAuthStore()
-      authStore.clearToken()
-      router.push('/login')
+    // 处理401未授权错误
+    if (error.response && error.response.status === 401) {
+      // 清除本地存储的认证信息
+      localStorage.removeItem('token');
+      localStorage.removeItem('user-token');
+      localStorage.removeItem('userInfo');
+      localStorage.removeItem('sessionId');
+      
+      // 重定向到登录页
+      window.location.href = '/login';
     }
     return Promise.reject(error)
   }
@@ -82,9 +110,30 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 app.use(Antd)
+app.use(ElementPlus)
 
-// 初始化认证状态
-const authStore = useAuthStore()
-authStore.initAuth()
+// 初始化认证状态，并在完成后挂载应用
+const initApp = async () => {
+  const authStore = useAuthStore()
+  
+  try {
+    // 检查是否有token
+    const token = localStorage.getItem('token')
+    if (token) {
+      // 设置全局axios默认头部
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      console.log('启动时设置全局token')
+    }
+    
+    // 初始化认证状态
+    await authStore.init()
+    console.log('认证初始化完成')
+  } catch (error) {
+    console.error('认证初始化失败:', error)
+  } finally {
+    // 无论认证是否成功，都挂载应用
+    app.mount('#app')
+  }
+}
 
-app.mount('#app')
+initApp()

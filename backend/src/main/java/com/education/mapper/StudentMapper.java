@@ -1,6 +1,8 @@
 package com.education.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.education.entity.Student;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -366,4 +368,83 @@ public interface StudentMapper extends BaseMapper<Student> {
                        @Param("extField1") String extField1, 
                        @Param("extField2") String extField2, 
                        @Param("extField3") String extField3);
+
+    /**
+     * 获取指定年份的最大学号
+     * 
+     * @param year 年份
+     * @return 最大学号
+     */
+    @Select("SELECT MAX(student_id) FROM student WHERE student_id LIKE CONCAT(#{year}, '%')")
+    String getMaxStudentIdByYear(@Param("year") String year);
+
+    /**
+     * 根据班级ID分页查询学生列表
+     *
+     * @param page 分页参数
+     * @param classId 班级ID
+     * @param keyword 关键词
+     * @return 学生列表
+     */
+    @Select("<script>" +
+            "SELECT s.*, " +
+            "u.id as 'user.id', u.username as 'user.username', u.real_name as 'user.real_name', " +
+            "u.email as 'user.email', u.avatar as 'user.avatar', u.status as 'user.status' " +
+            "FROM student s " +
+            "JOIN user u ON s.user_id = u.id " +
+            "JOIN class_student cs ON s.id = cs.student_id " +
+            "WHERE cs.class_id = #{classId} " +
+            "<if test='keyword != null and keyword != \"\"'>" +
+            "  AND (u.real_name LIKE CONCAT('%', #{keyword}, '%') " +
+            "  OR u.username LIKE CONCAT('%', #{keyword}, '%') " +
+            "  OR CAST(s.id AS CHAR) LIKE CONCAT('%', #{keyword}, '%')) " +
+            "</if>" +
+            "ORDER BY cs.join_time DESC" +
+            "</script>")
+    IPage<Student> selectPageByClassId(Page<Student> page,
+                                      @Param("classId") Long classId,
+                                      @Param("keyword") String keyword);
+
+    /**
+     * 根据课程ID分页查询学生
+     *
+     * @param page 分页参数
+     * @param courseId 课程ID
+     * @param keyword 关键词
+     * @return 分页学生列表
+     */
+    @Select("<script>" +
+            "SELECT s.* FROM student s " +
+            "JOIN course_student cs ON s.id = cs.student_id " +
+            "JOIN user u ON s.user_id = u.id " +
+            "WHERE cs.course_id = #{courseId} " +
+            "<if test=\"keyword != null and keyword != ''\">" +
+            "AND (u.real_name LIKE CONCAT('%', #{keyword}, '%') OR s.student_id LIKE CONCAT('%', #{keyword}, '%')) " +
+            "</if>" +
+            "ORDER BY s.id DESC" +
+            "</script>")
+    IPage<Student> selectPageByCourseId(Page<Student> page, @Param("courseId") Long courseId, @Param("keyword") String keyword);
+
+    /**
+     * 根据教师ID分页查询学生
+     *
+     * @param page 分页参数
+     * @param teacherId 教师ID
+     * @param keyword 关键词
+     * @return 分页学生列表
+     */
+    @Select("<script>" +
+            "SELECT DISTINCT s.* FROM student s " +
+            "LEFT JOIN course_student cs ON s.id = cs.student_id " +
+            "LEFT JOIN course c ON cs.course_id = c.id " +
+            "LEFT JOIN class_student cls ON s.id = cls.student_id " +
+            "LEFT JOIN course_class cc ON cls.class_id = cc.id " +
+            "JOIN user u ON s.user_id = u.id " +
+            "WHERE (c.teacher_id = #{teacherId} OR cc.teacher_id = #{teacherId}) " +
+            "<if test=\"keyword != null and keyword != ''\">" +
+            "AND (u.real_name LIKE CONCAT('%', #{keyword}, '%') OR s.student_id LIKE CONCAT('%', #{keyword}, '%')) " +
+            "</if>" +
+            "ORDER BY s.id DESC" +
+            "</script>")
+    IPage<Student> selectPageByTeacherId(Page<Student> page, @Param("teacherId") Long teacherId, @Param("keyword") String keyword);
 }

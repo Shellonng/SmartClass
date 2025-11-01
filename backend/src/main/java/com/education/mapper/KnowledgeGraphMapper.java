@@ -1,15 +1,18 @@
 package com.education.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.education.entity.KnowledgeGraph;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
-import java.util.Map;
 
 /**
- * 知识图谱数据访问层
+ * 知识图谱Mapper接口
  * 
  * @author Education Platform Team
  * @version 1.0.0
@@ -17,79 +20,121 @@ import java.util.Map;
  */
 @Mapper
 public interface KnowledgeGraphMapper extends BaseMapper<KnowledgeGraph> {
-    
+
     /**
-     * 根据课程ID查询知识图谱
+     * 分页查询知识图谱（包含关联信息）
      */
+    @Select("""
+        SELECT kg.*, c.title as course_name, u.real_name as creator_name
+        FROM knowledge_graph kg
+        LEFT JOIN course c ON kg.course_id = c.id
+        LEFT JOIN user u ON kg.creator_id = u.id
+        ${ew.customSqlSegment}
+    """)
+    IPage<KnowledgeGraph> selectPageWithRelations(Page<KnowledgeGraph> page, @Param("ew") com.baomidou.mybatisplus.core.conditions.Wrapper<KnowledgeGraph> wrapper);
+
+    /**
+     * 根据课程ID查询知识图谱列表
+     */
+    @Select("""
+        SELECT kg.*, c.title as course_name, u.real_name as creator_name
+        FROM knowledge_graph kg
+        LEFT JOIN course c ON kg.course_id = c.id
+        LEFT JOIN user u ON kg.creator_id = u.id
+        WHERE kg.course_id = #{courseId}
+        AND kg.status != 'archived'
+        ORDER BY kg.create_time DESC
+    """)
     List<KnowledgeGraph> selectByCourseId(@Param("courseId") Long courseId);
-    
+
     /**
-     * 根据创建者ID查询知识图谱
+     * 根据课程ID和图谱类型查询
      */
-    List<KnowledgeGraph> selectByCreatedBy(@Param("createdBy") Long createdBy);
-    
+    @Select("""
+        SELECT kg.*, c.title as course_name, u.real_name as creator_name
+        FROM knowledge_graph kg
+        LEFT JOIN course c ON kg.course_id = c.id
+        LEFT JOIN user u ON kg.creator_id = u.id
+        WHERE kg.course_id = #{courseId}
+        AND kg.graph_type = #{graphType}
+        AND kg.status = 'published'
+        ORDER BY kg.version DESC
+        LIMIT 1
+    """)
+    KnowledgeGraph selectLatestByTypeAndCourse(@Param("courseId") Long courseId, @Param("graphType") String graphType);
+
+    /**
+     * 查询用户创建的知识图谱
+     */
+    @Select("""
+        SELECT kg.*, c.title as course_name
+        FROM knowledge_graph kg
+        LEFT JOIN course c ON kg.course_id = c.id
+        WHERE kg.creator_id = #{creatorId}
+        ORDER BY kg.update_time DESC
+    """)
+    List<KnowledgeGraph> selectByCreatorId(@Param("creatorId") Long creatorId);
+
     /**
      * 查询公开的知识图谱
      */
-    List<KnowledgeGraph> selectPublicGraphs();
-    
+    @Select("""
+        SELECT kg.*, c.title as course_name, u.real_name as creator_name
+        FROM knowledge_graph kg
+        LEFT JOIN course c ON kg.course_id = c.id
+        LEFT JOIN user u ON kg.creator_id = u.id
+        WHERE kg.status = 'published'
+        ORDER BY kg.update_time DESC
+        LIMIT #{limit}
+    """)
+    List<KnowledgeGraph> selectPublicGraphs(@Param("limit") Integer limit);
+
     /**
-     * 根据标签查询知识图谱
+     * 查询已发布状态的知识图谱
      */
-    List<KnowledgeGraph> selectByTags(@Param("tags") List<String> tags);
-    
+    @Select("""
+        SELECT kg.*, c.title as course_name, u.real_name as creator_name
+        FROM knowledge_graph kg
+        LEFT JOIN course c ON kg.course_id = c.id
+        LEFT JOIN user u ON kg.creator_id = u.id
+        WHERE kg.status = 'published'
+        ORDER BY kg.update_time DESC
+        LIMIT #{limit}
+    """)
+    List<KnowledgeGraph> selectPublishedGraphs(@Param("limit") Integer limit);
+
+    /**
+     * 增加访问次数 - 注释掉，因为没有view_count列
+     */
+    // @Update("UPDATE knowledge_graph SET view_count = view_count + 1 WHERE id = #{id}")
+    // int incrementViewCount(@Param("id") Long id);
+
     /**
      * 搜索知识图谱
      */
-    List<KnowledgeGraph> searchGraphs(@Param("keyword") String keyword);
-    
+    @Select("""
+        SELECT kg.*, c.title as course_name, u.real_name as creator_name
+        FROM knowledge_graph kg
+        LEFT JOIN course c ON kg.course_id = c.id
+        LEFT JOIN user u ON kg.creator_id = u.id
+        WHERE (kg.title LIKE CONCAT('%', #{keyword}, '%')
+        OR kg.description LIKE CONCAT('%', #{keyword}, '%')
+        OR c.title LIKE CONCAT('%', #{keyword}, '%'))
+        AND kg.status = 'published'
+        AND (kg.creator_id = #{userId})
+        ORDER BY kg.update_time DESC
+    """)
+    List<KnowledgeGraph> searchGraphs(@Param("keyword") String keyword, @Param("userId") Long userId);
+
     /**
-     * 查询知识图谱版本历史
+     * 统计用户创建的图谱数量
      */
-    List<KnowledgeGraph> selectVersionHistory(@Param("name") String name, @Param("courseId") Long courseId);
-    
+    @Select("SELECT COUNT(*) FROM knowledge_graph WHERE creator_id = #{creatorId}")
+    Long countByCreatorId(@Param("creatorId") Long creatorId);
+
     /**
-     * 查询最新版本的知识图谱
+     * 统计课程的图谱数量
      */
-    KnowledgeGraph selectLatestVersion(@Param("name") String name, @Param("courseId") Long courseId);
-    
-    /**
-     * 查询知识图谱统计信息
-     */
-    Map<String, Object> selectGraphStats(@Param("graphId") Long graphId);
-    
-    /**
-     * 查询热门知识图谱
-     */
-    List<KnowledgeGraph> selectPopularGraphs(@Param("limit") Integer limit);
-    
-    /**
-     * 查询推荐知识图谱
-     */
-    List<KnowledgeGraph> selectRecommendedGraphs(@Param("userId") Long userId, @Param("limit") Integer limit);
-    
-    /**
-     * 复制知识图谱
-     */
-    int copyGraph(@Param("sourceId") Long sourceId, @Param("targetName") String targetName, @Param("createdBy") Long createdBy);
-    
-    /**
-     * 合并知识图谱
-     */
-    int mergeGraphs(@Param("sourceIds") List<Long> sourceIds, @Param("targetName") String targetName, @Param("createdBy") Long createdBy);
-    
-    /**
-     * 验证知识图谱完整性
-     */
-    Map<String, Object> validateGraphIntegrity(@Param("graphId") Long graphId);
-    
-    /**
-     * 获取知识图谱可视化数据
-     */
-    Map<String, Object> selectVisualizationData(@Param("graphId") Long graphId);
-    
-    /**
-     * 批量更新知识图谱状态
-     */
-    int batchUpdateStatus(@Param("graphIds") List<Long> graphIds, @Param("status") String status);
-}
+    @Select("SELECT COUNT(*) FROM knowledge_graph WHERE course_id = #{courseId} AND status != 'archived'")
+    Long countByCourseId(@Param("courseId") Long courseId);
+} 

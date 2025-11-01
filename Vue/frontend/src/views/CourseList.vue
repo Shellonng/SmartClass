@@ -2,296 +2,367 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { SearchOutlined, FilterOutlined, UserOutlined, StarOutlined, BookOutlined } from '@ant-design/icons-vue'
-import { getCourseList, getCourseCategories, type Course, type CourseListParams } from '@/api/course'
+import { SearchOutlined, FilterOutlined, UserOutlined, StarOutlined, BookOutlined, TeamOutlined, AppstoreOutlined, BarsOutlined } from '@ant-design/icons-vue'
+import { getPublicCourseList, getCourseCategories, enrollCourse as apiEnrollCourse, getEnrolledCourses, getStudentEnrolledCourseIds, type Course, type CourseCategory, type CourseListParams, getCourseInstructor } from '@/api/course'
+import { useAuthStore } from '@/stores/auth'
+import axios from 'axios'
+
+// 模拟课程数据
+const mockCourses = [
+  {
+    id: 1,
+    title: '高等数学（上）',
+    description: '本课程系统讲解高等数学的基本概念、理论和方法，包括函数、极限、导数、微分、积分等内容。',
+    coverImage: 'https://img.freepik.com/free-vector/hand-drawn-mathematics-background_23-2148157511.jpg',
+    instructor: '张教授',
+    instructorId: 101,
+    category: '数学',
+    categoryId: 1,
+    level: 'intermediate',
+    price: 0,
+    rating: 4.8,
+    students: 15420,
+    duration: '16周',
+    tags: ['数学', '微积分', '理工科基础'],
+    type: 'FEATURED',
+    createdAt: '2023-09-01',
+    updatedAt: '2024-01-15'
+  },
+  {
+    id: 2,
+    title: 'Python编程基础',
+    description: '零基础入门Python编程，掌握Python基本语法、数据类型、控制结构、函数和模块等核心内容。',
+    coverImage: 'https://img.freepik.com/free-vector/programming-concept-illustration_114360-1351.jpg',
+    instructor: '李教授',
+    instructorId: 102,
+    category: '计算机科学',
+    categoryId: 2,
+    level: 'beginner',
+    price: 99,
+    rating: 4.9,
+    students: 23150,
+    duration: '12周',
+    tags: ['Python', '编程', '入门'],
+    type: 'FEATURED',
+    createdAt: '2023-10-15',
+    updatedAt: '2024-02-20'
+  },
+  {
+    id: 3,
+    title: '大学物理（力学部分）',
+    description: '系统讲解经典力学的基本概念、定律和方法，包括牛顿力学、刚体力学、振动和波动等内容。',
+    coverImage: 'https://img.freepik.com/free-vector/physics-concept-illustration_114360-3972.jpg',
+    instructor: '王教授',
+    instructorId: 103,
+    category: '物理',
+    categoryId: 3,
+    level: 'intermediate',
+    price: 0,
+    rating: 4.7,
+    students: 12680,
+    duration: '14周',
+    tags: ['物理', '力学', '理工科基础'],
+    createdAt: '2023-09-10',
+    updatedAt: '2024-01-10'
+  },
+  {
+    id: 4,
+    title: '数据结构与算法',
+    description: '深入学习常用数据结构和算法设计技巧，包括数组、链表、栈、队列、树、图以及各种排序和搜索算法。',
+    coverImage: 'https://img.freepik.com/free-vector/programming-concept-illustration_114360-1213.jpg',
+    instructor: '陈教授',
+    instructorId: 104,
+    category: '计算机科学',
+    categoryId: 2,
+    level: 'advanced',
+    price: 199,
+    rating: 4.9,
+    students: 9850,
+    duration: '16周',
+    tags: ['数据结构', '算法', '计算机科学'],
+    createdAt: '2023-11-05',
+    updatedAt: '2024-02-28'
+  },
+  {
+    id: 5,
+    title: '大学英语综合教程',
+    description: '提升英语听说读写综合能力，涵盖语法、词汇、阅读理解和写作技巧，为四六级考试做准备。',
+    coverImage: 'https://img.freepik.com/free-vector/english-school-landing-page-template_23-2148475038.jpg',
+    instructor: '刘教授',
+    instructorId: 105,
+    category: '外语',
+    categoryId: 4,
+    level: 'beginner',
+    price: 129,
+    rating: 4.6,
+    students: 18760,
+    duration: '20周',
+    tags: ['英语', '四六级', '语言学习'],
+    createdAt: '2023-08-20',
+    updatedAt: '2024-01-05'
+  },
+  {
+    id: 6,
+    title: '微观经济学原理',
+    description: '介绍微观经济学的基本理论，包括供需关系、市场结构、消费者行为、生产理论等内容。',
+    coverImage: 'https://img.freepik.com/free-vector/economy-concept-illustration_114360-7385.jpg',
+    instructor: '赵教授',
+    instructorId: 106,
+    category: '经济学',
+    categoryId: 5,
+    level: 'intermediate',
+    price: 149,
+    rating: 4.5,
+    students: 11200,
+    duration: '15周',
+    tags: ['经济学', '微观经济', '商科基础'],
+    createdAt: '2023-10-01',
+    updatedAt: '2024-02-10'
+  },
+  {
+    id: 7,
+    title: '线性代数',
+    description: '系统学习线性代数的基本概念和方法，包括矩阵运算、行列式、向量空间、特征值和特征向量等内容。',
+    coverImage: 'https://img.freepik.com/free-vector/mathematics-concept-illustration_114360-3972.jpg',
+    instructor: '张教授',
+    instructorId: 101,
+    category: '数学',
+    categoryId: 1,
+    level: 'intermediate',
+    price: 0,
+    rating: 4.7,
+    students: 13580,
+    duration: '12周',
+    tags: ['数学', '线性代数', '理工科基础'],
+    createdAt: '2023-09-15',
+    updatedAt: '2024-01-20'
+  },
+  {
+    id: 8,
+    title: 'Java程序设计',
+    description: '从零开始学习Java编程语言，掌握面向对象编程思想和Java核心技术，为开发企业级应用打下基础。',
+    coverImage: 'https://img.freepik.com/free-vector/programming-concept-illustration_114360-1670.jpg',
+    instructor: '李教授',
+    instructorId: 102,
+    category: '计算机科学',
+    categoryId: 2,
+    level: 'intermediate',
+    price: 199,
+    rating: 4.8,
+    students: 16420,
+    duration: '18周',
+    tags: ['Java', '编程', '面向对象'],
+    type: 'FEATURED',
+    createdAt: '2023-11-10',
+    updatedAt: '2024-03-01'
+  }
+];
+
+// 模拟课程分类数据
+const mockCategories = [
+  { id: 1, name: '数学' },
+  { id: 2, name: '计算机科学' },
+  { id: 3, name: '物理' },
+  { id: 4, name: '外语' },
+  { id: 5, name: '经济学' },
+  { id: 6, name: '文学艺术' }
+];
 
 const router = useRouter()
+const authStore = useAuthStore()
 
-// 搜索和筛选状态
-const searchKeyword = ref('')
-const selectedCategory = ref('all')
-const selectedLevel = ref('all')
-const sortBy = ref('popular')
+// 状态
 const loading = ref(false)
-const currentPage = ref(1)
-const pageSize = ref(12)
-const total = ref(0)
-
-// 课程数据
 const courses = ref<Course[]>([])
-const categories = ref<string[]>([])
+const categories = ref<CourseCategory[]>([])
+const searchKeyword = ref('')
+const selectedCategory = ref('')
+const sortBy = ref('latest')
+const viewMode = ref('card')
+const enrolledCourses = ref<number[]>([])
+const teacherNames = ref<Record<number, string>>({}) // 存储教师ID到真实姓名的映射
 
-// 加载课程列表
-const loadCourses = async () => {
+// 分页配置
+const pagination = {
+  pageSize: 12,
+  current: 1,
+  total: 0,
+  onChange: (page: number) => {
+    pagination.current = page
+    fetchCourses()
+  }
+}
+
+// 过滤和排序后的课程列表
+const filteredCourses = computed(() => {
+  return courses.value
+})
+
+// 获取课程教师的真实姓名
+const fetchTeacherNames = async () => {
+  const teacherIds = courses.value
+    .map(course => course.instructorId)
+    .filter((id, index, self) => id && self.indexOf(id) === index) // 去重
+  
+  try {
+    for (const teacherId of teacherIds) {
+      if (!teacherNames.value[teacherId]) {
+        try {
+          const response = await getCourseInstructor(teacherId)
+          if (response && response.data && response.data.name) {
+            teacherNames.value[teacherId] = response.data.name
+          }
+        } catch (error) {
+          console.error(`获取教师 ${teacherId} 信息失败:`, error)
+        }
+      }
+    }
+  } catch (error) {
+    console.error('获取教师信息失败:', error)
+  }
+}
+
+// 获取课程列表
+const fetchCourses = async () => {
   loading.value = true
+  
   try {
     const params: CourseListParams = {
-      page: currentPage.value,
-      size: pageSize.value,
-      keyword: searchKeyword.value || undefined,
-      category: selectedCategory.value === 'all' ? undefined : selectedCategory.value,
-      level: selectedLevel.value === 'all' ? undefined : selectedLevel.value,
+      page: pagination.current - 1,
+      size: pagination.pageSize,
+      keyword: searchKeyword.value,
+      categoryId: selectedCategory.value || undefined,
       sortBy: sortBy.value
     }
     
-    const response = await getCourseList(params)
-    if (response.code === 200) {
-      courses.value = response.data.courses
-      total.value = response.data.total
-    } else {
-      message.error('加载课程列表失败')
-    }
+    const response = await getPublicCourseList(params)
+    courses.value = response.content || []
+    pagination.total = response.totalElements || 0
+    
+    // 获取教师真实姓名
+    fetchTeacherNames()
+    
+    console.log('从后端获取课程列表成功:', response)
   } catch (error) {
-    console.error('加载课程列表失败:', error)
-    message.error('加载课程列表失败')
-    // 使用模拟数据作为后备
-    courses.value = getMockCourses()
-    total.value = 50
+    console.error('获取课程列表失败:', error)
+    message.error('获取课程列表失败，请稍后重试')
+    courses.value = []
+    pagination.total = 0
   } finally {
     loading.value = false
   }
 }
 
-// 加载课程分类
-const loadCategories = async () => {
+// 获取课程分类
+const fetchCategories = async () => {
   try {
     const response = await getCourseCategories()
-    if (response.code === 200) {
-      categories.value = response.data
-    }
+    categories.value = response || mockCategories
+    console.log('获取课程分类成功:', categories.value)
   } catch (error) {
-    console.error('加载课程分类失败:', error)
-    // 使用默认分类
-    categories.value = ['数学', '计算机', '物理', '化学', '生物', '经济学', '管理学']
+    console.error('获取课程分类失败:', error)
+    categories.value = mockCategories
   }
 }
 
-// 模拟数据（作为后备）
-const getMockCourses = (): Course[] => [
-  {
-    id: 1,
-    title: '高等数学A',
-    instructor: '张教授',
-    university: '清华大学',
-    category: '数学',
-    level: 'beginner',
-    students: 15420,
-    rating: 4.8,
-    reviewCount: 1250,
-    duration: '16周',
-    effort: '每周4-6小时',
-    image: '',
-    description: '本课程系统讲解高等数学的基本概念、理论和方法，包括极限、导数、积分等内容。',
-    tags: ['数学', '基础课程', '理工科'],
-    price: 0,
-    originalPrice: 299,
-    startDate: '2024-03-01'
-  },
-  {
-    id: 2,
-    title: '计算机程序设计基础',
-    instructor: '李教授',
-    university: '北京大学',
-    category: '计算机',
-    level: 'beginner',
-    students: 12350,
-    rating: 4.9,
-    reviewCount: 980,
-    duration: '12周',
-    effort: '每周3-5小时',
-    image: '',
-    description: '面向零基础学员的编程入门课程，通过Python语言学习编程思维和基本技能。',
-    tags: ['编程', 'Python', '入门'],
-    price: 199,
-    startDate: '2024-03-15'
-  },
-  {
-    id: 3,
-    title: '大学英语综合教程',
-    instructor: '王教授',
-    university: '复旦大学',
-    category: '语言',
-    level: 'intermediate',
-    students: 18900,
-    rating: 4.7,
-    reviewCount: 1560,
-    duration: '20周',
-    effort: '每周2-4小时',
-    image: '',
-    description: '提升英语听说读写综合能力，涵盖语法、词汇、阅读理解和写作技巧。',
-    tags: ['英语', '语言学习', '四六级'],
-    price: 299,
-    startDate: '2024-02-20'
-  },
-  {
-    id: 4,
-    title: '线性代数',
-    instructor: '赵教授',
-    university: '中国科学技术大学',
-    category: '数学',
-    level: 'intermediate',
-    students: 9800,
-    rating: 4.6,
-    reviewCount: 720,
-    duration: '14周',
-    effort: '每周4-6小时',
-    image: '',
-    description: '深入学习线性代数的核心概念，包括矩阵运算、向量空间、特征值等。',
-    tags: ['数学', '线性代数', '理工科'],
-    price: 0,
-    startDate: '2024-03-10'
-  },
-  {
-    id: 5,
-    title: '数据结构与算法',
-    instructor: '陈教授',
-    university: '上海交通大学',
-    category: '计算机',
-    level: 'advanced',
-    students: 8750,
-    rating: 4.9,
-    reviewCount: 650,
-    duration: '18周',
-    effort: '每周6-8小时',
-    image: '',
-    description: '系统学习常用数据结构和算法设计技巧，提升编程能力和问题解决能力。',
-    tags: ['算法', '数据结构', '编程'],
-    price: 399,
-    startDate: '2024-04-01'
-  },
-  {
-    id: 6,
-    title: '微观经济学原理',
-    instructor: '刘教授',
-    university: '北京大学',
-    category: '经济',
-    level: 'beginner',
-    students: 11200,
-    rating: 4.5,
-    reviewCount: 890,
-    duration: '16周',
-    effort: '每周3-4小时',
-    image: '',
-    description: '介绍微观经济学的基本理论，包括供需关系、市场结构、消费者行为等。',
-    tags: ['经济学', '微观经济', '商科'],
-    price: 199,
-    startDate: '2024-03-20'
+// 获取用户已加入的课程
+const fetchEnrolledCourses = async () => {
+  if (!authStore.isAuthenticated) return
+  
+  try {
+    if (authStore.user?.role === 'STUDENT') {
+      // 如果是学生用户，获取学生ID
+      const studentId = authStore.user.id;
+      // 获取该学生已加入的所有课程ID
+      const enrolledIds = await getStudentEnrolledCourseIds(studentId);
+      enrolledCourses.value = enrolledIds;
+    } else {
+      // 非学生用户使用原有方法
+      const response = await getEnrolledCourses();
+      enrolledCourses.value = response.map(course => course.id);
+    }
+    console.log('获取已加入课程成功:', enrolledCourses.value);
+  } catch (error) {
+    console.error('获取已加入课程失败:', error);
+    enrolledCourses.value = [];
   }
-];
-
-// 分类选项
-const categoryOptions = computed(() => [
-  { label: '全部', value: 'all' },
-  ...categories.value.map(cat => ({ label: cat, value: cat }))
-])
-
-// 难度选项
-const levels = [
-  { value: 'all', label: '全部难度' },
-  { value: 'beginner', label: '初级' },
-  { value: 'intermediate', label: '中级' },
-  { value: 'advanced', label: '高级' }
-]
-
-// 排序选项
-const sortOptions = [
-  { value: 'popular', label: '最受欢迎' },
-  { value: 'rating', label: '评分最高' },
-  { value: 'newest', label: '最新发布' },
-  { value: 'price_low', label: '价格从低到高' },
-  { value: 'price_high', label: '价格从高到低' }
-]
-
-// 筛选后的课程
-const filteredCourses = computed(() => {
-  let result = courses.value
-
-  // 关键词搜索
-  if (searchKeyword.value) {
-    const keyword = searchKeyword.value.toLowerCase()
-    result = result.filter(course => 
-      course.title.toLowerCase().includes(keyword) ||
-      course.instructor.toLowerCase().includes(keyword) ||
-      course.university.toLowerCase().includes(keyword) ||
-      course.description.toLowerCase().includes(keyword) ||
-      course.tags.some(tag => tag.toLowerCase().includes(keyword))
-    )
-  }
-
-  // 分类筛选
-  if (selectedCategory.value !== 'all') {
-    result = result.filter(course => course.category === selectedCategory.value)
-  }
-
-  // 难度筛选
-  if (selectedLevel.value !== 'all') {
-    result = result.filter(course => course.level === selectedLevel.value)
-  }
-
-  // 排序
-  switch (sortBy.value) {
-    case 'popular':
-      result.sort((a, b) => b.students - a.students)
-      break
-    case 'rating':
-      result.sort((a, b) => b.rating - a.rating)
-      break
-    case 'newest':
-      result.sort((a, b) => {
-        const dateA = a.startDate ? new Date(a.startDate).getTime() : 0
-        const dateB = b.startDate ? new Date(b.startDate).getTime() : 0
-        return dateB - dateA
-      })
-      break
-    case 'price_low':
-      result.sort((a, b) => a.price - b.price)
-      break
-    case 'price_high':
-      result.sort((a, b) => b.price - a.price)
-      break
-  }
-
-  return result
-})
-
-// 搜索课程
-const searchCourses = () => {
-  currentPage.value = 1
-  loadCourses()
 }
 
-// 重置筛选
-const resetFilters = () => {
-  searchKeyword.value = ''
-  selectedCategory.value = 'all'
-  selectedLevel.value = 'all'
-  sortBy.value = 'popular'
-  currentPage.value = 1
-  loadCourses()
+// 判断用户是否已加入课程
+const isEnrolled = (courseId: number) => {
+  return enrolledCourses.value.includes(courseId)
 }
 
-// 查看课程详情
-const viewCourse = (courseId: number) => {
-  router.push(`/course/${courseId}`)
+// 搜索处理
+const handleSearch = () => {
+  pagination.current = 1
+  fetchCourses()
 }
 
-// 分页变化
-const onPageChange = (page: number) => {
-  currentPage.value = page
-  loadCourses()
+// 分类变更处理
+const handleCategoryChange = () => {
+  pagination.current = 1
+  fetchCourses()
+}
+
+// 排序变更处理
+const handleSortChange = () => {
+  pagination.current = 1
+  fetchCourses()
+}
+
+// 跳转到课程详情页
+const goToCourseDetail = (courseId: number) => {
+  router.push(`/courses/${courseId}`)
+}
+
+// 加入课程
+const enrollCourse = async (courseId: number) => {
+  if (!authStore.isAuthenticated) {
+    message.warning('请先登录后再加入课程')
+    router.push('/login?redirect=' + encodeURIComponent(router.currentRoute.value.fullPath))
+    return
+  }
+
+  if (isEnrolled(courseId)) {
+    // 已加入课程，直接进入学习
+    if (authStore.user?.role === 'STUDENT') {
+      router.push(`/student/courses/${courseId}`)
+    } else if (authStore.user?.role === 'TEACHER') {
+      router.push(`/teacher/courses/${courseId}`)
+    }
+    return
+}
+
+  try {
+    // 调用加入课程API
+    await apiEnrollCourse(courseId);
+    message.success('成功加入课程');
+    // 更新已加入课程列表
+    enrolledCourses.value.push(courseId);
+  } catch (error) {
+    console.error('加入课程失败:', error);
+    message.error('加入课程失败，请稍后重试');
+  }
+}
+
+// 文本截断
+const truncateText = (text: string, maxLength: number) => {
+  if (!text) return ''
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
 }
 
 // 获取难度标签颜色
 const getLevelColor = (level: string) => {
   switch (level) {
     case 'beginner': return 'green'
-    case 'intermediate': return 'orange'
+    case 'intermediate': return 'blue'
     case 'advanced': return 'red'
     default: return 'default'
   }
 }
 
-// 获取难度标签文本
+// 获取难度文本
 const getLevelText = (level: string) => {
   switch (level) {
     case 'beginner': return '初级'
@@ -301,422 +372,559 @@ const getLevelText = (level: string) => {
   }
 }
 
-// 格式化价格
-const formatPrice = (price: number) => {
-  return price === 0 ? '免费' : `¥${price}`
+/**
+ * 处理课程封面图片URL
+ * 将/files/开头的路径转换为API访问路径
+ */
+const processImageUrl = (url: string | undefined): string => {
+  if (!url) return '/default-course.jpg';
+  
+  // 如果是旧格式的URL(/files/开头)，则尝试转换为新格式
+  if (url.startsWith('/files/')) {
+    // 检查是否是课程封面路径
+    if (url.includes('/courses/covers/')) {
+      // 提取年月和文件名部分
+      const parts = url.split('/');
+      if (parts.length >= 5) {
+        const yearMonth = parts[parts.length - 2];
+        const filename = parts[parts.length - 1];
+        return `/api/photo/${yearMonth}/${filename}`;
+      }
+    }
+    // 如果不是课程封面或无法解析，使用通用文件访问API
+    return '/api/common/files/get/' + url.substring(7);
+  }
+  
+  // 如果已经是新格式(/api/photo/开头)或外部URL，直接返回
+  return url;
+};
+
+// 生成渐变背景色
+const getRandomGradient = (() => {
+  // 预定义一些漂亮的渐变色组合
+  const gradients = [
+    'linear-gradient(135deg, #F6D365 0%, #FDA085 100%)',
+    'linear-gradient(135deg, #5EFCE8 0%, #736EFE 100%)',
+    'linear-gradient(135deg, #FCCF31 0%, #F55555 100%)',
+    'linear-gradient(135deg, #43CBFF 0%, #9708CC 100%)',
+    'linear-gradient(135deg, #FFAF7B 0%, #D76D77 100%)',
+    'linear-gradient(135deg, #A6C0FE 0%, #F68084 100%)',
+    'linear-gradient(135deg, #6A11CB 0%, #2575FC 100%)',
+    'linear-gradient(135deg, #FF9A9E 0%, #FAD0C4 100%)',
+    'linear-gradient(135deg, #FF0844 0%, #FFB199 100%)',
+    'linear-gradient(135deg, #8BC6EC 0%, #9599E2 100%)',
+  ];
+  
+  // 使用闭包保存已使用的索引
+  let lastIndices: number[] = [];
+  
+  return (courseId: number) => {
+    // 基于courseId生成索引，但确保颜色分布均匀
+    let index = courseId % gradients.length;
+    
+    // 如果这个索引最近被使用过，选择另一个
+    if (lastIndices.includes(index)) {
+      for (let i = 0; i < gradients.length; i++) {
+        const newIndex = (index + i) % gradients.length;
+        if (!lastIndices.includes(newIndex)) {
+          index = newIndex;
+          break;
+        }
+      }
+    }
+    
+    // 更新最近使用的索引（保持最多3个）
+    lastIndices.push(index);
+    if (lastIndices.length > 3) {
+      lastIndices.shift();
+    }
+    
+    return gradients[index];
+  };
+})();
+
+// 获取课程状态显示文本
+const getCourseStatus = (course: Course) => {
+  if (!course.status) return '未开始';
+  return course.status;
+};
+
+// 根据教师ID获取教师姓名
+const getTeacherName = (instructorId: number, fallbackName: string): string => {
+  return teacherNames.value[instructorId] || fallbackName
 }
 
-// 监听筛选条件变化
-watch([selectedCategory, selectedLevel, sortBy], () => {
-  currentPage.value = 1
-  loadCourses()
-})
+// 获取课程按钮文本
+const getCourseButtonText = (courseId: number) => {
+  return isEnrolled(courseId) ? '进入学习' : '加入学习';
+}
 
-// 组件挂载时加载数据
-onMounted(async () => {
-  await loadCategories()
-  await loadCourses()
+// 生命周期钩子
+onMounted(() => {
+  fetchCourses()
+  fetchCategories()
+  
+  if (authStore.isAuthenticated) {
+    fetchEnrolledCourses()
+  }
 })
 </script>
 
 <template>
-  <div class="course-list-page">
-    <!-- 页面头部 -->
+  <div class="course-list-container">
     <div class="page-header">
-      <div class="container">
-        <h1>课程中心</h1>
-        <p>发现优质课程，开启学习之旅</p>
-      </div>
-    </div>
-
-    <!-- 搜索和筛选区域 -->
-    <div class="search-filter-section">
-      <div class="container">
-        <div class="search-bar">
+      <h1 class="page-title">全部课程</h1>
+      <div class="filter-section">
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="搜索课程、教师或大学"
-            size="large"
-            @search="searchCourses"
-          >
-            <template #prefix>
-              <SearchOutlined />
-            </template>
-          </a-input-search>
-        </div>
-        
-        <div class="filter-bar">
-          <div class="filter-item">
-            <label>分类：</label>
-            <a-select v-model:value="selectedCategory" style="width: 150px">
-              <a-select-option v-for="category in categoryOptions" :key="category.value" :value="category.value">
-                {{ category.label }}
+          placeholder="搜索课程名称或教师"
+          style="width: 250px"
+          @search="handleSearch"
+        />
+        <a-select
+          v-model:value="selectedCategory"
+          style="width: 150px"
+          placeholder="课程分类"
+          @change="handleCategoryChange"
+        >
+          <a-select-option value="">全部分类</a-select-option>
+          <a-select-option v-for="category in categories" :key="category.id" :value="category.id.toString()">
+            {{ category.name }}
               </a-select-option>
             </a-select>
-          </div>
-          
-          <div class="filter-item">
-            <label>难度：</label>
-            <a-select v-model:value="selectedLevel" style="width: 120px">
-              <a-select-option v-for="level in levels" :key="level.value" :value="level.value">
-                {{ level.label }}
-              </a-select-option>
+        <a-select
+          v-model:value="sortBy"
+          style="width: 150px"
+          @change="handleSortChange"
+        >
+          <a-select-option value="latest">最新发布</a-select-option>
+          <a-select-option value="popular">最受欢迎</a-select-option>
+          <a-select-option value="rating">评分最高</a-select-option>
+          <a-select-option value="price_low">价格从低到高</a-select-option>
+          <a-select-option value="price_high">价格从高到低</a-select-option>
             </a-select>
-          </div>
-          
-          <div class="filter-item">
-            <label>排序：</label>
-            <a-select v-model:value="sortBy" style="width: 150px">
-              <a-select-option v-for="option in sortOptions" :key="option.value" :value="option.value">
-                {{ option.label }}
-              </a-select-option>
-            </a-select>
-          </div>
-        </div>
       </div>
     </div>
 
-    <!-- 课程列表 -->
-    <div class="courses-section">
-      <div class="container">
-        <div class="courses-header">
-          <h2>共找到 {{ filteredCourses.length }} 门课程</h2>
+    <!-- 加载状态 -->
+    <div v-if="loading" class="loading-container">
+      <a-spin size="large" />
+      <p>正在加载课程数据...</p>
         </div>
         
-        <div class="courses-grid">
-          <div 
-            v-for="course in filteredCourses" 
-            :key="course.id" 
-            class="course-card"
-            @click="viewCourse(course.id)"
-          >
-            <div class="course-image">
-              <div v-if="!course.image" class="placeholder-course-image">
-                <div class="placeholder-content">
-                  <BookOutlined style="font-size: 24px; color: #1890ff;" />
-                  <span>{{ course.category }}</span>
+    <!-- 卡片视图 -->
+    <div v-else-if="viewMode === 'card'" class="course-grid">
+      <a-row :gutter="[24, 24]">
+        <a-col :xs="24" :sm="12" :md="8" :lg="6" v-for="course in filteredCourses" :key="course.id">
+          <a-card hoverable class="course-card" @click="goToCourseDetail(course.id)">
+            <template #cover>
+              <div class="course-cover" :style="{ background: course.coverImage ? 'none' : getRandomGradient(course.id) }">
+                <img v-if="course.coverImage" :src="processImageUrl(course.coverImage)" :alt="course.title" />
+                <div class="no-image-title" v-else>{{ course.title }}</div>
+                <div class="course-badge" v-if="course.type === 'FEATURED'">精品课程</div>
+              </div>
+            </template>
+            <a-card-meta :title="course.title">
+              <template #description>
+                <div class="course-info">
+                  <div class="course-teacher">
+                    <UserOutlined /> {{ getTeacherName(course.instructorId, course.instructor) }}
+                  </div>
+                  <div class="course-stats">
+                    <span class="course-rating">
+                      <StarOutlined /> 学分{{ course.credit || course.rating || '0' }}
+                    </span>
+                    <span class="course-students">
+                      <TeamOutlined /> {{ course.students?.toLocaleString() || '0' }} 名学生
+                    </span>
+                  </div>
+                  <div class="course-description">{{ truncateText(course.description, 60) }}</div>
+                  <div class="course-tag-list">
+                    <a-tag v-if="course.courseType || course.category" size="small">{{ course.courseType || course.category }}</a-tag>
+                    <a-tag v-for="tag in course.tags?.slice(0, 1)" :key="tag" size="small">{{ tag }}</a-tag>
+                  </div>
                 </div>
-              </div>
-              <img v-else :src="course.image" :alt="course.title" />
-              <div class="course-price">
-                {{ course.price === 0 ? '免费' : `¥${course.price}` }}
-              </div>
+              </template>
+            </a-card-meta>
+            <div class="course-footer">
+              <span class="course-status" :class="getCourseStatus(course).toLowerCase().replace(/\s/g, '-')">
+                {{ getCourseStatus(course) }}
+              </span>
+              <a-button type="primary" size="small" @click.stop="enrollCourse(course.id)">
+                {{ getCourseButtonText(course.id) }}
+              </a-button>
             </div>
-            
-            <div class="course-content">
-              <div class="course-header">
-                <h3 class="course-title">{{ course.title }}</h3>
-                <a-tag :color="getLevelColor(course.level)" class="level-tag">
-                  {{ getLevelText(course.level) }}
-                </a-tag>
-              </div>
-              
-              <p class="course-instructor">{{ course.instructor }} · {{ course.university }}</p>
-              <p class="course-description">{{ course.description }}</p>
-              
-              <div class="course-tags">
-                <a-tag v-for="tag in course.tags" :key="tag" class="course-tag">
-                  {{ tag }}
-                </a-tag>
-              </div>
-              
-              <div class="course-stats">
-                <div class="stat-item">
-                  <UserOutlined />
-                  <span>{{ course.students.toLocaleString() }}人学习</span>
+          </a-card>
+        </a-col>
+      </a-row>
+      
+      <!-- 卡片视图分页 -->
+      <div class="pagination-container">
+        <a-pagination
+          v-model:current="pagination.current"
+          :total="pagination.total"
+          :pageSize="pagination.pageSize"
+          @change="pagination.onChange"
+          show-quick-jumper
+          show-size-changer
+          :pageSizeOptions="['12', '24', '36', '48']"
+          @showSizeChange="(current: number, size: number) => { pagination.pageSize = size; fetchCourses(); }"
+        />
+      </div>
+    </div>
+    
+    <!-- 列表视图 -->
+    <div v-else class="course-list">
+      <a-list
+        :data-source="filteredCourses"
+        :pagination="pagination"
+      >
+        <template #renderItem="{ item: course }">
+          <a-list-item class="course-list-item" @click="goToCourseDetail(course.id)">
+            <a-list-item-meta>
+              <template #avatar>
+                <div class="course-list-image">
+                  <img :src="processImageUrl(course.coverImage)" :alt="course.title" />
                 </div>
-                <div class="stat-item">
-                  <StarOutlined />
-                  <span>{{ course.rating }}分</span>
+              </template>
+              <template #title>
+                <div class="course-list-title">
+                  {{ course.title }}
+                  <a-tag color="blue" v-if="course.type === 'FEATURED'">精品课程</a-tag>
+                  <a-tag :color="getLevelColor(course.level)">{{ getLevelText(course.level) }}</a-tag>
                 </div>
-                <div class="stat-item">
-                  <span>{{ course.duration }}</span>
+              </template>
+              <template #description>
+                <div class="course-list-info">
+                  <div class="course-list-description">{{ truncateText(course.description, 100) }}</div>
+                  <div class="course-list-meta">
+                    <span class="course-teacher">
+                      <UserOutlined /> {{ getTeacherName(course.instructorId, course.instructor) }}
+                    </span>
+                    <span class="course-rating">
+                      <StarOutlined /> {{ course.rating || '暂无评分' }}
+                    </span>
+                    <span class="course-students">
+                      <TeamOutlined /> {{ course.students?.toLocaleString() || '0' }} 名学生
+                    </span>
+                    <span class="course-duration">
+                      {{ course.duration || '16周' }}
+                    </span>
+                  </div>
+                  <div class="course-tag-list">
+                    <a-tag v-if="course.category" size="small">{{ course.category }}</a-tag>
+                    <a-tag v-for="tag in course.tags || []" :key="tag" size="small">{{ tag }}</a-tag>
+                  </div>
                 </div>
-              </div>
+              </template>
+            </a-list-item-meta>
+            <div class="course-list-actions">
+              <span class="course-price" v-if="course.price > 0">¥{{ course.price }}</span>
+              <span class="course-free" v-else>免费</span>
+              <a-button type="primary" @click.stop="enrollCourse(course.id)">
+                {{ getCourseButtonText(course.id) }}
+              </a-button>
             </div>
-          </div>
-        </div>
+          </a-list-item>
+        </template>
+      </a-list>
+    </div>
         
-        <!-- 空状态 -->
-        <div v-if="filteredCourses.length === 0" class="empty-state">
-          <a-empty description="暂无符合条件的课程">
-            <a-button type="primary" @click="() => { searchKeyword = ''; selectedCategory = 'all'; selectedLevel = 'all' }">
+    <!-- 空状态 -->
+    <div v-if="!loading && filteredCourses.length === 0" class="empty-state">
+      <a-empty description="暂无符合条件的课程" />
+      <a-button type="primary" @click="searchKeyword = ''; selectedCategory = ''; sortBy = 'latest'">
               重置筛选条件
             </a-button>
-          </a-empty>
         </div>
         
-        <!-- 分页 -->
-        <div class="pagination-container">
-          <a-pagination
-            v-model:current="currentPage"
-            :total="total"
-            :page-size="pageSize"
-            :show-size-changer="false"
-            :show-quick-jumper="true"
-            :show-total="(total: number, range: [number, number]) => `共 ${total} 门课程，当前显示 ${range[0]}-${range[1]} 门`"
-            @change="onPageChange"
-          />
-        </div>
-      </div>
+    <!-- 视图切换按钮 -->
+    <div class="view-toggle">
+      <a-button-group>
+        <a-button 
+          type="text" 
+          :class="{ active: viewMode === 'card' }" 
+          @click="viewMode = 'card'"
+        >
+          <AppstoreOutlined />
+        </a-button>
+        <a-button 
+          type="text" 
+          :class="{ active: viewMode === 'list' }" 
+          @click="viewMode = 'list'"
+        >
+          <BarsOutlined />
+        </a-button>
+      </a-button-group>
     </div>
   </div>
 </template>
 
 <style scoped>
-.course-list-page {
-  min-height: 100vh;
-  background: #f5f5f5;
-}
-
-/* 页面头部 */
-.page-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 60px 20px;
-  text-align: center;
-}
-
-.page-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-}
-
-.page-header p {
-  font-size: 1.1rem;
-  opacity: 0.9;
-}
-
-.container {
+.course-list-container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 24px;
+  position: relative;
 }
 
-/* 搜索筛选区域 */
-.search-filter-section {
-  background: white;
-  padding: 30px 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.search-bar {
-  margin-bottom: 20px;
-}
-
-.filter-bar {
+.page-header {
   display: flex;
-  gap: 20px;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.filter-section {
+  display: flex;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
-.filter-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* 卡片视图样式 */
+.course-grid {
+  margin-bottom: 40px;
 }
 
-.filter-item label {
-  font-weight: 500;
-  color: #666;
-}
-
-/* 课程列表区域 */
-.courses-section {
-  padding: 40px 20px;
-}
-
-.courses-header {
-  margin-bottom: 30px;
-}
-
-.courses-header h2 {
-  color: #333;
-  font-size: 1.5rem;
-}
-
-.courses-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 30px;
-}
-
-/* 课程卡片 */
 .course-card {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  cursor: pointer;
+  height: 100%;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
 }
 
 .course-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-.course-image {
+.course-cover {
   position: relative;
-  height: 200px;
+  height: 160px;
   overflow: hidden;
-}
-
-.course-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.course-price {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: #ff4d4f;
-  color: white;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 0.9rem;
-}
-
-/* 占位符图片样式 */
-.placeholder-course-image {
-  width: 100%;
-  height: 200px;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  position: relative;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 
-.placeholder-course-image .placeholder-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+.no-image-title {
+  font-size: 20px;
+  padding: 20px;
   text-align: center;
 }
 
-.placeholder-course-image .placeholder-content span {
+.course-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #ff4d4f;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
   font-size: 12px;
-  font-weight: 500;
-  color: #64748b;
 }
 
-.course-content {
-  padding: 20px;
+.course-info {
+  margin-top: 8px;
 }
 
-.course-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
-
-.course-title {
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #333;
-  margin: 0;
-  flex: 1;
-  margin-right: 10px;
-}
-
-.level-tag {
-  flex-shrink: 0;
-}
-
-.course-instructor {
+.course-teacher {
+  font-size: 13px;
   color: #666;
-  margin-bottom: 10px;
-  font-size: 0.9rem;
-}
-
-.course-description {
-  color: #888;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin-bottom: 15px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-clamp: 2;
-  overflow: hidden;
-}
-
-.course-tags {
-  margin-bottom: 15px;
-}
-
-.course-tag {
-  margin-right: 5px;
-  margin-bottom: 5px;
-  font-size: 0.8rem;
+  margin-bottom: 4px;
 }
 
 .course-stats {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  font-size: 12px;
   color: #999;
-  font-size: 0.9rem;
+  margin-bottom: 8px;
 }
 
-.stat-item {
+.course-rating {
+  color: #faad14;
+}
+
+.course-description {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  height: 36px;
+  overflow: hidden;
+}
+
+.course-tag-list {
+  margin-top: 8px;
+}
+
+.course-footer {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 4px;
-}
-
-/* 空状态 */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: #999;
-}
-
-.empty-state .ant-empty-description {
-  color: #999;
-}
-
-.pagination-container {
-  margin-top: 40px;
-  text-align: center;
-  padding: 20px 0;
+  margin-top: auto;
+  padding-top: 16px;
   border-top: 1px solid #f0f0f0;
 }
 
-/* 响应式设计 */
+.course-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ff4d4f;
+}
+
+.course-free {
+  font-size: 16px;
+  font-weight: 600;
+  color: #52c41a;
+}
+
+/* 列表视图样式 */
+.course-list-item {
+  padding: 16px;
+  border-radius: 8px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.course-list-item:hover {
+  background-color: #f5f5f5;
+}
+
+.course-list-image {
+  width: 120px;
+  height: 80px;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.course-list-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.course-list-title {
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.course-list-info {
+  max-width: 600px;
+}
+
+.course-list-description {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.course-list-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #999;
+  flex-wrap: wrap;
+}
+
+.course-list-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+/* 加载和空状态 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: #999;
+}
+
+.empty-state {
+  padding: 60px 0;
+  text-align: center;
+}
+
+/* 视图切换按钮 */
+.view-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.view-toggle .ant-btn {
+  padding: 8px 12px;
+}
+
+.view-toggle .ant-btn.active {
+  color: #1890ff;
+  background-color: #e6f7ff;
+}
+
+/* 响应式调整 */
 @media (max-width: 768px) {
-  .page-header h1 {
-    font-size: 2rem;
-  }
-  
-  .filter-bar {
+  .page-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 15px;
   }
   
-  .courses-grid {
-    grid-template-columns: 1fr;
+  .filter-section {
+    width: 100%;
   }
   
-  .course-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+  .course-list-image {
+    width: 80px;
+    height: 60px;
   }
-  
-  .course-stats {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
+}
+
+.course-status {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.course-status.未开始 {
+  color: #1890ff;
+}
+
+.course-status.进行中 {
+  color: #52c41a;
+}
+
+.course-status.已结束 {
+  color: #faad14;
+}
+
+/* 分页容器 */
+.pagination-container {
+  margin-top: 24px;
+  text-align: center;
 }
 </style>

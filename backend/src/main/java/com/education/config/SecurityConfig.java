@@ -1,80 +1,130 @@
 package com.education.config;
 
-import com.education.security.JwtAuthenticationFilter;
-import com.education.security.JwtAuthenticationEntryPoint;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * 安全配置类
- * 
- * @author Education Platform Team
- * @version 1.0.0
- * @since 2024
- */
+import com.education.mapper.UserMapper;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 public class SecurityConfig {
 
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+    
     @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
+    private UserMapper userMapper;
+    
     @Autowired
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private SessionAuthenticationFilter sessionAuthenticationFilter;
 
-    /**
-     * 安全过滤器链配置
-     */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // 允许CORS预检请求
-                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                // 公开接口 - 注意去掉/api前缀，因为context-path已经包含了
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/debug/**").permitAll()
-                .requestMatchers("/doc.html", "/swagger-resources/**", "/webjars/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/druid/**", "/actuator/**").permitAll()
-                // 其他接口需要认证
-                .anyRequest().authenticated()
-            );
-            
-        http.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        logger.info("配置Spring Security过滤链 - 基于Session认证");
         
+        http
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(session -> {
+                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+                session.maximumSessions(5); // 允许同一用户有多个活动会话
+                session.sessionFixation().migrateSession(); // 登录后迁移会话
+            })
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/**", "/api/auth/**").permitAll()
+                .requestMatchers("/api/common/files/**").permitAll()
+                .requestMatchers("/files/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/debug/**").permitAll()
+                .requestMatchers("/api/courses/public", "/api/courses/public/**").permitAll()
+                .requestMatchers("/api/courses/categories").permitAll()
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(sessionAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        logger.info("Spring Security配置完成 - 使用Session认证");
         return http.build();
     }
 
-    /**
-     * 密码编码器
-     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        logger.info("配置CORS");
+        
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+        
+        configuration.setExposedHeaders(Arrays.asList("Set-Cookie"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        
+        logger.info("CORS配置完成");
+        return source;
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    /**
-     * 认证管理器
-     */
+    
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
+    public UserDetailsService userDetailsService() {
+        logger.info("配置UserDetailsService - 基于Session认证");
+        
+        return new UserDetailsService() {
+            @Override
+            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+                logger.info("尝试加载用户: {}", username);
+                
+                try {
+                    com.education.entity.User user = userMapper.selectByUsernameWithPassword(username);
+                    if (user != null) {
+                        logger.info("找到用户: {}, 角色: {}", user.getUsername(), user.getRole());
+                        return User.withUsername(user.getUsername())
+                                .password(user.getPassword() != null ? user.getPassword() : passwordEncoder().encode("defaultpwd"))
+                                .roles(user.getRole())
+                                .build();
+                    }
+                    
+                    if ("admin".equals(username)) {
+                        logger.info("创建默认管理员用户: admin");
+                        return User.withUsername("admin")
+                                .password(passwordEncoder().encode("admin123"))
+                                .roles("ADMIN")
+                                .build();
+                    }
+                    
+                    logger.error("用户不存在: {}", username);
+                    throw new UsernameNotFoundException("用户不存在: " + username);
+                } catch (Exception e) {
+                    logger.error("加载用户时发生错误: {}", e.getMessage(), e);
+                    throw new UsernameNotFoundException("加载用户时发生错误", e);
+                }
+            }
+        };
     }
-
-
-}
+} 

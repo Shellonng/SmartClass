@@ -1,307 +1,202 @@
 package com.education.controller.teacher;
 
-import com.education.dto.CourseDTO;
 import com.education.dto.common.PageRequest;
 import com.education.dto.common.PageResponse;
 import com.education.dto.common.Result;
+import com.education.entity.Course;
 import com.education.service.teacher.CourseService;
-import com.education.utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 /**
- * 教师端课程管理控制器
+ * 教师课程管理控制器
  * 
  * @author Education Platform Team
  * @version 1.0.0
  * @since 2024
  */
-@Tag(name = "教师端-课程管理", description = "教师课程创建、管理、内容编辑等接口")
-@RestController("teacherCourseController")
+@Tag(name = "教师-课程管理", description = "教师课程管理相关接口")
+@RestController
 @RequestMapping("/api/teacher/courses")
 public class CourseController {
 
+    private static final Logger logger = LoggerFactory.getLogger(CourseController.class);
+
     @Autowired
     private CourseService courseService;
-    
-    @Autowired
-    private JwtUtils jwtUtils;
-    
-    @Autowired
-    private HttpServletRequest request;
 
-    @Operation(summary = "创建课程", description = "教师创建新课程")
+    @Operation(summary = "获取课程列表", description = "获取当前教师的课程列表")
+    @GetMapping
+    public Result<PageResponse<Course>> getCourses(
+            @Parameter(description = "页码") @RequestParam(defaultValue = "1") Integer page,
+            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Integer size,
+            @Parameter(description = "关键词搜索") @RequestParam(required = false) String keyword,
+            @Parameter(description = "状态筛选") @RequestParam(required = false) String status,
+            @Parameter(description = "学期筛选") @RequestParam(required = false) String term) {
+        
+        PageRequest pageRequest = new PageRequest(page, size);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        PageResponse<Course> courses = courseService.getTeacherCourses(username, pageRequest, keyword, status, term);
+        return Result.success(courses);
+    }
+
+    @Operation(summary = "创建课程", description = "创建新课程")
     @PostMapping
-    public Result<CourseDTO.CourseResponse> createCourse(@RequestBody CourseDTO.CourseCreateRequest createRequest) {
+    public Result<Course> createCourse(@RequestBody Course course) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        // 记录请求详情
+        logger.info("===============================================");
+        logger.info("接收到创建课程请求");
+        logger.info("请求路径: /api/teacher/courses");
+        logger.info("认证信息: {}", authentication);
+        logger.info("用户名: {}", username);
+        logger.info("认证类型: {}", authentication.getClass().getName());
+        logger.info("认证权限: {}", authentication.getAuthorities());
+        
+        // 检查是否为匿名用户
+        if (username.equals("anonymousUser")) {
+            logger.error("匿名用户尝试创建课程，请先登录");
+            return Result.error("请先登录后再创建课程");
+        }
+        
+        logger.info("课程信息: title={}, description={}, coverImage={}, credit={}, courseType={}, startTime={}, endTime={}, teacherId={}, status={}, term={}, studentCount={}",
+                course.getTitle(), 
+                (course.getDescription() != null && course.getDescription().length() > 20) ? 
+                    course.getDescription().substring(0, 20) + "..." : course.getDescription(),
+                course.getCoverImage(),
+                course.getCredit(),
+                course.getCourseType(),
+                course.getStartTime(),
+                course.getEndTime(),
+                course.getTeacherId(),
+                course.getStatus(),
+                course.getTerm(),
+                course.getStudentCount());
+        
         try {
-            // 1. 获取当前教师ID（从JWT token或session中获取）
-            Long teacherId = getCurrentTeacherId();
+            // 确保前端传递的课程名称正确设置
+            if (course.getTitle() == null && course.getCourseName() != null) {
+                course.setTitle(course.getCourseName());
+                logger.info("从courseName字段设置title: {}", course.getTitle());
+            }
             
-            // 2. 调用服务层创建课程
-            CourseDTO.CourseResponse result = courseService.createCourse(createRequest, teacherId);
+            // 确保前端传递的课程类型正确设置
+            if (course.getCourseType() == null && course.getCategory() != null) {
+                course.setCourseType(course.getCategory());
+                logger.info("从category字段设置courseType: {}", course.getCourseType());
+            }
             
-            return Result.success(result);
+            // 确保前端传递的学期正确设置
+            if (course.getTerm() == null && course.getSemester() != null) {
+                course.setTerm(course.getSemester());
+                logger.info("从semester字段设置term: {}", course.getTerm());
+            }
+            
+            Course createdCourse = courseService.createCourse(username, course);
+            logger.info("课程创建成功，ID: {}, 教师ID: {}", createdCourse.getId(), createdCourse.getTeacherId());
+            logger.info("===============================================");
+            return Result.success(createdCourse);
         } catch (Exception e) {
+            logger.error("创建课程失败: {}", e.getMessage(), e);
+            logger.info("===============================================");
             return Result.error("创建课程失败: " + e.getMessage());
         }
     }
 
-    @Operation(summary = "获取我的课程列表", description = "获取当前教师创建的所有课程")
-    @GetMapping
-    public Result<PageResponse<CourseDTO.CourseResponse>> getMyCourses(
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String status) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 构建分页参数
-            PageRequest pageRequest = new PageRequest();
-            pageRequest.setPage(page);
-        pageRequest.setSize(size);
-        // PageRequest类没有setKeyword方法，需要在查询时处理关键字
-        // pageRequest.setKeyword(keyword);
-            
-            // 3. 调用服务层查询课程列表
-            PageResponse<CourseDTO.CourseResponse> result = courseService.getCourseList(teacherId, pageRequest);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("获取课程列表失败: " + e.getMessage());
-        }
+    @Operation(summary = "获取课程详情", description = "根据ID获取课程详情")
+    @GetMapping("/{id}")
+    public Result<Course> getCourseDetail(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        Course course = courseService.getCourseDetail(username, id);
+        return Result.success(course);
     }
 
-    @Operation(summary = "获取课程详情", description = "获取指定课程的详细信息")
-    @GetMapping("/{courseId}")
-    public Result<CourseDTO.CourseDetailResponse> getCourseDetail(@PathVariable Long courseId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层获取课程详情
-            CourseDTO.CourseDetailResponse result = courseService.getCourseDetail(courseId, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("获取课程详情失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "更新课程信息", description = "更新课程基本信息")
-    @PutMapping("/{courseId}")
-    public Result<CourseDTO.CourseResponse> updateCourse(@PathVariable Long courseId, @RequestBody CourseDTO.CourseUpdateRequest updateRequest) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层更新课程
-            CourseDTO.CourseResponse result = courseService.updateCourse(courseId, updateRequest, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("更新课程失败: " + e.getMessage());
-        }
+    @Operation(summary = "更新课程", description = "更新课程信息")
+    @PutMapping("/{id}")
+    public Result<Course> updateCourse(@PathVariable Long id, @RequestBody Course course) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        course.setId(id);
+        Course updatedCourse = courseService.updateCourse(username, course);
+        return Result.success(updatedCourse);
     }
 
     @Operation(summary = "删除课程", description = "删除指定课程")
-    @DeleteMapping("/{courseId}")
-    public Result<Void> deleteCourse(@PathVariable Long courseId) {
+    @DeleteMapping("/{id}")
+    public Result<Boolean> deleteCourse(@PathVariable String id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        logger.info("===============================================");
+        logger.info("接收到删除课程请求");
+        logger.info("请求路径: /api/teacher/courses/{}", id);
+        logger.info("认证信息: {}", authentication);
+        logger.info("用户名: {}", username);
+        
         try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
+            // 将字符串ID转换为Long类型
+            Long courseId = Long.parseLong(id);
+            logger.info("解析课程ID: {} -> {}", id, courseId);
             
-            // 2. 调用服务层删除课程
-            Boolean result = courseService.deleteCourse(courseId, teacherId);
-            
-            if (result) {
-                return Result.success();
-            } else {
-                return Result.error("删除课程失败");
-            }
+            boolean result = courseService.deleteCourse(username, courseId);
+            logger.info("课程删除结果: {}", result);
+            logger.info("===============================================");
+            return Result.success(result);
+        } catch (NumberFormatException e) {
+            logger.error("课程ID格式错误: {}", id, e);
+            logger.info("===============================================");
+            return Result.error("课程ID格式错误");
         } catch (Exception e) {
+            logger.error("删除课程失败: {}", e.getMessage(), e);
+            logger.info("===============================================");
             return Result.error("删除课程失败: " + e.getMessage());
         }
     }
 
-    @Operation(summary = "发布课程", description = "发布课程供学生学习")
-    @PostMapping("/{courseId}/publish")
-    public Result<Void> publishCourse(@PathVariable Long courseId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层发布课程
-            Boolean result = courseService.publishCourse(courseId, teacherId);
-            
-            if (result) {
-                return Result.success();
-            } else {
-                return Result.error("发布课程失败");
-            }
-        } catch (Exception e) {
-            return Result.error("发布课程失败: " + e.getMessage());
-        }
+    @Operation(summary = "发布课程", description = "将课程状态改为已发布")
+    @PostMapping("/{id}/publish")
+    public Result<Course> publishCourse(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        Course course = courseService.publishCourse(username, id);
+        return Result.success(course);
     }
 
-    @Operation(summary = "下架课程", description = "将已发布的课程下架")
-    @PostMapping("/{courseId}/unpublish")
-    public Result<Void> unpublishCourse(@PathVariable Long courseId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层下架课程
-            Boolean result = courseService.unpublishCourse(courseId, teacherId);
-            
-            if (result) {
-                return Result.success();
-            } else {
-                return Result.error("下架课程失败");
-            }
-        } catch (Exception e) {
-            return Result.error("下架课程失败: " + e.getMessage());
-        }
+    @Operation(summary = "取消发布课程", description = "将课程状态改为未发布")
+    @PostMapping("/{id}/unpublish")
+    public Result<Course> unpublishCourse(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        Course course = courseService.unpublishCourse(username, id);
+        return Result.success(course);
     }
 
-    @Operation(summary = "获取课程章节", description = "获取课程的章节结构")
-    @GetMapping("/{courseId}/chapters")
-    public Result<Object> getCourseChapters(@PathVariable Long courseId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层获取课程章节
-            Object result = courseService.getCourseChapters(courseId, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("获取课程章节失败: " + e.getMessage());
-        }
+    @Operation(summary = "获取课程统计信息", description = "获取课程的统计数据")
+    @GetMapping("/{id}/statistics")
+    public Result<Map<String, Object>> getCourseStatistics(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        
+        Map<String, Object> statistics = courseService.getCourseStatistics(username, id);
+        return Result.success(statistics);
     }
-
-    @Operation(summary = "创建课程章节", description = "为课程创建新章节")
-    @PostMapping("/{courseId}/chapters")
-    public Result<CourseDTO.ChapterResponse> createChapter(@PathVariable Long courseId, @RequestBody CourseDTO.ChapterCreateRequest createRequest) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层创建章节
-            CourseDTO.ChapterResponse result = courseService.createChapter(courseId, createRequest, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("创建章节失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "更新章节信息", description = "更新指定章节的信息")
-    @PutMapping("/{courseId}/chapters/{chapterId}")
-    public Result<CourseDTO.ChapterResponse> updateChapter(
-            @PathVariable Long courseId,
-            @PathVariable Long chapterId,
-            @RequestBody CourseDTO.ChapterUpdateRequest updateRequest) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层更新章节
-            CourseDTO.ChapterResponse result = courseService.updateChapter(chapterId, updateRequest, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("更新章节失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "删除章节", description = "删除指定章节")
-    @DeleteMapping("/{courseId}/chapters/{chapterId}")
-    public Result<Void> deleteChapter(@PathVariable Long courseId, @PathVariable Long chapterId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层删除章节
-            Boolean result = courseService.deleteChapter(chapterId, teacherId);
-            
-            if (result) {
-                return Result.success();
-            } else {
-                return Result.error("删除章节失败");
-            }
-        } catch (Exception e) {
-            return Result.error("删除章节失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "获取课程统计", description = "获取课程的统计数据")
-    @GetMapping("/{courseId}/statistics")
-    public Result<Object> getCourseStatistics(@PathVariable Long courseId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层获取课程统计
-            Object result = courseService.getCourseStatistics(courseId, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("获取课程统计失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "复制课程", description = "复制现有课程创建新课程")
-    @PostMapping("/{courseId}/copy")
-    public Result<Object> copyCourse(@PathVariable Long courseId, @RequestBody CourseDTO.CourseCopyRequest copyRequest) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层复制课程
-            Object result = courseService.copyCourse(courseId, copyRequest.getNewCourseName(), teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("复制课程失败: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "导出课程", description = "导出课程内容")
-    @GetMapping("/{courseId}/export")
-    public Result<Object> exportCourse(@PathVariable Long courseId) {
-        try {
-            // 1. 获取当前教师ID
-            Long teacherId = getCurrentTeacherId();
-            
-            // 2. 调用服务层导出课程
-            Object result = courseService.exportCourse(courseId, teacherId);
-            
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("导出课程失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 获取当前教师ID
-     * 从JWT token或session中获取当前登录教师的ID
-     */
-    private Long getCurrentTeacherId() {
-        try {
-            String token = JwtUtils.getTokenFromRequest(request);
-            if (token != null) {
-                return jwtUtils.getUserIdFromToken(token);
-            }
-            throw new RuntimeException("未找到有效的认证令牌");
-        } catch (Exception e) {
-            throw new RuntimeException("获取当前用户信息失败: " + e.getMessage());
-        }
-    }
-
-
-}
+} 
