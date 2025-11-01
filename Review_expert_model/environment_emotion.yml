@@ -1,0 +1,19 @@
+name: interview_emotion
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - numpy=1.23.5
+  - pandas
+  - opencv
+  - pillow
+  - pip:
+    - deepface==0.0.79
+    - tensorflow==2.15.0
+    - keras==2.15.0
+    - retina-face==0.0.13
+    - tqdm
+    - gdown
+

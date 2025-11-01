@@ -1,0 +1,8 @@
+sample_id,video_path,question,start_time,end_time,focus_score,psychological_score,language_score,professional_score,alert_type,alert_text,notes
+sample_001,raw_data/sample_001_20251022_143025.mp4,请做一个简短的自我介绍,0,10,85,80,75,70,0,,开始有些紧张
+sample_001,raw_data/sample_001_20251022_143025.mp4,请做一个简短的自我介绍,10,20,90,85,88,75,0,,逐渐放松
+sample_001,raw_data/sample_001_20251022_143025.mp4,请做一个简短的自我介绍,20,30,92,88,90,80,0,,状态很好
+sample_001,raw_data/sample_001_20251022_143025.mp4,请做一个简短的自我介绍,30,40,88,75,85,78,2,深呼吸放轻松,中间有情绪波动
+sample_001,raw_data/sample_001_20251022_143025.mp4,请做一个简短的自我介绍,40,50,90,82,92,82,0,,恢复正常
+sample_002,raw_data/sample_002_20251022_143530.mp4,介绍一下你最近的项目经验,0,10,75,85,70,65,3,减少口头禅,开始说得慢
+

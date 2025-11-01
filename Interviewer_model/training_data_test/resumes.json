@@ -1,0 +1,478 @@
+[
+  {
+    "id": 1,
+    "name": "张伟",
+    "experience_level": "senior",
+    "education": {
+      "degree": "硕士",
+      "major": "计算机科学与技术",
+      "graduation_year": 2018
+    },
+    "skills": [
+      {
+        "category": "编程语言",
+        "items": [
+          "Python",
+          "Go",
+          "JavaScript"
+        ]
+      },
+      {
+        "category": "后端框架",
+        "items": [
+          "Django",
+          "Flask",
+          "FastAPI",
+          "Spring Boot"
+        ]
+      },
+      {
+        "category": "数据库与存储",
+        "items": [
+          "MySQL",
+          "PostgreSQL",
+          "Redis",
+          "MongoDB",
+          "Elasticsearch"
+        ]
+      },
+      {
+        "category": "云服务与部署",
+        "items": [
+          "AWS",
+          "Docker",
+          "Kubernetes",
+          "Terraform",
+          "CI/CD"
+        ]
+      },
+      {
+        "category": "架构设计",
+        "items": [
+          "微服务架构",
+          "事件驱动架构",
+          "CQRS",
+          "分布式系统设计"
+        ]
+      },
+      {
+        "category": "消息与通信",
+        "items": [
+          "Kafka",
+          "RabbitMQ",
+          "gRPC",
+          "RESTful API"
+        ]
+      },
+      {
+        "category": "监控与可观测性",
+        "items": [
+          "Prometheus",
+          "Grafana",
+          "ELK",
+          "OpenTelemetry"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "高并发电商平台订单系统重构",
+        "background": "原订单系统在大促期间频繁超时，数据库负载过高，无法支撑千万级日订单量。需重构为高可用、可扩展的分布式系统，提升稳定性与处理性能。",
+        "tech_stack": [
+          "Python",
+          "FastAPI",
+          "PostgreSQL",
+          "Redis",
+          "Kafka",
+          "Docker",
+          "Kubernetes"
+        ],
+        "responsibilities": "主导系统架构设计，拆分单体应用为微服务，设计异步订单处理流水线；实现基于Kafka的消息解耦与削峰填谷；优化数据库分库分表策略；引入缓存与读写分离机制；负责核心模块开发与团队技术指导。",
+        "highlights": [
+          "系统吞吐量提升5倍，P99延迟从1.2s降至200ms",
+          "通过事件溯源+状态机保障订单状态一致性，错误率下降90%",
+          "设计弹性扩缩容方案，支撑双十一流量洪峰"
+        ]
+      },
+      {
+        "name": "企业级数据中台API网关平台",
+        "background": "公司多个业务线数据服务分散，接口标准不一，权限混乱。需构建统一API网关平台，实现服务聚合、认证鉴权、流量控制与调用监控。",
+        "tech_stack": [
+          "Python",
+          "Django",
+          "OAuth2",
+          "JWT",
+          "Nginx",
+          "Redis",
+          "Prometheus",
+          "Swagger"
+        ],
+        "responsibilities": "负责整体架构设计与核心模块开发，包括动态路由、插件化中间件体系、多租户权限模型、实时监控面板；制定API规范并推动各团队接入。",
+        "highlights": [
+          "支持日均2亿次API调用，SLA达99.99%",
+          "插件化设计支持灵活扩展鉴权、限流、日志等策略",
+          "提供自助式API注册与文档生成，提升研发效率40%"
+        ]
+      },
+      {
+        "name": "实时推荐引擎服务",
+        "background": "为内容平台提供个性化推荐服务，需低延迟响应用户行为，支持实时特征更新与模型热加载，提升点击率与用户停留时长。",
+        "tech_stack": [
+          "Python",
+          "Flask",
+          "Redis",
+          "Kafka",
+          "TensorFlow Serving",
+          "Airflow",
+          "gRPC"
+        ],
+        "responsibilities": "设计实时特征管道与在线推理服务架构；集成机器学习模型，实现AB测试与版本灰度发布；优化向量检索性能；保障服务高可用与低延迟。",
+        "highlights": [
+          "推荐请求响应时间控制在50ms内（P95）",
+          "基于用户实时行为更新特征，CTR提升22%",
+          "支持多模型并行评估与自动切换，降低线上风险"
+        ]
+      }
+    ],
+    "work_experience": [
+      {
+        "company": "某头部互联网科技公司",
+        "position": "高级Python后端工程师",
+        "start_date": "2020-06",
+        "end_date": "present",
+        "description": "负责核心业务系统架构设计与高并发服务开发，主导多个关键项目的技术选型与落地，带领3-5人技术小组完成迭代交付。"
+      },
+      {
+        "company": "知名电商平台",
+        "position": "Python后端工程师",
+        "start_date": "2018-07",
+        "end_date": "2020-05",
+        "description": "参与订单、库存与促销系统开发，深入理解电商业务逻辑与分布式事务处理，完成从单体到微服务的迁移。"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "李明",
+    "experience_level": "junior",
+    "education": {
+      "degree": "本科",
+      "major": "计算机科学与技术",
+      "graduation_year": 2023
+    },
+    "skills": [
+      {
+        "category": "编程语言",
+        "items": [
+          "Python",
+          "JavaScript"
+        ]
+      },
+      {
+        "category": "后端框架",
+        "items": [
+          "Django",
+          "Flask"
+        ]
+      },
+      {
+        "category": "数据库",
+        "items": [
+          "MySQL",
+          "Redis"
+        ]
+      },
+      {
+        "category": "工具与平台",
+        "items": [
+          "Git",
+          "Docker",
+          "Linux"
+        ]
+      },
+      {
+        "category": "API 开发",
+        "items": [
+          "RESTful API",
+          "JSON",
+          "HTTP/HTTPS"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "在线图书管理系统",
+        "background": "为高校图书馆开发的轻量级图书管理原型系统，支持图书录入、借阅记录查询和用户权限管理。项目旨在提升图书流通效率并实现数字化管理。",
+        "tech_stack": [
+          "Python",
+          "Django",
+          "MySQL",
+          "HTML/CSS"
+        ],
+        "responsibilities": "负责后端模块开发，包括图书信息增删改查接口设计、用户认证逻辑实现以及数据库表结构设计。使用Django ORM进行数据操作，配合前端完成页面数据渲染，并编写基础单元测试确保核心功能稳定。",
+        "highlights": [
+          "独立完成用户权限分级控制模块，支持管理员与普通读者角色区分",
+          "优化数据库查询逻辑，关键接口响应时间降低30%"
+        ]
+      },
+      {
+        "name": "个人博客API服务",
+        "background": "基于REST架构构建的个人博客后端服务，支持文章发布、分类管理和评论功能，供移动端和前端调用，具备良好扩展性。",
+        "tech_stack": [
+          "Python",
+          "Flask",
+          "SQLite",
+          "JWT",
+          "Swagger"
+        ],
+        "responsibilities": "从零搭建Flask应用结构，设计并实现文章、标签、评论等资源的RESTful API。集成JWT实现用户登录鉴权，使用Swagger生成接口文档便于前后端协作，并部署至测试服务器进行联调。",
+        "highlights": [
+          "实现基于装饰器的权限验证机制，提升代码可维护性",
+          "通过Swagger自动生成API文档，提高团队协作效率"
+        ]
+      },
+      {
+        "name": "天气数据查询小程序后端",
+        "background": "为微信小程序提供天气信息查询服务的轻量级后端，整合第三方气象API，支持城市搜索与实时天气展示。",
+        "tech_stack": [
+          "Python",
+          "Flask",
+          "Redis",
+          "requests"
+        ],
+        "responsibilities": "开发数据代理接口，对接第三方天气API并缓存结果以减少请求开销。实现城市模糊搜索功能，并使用Redis缓存热点城市天气数据，降低响应延迟。",
+        "highlights": [
+          "引入Redis缓存机制，高频查询性能提升约40%",
+          "封装通用HTTP请求模块，提升外部API调用稳定性"
+        ]
+      }
+    ],
+    "work_experience": [
+      {
+        "company": "星云科技有限公司",
+        "position": "Python后端开发实习生",
+        "start_date": "2022-07",
+        "end_date": "2023-06",
+        "description": "参与公司内部管理系统的迭代开发，协助完成模块接口编写与Bug修复，在导师指导下学习企业级代码规范与部署流程。"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "李明",
+    "experience_level": "mid",
+    "education": {
+      "degree": "本科",
+      "major": "计算机科学与技术",
+      "graduation_year": 2020
+    },
+    "skills": [
+      {
+        "category": "编程语言",
+        "items": [
+          "Python",
+          "JavaScript"
+        ]
+      },
+      {
+        "category": "后端框架",
+        "items": [
+          "Django",
+          "Flask",
+          "FastAPI"
+        ]
+      },
+      {
+        "category": "数据库",
+        "items": [
+          "MySQL",
+          "PostgreSQL",
+          "Redis"
+        ]
+      },
+      {
+        "category": "DevOps与部署",
+        "items": [
+          "Docker",
+          "Nginx",
+          "Linux"
+        ]
+      },
+      {
+        "category": "API与通信",
+        "items": [
+          "RESTful API",
+          "GraphQL",
+          "WebSocket"
+        ]
+      },
+      {
+        "category": "版本控制与协作",
+        "items": [
+          "Git",
+          "GitHub",
+          "CI/CD"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "电商平台订单管理系统",
+        "background": "为某中型电商公司构建统一的订单管理后端系统，解决原有系统性能瓶颈和数据不一致问题。系统需支持每日10万+订单的高效处理，并提供实时状态同步与异常预警功能。",
+        "tech_stack": [
+          "Python",
+          "Django",
+          "MySQL",
+          "Redis",
+          "Celery"
+        ],
+        "responsibilities": "独立负责订单核心模块的设计与开发，包括订单创建、支付回调、库存扣减与状态机管理；使用Celery实现异步任务处理，优化高峰期响应延迟；通过数据库索引优化和Redis缓存策略，将关键接口响应时间降低60%；设计并实现基于Webhook的外部系统通知机制，提升系统集成能力。",
+        "highlights": [
+          "通过异步任务队列和缓存优化，系统吞吐量提升2倍",
+          "设计可扩展的状态机模型，支持未来多业务线复用"
+        ]
+      },
+      {
+        "name": "企业级用户权限中心",
+        "background": "为多个内部系统提供统一的身份认证与权限管理服务，解决账号体系分散、权限配置复杂的问题。系统需支持RBAC模型、OAuth2.0协议及细粒度权限控制。",
+        "tech_stack": [
+          "Python",
+          "Flask",
+          "PostgreSQL",
+          "JWT",
+          "Redis"
+        ],
+        "responsibilities": "主导后端架构设计，实现用户管理、角色权限分配、API访问控制等核心功能；基于JWT实现无状态鉴权，集成至5个以上内部系统；开发RESTful API并编写完整文档；通过Redis实现高频权限查询缓存，提升接口性能；配合前端完成SSO单点登录流程对接。",
+        "highlights": [
+          "实现高可用权限校验中间件，日均调用量超50万次",
+          "支持动态权限策略配置，满足多部门灵活管理需求"
+        ]
+      },
+      {
+        "name": "实时数据监控仪表盘",
+        "background": "为运营团队开发实时数据监控平台，聚合来自多个业务系统的指标数据，提供可视化看板与异常告警功能，帮助快速发现业务波动。",
+        "tech_stack": [
+          "Python",
+          "FastAPI",
+          "WebSocket",
+          "MySQL",
+          "InfluxDB"
+        ],
+        "responsibilities": "负责后端数据采集服务与实时推送模块开发；使用FastAPI构建高性能数据接口，通过WebSocket向前端推送实时更新；设计时序数据存储方案，结合InfluxDB提升写入与查询效率；编写定时任务从各业务库抽取指标数据并做清洗聚合。",
+        "highlights": [
+          "实现实时数据延迟控制在1秒以内，显著提升监控时效性",
+          "采用插件化采集架构，便于后续接入新数据源"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "李明",
+    "experience_level": "mid",
+    "education": {
+      "degree": "本科",
+      "major": "计算机科学与技术",
+      "graduation_year": 2020
+    },
+    "skills": [
+      {
+        "category": "编程语言",
+        "items": [
+          "Python",
+          "JavaScript"
+        ]
+      },
+      {
+        "category": "后端框架",
+        "items": [
+          "Django",
+          "Flask",
+          "FastAPI"
+        ]
+      },
+      {
+        "category": "数据库",
+        "items": [
+          "MySQL",
+          "PostgreSQL",
+          "Redis"
+        ]
+      },
+      {
+        "category": "DevOps与部署",
+        "items": [
+          "Docker",
+          "Nginx",
+          "Linux"
+        ]
+      },
+      {
+        "category": "API与通信",
+        "items": [
+          "RESTful API",
+          "GraphQL",
+          "WebSocket"
+        ]
+      },
+      {
+        "category": "测试与质量",
+        "items": [
+          "unittest",
+          "pytest",
+          "CI/CD"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "电商平台订单管理系统",
+        "background": "为中型电商公司构建高可用的订单处理系统，解决原有系统性能瓶颈和数据一致性问题。系统需支持每日10万+订单的创建、支付、发货与退款流程，并具备良好的扩展性。",
+        "tech_stack": [
+          "Python",
+          "Django",
+          "MySQL",
+          "Redis",
+          "Celery"
+        ],
+        "responsibilities": "独立负责订单核心模块的设计与开发，包括订单状态机、库存扣减、异步任务处理等；使用Celery实现支付超时自动取消、发货通知等后台任务；优化数据库索引和查询逻辑，将订单查询响应时间从800ms降低至150ms以内；设计RESTful API供前端和移动端调用，并编写详细接口文档。",
+        "highlights": [
+          "通过引入Redis缓存热点数据和Celery异步处理，系统吞吐量提升3倍",
+          "实现幂等性接口设计，有效避免重复下单和支付异常"
+        ]
+      },
+      {
+        "name": "企业级用户权限中心",
+        "background": "为多业务线企业平台统一身份认证与权限管理，解决各系统账号体系割裂、权限配置复杂的问题。项目需支持RBAC模型、OAuth2.0集成及细粒度权限控制。",
+        "tech_stack": [
+          "Python",
+          "Flask",
+          "PostgreSQL",
+          "JWT",
+          "Redis"
+        ],
+        "responsibilities": "主导权限中心后端架构设计，完成用户认证、角色管理、权限分配等核心功能开发；基于JWT实现无状态鉴权机制，支持多系统单点登录；与各业务系统对接API网关，统一校验访问权限；编写自动化测试用例覆盖关键路径，确保系统稳定性。",
+        "highlights": [
+          "设计可扩展的权限模型，支持动态角色与资源绑定",
+          "实现99.99%服务可用性，日均处理超50万次鉴权请求"
+        ]
+      },
+      {
+        "name": "实时数据监控仪表盘",
+        "background": "为运营团队提供实时业务数据可视化平台，整合来自多个微服务的日志与指标数据，帮助快速发现异常与趋势变化。",
+        "tech_stack": [
+          "Python",
+          "FastAPI",
+          "WebSocket",
+          "InfluxDB",
+          "Vue.js"
+        ],
+        "responsibilities": "负责后端数据采集与推送服务开发，使用FastAPI提供高性能API接口，通过WebSocket主动推送实时指标更新；设计数据聚合管道，定时从各服务拉取日志并写入InfluxDB；与前端协作定义消息格式，确保低延迟渲染。",
+        "highlights": [
+          "实现实时数据延迟低于500ms，支持上千客户端并发连接",
+          "采用异步非阻塞架构，单实例可承载高并发数据流"
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,112 @@
+# AI Interview Coach Configuration
+
+# ===== Model Configuration =====
+models:
+  # 主对话模型
+  llm:
+    name: "Qwen/Qwen2-1.5B-Instruct"  # 使用Qwen2，兼容性更好
+    lora_checkpoint: "./checkpoints/qwen_interviewer_lora"  # LoRA微调权重
+    load_in_8bit: true  # 使用8bit量化节省显存
+    device_map: "auto"
+    max_length: 512
+    temperature: 0.7
+    top_p: 0.9
+  
+  # 语音识别
+  asr:
+    name: "medium"  # whisper模型大小: tiny/base/small/medium/large
+    language: "zh"
+    
+  # 嵌入模型（RAG检索）
+  embedding:
+    name: "paraphrase-multilingual-MiniLM-L12-v2"
+    dimension: 384
+  
+  # 追问决策模型
+  follow_up_classifier:
+    name: "bert-base-chinese"
+    checkpoint: "./checkpoints/follow_up_classifier_1500"  # 使用1500条数据训练的模型
+    num_labels: 2  # FOLLOW_UP vs NEXT_TOPIC
+  
+  # 回答评估模型（多任务：分类+回归）
+  evaluator:
+    name: "./models/chinese-roberta-wwm-ext"  # 本地RoBERTa模型
+    checkpoint: "./checkpoints/answer_evaluator"
+    num_labels: 4  # 当前回答质量：差/一般/良好/优秀
+    label_names: ["差", "一般", "良好", "优秀"]
+    score_mapping: [50, 70, 85, 95]  # 对应分数
+
+# ===== Speech Processing =====
+speech:
+  sample_rate: 16000
+  chunk_duration: 2.0  # 秒
+  silence_threshold: 0.3
+  min_speech_duration: 0.5
+  
+  # 填充词列表
+  filler_words:
+    - "嗯"
+    - "呃"
+    - "额"
+    - "这个"
+    - "那个"
+    - "就是"
+    - "然后"
+    - "emm"
+    - "啊"
+    - "呀"
+  
+  # 犹豫判断阈值
+  hesitation:
+    filler_density_threshold: 0.15  # 填充词密度
+    long_pause_threshold: 1.5  # 长停顿阈值（秒）
+    speech_rate_low: 3.0  # 语速过慢（字/秒）
+
+# ===== Interview Settings =====
+interview:
+  # 追问策略
+  max_follow_up_depth: 3
+  follow_up_probability: 0.7
+  
+  # 每个技能点的提问数量
+  questions_per_skill: 2
+  
+  # 难度分布
+  difficulty_distribution:
+    basic: 0.3
+    intermediate: 0.5
+    advanced: 0.2
+  
+  # 面试时长（分钟）
+  max_duration: 30
+  
+  # 评分标准
+  scoring:
+    excellent: 90
+    good: 75
+    average: 60
+    poor: 40
+
+# ===== RAG Settings =====
+rag:
+  top_k: 5  # 检索top-k相关问题
+  similarity_threshold: 0.6
+  question_db_path: "./data/interview_questions.json"
+
+# ===== Paths =====
+paths:
+  data_dir: "./data"
+  checkpoint_dir: "./checkpoints"
+  log_dir: "./logs"
+  cache_dir: "./cache"
+
+# ===== Logging =====
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  save_to_file: true
+
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  save_to_file: true
+
+

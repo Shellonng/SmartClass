@@ -1,0 +1,27 @@
+# 火山引擎TTS配置
+# 文档：https://www.volcengine.com/docs/6561/1329505
+#
+# 获取步骤：
+# 1. 访问：https://console.volcengine.com/speech/app
+# 2. 创建应用，获取appid和token
+# 3. 开通语音合成服务
+
+volcengine:
+  # 应用ID（在火山引擎控制台创建应用后获取）
+  appid: "your_app_id_here"
+  
+  # Access Token（在火山引擎控制台获取）
+  access_token: "FS0ZfP6NkW95nQwlWhbenvwXCpq8YBG7"
+  
+  # Secret Key（保密！）
+  secret_key: "Z0ukMezxmBvri1QtPFfGDXJBsMF1MbB8"
+  
+  # API地址
+  api_url: "https://openspeech.bytedance.com/api/v1/tts"
+  
+  # 语音类型（可选）
+  # zh_female_shuangkuaisisi_moon_bigtts - 双快思思（推荐）
+  # zh_male_aojiaobazong_moon_bigtts - 霸道总裁
+  # zh_female_wanwanxiaohe_moon_bigtts - 温婉小和
+  voice_type: "zh_female_shuangkuaisisi_moon_bigtts"
+

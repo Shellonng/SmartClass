@@ -1,0 +1,415 @@
+{
+  "video_file": "v6-1.mp4",
+  "sample_id": "sample_006",
+  "num_windows": 12,
+  "windows": [
+    {
+      "window_idx": 0,
+      "start_time": 0,
+      "end_time": 10,
+      "scores": {
+        "language": 67.18441239168811,
+        "psychological": 41.68652476071104,
+        "body_language": 73.85646562983861,
+        "focus": 100.0,
+        "total": 68.01425394669312
+      },
+      "reminder": {
+        "class": 10,
+        "text": "你好像有点紧张，深呼吸放轻松"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "fear",
+          "stability": "unstable",
+          "positive_ratio": 0.031007196754217148,
+          "negative_ratio": 0.7960294485092163
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 1,
+      "start_time": 10,
+      "end_time": 20,
+      "scores": {
+        "language": 65.80020984945196,
+        "psychological": 40.376543748698374,
+        "body_language": 82.25796777331206,
+        "focus": 100.0,
+        "total": 70.55185748032096
+      },
+      "reminder": {
+        "class": 10,
+        "text": "你好像有点紧张，深呼吸放轻松"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "fear",
+          "stability": "unstable",
+          "positive_ratio": 0.006822826806455851,
+          "negative_ratio": 0.6491957902908325
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 2,
+      "start_time": 20,
+      "end_time": 30,
+      "scores": {
+        "language": 65.54971741772282,
+        "psychological": 39.46867788356937,
+        "body_language": 79.4598647384674,
+        "focus": 100.0,
+        "total": 68.84927894920045
+      },
+      "reminder": {
+        "class": 10,
+        "text": "你好像有点紧张，深呼吸放轻松"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "fear",
+          "stability": "unstable",
+          "positive_ratio": 0.002715933369472623,
+          "negative_ratio": 0.7637591361999512
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 3,
+      "start_time": 30,
+      "end_time": 40,
+      "scores": {
+        "language": 61.70658022670529,
+        "psychological": 38.70941374813865,
+        "body_language": 76.03767592692101,
+        "focus": 100.0,
+        "total": 67.46771488742488
+      },
+      "reminder": {
+        "class": 10,
+        "text": "你好像有点紧张，深呼吸放轻松"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "fear",
+          "stability": "unstable",
+          "positive_ratio": 0.0013121559750288725,
+          "negative_ratio": 0.8036689162254333
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 4,
+      "start_time": 40,
+      "end_time": 50,
+      "scores": {
+        "language": 66.6955460175714,
+        "psychological": 42.28049757962409,
+        "body_language": 75.41243725122972,
+        "focus": 100.0,
+        "total": 71.79102008875675
+      },
+      "reminder": {
+        "class": 10,
+        "text": "你好像有点紧张，深呼吸放轻松"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "fear",
+          "stability": "unstable",
+          "positive_ratio": 0.0033489190973341465,
+          "negative_ratio": 0.6281251907348633
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 5,
+      "start_time": 50,
+      "end_time": 60,
+      "scores": {
+        "language": 65.23086301628652,
+        "psychological": 37.3306465906402,
+        "body_language": 70.35796963442267,
+        "focus": 99.02022727905621,
+        "total": 67.91488240632607
+      },
+      "reminder": {
+        "class": 10,
+        "text": "你好像有点紧张，深呼吸放轻松"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "fear",
+          "stability": "unstable",
+          "positive_ratio": 0.003764582797884941,
+          "negative_ratio": 0.8162755966186523
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 6,
+      "start_time": 60,
+      "end_time": 70,
+      "scores": {
+        "language": 66.93798198959898,
+        "psychological": 40.824574353171045,
+        "body_language": 74.10331135830967,
+        "focus": 100.0,
+        "total": 68.51923692756206
+      },
+      "reminder": {
+        "class": 10,
+        "text": "你好像有点紧张，深呼吸放轻松"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "fear",
+          "stability": "unstable",
+          "positive_ratio": 0.000723042874597013,
+          "negative_ratio": 0.7516673803329468
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 7,
+      "start_time": 70,
+      "end_time": 80,
+      "scores": {
+        "language": 59.729996734810896,
+        "psychological": 47.038780747249525,
+        "body_language": 72.0625249198333,
+        "focus": 100.0,
+        "total": 68.11613612716192
+      },
+      "reminder": {
+        "class": 10,
+        "text": "你好像有点紧张，深呼吸放轻松"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "fear",
+          "stability": "unstable",
+          "positive_ratio": 2.239610876131337e-05,
+          "negative_ratio": 0.5923117399215698
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 8,
+      "start_time": 80,
+      "end_time": 90,
+      "scores": {
+        "language": 70.43758835309828,
+        "psychological": 47.97648239600775,
+        "body_language": 72.49739372062491,
+        "focus": 100.0,
+        "total": 70.33833398175045
+      },
+      "reminder": {
+        "class": 10,
+        "text": "你好像有点紧张，深呼吸放轻松"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "fear",
+          "stability": "stable",
+          "positive_ratio": 0.00025241810362786055,
+          "negative_ratio": 0.973495602607727
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 9,
+      "start_time": 90,
+      "end_time": 100,
+      "scores": {
+        "language": 64.4046297233322,
+        "psychological": 41.71263920384877,
+        "body_language": 72.83354946562301,
+        "focus": 100.0,
+        "total": 69.58857315316247
+      },
+      "reminder": {
+        "class": 10,
+        "text": "你好像有点紧张，深呼吸放轻松"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "fear",
+          "stability": "unstable",
+          "positive_ratio": 0.007121051196008921,
+          "negative_ratio": 0.6703476905822754
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 10,
+      "start_time": 100,
+      "end_time": 110,
+      "scores": {
+        "language": 63.802599603519084,
+        "psychological": 47.98579225013572,
+        "body_language": 79.15327562099279,
+        "focus": 100.0,
+        "total": 69.39110443603533
+      },
+      "reminder": {
+        "class": 10,
+        "text": "你好像有点紧张，深呼吸放轻松"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "fear",
+          "stability": "unstable",
+          "positive_ratio": 0.01072849053889513,
+          "negative_ratio": 0.5877180099487305
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 11,
+      "start_time": 110,
+      "end_time": 120,
+      "scores": {
+        "language": 68.92834092704203,
+        "psychological": 56.03860609582273,
+        "body_language": 71.91531119269713,
+        "focus": 99.5180524360949,
+        "total": 72.65933885842335
+      },
+      "reminder": {
+        "class": 10,
+        "text": "你好像有点紧张，深呼吸放轻松"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "fear",
+          "stability": "stable",
+          "positive_ratio": 0.0681336373090744,
+          "negative_ratio": 0.8429782390594482
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    }
+  ]
+}

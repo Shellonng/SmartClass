@@ -1,0 +1,14 @@
+name: interview_pose
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - opencv
+  - pip:
+    - mediapipe==0.10.9
+    - protobuf==3.20.3
+

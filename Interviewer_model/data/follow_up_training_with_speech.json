@@ -1,0 +1,354 @@
+[
+  {
+    "id": 1,
+    "question": "请介绍一下你的Redis使用经验？",
+    "answer": "嗯...这个...我不太了解Redis，嗯...没怎么用过。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.82,
+      "filler_count": 6,
+      "filler_words": ["嗯", "这个"],
+      "speech_rate": 2.3,
+      "pause_count": 2,
+      "long_pauses": [1.8, 2.1],
+      "answer_length": 28
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "候选人明确表示不了解，且hesitation_score高达0.82，多个填充词和停顿，应该换话题",
+    "reason_type": "negative"
+  },
+  {
+    "id": 2,
+    "question": "请介绍一下你的Redis使用经验？",
+    "answer": "用过，我在项目中用Redis做缓存，主要缓存用户session和热点数据。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.18,
+      "filler_count": 1,
+      "filler_words": ["就是"],
+      "speech_rate": 4.1,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 45
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答流畅（hesitation_score=0.18），内容充实，可以追问具体实现"
+  },
+  {
+    "id": 3,
+    "question": "那你遇到过缓存穿透的问题吗？怎么解决的？",
+    "answer": "遇到过，我用了布隆过滤器加空值缓存的方案。对于不存在的key，先用布隆过滤器拦截，然后缓存空值设置短过期时间。还监控了缓存命中率，及时发现异常。",
+    "context": {
+      "follow_up_depth": 3,
+      "hesitation_score": 0.12,
+      "filler_count": 0,
+      "filler_words": [],
+      "speech_rate": 4.5,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 120
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "已经追问3层且候选人都答得很好（hesitation_score=0.12，无填充词），Redis这个话题已经充分展示了能力，应该换话题",
+    "reason_type": "positive"
+  },
+  {
+    "id": 4,
+    "question": "能举个具体的优化案例吗？",
+    "answer": "嗯...具体的案例...我想想...好像有一次是查询用户和订单，嗯...然后...具体怎么做的我有点记不清了。",
+    "context": {
+      "follow_up_depth": 3,
+      "hesitation_score": 0.88,
+      "filler_count": 12,
+      "filler_words": ["嗯", "然后", "这个", "就是"],
+      "speech_rate": 1.8,
+      "pause_count": 4,
+      "long_pauses": [2.5, 2.0, 1.9, 2.2],
+      "answer_length": 60
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "已经追问3层，hesitation_score=0.88且12个填充词，4次长停顿，候选人明显答不上来，应该换话题",
+    "reason_type": "negative"
+  },
+  {
+    "id": 5,
+    "question": "你在项目中是如何处理Git分支管理的？",
+    "answer": "我们团队用Git Flow，主分支master和develop，功能开发在feature分支，上线前合并到release分支测试，发布后打tag。遇到线上bug就从master切hotfix分支修复。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.10,
+      "filler_count": 0,
+      "filler_words": [],
+      "speech_rate": 4.8,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 105
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答非常流畅（hesitation_score=0.10，无填充词），对Git Flow很熟悉，可以追问具体实践"
+  },
+  {
+    "id": 6,
+    "question": "那你遇到过需要回滚代码的情况吗？怎么操作的？",
+    "answer": "嗯，遇到过。如果是commit还没push，用git reset。如果已经push了，用git revert生成反向提交。线上紧急回滚的话，直接git revert然后push，保留完整的历史记录。",
+    "context": {
+      "follow_up_depth": 2,
+      "hesitation_score": 0.22,
+      "filler_count": 2,
+      "filler_words": ["嗯", "就是"],
+      "speech_rate": 3.9,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 110
+    },
+    "label": "FOLLOW_UP",
+    "reason": "有轻微思考（hesitation_score=0.22），但回答专业，可以继续追问边界情况"
+  },
+  {
+    "id": 7,
+    "question": "reset和revert的区别你能详细说说吗？",
+    "answer": "reset是回退到某个提交，会改变历史记录，适合本地还没push的情况。revert是生成一个新提交来撤销之前的修改，不改变历史，适合已经push的代码。reset有--soft、--mixed、--hard三种模式，影响工作区和暂存区的状态。",
+    "context": {
+      "follow_up_depth": 3,
+      "hesitation_score": 0.08,
+      "filler_count": 0,
+      "filler_words": [],
+      "speech_rate": 4.6,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 140
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "已经追问3层，hesitation_score仅0.08，非常流畅，候选人对Git掌握很扎实，充分展示了版本控制能力，应该换话题",
+    "reason_type": "positive"
+  },
+  {
+    "id": 8,
+    "question": "你对Docker了解吗？",
+    "answer": "嗯...了解一些...基础概念，但是...嗯...没有实际使用经验。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.58,
+      "filler_count": 5,
+      "filler_words": ["嗯", "这个", "就是"],
+      "speech_rate": 2.6,
+      "pause_count": 1,
+      "long_pauses": [1.6],
+      "answer_length": 28
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "hesitation_score=0.58，5个填充词，候选人只知道概念没有实践，不适合深入追问",
+    "reason_type": "negative"
+  },
+  {
+    "id": 9,
+    "question": "你在Python中用过异步编程吗？",
+    "answer": "用过，我用asyncio做过爬虫和API服务。用async、await定义协程，asyncio.gather并发执行任务，还用了aiohttp做异步HTTP请求。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.16,
+      "filler_count": 1,
+      "filler_words": ["就是"],
+      "speech_rate": 4.3,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 95
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答流畅（hesitation_score=0.16），有实践经验，可以追问具体场景"
+  },
+  {
+    "id": 10,
+    "question": "那你是怎么处理异步任务中的异常的？",
+    "answer": "嗯，我会在每个协程里加try-except捕获异常，然后记录日志。用asyncio.gather的时候设置return_exceptions=True，这样一个任务出错不影响其他任务。还会设置超时timeout避免某个任务卡死。",
+    "context": {
+      "follow_up_depth": 2,
+      "hesitation_score": 0.24,
+      "filler_count": 2,
+      "filler_words": ["嗯", "然后"],
+      "speech_rate": 3.7,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 115
+    },
+    "label": "FOLLOW_UP",
+    "reason": "有轻微思考（hesitation_score=0.24），但理解深入，可以继续追问边界情况"
+  },
+  {
+    "id": 11,
+    "question": "遇到过事件循环阻塞的问题吗？怎么定位和解决的？",
+    "answer": "遇到过，有一次在协程里调用了同步的数据库操作，导致整个事件循环卡住。我用loop.run_in_executor把同步操作放到线程池执行，问题就解决了。还用了logging打印协程运行时间，找到耗时的操作。",
+    "context": {
+      "follow_up_depth": 3,
+      "hesitation_score": 0.18,
+      "filler_count": 1,
+      "filler_words": ["就是"],
+      "speech_rate": 4.0,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 125
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "已经追问3层，hesitation_score=0.18，回答流畅，候选人对Python异步编程理解很深，充分展示了能力，可以换话题",
+    "reason_type": "positive"
+  },
+  {
+    "id": 12,
+    "question": "你对微服务架构了解吗？",
+    "answer": "嗯...听说过，但是...我们项目都是单体应用，嗯...没接触过微服务。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.73,
+      "filler_count": 7,
+      "filler_words": ["嗯", "这个", "就是"],
+      "speech_rate": 2.4,
+      "pause_count": 2,
+      "long_pauses": [1.7, 1.9],
+      "answer_length": 32
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "hesitation_score=0.73，7个填充词，2次停顿，候选人没有微服务经验，应该换到熟悉的话题",
+    "reason_type": "negative"
+  },
+  {
+    "id": 13,
+    "question": "你在项目中用过消息队列吗？",
+    "answer": "用过RabbitMQ，主要用来做异步任务处理和服务解耦。比如用户下单后，发消息到队列，库存服务和通知服务分别消费，互不影响。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.19,
+      "filler_count": 1,
+      "filler_words": ["然后"],
+      "speech_rate": 4.2,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 85
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答流畅（hesitation_score=0.19），有实践经验，可以追问具体实现"
+  },
+  {
+    "id": 14,
+    "question": "那如果消费失败了怎么办？有重试机制吗？",
+    "answer": "有，我设置了死信队列DLX。消息消费失败会重新入队，重试3次还失败就进死信队列。然后定时任务监控死信队列，人工处理或重新投递。还用了幂等性设计，避免重复消费。",
+    "context": {
+      "follow_up_depth": 2,
+      "hesitation_score": 0.14,
+      "filler_count": 0,
+      "filler_words": [],
+      "speech_rate": 4.4,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 120
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答非常流畅（hesitation_score=0.14，无填充词），设计合理，可以继续追问高级场景"
+  },
+  {
+    "id": 15,
+    "question": "遇到过消息积压吗？怎么处理的？",
+    "answer": "遇到过，有一次消费者挂了，消息积压了几万条。我先紧急重启消费者，然后增加消费者实例数做水平扩展。还优化了消费逻辑，把耗时操作异步化，提升了消费速度。后来加了监控告警，及时发现积压。",
+    "context": {
+      "follow_up_depth": 3,
+      "hesitation_score": 0.20,
+      "filler_count": 1,
+      "filler_words": ["然后"],
+      "speech_rate": 3.9,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 135
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "已经追问3层，hesitation_score=0.20，回答详细，候选人对消息队列有深入理解和实践经验，充分展示了分布式系统能力，可以换话题",
+    "reason_type": "positive"
+  },
+  {
+    "id": 16,
+    "question": "你对Kubernetes了解吗？",
+    "answer": "不了解，嗯...我们公司还在用...传统部署。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.52,
+      "filler_count": 4,
+      "filler_words": ["嗯", "这个"],
+      "speech_rate": 2.7,
+      "pause_count": 1,
+      "long_pauses": [1.6],
+      "answer_length": 22
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "hesitation_score=0.52，4个填充词，候选人没有K8s经验，应该换话题",
+    "reason_type": "negative"
+  },
+  {
+    "id": 17,
+    "question": "你在数据库优化方面有什么经验？",
+    "answer": "我主要做过索引优化和慢查询优化。用EXPLAIN分析查询计划，在WHERE和JOIN字段建索引。还做过分表，把大表按时间分成多个小表，查询速度提升明显。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.21,
+      "filler_count": 1,
+      "filler_words": ["然后"],
+      "speech_rate": 4.0,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 95
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答流畅（hesitation_score=0.21），有优化经验，可以追问具体案例"
+  },
+  {
+    "id": 18,
+    "question": "那你知道什么情况下索引会失效吗？",
+    "answer": "知道几种：对索引字段用函数、隐式类型转换、like左模糊、or条件、不等于和not in、复合索引不满足最左前缀。这些都会导致索引失效，需要避免。",
+    "context": {
+      "follow_up_depth": 2,
+      "hesitation_score": 0.15,
+      "filler_count": 0,
+      "filler_words": [],
+      "speech_rate": 4.3,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 95
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答流畅（hesitation_score=0.15，无填充词），理论知识扎实，可以继续追问实践"
+  },
+  {
+    "id": 19,
+    "question": "那你在实际项目中遇到过这些情况吗？怎么发现和解决的？",
+    "answer": "遇到过，有一次查询很慢，发现WHERE条件用了DATE函数，导致索引失效。我改成BETWEEN条件，走了索引，速度快了几十倍。还有一次是隐式转换，字段是varchar但传入了int，加了引号就好了。",
+    "context": {
+      "follow_up_depth": 3,
+      "hesitation_score": 0.17,
+      "filler_count": 1,
+      "filler_words": ["然后"],
+      "speech_rate": 4.1,
+      "pause_count": 0,
+      "long_pauses": [],
+      "answer_length": 140
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "已经追问3层，hesitation_score=0.17，回答详细，候选人对数据库优化有理论知识也有实践经验，充分展示了能力，可以换话题",
+    "reason_type": "positive"
+  },
+  {
+    "id": 20,
+    "question": "你对区块链技术了解吗？",
+    "answer": "嗯...不太了解，这块...我没接触过。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.68,
+      "filler_count": 6,
+      "filler_words": ["嗯", "这个", "额"],
+      "speech_rate": 2.2,
+      "pause_count": 2,
+      "long_pauses": [1.8, 2.0],
+      "answer_length": 18
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "hesitation_score=0.68，6个填充词，2次停顿，候选人不了解区块链，应该换到熟悉的领域",
+    "reason_type": "negative"
+  }
+]
+

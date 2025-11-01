@@ -1,0 +1,104 @@
+[
+  {
+    "id": 1,
+    "name": "张伟",
+    "experience_level": "mid",
+    "education": {
+      "degree": "本科",
+      "major": "计算机科学与技术",
+      "graduation_year": 2020
+    },
+    "skills": [
+      {
+        "category": "编程语言",
+        "items": [
+          "Python",
+          "JavaScript",
+          "SQL"
+        ]
+      },
+      {
+        "category": "后端框架",
+        "items": [
+          "Django",
+          "Flask",
+          "FastAPI"
+        ]
+      },
+      {
+        "category": "数据库",
+        "items": [
+          "MySQL",
+          "PostgreSQL",
+          "Redis"
+        ]
+      },
+      {
+        "category": "DevOps与部署",
+        "items": [
+          "Docker",
+          "Nginx",
+          "Git",
+          "CI/CD"
+        ]
+      },
+      {
+        "category": "消息与异步处理",
+        "items": [
+          "Celery",
+          "RabbitMQ"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "电商平台后端系统",
+        "background": "为一家中型电商公司构建高可用的后端服务，支持商品管理、订单处理、用户认证和支付对接，日均请求量达50万次。系统需具备良好的扩展性和稳定性。",
+        "tech_stack": [
+          "Python",
+          "Django",
+          "MySQL",
+          "Redis",
+          "Celery"
+        ],
+        "responsibilities": "独立负责后端模块的设计与开发，包括商品目录、购物车、订单服务及用户权限管理；设计RESTful API接口并与前端团队协作联调；使用Redis缓存热点数据提升响应速度；通过Celery实现异步订单处理与邮件通知；编写单元测试并参与代码评审，确保系统稳定性和可维护性。",
+        "highlights": [
+          "通过引入Redis缓存策略，将核心接口响应时间降低60%",
+          "基于Django REST Framework设计标准化API，提升前后端协作效率"
+        ]
+      },
+      {
+        "name": "企业内部审批工作流系统",
+        "background": "为某制造企业定制开发一套内部审批流程管理系统，涵盖请假、报销、采购等多类流程，替代原有纸质流程，提升办公自动化水平。",
+        "tech_stack": [
+          "Python",
+          "Flask",
+          "PostgreSQL",
+          "RabbitMQ",
+          "Docker"
+        ],
+        "responsibilities": "主导系统架构设计与核心功能开发，实现动态表单配置、多级审批链、状态机驱动流程流转；使用RabbitMQ解耦审批事件通知；采用Docker容器化部署，提升环境一致性；配合前端完成接口对接，并提供API文档支持。",
+        "highlights": [
+          "设计可扩展的状态机模型，支持灵活配置多种审批流程",
+          "通过Docker+Compose实现一键部署，显著提升交付效率"
+        ]
+      },
+      {
+        "name": "实时数据分析仪表盘后端",
+        "background": "为数据团队搭建支持实时数据接入与聚合分析的后端服务，对接Kafka数据源，供前端仪表盘展示关键业务指标。",
+        "tech_stack": [
+          "Python",
+          "FastAPI",
+          "PostgreSQL",
+          "Redis",
+          "Kafka"
+        ],
+        "responsibilities": "开发数据接收接口，消费Kafka消息并进行清洗与聚合存储；使用FastAPI构建高性能异步API供前端查询；利用Redis实现实时指标缓存；设计数据库 schema 并优化查询性能；参与监控告警体系建设。",
+        "highlights": [
+          "基于FastAPI的异步特性，实现高并发数据写入与查询能力",
+          "通过分表与索引优化，使大数据量下查询性能提升40%"
+        ]
+      }
+    ]
+  }
+]

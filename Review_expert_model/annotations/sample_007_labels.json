@@ -1,0 +1,41 @@
+{
+  "video_file": "v7-1.mp4",
+  "sample_id": "sample_007",
+  "num_windows": 1,
+  "windows": [
+    {
+      "window_idx": 0,
+      "start_time": 0,
+      "end_time": 10,
+      "scores": {
+        "language": 72.91830182252421,
+        "psychological": 72.20078115605082,
+        "body_language": 80.7289393837575,
+        "focus": 100.0,
+        "total": 79.12083781872697
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 1.8617131445353152e-06,
+          "negative_ratio": 0.25404858589172363
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "good"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    }
+  ]
+}

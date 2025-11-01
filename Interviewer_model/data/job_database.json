@@ -1,0 +1,105 @@
+[
+  {
+    "job_title": "后端工程师",
+    "core_skills": [
+      "Python",
+      "Java",
+      "数据库",
+      "API设计",
+      "分布式系统"
+    ],
+    "scenarios": [
+      "高并发处理",
+      "数据库优化",
+      "微服务架构",
+      "缓存策略"
+    ],
+    "description": "负责服务端开发、API设计、数据库设计与优化"
+  },
+  {
+    "job_title": "前端工程师",
+    "core_skills": [
+      "JavaScript",
+      "React",
+      "Vue",
+      "CSS",
+      "性能优化"
+    ],
+    "scenarios": [
+      "组件设计",
+      "状态管理",
+      "性能调优",
+      "响应式布局"
+    ],
+    "description": "负责Web前端开发、用户界面实现、前端性能优化"
+  },
+  {
+    "job_title": "全栈工程师",
+    "core_skills": [
+      "JavaScript",
+      "Node.js",
+      "React",
+      "数据库",
+      "DevOps"
+    ],
+    "scenarios": [
+      "全栈应用开发",
+      "前后端交互",
+      "系统架构设计",
+      "部署运维"
+    ],
+    "description": "负责前后端全栈开发、系统架构设计"
+  },
+  {
+    "job_title": "算法工程师",
+    "core_skills": [
+      "Python",
+      "机器学习",
+      "深度学习",
+      "PyTorch",
+      "数据分析"
+    ],
+    "scenarios": [
+      "模型设计",
+      "特征工程",
+      "模型调优",
+      "A/B测试"
+    ],
+    "description": "负责机器学习模型设计、训练、优化与部署"
+  },
+  {
+    "job_title": "数据工程师",
+    "core_skills": [
+      "Python",
+      "SQL",
+      "Spark",
+      "数据仓库",
+      "ETL"
+    ],
+    "scenarios": [
+      "数据处理",
+      "数据仓库设计",
+      "实时计算",
+      "数据质量"
+    ],
+    "description": "负责数据采集、处理、存储与分析"
+  },
+  {
+    "job_title": "移动端工程师",
+    "core_skills": [
+      "Android",
+      "iOS",
+      "React Native",
+      "Flutter",
+      "移动架构"
+    ],
+    "scenarios": [
+      "App开发",
+      "性能优化",
+      "跨平台开发",
+      "用户体验"
+    ],
+    "description": "负责移动应用开发、性能优化、用户体验提升"
+  }
+]
+

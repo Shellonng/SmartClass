@@ -1,0 +1,415 @@
+{
+  "video_file": "v1-1.mp4",
+  "sample_id": "sample_001",
+  "num_windows": 12,
+  "windows": [
+    {
+      "window_idx": 0,
+      "start_time": 0,
+      "end_time": 10,
+      "scores": {
+        "language": 68.10541913720908,
+        "psychological": 90.5861642997684,
+        "body_language": 73.28440036208093,
+        "focus": 99.4066787376227,
+        "total": 84.27736794163555
+      },
+      "reminder": {
+        "class": 9,
+        "text": "表达很清晰，但可以更有条理"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "stable",
+          "positive_ratio": 5.822862476634327e-07,
+          "negative_ratio": 0.048753634095191956
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 1,
+      "start_time": 10,
+      "end_time": 20,
+      "scores": {
+        "language": 63.2550235424112,
+        "psychological": 67.40538770964574,
+        "body_language": 100.0,
+        "focus": 99.44181757372841,
+        "total": 84.43309248248839
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 7.929286766739096e-06,
+          "negative_ratio": 0.317831814289093
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "good"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 2,
+      "start_time": 20,
+      "end_time": 30,
+      "scores": {
+        "language": 66.14434758079537,
+        "psychological": 85.82698979608406,
+        "body_language": 75.97195259738777,
+        "focus": 97.7957186730429,
+        "total": 81.97947002057852
+      },
+      "reminder": {
+        "class": 9,
+        "text": "表达很清晰，但可以更有条理"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "stable",
+          "positive_ratio": 3.1930376280797645e-06,
+          "negative_ratio": 0.01314915344119072
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 3,
+      "start_time": 30,
+      "end_time": 40,
+      "scores": {
+        "language": 62.48160286999791,
+        "psychological": 64.54959875196415,
+        "body_language": 77.90112668013131,
+        "focus": 98.59585183617085,
+        "total": 80.11595995202407
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 6.800389382988214e-05,
+          "negative_ratio": 0.2601487636566162
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 4,
+      "start_time": 40,
+      "end_time": 50,
+      "scores": {
+        "language": 60.35248324145868,
+        "psychological": 75.98116875320706,
+        "body_language": 74.20803805003031,
+        "focus": 91.7328870208129,
+        "total": 76.56823764005378
+      },
+      "reminder": {
+        "class": 9,
+        "text": "表达很清晰，但可以更有条理"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 1.614396387594752e-05,
+          "negative_ratio": 0.1881522387266159
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 5,
+      "start_time": 50,
+      "end_time": 60,
+      "scores": {
+        "language": 65.83445814102029,
+        "psychological": 85.37265163510833,
+        "body_language": 73.39180770905129,
+        "focus": 94.45214435106887,
+        "total": 78.31510824996784
+      },
+      "reminder": {
+        "class": 9,
+        "text": "表达很清晰，但可以更有条理"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "stable",
+          "positive_ratio": 1.570622202962113e-06,
+          "negative_ratio": 0.05192822217941284
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 6,
+      "start_time": 60,
+      "end_time": 70,
+      "scores": {
+        "language": 67.83401799960613,
+        "psychological": 87.60828172682542,
+        "body_language": 96.0269167424551,
+        "focus": 95.6527474756776,
+        "total": 85.70656541718661
+      },
+      "reminder": {
+        "class": 9,
+        "text": "表达很清晰，但可以更有条理"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "stable",
+          "positive_ratio": 1.2564343023768743e-06,
+          "negative_ratio": 0.06634191423654556
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "good"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 7,
+      "start_time": 70,
+      "end_time": 80,
+      "scores": {
+        "language": 67.61920953134421,
+        "psychological": 68.53292936732149,
+        "body_language": 79.35130108518943,
+        "focus": 98.24877952847218,
+        "total": 80.61925236476544
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 0.0002505978918634355,
+          "negative_ratio": 0.1997384876012802
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 8,
+      "start_time": 80,
+      "end_time": 90,
+      "scores": {
+        "language": 67.93536084107006,
+        "psychological": 67.20967830484244,
+        "body_language": 74.22808035495409,
+        "focus": 98.91997812429537,
+        "total": 72.88318832235407
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 0.00034738442627713084,
+          "negative_ratio": 0.13487328588962555
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 9,
+      "start_time": 90,
+      "end_time": 100,
+      "scores": {
+        "language": 68.49214830147055,
+        "psychological": 88.28247805798458,
+        "body_language": 68.32853568353838,
+        "focus": 100.0,
+        "total": 81.96784858813011
+      },
+      "reminder": {
+        "class": 9,
+        "text": "表达很清晰，但可以更有条理"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "stable",
+          "positive_ratio": 5.132147293807066e-07,
+          "negative_ratio": 0.07603254169225693
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 10,
+      "start_time": 100,
+      "end_time": 110,
+      "scores": {
+        "language": 66.50323251570862,
+        "psychological": 88.42468371201919,
+        "body_language": 74.71249819775616,
+        "focus": 99.23763446151258,
+        "total": 81.53628344042237
+      },
+      "reminder": {
+        "class": 9,
+        "text": "表达很清晰，但可以更有条理"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "stable",
+          "positive_ratio": 4.783276017406024e-05,
+          "negative_ratio": 0.10258444398641586
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 11,
+      "start_time": 110,
+      "end_time": 120,
+      "scores": {
+        "language": 63.35941957311498,
+        "psychological": 86.69363157106238,
+        "body_language": 73.51546705598838,
+        "focus": 99.29691897136544,
+        "total": 84.55632258084229
+      },
+      "reminder": {
+        "class": 9,
+        "text": "表达很清晰，但可以更有条理"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "stable",
+          "positive_ratio": 9.928771049771967e-08,
+          "negative_ratio": 0.014126304537057877
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    }
+  ]
+}

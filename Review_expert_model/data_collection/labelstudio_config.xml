@@ -1,0 +1,49 @@
+<View>
+  <Header value="面试评估标注系统"/>
+  
+  <!-- 视频播放器 -->
+  <Video name="video" value="$video_url" sync="audio"/>
+  
+  <!-- 音频播放器 -->
+  <Audio name="audio" value="$audio_url" sync="video"/>
+  
+  <!-- 问题显示 -->
+  <Header value="面试问题: $question"/>
+  
+  <!-- 转录文本（可编辑） -->
+  <TextArea name="transcription" toName="video" 
+            placeholder="自动转录文本（可修改）" 
+            value="$transcription" rows="3"/>
+  
+  <!-- 评分滑块 -->
+  <Header value="评分（0-100分）"/>
+  <Number name="focus" toName="video" min="0" max="100" step="5" 
+          placeholder="专注度/自信度"/>
+  <Number name="psychological" toName="video" min="0" max="100" step="5" 
+          placeholder="心理素质"/>
+  <Number name="language" toName="video" min="0" max="100" step="5" 
+          placeholder="语言表达"/>
+  <Number name="professional" toName="video" min="0" max="100" step="5" 
+          placeholder="专业能力"/>
+  
+  <!-- 异常检测 -->
+  <Header value="异常标注"/>
+  <Choices name="alert_type" toName="video" choice="single">
+    <Choice value="0" hint="无异常"/>
+    <Choice value="1" hint="眼神游离"/>
+    <Choice value="2" hint="情绪紧张"/>
+    <Choice value="3" hint="语言问题（口头禅/语速）"/>
+    <Choice value="4" hint="姿势不佳"/>
+  </Choices>
+  
+  <!-- 提醒文本 -->
+  <TextArea name="alert_text" toName="video" 
+            placeholder="如果有异常，应该给什么提醒？"
+            showSubmitButton="false" rows="2"/>
+  
+  <!-- 备注 -->
+  <TextArea name="notes" toName="video" 
+            placeholder="备注"
+            showSubmitButton="false" rows="2"/>
+</View>
+

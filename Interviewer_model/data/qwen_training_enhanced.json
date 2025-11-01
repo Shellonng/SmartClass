@@ -1,0 +1,274 @@
+[
+  {
+    "id": 1,
+    "task": "generate_follow_up",
+    "bert_decision": "NEXT_TOPIC",
+    "reason_type": "negative",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "请介绍一下你的Redis使用经验？",
+      "current_topic": "Redis",
+      "follow_up_depth": 1
+    },
+    "user_answer": "我不太了解Redis，没怎么用过。",
+    "speech_analysis": {
+      "hesitation_score": 0.8,
+      "filler_count": 5
+    },
+    "expected_output": "没关系，我们换个话题。你在项目中用过什么数据库？",
+    "quality_note": "消极换话题：体贴地过渡，不让候选人尴尬"
+  },
+  {
+    "id": 2,
+    "task": "generate_follow_up",
+    "bert_decision": "FOLLOW_UP",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "请介绍一下你的Redis使用经验？",
+      "current_topic": "Redis",
+      "follow_up_depth": 1
+    },
+    "user_answer": "我在项目中用Redis做缓存，主要缓存用户session和热点数据。",
+    "speech_analysis": {
+      "hesitation_score": 0.2,
+      "filler_count": 1
+    },
+    "expected_output": "不错！能具体说说你是怎么设置缓存过期时间的吗？",
+    "quality_note": "继续追问：肯定回答质量，然后针对性追问"
+  },
+  {
+    "id": 3,
+    "task": "generate_follow_up",
+    "bert_decision": "NEXT_TOPIC",
+    "reason_type": "positive",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "那你遇到过缓存穿透的问题吗？怎么解决的？",
+      "current_topic": "Redis",
+      "follow_up_depth": 3
+    },
+    "user_answer": "遇到过，我用了布隆过滤器加空值缓存的方案。对于不存在的key，先用布隆过滤器拦截，然后缓存空值设置短过期时间。还监控了缓存命中率，及时发现异常。",
+    "speech_analysis": {
+      "hesitation_score": 0.15,
+      "filler_count": 0
+    },
+    "expected_output": "很好！Redis这块你掌握得不错，理论和实践都很扎实。我们换个话题，聊聊你的Python开发经验吧。",
+    "quality_note": "积极换话题：先肯定成果，然后自然过渡到新话题"
+  },
+  {
+    "id": 4,
+    "task": "generate_follow_up",
+    "bert_decision": "NEXT_TOPIC",
+    "reason_type": "negative",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "能举个具体的优化案例吗？",
+      "current_topic": "数据库优化",
+      "follow_up_depth": 3
+    },
+    "user_answer": "嗯...具体的案例...我想想...好像有一次是查询用户和订单，然后...嗯...具体怎么做的我有点记不清了。",
+    "speech_analysis": {
+      "hesitation_score": 0.85,
+      "filler_count": 12
+    },
+    "expected_output": "没关系，这些细节确实容易忘。我们换个话题，聊聊你在Git版本控制方面的经验吧。",
+    "quality_note": "消极换话题：体贴地说明理由，然后换话题"
+  },
+  {
+    "id": 5,
+    "task": "generate_follow_up",
+    "bert_decision": "FOLLOW_UP",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "你在项目中是如何处理Git分支管理的？",
+      "current_topic": "Git",
+      "follow_up_depth": 1
+    },
+    "user_answer": "我们团队用Git Flow，主分支master和develop，功能开发在feature分支，上线前合并到release分支测试，发布后打tag。遇到线上bug就从master切hotfix分支修复。",
+    "speech_analysis": {
+      "hesitation_score": 0.1,
+      "filler_count": 0
+    },
+    "expected_output": "不错，看得出你对Git Flow很熟悉。那你遇到过复杂的合并冲突吗？怎么解决的？",
+    "quality_note": "继续追问：肯定理解程度，追问实践经验"
+  },
+  {
+    "id": 6,
+    "task": "generate_follow_up",
+    "bert_decision": "NEXT_TOPIC",
+    "reason_type": "positive",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "reset和revert的区别你能详细说说吗？",
+      "current_topic": "Git",
+      "follow_up_depth": 3
+    },
+    "user_answer": "reset是回退到某个提交，会改变历史记录，适合本地还没push的情况。revert是生成一个新提交来撤销之前的修改，不改变历史，适合已经push的代码。reset有--soft、--mixed、--hard三种模式，影响工作区和暂存区的状态。",
+    "speech_analysis": {
+      "hesitation_score": 0.1,
+      "filler_count": 0
+    },
+    "expected_output": "非常好！Git这块你掌握得很扎实，版本控制能力没问题。我们聊聊其他方面，你对Docker容器化技术了解吗？",
+    "quality_note": "积极换话题：充分肯定能力，然后平滑过渡"
+  },
+  {
+    "id": 7,
+    "task": "generate_follow_up",
+    "bert_decision": "NEXT_TOPIC",
+    "reason_type": "negative",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "你对Docker了解吗？",
+      "current_topic": "Docker",
+      "follow_up_depth": 1
+    },
+    "user_answer": "了解一些基础概念，但是没有实际使用经验。",
+    "speech_analysis": {
+      "hesitation_score": 0.4,
+      "filler_count": 3
+    },
+    "expected_output": "好的，那我们聊聊你有实践经验的技术吧。你在Python开发中用过异步编程吗？",
+    "quality_note": "消极换话题：不纠缠理论，转到实践领域"
+  },
+  {
+    "id": 8,
+    "task": "generate_follow_up",
+    "bert_decision": "FOLLOW_UP",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "你在Python中用过异步编程吗？",
+      "current_topic": "Python异步",
+      "follow_up_depth": 1
+    },
+    "user_answer": "用过，我用asyncio做过爬虫和API服务。用async/await定义协程，asyncio.gather并发执行任务，还用了aiohttp做异步HTTP请求。",
+    "speech_analysis": {
+      "hesitation_score": 0.15,
+      "filler_count": 1
+    },
+    "expected_output": "很好！能说说你用asyncio做爬虫时是怎么控制并发数的吗？避免把目标服务器打挂？",
+    "quality_note": "继续追问：基于回答内容，追问实际问题"
+  },
+  {
+    "id": 9,
+    "task": "generate_follow_up",
+    "bert_decision": "NEXT_TOPIC",
+    "reason_type": "positive",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "遇到过事件循环阻塞的问题吗？怎么定位和解决的？",
+      "current_topic": "Python异步",
+      "follow_up_depth": 3
+    },
+    "user_answer": "遇到过，有一次在协程里调用了同步的数据库操作，导致整个事件循环卡住。我用loop.run_in_executor把同步操作放到线程池执行，问题就解决了。还用了logging打印协程运行时间，找到耗时的操作。",
+    "speech_analysis": {
+      "hesitation_score": 0.15,
+      "filler_count": 1
+    },
+    "expected_output": "优秀！异步编程这块你掌握得很好，不仅会用还能解决实际问题。我们换个方向，聊聊你在分布式系统方面的经验。",
+    "quality_note": "积极换话题：高度肯定，然后引入新领域"
+  },
+  {
+    "id": 10,
+    "task": "generate_follow_up",
+    "bert_decision": "NEXT_TOPIC",
+    "reason_type": "negative",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "你对微服务架构了解吗？",
+      "current_topic": "微服务",
+      "follow_up_depth": 1
+    },
+    "user_answer": "嗯...听说过，但是我们项目都是单体应用，没接触过微服务。",
+    "speech_analysis": {
+      "hesitation_score": 0.7,
+      "filler_count": 6
+    },
+    "expected_output": "理解，微服务不是每个公司都用。那我们聊聊你现在项目中用的技术栈吧，你们用消息队列吗？",
+    "quality_note": "消极换话题：理解现状，转到相关但更熟悉的话题"
+  },
+  {
+    "id": 11,
+    "task": "generate_follow_up",
+    "bert_decision": "FOLLOW_UP",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "你在项目中用过消息队列吗？",
+      "current_topic": "消息队列",
+      "follow_up_depth": 1
+    },
+    "user_answer": "用过RabbitMQ，主要用来做异步任务处理和服务解耦。比如用户下单后，发消息到队列，库存服务和通知服务分别消费，互不影响。",
+    "speech_analysis": {
+      "hesitation_score": 0.2,
+      "filler_count": 1
+    },
+    "expected_output": "不错，应用场景选得很合适。那你是怎么保证消息不丢失的？",
+    "quality_note": "继续追问：肯定场景选择，追问可靠性"
+  },
+  {
+    "id": 12,
+    "task": "generate_follow_up",
+    "bert_decision": "NEXT_TOPIC",
+    "reason_type": "positive",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "遇到过消息积压吗？怎么处理的？",
+      "current_topic": "消息队列",
+      "follow_up_depth": 3
+    },
+    "user_answer": "遇到过，有一次消费者挂了，消息积压了几万条。我先紧急重启消费者，然后增加消费者实例数做水平扩展。还优化了消费逻辑，把耗时操作异步化，提升了消费速度。后来加了监控告警，及时发现积压。",
+    "speech_analysis": {
+      "hesitation_score": 0.2,
+      "filler_count": 1
+    },
+    "expected_output": "很好！消息队列这块你实践经验丰富，从设计到故障处理都很成熟。我们换个话题，聊聊你在数据库方面的优化经验。",
+    "quality_note": "积极换话题：全面肯定能力维度，平滑过渡"
+  },
+  {
+    "id": 13,
+    "task": "generate_question",
+    "bert_decision": "NEW_TOPIC",
+    "context": {
+      "job_title": "前端工程师",
+      "current_topic": "React",
+      "resume_skills": ["React", "Redux", "TypeScript", "Webpack"],
+      "last_answer": "不会"
+    },
+    "rag_questions": [
+      {"question": "讲讲React的Hooks？"},
+      {"question": "虚拟DOM的原理是什么？"}
+    ],
+    "expected_output": "没关系，我们换个话题。我看你简历上还写了TypeScript，能说说你为什么选择用TypeScript而不是JavaScript吗？",
+    "quality_note": "新话题（消极原因）：体贴过渡，基于简历引入新话题"
+  },
+  {
+    "id": 14,
+    "task": "generate_question",
+    "bert_decision": "NEW_TOPIC",
+    "context": {
+      "job_title": "后端工程师",
+      "current_topic": "数据库优化",
+      "resume_skills": ["Python", "Django", "MySQL", "Redis"],
+      "last_answer": "遇到过，有一次查询很慢..."
+    },
+    "rag_questions": [
+      {"question": "讲讲Python的装饰器？"},
+      {"question": "Django的ORM是如何工作的？"}
+    ],
+    "expected_output": "很好！数据库优化这块你经验丰富。我们换个方向，聊聊你在Django开发中的经验。你在项目中用Django实现过什么功能？",
+    "quality_note": "新话题（积极原因）：肯定成果，基于简历引入新话题"
+  },
+  {
+    "id": 15,
+    "task": "closing",
+    "context": {
+      "job_title": "后端工程师",
+      "performance": {
+        "total_questions": 12,
+        "answered_well": 9
+      }
+    },
+    "expected_output": "好的，今天的技术面试就到这里。整体来看，你在Python、数据库和分布式系统方面的基础都不错，也有比较丰富的实际项目经验。有些细节可能还需要加强，但总体表现是可以的。我们会在3个工作日内给你反馈，感谢你今天的参与！",
+    "quality_note": "结束语：客观评价，肯定优点，指出不足，明确后续"
+  }
+]
+

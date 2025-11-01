@@ -1,0 +1,37 @@
+[
+  {
+    "video_file": "v1-1.mp4",
+    "sample_id": "sample_001",
+    "feature_file": "./features/audio\\sample_001_audio.npz"
+  },
+  {
+    "video_file": "v2-1.mp4",
+    "sample_id": "sample_002",
+    "feature_file": "./features/audio\\sample_002_audio.npz"
+  },
+  {
+    "video_file": "v3-1.mp4",
+    "sample_id": "sample_003",
+    "feature_file": "./features/audio\\sample_003_audio.npz"
+  },
+  {
+    "video_file": "v4-1.mp4",
+    "sample_id": "sample_004",
+    "feature_file": "./features/audio\\sample_004_audio.npz"
+  },
+  {
+    "video_file": "v5-1.mp4",
+    "sample_id": "sample_005",
+    "feature_file": "./features/audio\\sample_005_audio.npz"
+  },
+  {
+    "video_file": "v6-1.mp4",
+    "sample_id": "sample_006",
+    "feature_file": "./features/audio\\sample_006_audio.npz"
+  },
+  {
+    "video_file": "v7-1.mp4",
+    "sample_id": "sample_007",
+    "feature_file": "./features/audio\\sample_007_audio.npz"
+  }
+]

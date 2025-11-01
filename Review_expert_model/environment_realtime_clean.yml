@@ -1,0 +1,32 @@
+name: interview_realtime
+channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy=1.26.4
+  - pip
+  # PyTorch for model inference (从conda安装)
+  - pytorch::pytorch
+  - pytorch::torchvision
+  - pytorch::torchaudio
+  # 其他所有库都通过pip安装，避免conda/pip冲突
+  - pip:
+    # Core CV libraries
+    - opencv-python==4.10.0.84
+    - mediapipe==0.10.9
+    # DeepFace and TensorFlow
+    - deepface
+    - tensorflow==2.15.0
+    - tf-keras==2.15.1
+    - protobuf==3.20.3
+    # Audio processing
+    - librosa
+    - soundfile
+    # Utilities
+    - scikit-learn
+    - tqdm
+

@@ -1,0 +1,263 @@
+[
+  {
+    "id": 1,
+    "question": "请介绍一下你的Redis使用经验？",
+    "answer": "我不太了解Redis，没怎么用过。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.8,
+      "filler_count": 5,
+      "answer_length": 15
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "候选人明确表示不了解，应该换话题"
+  },
+  {
+    "id": 2,
+    "question": "请介绍一下你的Redis使用经验？",
+    "answer": "我在项目中用Redis做缓存，主要缓存用户session和热点数据。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.2,
+      "filler_count": 1,
+      "answer_length": 45
+    },
+    "label": "FOLLOW_UP",
+    "reason": "候选人回答了且有内容，可以追问具体实现"
+  },
+  {
+    "id": 3,
+    "question": "那你是怎么设置缓存过期时间的？",
+    "answer": "我根据业务需求设置，比如session是30分钟，热点数据是1小时。还会根据访问频率动态调整。",
+    "context": {
+      "follow_up_depth": 2,
+      "hesitation_score": 0.15,
+      "filler_count": 0,
+      "answer_length": 80
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答详细，可以继续追问缓存穿透等深层问题"
+  },
+  {
+    "id": 4,
+    "question": "遇到过缓存穿透的问题吗？怎么解决的？",
+    "answer": "嗯...这个...我好像没遇到过，不太清楚怎么处理。",
+    "context": {
+      "follow_up_depth": 3,
+      "hesitation_score": 0.9,
+      "filler_count": 8,
+      "answer_length": 25
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "已经追问3层且候选人答不上来，应该换话题"
+  },
+  {
+    "id": 5,
+    "question": "你对Python的装饰器了解吗？",
+    "answer": "了解，装饰器是Python的一种高级特性，可以在不修改原函数的情况下增加功能。我在项目中用装饰器实现了权限检查、日志记录等功能。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.1,
+      "filler_count": 0,
+      "answer_length": 95
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答专业且详细，可以追问装饰器的实现原理"
+  },
+  {
+    "id": 6,
+    "question": "能手写一个简单的装饰器吗？",
+    "answer": "可以的。def my_decorator(func): def wrapper(*args, **kwargs): print('before'); result = func(*args, **kwargs); print('after'); return result; return wrapper。基本就是这样的结构。",
+    "context": {
+      "follow_up_depth": 2,
+      "hesitation_score": 0.25,
+      "filler_count": 2,
+      "answer_length": 150
+    },
+    "label": "FOLLOW_UP",
+    "reason": "候选人能写出代码，可以继续追问带参数的装饰器"
+  },
+  {
+    "id": 7,
+    "question": "讲讲Django的ORM。",
+    "answer": "我没用过Django，我主要用Flask。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.3,
+      "filler_count": 1,
+      "answer_length": 20
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "候选人明确说没用过，应该换到Flask相关问题"
+  },
+  {
+    "id": 8,
+    "question": "你在Flask项目中是怎么处理数据库操作的？",
+    "answer": "我用SQLAlchemy，定义Model类，然后通过db.session进行增删改查操作。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.2,
+      "filler_count": 1,
+      "answer_length": 55
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答合理，可以追问事务处理、连接池等"
+  },
+  {
+    "id": 9,
+    "question": "那你遇到过N+1查询问题吗？怎么优化的？",
+    "answer": "遇到过，我用了joinedload和subqueryload来做预加载，减少查询次数。还会用select_related优化外键查询。",
+    "context": {
+      "follow_up_depth": 2,
+      "hesitation_score": 0.15,
+      "filler_count": 0,
+      "answer_length": 75
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答专业，可以继续追问具体场景"
+  },
+  {
+    "id": 10,
+    "question": "能举个具体的优化案例吗？",
+    "answer": "嗯...具体的案例...我想想...好像有一次是查询用户和订单，然后...嗯...具体怎么做的我有点记不清了。",
+    "context": {
+      "follow_up_depth": 3,
+      "hesitation_score": 0.85,
+      "filler_count": 12,
+      "answer_length": 60
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "已经追问3层，候选人明显答不上来具体细节，应该换话题"
+  },
+  {
+    "id": 11,
+    "question": "你了解RESTful API设计吗？",
+    "answer": "了解，RESTful是一种API设计规范，使用HTTP方法（GET/POST/PUT/DELETE）对应CRUD操作，URL设计要语义化，状态码要规范。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.1,
+      "filler_count": 0,
+      "answer_length": 90
+    },
+    "label": "FOLLOW_UP",
+    "reason": "理解准确，可以追问实际设计经验"
+  },
+  {
+    "id": 12,
+    "question": "你在项目中是如何设计API版本管理的？",
+    "answer": "额...版本管理...我们好像没有做版本管理，就是直接改API。",
+    "context": {
+      "follow_up_depth": 2,
+      "hesitation_score": 0.6,
+      "filler_count": 4,
+      "answer_length": 35
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "候选人没有版本管理经验，继续问也问不出什么，可以换话题"
+  },
+  {
+    "id": 13,
+    "question": "你对Git的使用熟悉吗？",
+    "answer": "熟悉，我平时用Git做版本控制，会用分支管理、合并代码、解决冲突这些基本操作。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.2,
+      "filler_count": 1,
+      "answer_length": 60
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答基础知识，可以追问进阶操作"
+  },
+  {
+    "id": 14,
+    "question": "你用过Git rebase吗？和merge有什么区别？",
+    "answer": "用过，rebase会把提交记录线性化，看起来更清晰，但是会改变历史提交。merge会保留完整的分支历史，但是会产生merge commit。我一般在个人分支用rebase，公共分支用merge。",
+    "context": {
+      "follow_up_depth": 2,
+      "hesitation_score": 0.15,
+      "filler_count": 0,
+      "answer_length": 120
+    },
+    "label": "FOLLOW_UP",
+    "reason": "回答专业且有实践经验，可以继续追问冲突处理等"
+  },
+  {
+    "id": 15,
+    "question": "遇到过复杂的Git冲突吗？怎么解决的？",
+    "answer": "遇到过，我会先用git status查看冲突文件，然后手动编辑解决冲突标记，测试没问题后git add和commit。如果冲突太复杂，我会和同事沟通确认逻辑。",
+    "context": {
+      "follow_up_depth": 3,
+      "hesitation_score": 0.2,
+      "filler_count": 1,
+      "answer_length": 110
+    },
+    "label": "END",
+    "reason": "已经追问3层且候选人都答得很好，这个话题可以结束了"
+  },
+  {
+    "id": 16,
+    "question": "你对前端框架了解吗？",
+    "answer": "不太了解，我是后端开发，前端只会一些基础的HTML和CSS。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.3,
+      "filler_count": 2,
+      "answer_length": 35
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "候选人明确表示不了解前端，应该回到后端话题"
+  },
+  {
+    "id": 17,
+    "question": "你对MySQL的索引优化有经验吗？",
+    "answer": "有一些经验，我知道要在WHERE、JOIN、ORDER BY的字段上建索引，避免全表扫描。还要注意不要建太多索引影响写入性能。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.25,
+      "filler_count": 2,
+      "answer_length": 75
+    },
+    "label": "FOLLOW_UP",
+    "reason": "有基础知识，可以追问具体优化案例"
+  },
+  {
+    "id": 18,
+    "question": "能讲一个你做过的索引优化案例吗？",
+    "answer": "有一次查询很慢，我用EXPLAIN分析发现没走索引，然后在查询字段上建了联合索引，查询时间从2秒降到了100ms。",
+    "context": {
+      "follow_up_depth": 2,
+      "hesitation_score": 0.2,
+      "filler_count": 1,
+      "answer_length": 85
+    },
+    "label": "FOLLOW_UP",
+    "reason": "有实际案例，可以继续追问联合索引的原理"
+  },
+  {
+    "id": 19,
+    "question": "你知道联合索引的最左匹配原则吗？",
+    "answer": "知道，联合索引要按照建立索引时的字段顺序来查询才能生效。比如索引是(a,b,c)，查询a或者a,b或者a,b,c都能用上索引，但是单独查b或c就用不上。",
+    "context": {
+      "follow_up_depth": 3,
+      "hesitation_score": 0.15,
+      "filler_count": 0,
+      "answer_length": 105
+    },
+    "label": "END",
+    "reason": "已经追问3层且理解透彻，这个话题可以结束"
+  },
+  {
+    "id": 20,
+    "question": "你对Docker容器化有了解吗？",
+    "answer": "了解一些基础概念，但是没有实际使用经验。",
+    "context": {
+      "follow_up_depth": 1,
+      "hesitation_score": 0.4,
+      "filler_count": 3,
+      "answer_length": 25
+    },
+    "label": "NEXT_TOPIC",
+    "reason": "候选人只知道概念没有实践，不适合深入追问"
+  }
+]
+

@@ -1,0 +1,236 @@
+[
+  {
+    "id": 1,
+    "task": "generate_follow_up",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "你用过Redis吗？",
+      "current_topic": "缓存技术"
+    },
+    "user_answer": "用过，我在项目中用Redis做缓存。",
+    "speech_analysis": {
+      "hesitation_score": 0.2,
+      "filler_count": 1
+    },
+    "expected_output": "很好！能具体说说你用Redis缓存了哪些数据吗？",
+    "quality_note": "自然的追问，针对具体细节"
+  },
+  {
+    "id": 2,
+    "task": "generate_follow_up",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "你用过Redis吗？",
+      "current_topic": "缓存技术"
+    },
+    "user_answer": "不太了解，我没怎么用过。",
+    "speech_analysis": {
+      "hesitation_score": 0.8,
+      "filler_count": 5
+    },
+    "expected_output": "没关系，我们换个话题。你在项目中用过什么数据库？",
+    "quality_note": "识别到不会，立即换话题并过渡自然"
+  },
+  {
+    "id": 3,
+    "task": "generate_question",
+    "context": {
+      "job_title": "后端工程师",
+      "current_topic": "Python",
+      "resume_skills": ["Python", "Django", "Flask", "MySQL"]
+    },
+    "rag_questions": [
+      {"question": "讲讲Python的装饰器？"},
+      {"question": "Python的GIL是什么？"}
+    ],
+    "expected_output": "你对Python的装饰器了解吗？能举个使用场景吗？",
+    "quality_note": "基于简历技能和RAG参考，生成相关问题"
+  },
+  {
+    "id": 4,
+    "task": "generate_follow_up",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "你对Python的装饰器了解吗？",
+      "current_topic": "Python"
+    },
+    "user_answer": "了解，装饰器可以在不修改原函数的情况下增加功能，我用它做过权限检查和日志记录。",
+    "speech_analysis": {
+      "hesitation_score": 0.1,
+      "filler_count": 0
+    },
+    "expected_output": "很专业！那你能手写一个简单的装饰器吗？",
+    "quality_note": "肯定回答质量，然后追问实现能力"
+  },
+  {
+    "id": 5,
+    "task": "generate_follow_up",
+    "context": {
+      "job_title": "全栈工程师",
+      "current_question": "你用过Vue.js吗？",
+      "current_topic": "前端框架"
+    },
+    "user_answer": "嗯...这个...我没用过Vue，我主要做后端。",
+    "speech_analysis": {
+      "hesitation_score": 0.9,
+      "filler_count": 8
+    },
+    "expected_output": "理解，那我们聊聊你擅长的后端吧。你在后端开发中用过什么框架？",
+    "quality_note": "理解候选人情况，自然过渡到擅长领域"
+  },
+  {
+    "id": 6,
+    "task": "generate_question",
+    "context": {
+      "job_title": "算法工程师",
+      "current_topic": "机器学习",
+      "resume_skills": ["Python", "TensorFlow", "PyTorch", "数据分析"]
+    },
+    "rag_questions": [
+      {"question": "讲讲过拟合和欠拟合？"},
+      {"question": "如何选择合适的学习率？"}
+    ],
+    "expected_output": "我看你简历上写了TensorFlow，能讲讲你用它做过什么项目吗？",
+    "quality_note": "结合简历，自然引入话题"
+  },
+  {
+    "id": 7,
+    "task": "generate_follow_up",
+    "context": {
+      "job_title": "算法工程师",
+      "current_question": "你用TensorFlow做过什么项目？",
+      "current_topic": "深度学习"
+    },
+    "user_answer": "我用TensorFlow做过图像分类，训练了一个ResNet模型，准确率达到了92%。",
+    "speech_analysis": {
+      "hesitation_score": 0.15,
+      "filler_count": 1
+    },
+    "expected_output": "不错！那你在训练过程中遇到过什么问题吗？比如过拟合或者收敛慢？",
+    "quality_note": "基于回答内容，追问可能遇到的实际问题"
+  },
+  {
+    "id": 8,
+    "task": "generate_follow_up",
+    "context": {
+      "job_title": "数据工程师",
+      "current_question": "你对Spark了解吗？",
+      "current_topic": "大数据"
+    },
+    "user_answer": "不太了解，我主要用Pandas处理数据。",
+    "speech_analysis": {
+      "hesitation_score": 0.5,
+      "filler_count": 3
+    },
+    "expected_output": "没关系，Pandas也很重要。那你用Pandas处理过多大规模的数据？遇到过性能瓶颈吗？",
+    "quality_note": "顺着候选人的回答，转到他熟悉的技术"
+  },
+  {
+    "id": 9,
+    "task": "generate_question",
+    "context": {
+      "job_title": "前端工程师",
+      "current_topic": "React",
+      "resume_skills": ["React", "Redux", "TypeScript", "Webpack"]
+    },
+    "rag_questions": [
+      {"question": "讲讲React的Hooks？"},
+      {"question": "虚拟DOM的原理是什么？"}
+    ],
+    "expected_output": "你在React开发中用过Hooks吗？主要用哪些？",
+    "quality_note": "基于热门技术点提问，贴近实际开发"
+  },
+  {
+    "id": 10,
+    "task": "generate_follow_up",
+    "context": {
+      "job_title": "前端工程师",
+      "current_question": "你用过React的Hooks吗？",
+      "current_topic": "React"
+    },
+    "user_answer": "用过，我常用useState管理状态，useEffect处理副作用，还用过useMemo做性能优化。",
+    "speech_analysis": {
+      "hesitation_score": 0.1,
+      "filler_count": 0
+    },
+    "expected_output": "很好！那你能说说useEffect的依赖数组是怎么工作的吗？",
+    "quality_note": "基于候选人提到的知识点，深入追问原理"
+  },
+  {
+    "id": 11,
+    "task": "generate_follow_up",
+    "context": {
+      "job_title": "移动端工程师",
+      "current_question": "你对Flutter了解吗？",
+      "current_topic": "移动开发"
+    },
+    "user_answer": "不了解，我主要做Android原生开发。",
+    "speech_analysis": {
+      "hesitation_score": 0.3,
+      "filler_count": 2
+    },
+    "expected_output": "好的，那我们聊聊Android开发。你在Android项目中用过什么架构模式？比如MVVM或MVP？",
+    "quality_note": "快速切换到候选人擅长的领域"
+  },
+  {
+    "id": 12,
+    "task": "generate_follow_up",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "你遇到过数据库慢查询吗？怎么优化的？",
+      "current_topic": "数据库优化"
+    },
+    "user_answer": "遇到过，我用EXPLAIN分析查询计划，然后在WHERE字段上建了索引，查询速度快了很多。",
+    "speech_analysis": {
+      "hesitation_score": 0.2,
+      "filler_count": 1
+    },
+    "expected_output": "不错！那你知道什么情况下索引会失效吗？",
+    "quality_note": "顺着优化话题，追问更深层的知识"
+  },
+  {
+    "id": 13,
+    "task": "generate_follow_up",
+    "context": {
+      "job_title": "后端工程师",
+      "current_question": "你知道索引失效的情况吗？",
+      "current_topic": "数据库优化"
+    },
+    "user_answer": "嗯...这个...好像是...用了函数？还有...嗯...记不太清了。",
+    "speech_analysis": {
+      "hesitation_score": 0.85,
+      "filler_count": 10
+    },
+    "expected_output": "没关系，这些细节确实容易忘。我们换个话题，聊聊你在项目中遇到过的其他技术难题吧？",
+    "quality_note": "察觉到候选人卡壳，体贴地换话题"
+  },
+  {
+    "id": 14,
+    "task": "closing",
+    "context": {
+      "job_title": "后端工程师",
+      "performance": {
+        "total_questions": 8,
+        "answered_well": 6
+      }
+    },
+    "expected_output": "好的，今天的技术面试就到这里。整体来看，你在Python和数据库方面的基础还是不错的，也有一些实际项目经验。我们会在3个工作日内给你反馈，感谢你今天的参与！",
+    "quality_note": "专业、友好的结束语，肯定优点，明确后续流程"
+  },
+  {
+    "id": 15,
+    "task": "generate_question",
+    "context": {
+      "job_title": "后端工程师",
+      "current_topic": "微服务",
+      "resume_skills": ["Python", "Django", "Docker", "Redis"]
+    },
+    "rag_questions": [
+      {"question": "如何保证微服务之间的通信？"},
+      {"question": "服务发现是怎么实现的？"}
+    ],
+    "expected_output": "我看你简历上提到了Docker，你在项目中用Docker做过微服务部署吗？",
+    "quality_note": "从简历技能切入，引出微服务话题"
+  }
+]
+

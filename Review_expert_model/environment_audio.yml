@@ -1,0 +1,20 @@
+name: interview_audio
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - ffmpeg
+  - pytorch::pytorch=2.1.0
+  - pytorch::torchaudio=2.1.0
+  - pip:
+    - transformers>=4.35.0
+    - soundfile
+    - librosa
+    - jiwer
+    - faster-whisper
+

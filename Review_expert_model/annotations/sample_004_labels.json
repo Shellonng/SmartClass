@@ -1,0 +1,551 @@
+{
+  "video_file": "v4-1.mp4",
+  "sample_id": "sample_004",
+  "num_windows": 16,
+  "windows": [
+    {
+      "window_idx": 0,
+      "start_time": 0,
+      "end_time": 10,
+      "scores": {
+        "language": 75.08827326356045,
+        "psychological": 66.7542829063527,
+        "body_language": 78.55746061916385,
+        "focus": 97.14573508461244,
+        "total": 82.1041874814746
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 7.699894194956869e-05,
+          "negative_ratio": 0.5708645582199097
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 1,
+      "start_time": 10,
+      "end_time": 20,
+      "scores": {
+        "language": 66.72089778166516,
+        "psychological": 64.36149411114292,
+        "body_language": 74.86776117718621,
+        "focus": 100.0,
+        "total": 75.54347221100751
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 0.00016216629592236131,
+          "negative_ratio": 0.5051403641700745
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 2,
+      "start_time": 20,
+      "end_time": 30,
+      "scores": {
+        "language": 68.66240732751154,
+        "psychological": 64.02087317648937,
+        "body_language": 75.48804824077295,
+        "focus": 95.77939317329503,
+        "total": 75.29621099004758
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 0.00930560939013958,
+          "negative_ratio": 0.5985175967216492
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 3,
+      "start_time": 30,
+      "end_time": 40,
+      "scores": {
+        "language": 69.3902682530202,
+        "psychological": 64.74713561324587,
+        "body_language": 67.83650407234846,
+        "focus": 96.51466295777344,
+        "total": 72.95953936288917
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 0.0001705230970401317,
+          "negative_ratio": 0.4687844216823578
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 4,
+      "start_time": 40,
+      "end_time": 50,
+      "scores": {
+        "language": 66.07943804587276,
+        "psychological": 38.06785880504073,
+        "body_language": 74.91648808991222,
+        "focus": 99.73986516576728,
+        "total": 63.9499613679846
+      },
+      "reminder": {
+        "class": 12,
+        "text": "情绪有些低落，积极一点"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "sad",
+          "stability": "unstable",
+          "positive_ratio": 0.004616573918610811,
+          "negative_ratio": 0.6403627395629883
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 5,
+      "start_time": 50,
+      "end_time": 60,
+      "scores": {
+        "language": 71.95009576631762,
+        "psychological": 62.57579569148685,
+        "body_language": 75.0947213476297,
+        "focus": 99.91244390253317,
+        "total": 76.13951618895098
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 2.5636976715759374e-05,
+          "negative_ratio": 0.4912186861038208
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 6,
+      "start_time": 60,
+      "end_time": 70,
+      "scores": {
+        "language": 59.73542847979723,
+        "psychological": 55.814427320175724,
+        "body_language": 72.33521245071447,
+        "focus": 100.0,
+        "total": 70.81920208082788
+      },
+      "reminder": {
+        "class": 5,
+        "text": "语速有点快，可以慢一点"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 0.00010420511534903198,
+          "negative_ratio": 0.689022421836853
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 7,
+      "start_time": 70,
+      "end_time": 80,
+      "scores": {
+        "language": 67.24895482959423,
+        "psychological": 69.82807207417227,
+        "body_language": 75.76694882007847,
+        "focus": 97.74249924886712,
+        "total": 79.15774370109088
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 0.0006575688603334129,
+          "negative_ratio": 0.2556331753730774
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 8,
+      "start_time": 80,
+      "end_time": 90,
+      "scores": {
+        "language": 66.21756015606078,
+        "psychological": 44.96887502607652,
+        "body_language": 73.1526914506146,
+        "focus": 100.0,
+        "total": 71.34846555186446
+      },
+      "reminder": {
+        "class": 12,
+        "text": "情绪有些低落，积极一点"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "sad",
+          "stability": "unstable",
+          "positive_ratio": 0.04624667018651962,
+          "negative_ratio": 0.6180905103683472
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 9,
+      "start_time": 90,
+      "end_time": 100,
+      "scores": {
+        "language": 65.6407606495068,
+        "psychological": 62.137618713485296,
+        "body_language": 75.19675350005132,
+        "focus": 100.0,
+        "total": 74.89259187443953
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 4.521623850450851e-05,
+          "negative_ratio": 0.3784457743167877
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 10,
+      "start_time": 100,
+      "end_time": 110,
+      "scores": {
+        "language": 70.032432100818,
+        "psychological": 64.41718721553107,
+        "body_language": 72.16892952566585,
+        "focus": 98.75471389499687,
+        "total": 74.52510264923167
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 0.00031684315763413906,
+          "negative_ratio": 0.44445034861564636
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 11,
+      "start_time": 110,
+      "end_time": 120,
+      "scores": {
+        "language": 65.54417580087906,
+        "psychological": 66.08780322008937,
+        "body_language": 71.49662683941932,
+        "focus": 99.18147725230067,
+        "total": 75.93765967383432
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "unstable",
+          "positive_ratio": 0.0004944863030686975,
+          "negative_ratio": 0.48547130823135376
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 12,
+      "start_time": 120,
+      "end_time": 130,
+      "scores": {
+        "language": 64.97955150563496,
+        "psychological": 37.14202917243908,
+        "body_language": 78.69844509610759,
+        "focus": 100.0,
+        "total": 68.6059556737582
+      },
+      "reminder": {
+        "class": 12,
+        "text": "情绪有些低落，积极一点"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "sad",
+          "stability": "unstable",
+          "positive_ratio": 0.010619048029184341,
+          "negative_ratio": 0.5325385332107544
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 13,
+      "start_time": 130,
+      "end_time": 140,
+      "scores": {
+        "language": 57.95107792902844,
+        "psychological": 46.43781667931161,
+        "body_language": 79.55029769230214,
+        "focus": 100.0,
+        "total": 72.3324415407035
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "angry",
+          "stability": "unstable",
+          "positive_ratio": 0.09462655335664749,
+          "negative_ratio": 0.5651779770851135
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 14,
+      "start_time": 140,
+      "end_time": 150,
+      "scores": {
+        "language": 66.05664272279724,
+        "psychological": 40.58239477076716,
+        "body_language": 71.13336985325307,
+        "focus": 100.0,
+        "total": 70.00595471884647
+      },
+      "reminder": {
+        "class": 11,
+        "text": "保持自信，不要过度焦虑"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "angry",
+          "stability": "unstable",
+          "positive_ratio": 0.05605005472898483,
+          "negative_ratio": 0.796106219291687
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    },
+    {
+      "window_idx": 15,
+      "start_time": 150,
+      "end_time": 160,
+      "scores": {
+        "language": 66.22612189512671,
+        "psychological": 86.99290217888941,
+        "body_language": 73.184591387639,
+        "focus": 100.0,
+        "total": 78.68589887925981
+      },
+      "reminder": {
+        "class": 9,
+        "text": "表达很清晰，但可以更有条理"
+      },
+      "analyses": {
+        "emotion": {
+          "dominant": "neutral",
+          "stability": "stable",
+          "positive_ratio": 6.810325317019306e-07,
+          "negative_ratio": 0.03790143132209778
+        },
+        "audio": {
+          "speech_rate": "fast",
+          "volume": "high"
+        },
+        "pose": {
+          "posture_quality": "rigid"
+        },
+        "gaze": {
+          "focus_level": "high"
+        }
+      }
+    }
+  ]
+}
